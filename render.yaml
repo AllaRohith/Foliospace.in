@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: foliospace
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        value: FolioSpace <hello@foliospace.in>
+      - key: RESEND_REPLY_TO
+        sync: false

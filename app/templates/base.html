@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0F1419" />
+  <title>{% block title %}{{ page_title }}{% endblock %}</title>
+  <meta name="description" content="{% block description %}{{ description }}{% endblock %}" />
+  <link rel="canonical" href="{{ request.url_for('landing') }}" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="{% block og_title %}{{ page_title }}{% endblock %}" />
+  <meta property="og:description" content="{% block og_description %}{{ description }}{% endblock %}" />
+  <meta property="og:url" content="{{ request.url }}" />
+  <meta property="og:site_name" content="{{ site_name }}" />
+  <meta property="og:image" content="{{ request.url_for('static', path='img/og.png') }}" />
+  <meta property="og:image:alt" content="FolioSpace — A portfolio for everyone. ₹150 setup, ₹99/month." />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{% block twitter_title %}{{ page_title }}{% endblock %}" />
+  <meta name="twitter:description" content="{% block twitter_description %}{{ description }}{% endblock %}" />
+  <meta name="twitter:image" content="{{ request.url_for('static', path='img/og.png') }}" />
+
+  <link rel="icon" type="image/svg+xml" href="{{ request.url_for('static', path='img/favicon.svg') }}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}" />
+</head>
+<body>
+  <a class="skip-link" href="#join">Skip to join waitlist</a>
+  <div class="scroll-progress" aria-hidden="true"></div>
+  <div class="page-curtain" aria-hidden="true">
+    <span class="curtain-beam"></span>
+    <span class="curtain-mark"><span class="curtain-mark-inner"></span></span>
+  </div>
+  <div class="cursor-dot" aria-hidden="true"></div>
+  <div class="cursor-ring" aria-hidden="true"></div>
+  <button class="cmd-k-fab" aria-label="Open command palette">
+    <span class="cmd-k-icon">⌘K</span>
+    <span class="cmd-k-text">Quick nav</span>
+  </button>
+  <div class="cmd-palette" aria-hidden="true">
+    <div class="cmd-palette-backdrop"></div>
+    <div class="cmd-palette-card">
+      <div class="cmd-palette-input">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="cmd-input" type="text" placeholder="Search pages, actions, or jump to…" autocomplete="off" />
+        <kbd>ESC</kbd>
+      </div>
+      <ul class="cmd-palette-list" id="cmd-list"></ul>
+      <div class="cmd-palette-foot">
+        <span><kbd>↑↓</kbd> navigate</span>
+        <span><kbd>↵</kbd> select</span>
+        <span><kbd>esc</kbd> close</span>
+      </div>
+    </div>
+  </div>
+  {% block content %}{% endblock %}
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="{{ request.url_for('static', path='js/main.js') }}"></script>
+</body>
+</html>
