@@ -360,6 +360,34 @@
     update();
   }
 
+  (function () {
+    if (reduceMotion) return;
+    const sections = document.querySelectorAll('main > section');
+    if (!sections.length) return;
+    let depthTick = false;
+    function updateDepth() {
+      const vh = window.innerHeight;
+      sections.forEach(function (s) {
+        const r = s.getBoundingClientRect();
+        const center = r.top + r.height / 2;
+        const vpCenter = vh / 2;
+        const dist = (center - vpCenter) / vh;
+        const absDist = Math.min(0.8, Math.abs(dist));
+        const z = -absDist * 40;
+        const scale = 1 - absDist * 0.015;
+        s.style.transform = 'translateZ(' + z + 'px) scale(' + scale + ')';
+      });
+      depthTick = false;
+    }
+    window.addEventListener('scroll', function () {
+      if (!depthTick) {
+        requestAnimationFrame(updateDepth);
+        depthTick = true;
+      }
+    }, { passive: true });
+    updateDepth();
+  })();
+
   document.querySelectorAll('.magnetic').forEach(function (btn) {
     btn.addEventListener('mousemove', function (e) {
       const r = btn.getBoundingClientRect();

@@ -170,6 +170,24 @@ body.dark .bg-topo {
 
 main, .nav, .footer { position: relative; z-index: 1; }
 
+main {
+  perspective: 2200px;
+  perspective-origin: 50% 30%;
+  transform-style: preserve-3d;
+}
+
+main > section {
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+  will-change: transform;
+  transition: transform 0.25s ease-out;
+  transform: translateZ(0) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main > section { transform: none !important; transition: none !important; }
+}
+
 em, .italic { font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; }
 
 h1, h2, h3, h4, h5, h6 {
