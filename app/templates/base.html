@@ -26,19 +26,13 @@
   <link rel="icon" type="image/svg+xml" href="{{ request.url_for('static', path='img/favicon.svg') }}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&family=Instrument+Serif:ital@0;1&family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..800,0..40,0..1&family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=DM+Serif+Display:ital@0;1&family=Inter:wght@800;900&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}" />
 </head>
 <body>
   <a class="skip-link" href="#join">Skip to join waitlist</a>
   <div class="scroll-progress" aria-hidden="true"></div>
-  <div class="page-curtain" aria-hidden="true">
-    <span class="curtain-beam"></span>
-    <span class="curtain-mark"><span class="curtain-mark-inner"></span></span>
-  </div>
-  <div class="cursor-dot" aria-hidden="true"></div>
-  <div class="cursor-ring" aria-hidden="true"></div>
   <button class="cmd-k-fab" aria-label="Open command palette">
     <span class="cmd-k-icon">⌘K</span>
     <span class="cmd-k-text">Quick nav</span>
@@ -60,8 +54,6 @@
     </div>
   </div>
   {% block content %}{% endblock %}
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <script src="{{ request.url_for('static', path='js/main.js') }}"></script>
 </body>
 </html>

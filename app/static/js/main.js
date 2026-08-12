@@ -1,17 +1,113 @@
 (function () {
-  if (window.gsap && window.ScrollTrigger) {
-    gsap.registerPlugin(ScrollTrigger);
-  }
-
+  
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const isDesktop = window.matchMedia('(min-width: 900px)').matches && window.matchMedia('(hover: hover)').matches;
 
-  document.body.classList.add('curtain-active');
-  setTimeout(function () {
-    document.body.classList.remove('curtain-active');
-    const c = document.querySelector('.page-curtain');
-    if (c) c.remove();
-  }, 1700);
+  (function () {
+    if (reduceMotion) return;
+    var targets = document.querySelectorAll('a[href^="#"]');
+    targets.forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        var href = a.getAttribute('href');
+        if (!href || href.length <= 1) return;
+        var target = document.querySelector(href);
+        if (!target) return;
+        e.preventDefault();
+        var startY = window.pageYOffset;
+        var endY = target.getBoundingClientRect().top + startY - 80;
+        var distance = endY - startY;
+        var duration = Math.min(900, Math.max(450, Math.abs(distance) * 0.4));
+        var startTime = null;
+        function step(ts) {
+          if (startTime === null) startTime = ts;
+          var p = Math.min(1, (ts - startTime) / duration);
+          var eased = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+          window.scrollTo(0, startY + distance * eased);
+          if (p < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      });
+    });
+  })();
+
+
+  (function () {
+    const launch = document.getElementById('launch');
+    if (!launch) return;
+    const target = new Date(launch.dataset.launch).getTime();
+    const $d = document.getElementById('ld-d');
+    const $h = document.getElementById('ld-h');
+    const $m = document.getElementById('ld-m');
+    const $s = document.getElementById('ld-s');
+    if (!$d || !$h || !$m || !$s) return;
+    function pad(n) { return String(Math.max(0, n)).padStart(2, '0'); }
+    function rollDigit(el, newText) {
+      if (el.textContent === newText) return;
+      if (reduceMotion) { el.textContent = newText; return; }
+      el.animate(
+        [
+          { transform: 'translateY(0)', opacity: 1 },
+          { transform: 'translateY(-8px)', opacity: 0, offset: 0.5 },
+          { transform: 'translateY(8px)', opacity: 0, offset: 0.501 },
+          { transform: 'translateY(0)', opacity: 1 },
+        ],
+        { duration: 420, easing: 'ease-in-out' }
+      );
+      setTimeout(function () { el.textContent = newText; }, 210);
+    }
+    function tick() {
+      const diff = Math.max(0, target - Date.now());
+      const days = Math.floor(diff / 86400000);
+      const hrs = Math.floor((diff % 86400000) / 3600000);
+      const mins = Math.floor((diff % 3600000) / 60000);
+      const secs = Math.floor((diff % 60000) / 1000);
+      rollDigit($d, pad(days));
+      rollDigit($h, pad(hrs));
+      rollDigit($m, pad(mins));
+      rollDigit($s, pad(secs));
+      if (diff === 0) onLaunch();
+    }
+    let launched = (target - Date.now()) <= 0;
+    if (launched) onLaunch();
+    function onLaunch() {
+      if (launched) return;
+      launched = true;
+      const lbl = launch.querySelector('.launch-label');
+      const foot = launch.querySelector('.launch-foot');
+      if (lbl) lbl.innerHTML = '<span class="launch-dot"></span> We\'re live';
+      if (foot) foot.textContent = 'Welcome to FolioSpace';
+      launch.style.borderColor = 'var(--accent)';
+      fireConfetti();
+    }
+    function fireConfetti() {
+      const wrap = document.createElement('div');
+      wrap.className = 'confetti';
+      const colors = ['#FF6B35', '#0F1419', '#FAF7F2', '#FFB088', '#E8E2D6', '#FF8A5B'];
+      const n = 140;
+      for (let i = 0; i < n; i++) {
+        const p = document.createElement('span');
+        p.className = 'confetti-piece';
+        const left = Math.random() * 100;
+        const dx = (Math.random() - 0.5) * 240;
+        const rot = (Math.random() * 720) + 'deg';
+        const dur = 2200 + Math.random() * 2200;
+        const delay = Math.random() * 600;
+        p.style.left = left + 'vw';
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        p.style.setProperty('--dx', dx + 'px');
+        p.style.setProperty('--rot', rot);
+        p.style.animationDuration = dur + 'ms';
+        p.style.animationDelay = delay + 'ms';
+        p.style.width = (6 + Math.random() * 8) + 'px';
+        p.style.height = (10 + Math.random() * 14) + 'px';
+        wrap.appendChild(p);
+      }
+      document.body.appendChild(wrap);
+      setTimeout(function () { wrap.remove(); }, 6000);
+    }
+    tick();
+    setInterval(tick, 1000);
+  })();
 
   const navWrap = document.querySelector('.nav-wrap');
   let lastScroll = 0;
@@ -98,6 +194,23 @@
 
   const konami = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
   let kIdx = 0;
+  (function () {
+    const story = document.getElementById('story');
+    if (!story) return;
+    const steps = story.querySelectorAll('.story-step');
+    function update() {
+      const r = story.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const traveled = -r.top;
+      const total = Math.max(1, r.height - vh * 0.4);
+      const ratio = Math.min(1, Math.max(0, traveled / total));
+      const idx = Math.min(steps.length - 1, Math.max(0, Math.floor(ratio * steps.length)));
+      steps.forEach(function (s, i) { s.classList.toggle('is-active', i === idx); });
+    }
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+  })();
+
   document.addEventListener('keydown', function (e) {
     if (e.key === konami[kIdx]) {
       kIdx++;
@@ -200,32 +313,12 @@
     });
   });
 
-  if (window.gsap && window.ScrollTrigger && !reduceMotion) {
-    document.querySelectorAll('.reveal').forEach(function (el) {
+  if (reduceMotion) {
+    document.querySelectorAll('.reveal, .reveal-stagger').forEach(function (el) { el.classList.add('is-in'); });
+  } else {
+    document.querySelectorAll('.reveal, .reveal-stagger').forEach(function (el) {
       const r = el.getBoundingClientRect();
-      if (r.top < window.innerHeight && r.bottom > 0) {
-        el.classList.add('is-in');
-      } else {
-        ScrollTrigger.create({
-          trigger: el,
-          start: 'top 92%',
-          onEnter: function () { el.classList.add('is-in'); },
-          onEnterBack: function () { el.classList.add('is-in'); },
-        });
-      }
-    });
-    document.querySelectorAll('.reveal-stagger').forEach(function (el) {
-      const r = el.getBoundingClientRect();
-      if (r.top < window.innerHeight && r.bottom > 0) {
-        el.classList.add('is-in');
-      } else {
-        ScrollTrigger.create({
-          trigger: el,
-          start: 'top 92%',
-          onEnter: function () { el.classList.add('is-in'); },
-          onEnterBack: function () { el.classList.add('is-in'); },
-        });
-      }
+      if (r.top < window.innerHeight && r.bottom > 0) el.classList.add('is-in');
     });
 
     if ('IntersectionObserver' in window) {
@@ -247,76 +340,6 @@
         el.classList.add('is-in');
       });
     }, 4000);
-
-    document.querySelectorAll('.section-label, .who h2, .features h2, .pricing h2, .faq h2, .cta h2').forEach(function (el) {
-      if (!el.classList.contains('reveal')) el.classList.add('reveal');
-    });
-
-    document.querySelectorAll('.who-grid li, .feature-grid .feature, .pricing-grid .plan, .faq-item, .badge, .plan-tag').forEach(function (el) {
-      if (!el.classList.contains('gs-reveal')) el.classList.add('gs-reveal');
-    });
-
-    if ('IntersectionObserver' in window) {
-      const io2 = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('gs-in');
-            io2.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0, rootMargin: '0px 0px 100px 0px' });
-      document.querySelectorAll('.gs-reveal:not(.gs-in)').forEach(function (el) { io2.observe(el); });
-    }
-
-    setTimeout(function () {
-      document.querySelectorAll('.gs-reveal:not(.gs-in)').forEach(function (el) {
-        const r = el.getBoundingClientRect();
-        if (r.top < window.innerHeight + 200) el.classList.add('gs-in');
-      });
-    }, 4000);
-  } else {
-    document.querySelectorAll('.reveal, .reveal-stagger').forEach(function (el) { el.classList.add('is-in'); });
-  }
-
-  const card = document.querySelector('.showcase-card');
-  if (card && isDesktop) {
-    const wrap = card.parentElement;
-    wrap.addEventListener('mousemove', function (e) {
-      const r = wrap.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width - 0.5;
-      const y = (e.clientY - r.top) / r.height - 0.5;
-      card.style.transform = 'perspective(1400px) rotateX(' + (-y * 6) + 'deg) rotateY(' + (x * 8) + 'deg)';
-    });
-    wrap.addEventListener('mouseleave', function () {
-      card.style.transform = 'perspective(1400px) rotateX(2deg)';
-    });
-  } else if (card) {
-    card.style.transform = 'none';
-  }
-
-  if (window.gsap && !reduceMotion) {
-    document.querySelectorAll('.hero .eyebrow, .hero .hero-title, .hero .hero-sub, .hero .signup-form, .hero .hero-meta').forEach(function (el, i) {
-      gsap.from(el, {
-        y: 30,
-        opacity: 0,
-        duration: 1,
-        delay: 0.6 + i * 0.12,
-        ease: 'power3.out',
-        filter: 'blur(8px)',
-        clearProps: 'filter',
-      });
-    });
-    if (card) {
-      gsap.from(card, {
-        y: 60,
-        opacity: 0,
-        duration: 1.2,
-        delay: 1.2,
-        ease: 'power3.out',
-        filter: 'blur(10px)',
-        clearProps: 'filter',
-      });
-    }
   }
 
   const progress = document.querySelector('.scroll-progress');
@@ -333,29 +356,6 @@
       if (!ticking) { requestAnimationFrame(update); ticking = true; }
     }, { passive: true });
     update();
-  }
-
-  const GLYPHS = '!<>-_\\/[]{}—=+*^?#________';
-  function scramble(el) {
-    if (!el || el.dataset.scrambled) return;
-    el.dataset.scrambled = '1';
-  }
-
-  const scrambleTargets = document.querySelectorAll('[data-scramble]');
-  if (scrambleTargets.length) {
-    if ('IntersectionObserver' in window) {
-      const so = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            scramble(entry.target);
-            so.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.5 });
-      scrambleTargets.forEach(function (el) { so.observe(el); });
-    } else {
-      scrambleTargets.forEach(scramble);
-    }
   }
 
   document.querySelectorAll('.magnetic').forEach(function (btn) {
@@ -381,37 +381,6 @@
     });
   });
 
-  const cursorDot = document.querySelector('.cursor-dot');
-  const cursorRing = document.querySelector('.cursor-ring');
-  if (cursorDot && cursorRing && isDesktop && !reduceMotion) {
-    let mx = window.innerWidth / 2, my = window.innerHeight / 2;
-    let rx = mx, ry = my;
-    let hidden = false;
-    document.addEventListener('mousemove', function (e) { mx = e.clientX; my = e.clientY; });
-    document.addEventListener('mouseleave', function () {
-      cursorDot.classList.add('is-hidden');
-      cursorRing.classList.add('is-hidden');
-      hidden = true;
-    });
-    document.addEventListener('mouseenter', function () {
-      cursorDot.classList.remove('is-hidden');
-      cursorRing.classList.remove('is-hidden');
-      hidden = false;
-    });
-    function tick() {
-      rx += (mx - rx) * 0.18;
-      ry += (my - ry) * 0.18;
-      cursorDot.style.transform = 'translate3d(' + (mx - 3) + 'px,' + (my - 3) + 'px,0)';
-      cursorRing.style.transform = 'translate3d(' + (rx - 16) + 'px,' + (ry - 16) + 'px,0)';
-      requestAnimationFrame(tick);
-    }
-    tick();
-    document.querySelectorAll('a, button, .faq-item summary, .who-grid li, .feature, .plan, .badge, .marquee-chip').forEach(function (el) {
-      el.addEventListener('mouseenter', function () { cursorRing.classList.add('is-hover'); });
-      el.addEventListener('mouseleave', function () { cursorRing.classList.remove('is-hover'); });
-    });
-  }
-
   document.querySelectorAll('.faq-item').forEach(function (item) {
     const body = item.querySelector('.faq-body');
     if (!body) return;
@@ -425,69 +394,160 @@
   });
 
   const PROF = {
-    consultant: {
-      name: 'Aarav Mehta',
-      role: 'Consultant · Odoo & Python',
-      avatar: 'linear-gradient(135deg, #FF6B35, #FFB088)',
-      tiles: [
-        ['Case study', 'Inventory automation for a retail chain'],
-        ['Case study', 'Custom CRM for a logistics startup'],
-        ['Case study', 'Field service app, 12 states'],
-      ],
-    },
     chef: {
+      url: 'priya-iyer',
+      monogram: 'PI',
       name: 'Priya Iyer',
-      role: 'Chef · South Indian fine dining',
-      avatar: 'linear-gradient(135deg, #FFB088, #FFD2A0)',
-      tiles: [
-        ['Menu', '8-course Onam sadhya, plated for service'],
-        ['Gallery', 'Plating — 240 covers, single seating'],
-        ['Story', 'Why I source millets from Palakkad'],
-      ],
-    },
-    student: {
-      name: 'Riya Sharma',
-      role: 'Student · IIT Madras, CS ’26',
-      avatar: 'linear-gradient(135deg, #D2C0FF, #FFE4D2)',
-      tiles: [
-        ['Project', 'Real-time sign-language translator'],
-        ['Paper', 'CNN paper, IEEE region 10, 2025'],
-        ['Talk', "TEDx — 'My code doesn't work'"],
-      ],
+      role: 'Chef · South Indian fine dining, Bengaluru',
+      body: function () {
+        return ''
+          + '<div class="pf pf-chef">'
+          +   '<div class="pf-head">'
+          +     '<div class="pf-monogram">' + PROF.chef.monogram + '</div>'
+          +     '<div class="pf-head-meta">'
+          +       '<h3 class="pf-name">' + PROF.chef.name + '</h3>'
+          +       '<p class="pf-role">' + PROF.chef.role + '</p>'
+          +     '</div>'
+          +     '<span class="pf-status"><span class="pf-status-dot"></span>Live menu</span>'
+          +   '</div>'
+          +   '<div class="pf-section-title">Today’s tasting menu</div>'
+          +   '<ul class="pf-menu">'
+          +     '<li><span class="pf-course">01</span><span class="pf-dish">Nellore karam podi, gongura leaf</span><span class="pf-tag">veg</span></li>'
+          +     '<li><span class="pf-course">02</span><span class="pf-dish">Palakkad millet risotto, morel</span><span class="pf-tag">gf</span></li>'
+          +     '<li><span class="pf-course">03</span><span class="pf-dish">Tellicherry pepper crab, appam</span></li>'
+          +     '<li><span class="pf-course">04</span><span class="pf-dish">8-course Onam sadhya, plated</span><span class="pf-tag">signature</span></li>'
+          +   '</ul>'
+          +   '<div class="pf-foot">'
+          +     '<span class="pf-foot-meta">240 covers · single seating · since 2019</span>'
+          +     '<span class="pf-foot-meta pf-foot-meta-2">PDF · ₹0 · share on WhatsApp</span>'
+          +   '</div>'
+          + '</div>';
+      }
     },
     developer: {
+      url: 'karan-desai',
+      monogram: 'KD',
       name: 'Karan Desai',
-      role: 'Developer · Bengaluru',
-      avatar: 'linear-gradient(135deg, #A0E4FF, #C0FFD2)',
-      tiles: [
-        ['OSS', 'graphql-shield · 6k stars · maintainer'],
-        ['Talk', 'JSConf India 2024 — runtime hacking'],
-        ['Build', 'TinySlack — 14kb Slack clone'],
-      ],
+      role: 'Developer · Bengaluru · ex-Razorpay',
+      body: function () {
+        return ''
+          + '<div class="pf pf-dev">'
+          +   '<div class="pf-head">'
+          +     '<div class="pf-monogram">' + PROF.developer.monogram + '</div>'
+          +     '<div class="pf-head-meta">'
+          +       '<h3 class="pf-name">' + PROF.developer.name + '</h3>'
+          +       '<p class="pf-role">' + PROF.developer.role + '</p>'
+          +     '</div>'
+          +     '<span class="pf-status"><span class="pf-status-dot"></span>Building</span>'
+          +   '</div>'
+          +   '<div class="pf-dev-row">'
+          +     '<div class="pf-stat"><span class="pf-stat-num">6.2k</span><span class="pf-stat-label">★ graphql-shield</span></div>'
+          +     '<div class="pf-stat"><span class="pf-stat-num">14</span><span class="pf-stat-label">★ TinySlack</span></div>'
+          +     '<div class="pf-stat"><span class="pf-stat-num">2.4k</span><span class="pf-stat-label">★ edge-cache</span></div>'
+          +   '</div>'
+          +   '<div class="pf-contrib-grid">'
+          +     '<div class="pf-contrib-cell">Mon<br><span class="pf-contrib-bar" style="--h:60%"></span></div>'
+          +     '<div class="pf-contrib-cell">Tue<br><span class="pf-contrib-bar" style="--h:90%"></span></div>'
+          +     '<div class="pf-contrib-cell">Wed<br><span class="pf-contrib-bar" style="--h:40%"></span></div>'
+          +     '<div class="pf-contrib-cell">Thu<br><span class="pf-contrib-bar" style="--h:75%"></span></div>'
+          +     '<div class="pf-contrib-cell">Fri<br><span class="pf-contrib-bar" style="--h:55%"></span></div>'
+          +     '<div class="pf-contrib-cell">Sat<br><span class="pf-contrib-bar" style="--h:30%"></span></div>'
+          +     '<div class="pf-contrib-cell">Sun<br><span class="pf-contrib-bar" style="--h:20%"></span></div>'
+          +   '</div>'
+          +   '<div class="pf-section-title">Recent talks</div>'
+          +   '<div class="pf-dev-talk">JSConf India 2024 · runtime hacking</div>'
+          + '</div>';
+      }
+    },
+    student: {
+      url: 'riya-sharma',
+      monogram: 'RS',
+      name: 'Riya Sharma',
+      role: 'Student · IIT Madras, CS ’26',
+      body: function () {
+        return ''
+          + '<div class="pf pf-student">'
+          +   '<div class="pf-head">'
+          +     '<div class="pf-monogram">' + PROF.student.monogram + '</div>'
+          +     '<div class="pf-head-meta">'
+          +       '<h3 class="pf-name">' + PROF.student.name + '</h3>'
+          +       '<p class="pf-role">' + PROF.student.role + '</p>'
+          +     '</div>'
+          +     '<span class="pf-status"><span class="pf-status-dot"></span>Open to work</span>'
+          +   '</div>'
+          +   '<div class="pf-section-title">Projects</div>'
+          +   '<div class="pf-proj-grid">'
+          +     '<div class="pf-proj pf-proj-1">'
+          +       '<span class="pf-proj-tag">SIGN-LANG</span>'
+          +       '<strong>Real-time ISL translator</strong>'
+          +       '<span class="pf-proj-meta">React Native · TensorFlow Lite · 22k MAU</span>'
+          +     '</div>'
+          +     '<div class="pf-proj pf-proj-2">'
+          +       '<span class="pf-proj-tag">CNN PAPER</span>'
+          +       '<strong>Edge-detect on low-bandwidth</strong>'
+          +       '<span class="pf-proj-meta">IEEE Region 10 · 2025</span>'
+          +     '</div>'
+          +     '<div class="pf-proj pf-proj-3">'
+          +       '<span class="pf-proj-tag">TEDX</span>'
+          +       '<strong>“My code doesn’t work”</strong>'
+          +       '<span class="pf-proj-meta">Mar 2025 · 1,400 attendees</span>'
+          +     '</div>'
+          +     '<div class="pf-proj pf-proj-4">'
+          +       '<span class="pf-proj-tag">FELLOW</span>'
+          +       '<strong>MLH Spring 2025 Top 50</strong>'
+          +       '<span class="pf-proj-meta">MajorLeagueHacking · fellow</span>'
+          +     '</div>'
+          +   '</div>'
+          + '</div>';
+      }
+    },
+    consultant: {
+      url: 'aarav-mehta',
+      monogram: 'AM',
+      name: 'Aarav Mehta',
+      role: 'Consultant · Odoo & Python · Mumbai',
+      body: function () {
+        return ''
+          + '<div class="pf pf-consultant">'
+          +   '<div class="pf-head">'
+          +     '<div class="pf-monogram">' + PROF.consultant.monogram + '</div>'
+          +     '<div class="pf-head-meta">'
+          +       '<h3 class="pf-name">' + PROF.consultant.name + '</h3>'
+          +       '<p class="pf-role">' + PROF.consultant.role + '</p>'
+          +     '</div>'
+          +     '<span class="pf-status"><span class="pf-status-dot"></span>Available Q4</span>'
+          +   '</div>'
+          +   '<div class="pf-section-title">Recent engagements</div>'
+          +   '<ul class="pf-cases">'
+          +     '<li><span class="pf-case-num">01</span><div class="pf-case-meta"><strong>Inventory automation</strong><span>Retail chain · 14 stores · 6 weeks</span></div><span class="pf-case-out">-42% stockouts</span></li>'
+          +     '<li><span class="pf-case-num">02</span><div class="pf-case-meta"><strong>Custom CRM</strong><span>Logistics startup · 8 users · 4 weeks</span></div><span class="pf-case-out">Shipped</span></li>'
+          +     '<li><span class="pf-case-num">03</span><div class="pf-case-meta"><strong>Field service app</strong><span>12 states · 240 technicians · 10 weeks</span></div><span class="pf-case-out">3.8× throughput</span></li>'
+          +   '</ul>'
+          +   '<div class="pf-section-title">Testimonials</div>'
+          +   '<p class="pf-quote">“Cut our month-end close from 9 days to 2.” — CFO, retail client</p>'
+          + '</div>';
+      }
     },
   };
 
+  const showcaseBody = document.getElementById('showcase-body');
+  const showcaseUrl = document.getElementById('s-url');
+  const showcaseCaption = document.getElementById('showcase-caption');
   const tabs = document.querySelectorAll('.s-tab');
-  const sName = document.getElementById('s-name');
-  const sRole = document.getElementById('s-role');
-  const sAvatar = document.getElementById('s-avatar');
-  const sGrid = document.getElementById('s-grid');
-  if (tabs.length && sName && sRole && sAvatar && sGrid) {
+  if (tabs.length && showcaseBody) {
     function switchProf(prof) {
       const p = PROF[prof];
       if (!p) return;
-      sName.textContent = p.name;
-      sRole.textContent = p.role;
-      sAvatar.style.background = p.avatar;
-      sGrid.style.opacity = '0';
-      sGrid.style.transform = 'translateY(8px)';
+      showcaseBody.style.transition = 'opacity 0.18s ease';
+      showcaseBody.style.opacity = '0';
+      showcaseBody.style.transform = 'translateY(6px)';
       setTimeout(function () {
-        sGrid.innerHTML = p.tiles.map(function (t) {
-          return '<div class="showcase-tile"><span class="tile-label">' + t[0] + '</span><strong>' + t[1] + '</strong></div>';
-        }).join('');
-        sGrid.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-        sGrid.style.opacity = '1';
-        sGrid.style.transform = 'translateY(0)';
+        showcaseBody.innerHTML = p.body();
+        showcaseBody.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        showcaseBody.style.opacity = '1';
+        showcaseBody.style.transform = 'translateY(0)';
+        if (showcaseUrl) showcaseUrl.textContent = 'foliospace.in/' + p.url;
+        if (showcaseCaption) showcaseCaption.textContent = 'Fig. 1 — foliospace.in/' + p.url;
       }, 200);
     }
     tabs.forEach(function (t) {
@@ -504,10 +564,12 @@
         b.classList.add('is-flash');
         setTimeout(function () { b.classList.remove('is-flash'); }, 1200);
         if (b.textContent.indexOf('Copy') !== -1 && navigator.clipboard) {
-          navigator.clipboard.writeText('foliospace.in/yourname').catch(function () {});
+          navigator.clipboard.writeText(showcaseUrl ? showcaseUrl.textContent : 'foliospace.in/yourname').catch(function () {});
         }
       });
     });
+
+    switchProf('chef');
   }
 
   const burger = document.querySelector('.nav-burger');
@@ -606,6 +668,156 @@
       items.forEach(function (li, i) { li.classList.toggle('is-active', i === activeIdx); });
     });
   }
+  (function () {
+    const nav = document.querySelector('.nav');
+    const indicator = document.querySelector('.nav-indicator');
+    const links = document.querySelectorAll('.nav-link[data-section]');
+    if (!nav || !indicator || !links.length) return;
+
+    const sections = Array.from(links).map(function (a) {
+      return { link: a, target: document.getElementById(a.dataset.section) };
+    }).filter(function (s) { return s.target; });
+
+    let activeIdx = -1;
+
+    function moveIndicator(link) {
+      if (!link || activeIdx === -1 && !link) return;
+      const r = link.getBoundingClientRect();
+      const nr = nav.getBoundingClientRect();
+      indicator.style.width = r.width + 'px';
+      indicator.style.left = (r.left - nr.left) + 'px';
+    }
+
+    function setActive(idx) {
+      if (idx === activeIdx) return;
+      activeIdx = idx;
+      links.forEach(function (l, i) { l.classList.toggle('is-active', i === idx); });
+      if (idx >= 0) moveIndicator(sections[idx].link);
+      else indicator.style.opacity = '0';
+    }
+
+    if ('IntersectionObserver' in window) {
+      const obs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          const idx = sections.findIndex(function (s) { return s.target === e.target; });
+          if (idx === -1) return;
+          if (e.isIntersecting && e.intersectionRatio > 0.15) setActive(idx);
+        });
+      }, { threshold: [0, 0.15, 0.3, 0.6] });
+      sections.forEach(function (s) { obs.observe(s.target); });
+    }
+
+    links.forEach(function (l) {
+      l.addEventListener('mouseenter', function () { moveIndicator(l); });
+      l.addEventListener('focus', function () { moveIndicator(l); });
+    });
+
+    nav.addEventListener('mouseleave', function () {
+      if (activeIdx >= 0) moveIndicator(sections[activeIdx].link);
+      else indicator.style.opacity = '0';
+    });
+
+    window.addEventListener('scroll', function () {
+      const scrolled = window.scrollY > 80;
+      nav.dataset.state = scrolled ? 'scrolled' : 'top';
+    }, { passive: true });
+  })();
+
+  (function () {
+    const hero = document.querySelector('.hero');
+    if (!hero || !isDesktop) return;
+    if (reduceMotion) return;
+    let mx = 0, my = 0;
+    let raf = null;
+    function apply() {
+      hero.style.setProperty('--mx', mx + 'px');
+      hero.style.setProperty('--my', my + 'px');
+      raf = null;
+    }
+    hero.addEventListener('mousemove', function (e) {
+      const r = hero.getBoundingClientRect();
+      mx = e.clientX - r.left;
+      my = e.clientY - r.top;
+      hero.classList.add('is-cursor-on');
+      if (!raf) raf = requestAnimationFrame(apply);
+    });
+    hero.addEventListener('mouseleave', function () {
+      hero.classList.remove('is-cursor-on');
+    });
+  })();
+
+  (function () {
+    const toggle = document.getElementById('pricing-toggle');
+    if (!toggle) return;
+    const buttons = toggle.querySelectorAll('button');
+    buttons.forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (b.classList.contains('is-on')) return;
+        buttons.forEach(function (x) { x.classList.remove('is-on'); });
+        b.classList.add('is-on');
+        const cycle = b.dataset.cycle;
+        document.querySelectorAll('.price.is-monthly, .price.is-yearly, .price-sub.is-monthly, .price-sub.is-yearly').forEach(function (el) {
+          if (el.classList.contains('is-monthly')) {
+            el.classList.toggle('is-hidden', cycle !== 'monthly');
+          } else {
+            el.classList.toggle('is-hidden', cycle !== 'yearly');
+          }
+        });
+      });
+    });
+  })();
+
+  (function () {
+    const btn = document.getElementById('share-float');
+    const pricing = document.getElementById('pricing');
+    if (!btn || !pricing) return;
+    let visible = false;
+    let lastState = false;
+    function update() {
+      const r = pricing.getBoundingClientRect();
+      const inView = r.top < window.innerHeight && r.bottom > 0;
+      if (inView !== lastState) {
+        lastState = inView;
+        btn.classList.toggle('is-on', inView);
+      }
+    }
+    window.addEventListener('scroll', update, { passive: true });
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      const text = encodeURIComponent('Check out FolioSpace — a portfolio link that loads fast on WhatsApp: https://foliospace.in');
+      window.open('https://wa.me/?text=' + text, '_blank');
+    });
+    update();
+  })();
+
+  (function () {
+    const orbits = document.querySelector('.orbits');
+    if (!orbits) return;
+    const obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting && e.intersectionRatio > 0.3) {
+          orbits.classList.add('is-on');
+          obs.unobserve(orbits);
+        }
+      });
+    }, { threshold: [0, 0.3, 0.6] });
+    obs.observe(orbits);
+  })();
+
+  (function () {
+    const workshop = document.getElementById('workshop');
+    if (!workshop) return;
+    const obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting && e.intersectionRatio > 0.3) {
+          workshop.classList.add('is-on');
+          obs.unobserve(workshop);
+        }
+      });
+    }, { threshold: [0, 0.3, 0.6] });
+    obs.observe(workshop);
+  })();
+
   document.addEventListener('keydown', function (e) {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
       e.preventDefault();
@@ -626,4 +838,32 @@
       });
     }
   });
+
+  const rhSection = document.getElementById('rh-section');
+  const rhPage = document.getElementById('rh-page');
+  const rhSections = Array.from(document.querySelectorAll('section[data-rh-section]'));
+  function updateRunningHead() {
+    const vh = window.innerHeight;
+    let active = rhSections[0];
+    let bestRatio = 0;
+    rhSections.forEach(function (s) {
+      const r = s.getBoundingClientRect();
+      const visible = Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0));
+      const ratio = visible / Math.min(r.height, vh);
+      if (ratio > bestRatio) { bestRatio = ratio; active = s; }
+    });
+    if (active) {
+      rhSection.textContent = active.getAttribute('data-rh-section');
+      rhPage.textContent = 'Page ' + active.getAttribute('data-rh-page');
+    }
+  }
+  if (rhSection && rhPage && rhSections.length) {
+    updateRunningHead();
+    let raf = null;
+    window.addEventListener('scroll', function () {
+      if (raf) return;
+      raf = requestAnimationFrame(function () { raf = null; updateRunningHead(); });
+    }, { passive: true });
+    window.addEventListener('resize', updateRunningHead);
+  }
 })();

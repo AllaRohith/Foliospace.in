@@ -1,148 +1,334 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <header class="nav-wrap">
-    <div class="nav">
+  <header class="nav-wrap" id="nav-wrap">
+    <div class="nav" data-state="top">
       <a href="/" class="brand">
-        <span class="brand-mark"></span>
+        <span class="brand-mark">
+          <svg viewBox="0 0 56 56" aria-hidden="true">
+            <rect x="6" y="6" width="44" height="44" rx="4" fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <path d="M 36 50 L 50 50 L 50 36 Z" fill="#FF6B35"/>
+            <path d="M 36 50 L 36 36 L 50 36" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+            <line x1="14" y1="18" x2="32" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="14" y1="26" x2="38" y2="26" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="14" y1="34" x2="30" y2="34" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
         <span class="brand-name">FolioSpace</span>
       </a>
-      <nav class="nav-links" id="nav-links">
-        <a href="#who">Who it's for</a>
-        <a href="#features">Features</a>
-        <a href="#pricing">Pricing</a>
-        <a href="#join" class="nav-cta">
-          <span>Join waitlist</span>
-          <span class="nav-cta-arrow">→</span>
+
+      <nav class="nav-links" id="nav-links" aria-label="Primary">
+        <a href="#who" data-section="who" class="nav-link">
+          <span>Who it's for</span>
+        </a>
+        <div class="nav-mega" data-trigger="features">
+          <a href="#features" data-section="features" class="nav-link">
+            <span>Features</span>
+            <span class="nav-link-arrow">↓</span>
+          </a>
+          <div class="nav-mega-panel" role="menu">
+            <div class="mega-grid">
+              <a href="#features" class="mega-item" role="menuitem">
+                <div>
+                  <strong>Built for the chat era</strong>
+                  <span>WhatsApp + LinkedIn previews that slap</span>
+                </div>
+              </a>
+              <a href="#features" class="mega-item" role="menuitem">
+                <div>
+                  <strong>PDF in one tap</strong>
+                  <span>Send a polished PDF on demand</span>
+                </div>
+              </a>
+              <a href="#features" class="mega-item" role="menuitem">
+                <div>
+                  <strong>Edit from phone</strong>
+                  <span>Your page keeps up with your work</span>
+                </div>
+              </a>
+              <a href="#features" class="mega-item" role="menuitem">
+                <div>
+                  <strong>Inbox without exposure</strong>
+                  <span>Leads via WhatsApp, not your email</span>
+                </div>
+              </a>
+            </div>
+            <div class="mega-foot">
+              <a href="#pricing" class="mega-foot-link">Pricing →</a>
+              <span class="mega-foot-meta">₹150 setup · ₹99/mo</span>
+            </div>
+          </div>
+        </div>
+        <a href="#pricing" data-section="pricing" class="nav-link">
+          <span>Pricing</span>
+        </a>
+        <a href="#faq" data-section="faq" class="nav-link">
+          <span>FAQ</span>
         </a>
       </nav>
+
+      <div class="nav-search" id="nav-search">
+        <kbd>⌘K</kbd>
+        <span>Quick nav</span>
+      </div>
+
+      <a href="#join" class="nav-cta">
+        <span>Join waitlist</span>
+        <span class="nav-cta-arrow">→</span>
+      </a>
+
       <button class="nav-burger" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
         <span></span><span></span><span></span>
       </button>
+
+      <div class="nav-indicator" aria-hidden="true"></div>
     </div>
   </header>
 
   <main>
-    <section class="hero">
-      <aside class="hero-rail" aria-hidden="true">
-        <span class="rail-issue">No. 01</span>
-        <span class="rail-line"></span>
-        <span class="rail-label">The waitlist edition</span>
-      </aside>
+    <div class="running-head" id="running-head" aria-hidden="true">
+      <div class="running-head-inner">
+        <span class="running-head-issue">FolioSpace</span>
+        <span class="running-head-sep">·</span>
+        <span class="running-head-section" id="rh-section">Issue 01</span>
+        <span class="running-head-page" id="rh-page">Page 01</span>
+      </div>
+    </div>
+    <section class="hero hero-asymmetric" data-rh-section="Cover" data-rh-page="01">
+      <div class="hero-folio" aria-hidden="true">
+        <span class="folio-issue">No. 01</span>
+        <span class="folio-rule"></span>
+        <span class="folio-label">The Waitlist Edition · Sep 2026</span>
+      </div>
+      <svg class="hero-scurve" viewBox="0 0 1440 900" aria-hidden="true">
+        <path d="M 0 720 C 240 540, 480 360, 720 360 S 1120 540, 1440 240" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+      </svg>
       <div class="container">
-        <div class="hero-inner">
-          <div class="hero-mark-row">
-            <span class="hero-mark">
-              <span class="mark-eyebrow">Private beta</span>
-              <span class="mark-pulse"></span>
-            </span>
-            <span class="hero-eyebrow-text">
-              <span id="counter-mini" hidden><strong id="counter-mini-n">0</strong> already in</span>
-              <span class="hero-eyebrow-text-sep" hidden>·</span>
-              <span>doors open soon</span>
-            </span>
+        <div class="hero-asymmetric-grid">
+          <div class="hero-left">
+            <div class="hero-mark-row">
+              <span class="hero-mark">
+                <span class="mark-eyebrow">Private beta</span>
+              </span>
+              <span class="hero-eyebrow-text">
+                <span id="counter-mini" hidden><strong id="counter-mini-n">0</strong> already in</span>
+                <span class="hero-eyebrow-text-sep" hidden>·</span>
+                <span>doors open soon</span>
+              </span>
+            </div>
+
+            <h1 class="hero-title">
+              <span class="ht-row ht-row-1">
+                <span class="ht-display" data-split>Stop sending</span>
+                <span class="ht-serif ht-strike">PDFs.</span>
+              </span>
+              <span class="ht-row ht-row-2">
+                <span class="ht-display" data-split>Start sharing a link that lands.</span>
+              </span>
+            </h1>
+
+            <p class="hero-sub">
+              One page for everything you've built. Loads fast, looks sharp,
+              and makes you unforgettable the moment someone taps your name
+              on WhatsApp or LinkedIn.
+            </p>
+
+            <form id="join" class="signup-form hero-form-slim" autocomplete="off">
+              <div class="signup-row">
+                <input
+                  type="text"
+                  name="website"
+                  tabindex="-1"
+                  autocomplete="off"
+                  style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;"
+                  aria-hidden="true"
+                />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="you@email.com"
+                  required
+                  inputmode="email"
+                  autocomplete="email"
+                  aria-label="Email address"
+                />
+                <select name="role" aria-label="What do you do?">
+                  <option value="">I am a…</option>
+                  <option value="student">Student</option>
+                  <option value="developer">Developer</option>
+                  <option value="designer">Designer</option>
+                  <option value="chef">Chef / culinary</option>
+                  <option value="artist">Artist / creator</option>
+                  <option value="consultant">Consultant / freelancer</option>
+                  <option value="employee">Working professional</option>
+                  <option value="other">Something else</option>
+                </select>
+                <button type="submit" class="btn btn-primary magnetic">Claim my spot →</button>
+              </div>
+              <p class="form-msg" id="form-msg" role="status" aria-live="polite"></p>
+            </form>
+
+            <div class="hero-meta">
+              <span>₹150 to start</span>
+              <span class="sep">·</span>
+              <span>less than a pizza / month after</span>
+              <span class="sep">·</span>
+              <span>cancel in two taps</span>
+            </div>
+
+            <ul class="hero-strip" aria-label="What's included">
+              <li><span class="hero-strip-dot"></span>Custom foliospace.in/yourname</li>
+              <li><span class="hero-strip-dot"></span>WhatsApp preview card</li>
+              <li><span class="hero-strip-dot"></span>LinkedIn OG image</li>
+              <li><span class="hero-strip-dot"></span>One-tap PDF</li>
+              <li><span class="hero-strip-dot"></span>Edit from any phone</li>
+            </ul>
+
+            <div class="hero-launch" id="launch" data-launch="2026-09-02T00:00:00+05:30">
+              <div class="launch-label">
+                <span class="launch-dot"></span>
+                Public launch in
+              </div>
+              <div class="launch-grid" aria-live="polite">
+                <div class="launch-cell"><strong id="ld-d">00</strong><span>days</span></div>
+                <div class="launch-sep">:</div>
+                <div class="launch-cell"><strong id="ld-h">00</strong><span>hrs</span></div>
+                <div class="launch-sep">:</div>
+                <div class="launch-cell"><strong id="ld-m">00</strong><span>min</span></div>
+                <div class="launch-sep">:</div>
+                <div class="launch-cell"><strong id="ld-s">00</strong><span>sec</span></div>
+              </div>
+              <div class="launch-foot">
+                <span>Sep 2, 2026 · 12:00 AM IST</span>
+              </div>
+            </div>
           </div>
 
-          <h1 class="hero-title">
-            <span class="ht-row ht-row-1">
-              <span class="ht-display" data-split>Stop sending</span>
-              <span class="ht-serif ht-orange" data-split>PDFs.</span>
-            </span>
-            <span class="ht-row ht-row-2">
-              <span class="ht-display" data-split>Start sharing</span>
-              <span class="ht-serif ht-ink" data-split>a link</span>
-              <span class="ht-display ht-outline" data-split>that lands.</span>
-            </span>
-          </h1>
-
-          <p class="hero-sub">
-            One page for everything you've built. Loads fast, looks sharp,
-            and makes you unforgettable the moment someone taps your name
-            on WhatsApp or LinkedIn.
-          </p>
-
-          <form id="join" class="signup-form" autocomplete="off">
-            <div class="signup-row">
-              <input
-                type="text"
-                name="website"
-                tabindex="-1"
-                autocomplete="off"
-                style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;"
-                aria-hidden="true"
-              />
-              <input
-                type="email"
-                name="email"
-                placeholder="you@email.com"
-                required
-                inputmode="email"
-                autocomplete="email"
-                aria-label="Email address"
-              />
-              <select name="role" aria-label="What do you do?">
-                <option value="">I am a…</option>
-                <option value="student">Student</option>
-                <option value="developer">Developer</option>
-                <option value="designer">Designer</option>
-                <option value="chef">Chef / culinary</option>
-                <option value="artist">Artist / creator</option>
-                <option value="consultant">Consultant / freelancer</option>
-                <option value="employee">Working professional</option>
-                <option value="other">Something else</option>
-              </select>
-              <button type="submit" class="btn btn-primary magnetic">Claim my spot →</button>
+          <div class="hero-right">
+            <div class="showcase-card-wrap">
+              <div class="showcase-card" id="showcase-card">
+                <div class="showcase-bar">
+                  <span class="dot-r"></span>
+                  <span class="dot-y"></span>
+                  <span class="dot-g"></span>
+                  <span class="showcase-url" id="s-url">foliospace.in/priya-iyer</span>
+                  <span class="showcase-tabs">
+                    <button class="s-tab is-active" data-prof="chef">Chef</button>
+                    <button class="s-tab" data-prof="developer">Developer</button>
+                    <button class="s-tab" data-prof="student">Student</button>
+                    <button class="s-tab" data-prof="consultant">Consultant</button>
+                  </span>
+                </div>
+                <div class="showcase-body" id="showcase-body"></div>
+              </div>
+              <p class="showcase-caption" id="showcase-caption">Fig. 1 — foliospace.in/priya-iyer</p>
             </div>
-            <p class="form-msg" id="form-msg" role="status" aria-live="polite"></p>
-          </form>
-
-          <div class="hero-meta">
-            <span>₹150 to start</span>
-            <span class="sep">·</span>
-            <span>less than a pizza / month after</span>
-            <span class="sep">·</span>
-            <span>cancel in two taps</span>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="showcase">
+    <section class="workshop" id="workshop" data-rh-section="The dossier" data-rh-page="02">
+      <div class="workshop-hairline" aria-hidden="true"></div>
       <div class="container">
-        <p class="showcase-eyebrow">
-          <span class="dot-live"></span>
-          Yours in 60 seconds · foliospace.in/yourname
-        </p>
-        <div class="showcase-card" data-parallax="0.10">
-          <div class="showcase-bar">
-            <span class="dot-r"></span>
-            <span class="dot-y"></span>
-            <span class="dot-g"></span>
-            <span class="showcase-url">foliospace.in/yourname</span>
-            <span class="showcase-tabs">
-              <button class="s-tab is-active" data-prof="consultant">Consultant</button>
-              <button class="s-tab" data-prof="chef">Chef</button>
-              <button class="s-tab" data-prof="student">Student</button>
-              <button class="s-tab" data-prof="developer">Developer</button>
-            </span>
+        <div class="workshop-grid">
+          <div class="workshop-left">
+            <p class="workshop-eyebrow">The dossier</p>
+            <h2 class="workshop-heading">
+              <span class="workshop-line workshop-line-1">One page.</span>
+              <span class="workshop-line workshop-line-2">Every kind of work.</span>
+              <span class="workshop-line workshop-line-3">Just works.</span>
+            </h2>
+            <div class="workshop-pullquote">
+              <p class="workshop-quote">A portfolio that loads on a 2G phone in Dharavi. A menu that renders before the customer finishes asking. A consultant's six-figure week that started with a single link in a group chat.</p>
+              <span class="workshop-attribution">— Three real FolioSpace users, fall 2026</span>
+            </div>
           </div>
-          <div class="showcase-body">
-            <div class="showcase-hero">
-              <div class="showcase-avatar" id="s-avatar"></div>
-              <div>
-                <h3 id="s-name">Aarav Mehta</h3>
-                <p id="s-role">Consultant · Odoo &amp; Python</p>
+          <div class="workshop-right">
+            <div class="workshop-card-wrap">
+              <div class="showcase-card workshop-card">
+                <div class="showcase-bar">
+                  <span class="dot-r"></span>
+                  <span class="dot-y"></span>
+                  <span class="dot-g"></span>
+                  <span class="showcase-url">foliospace.in/priya-iyer</span>
+                  <span class="showcase-tabs">
+                    <button class="s-tab is-active" data-prof="chef">Chef</button>
+                    <button class="s-tab" data-prof="developer">Developer</button>
+                    <button class="s-tab" data-prof="student">Student</button>
+                    <button class="s-tab" data-prof="consultant">Consultant</button>
+                  </span>
+                </div>
+                <div class="showcase-body">
+                  <div class="showcase-hero">
+                    <div class="pf-monogram">PI</div>
+                    <div class="pf-head-meta">
+                      <h3 class="pf-name">Priya Iyer</h3>
+                      <p class="pf-role">Chef · South Indian fine dining, Bengaluru</p>
+                    </div>
+                    <span class="pf-status"><span class="pf-status-dot"></span>Live menu</span>
+                  </div>
+                  <div class="pf-section-title">Today’s tasting menu</div>
+                  <ul class="pf-menu">
+                    <li><span class="pf-course">01</span><span class="pf-dish">Nellore karam podi, gongura leaf</span><span class="pf-tag">veg</span><span class="pf-price">₹850</span></li>
+                    <li><span class="pf-course">02</span><span class="pf-dish">Palakkad millet risotto, morel</span><span class="pf-tag">gf</span><span class="pf-price">₹1,200</span></li>
+                    <li><span class="pf-course">03</span><span class="pf-dish">Tellicherry pepper crab, appam</span><span class="pf-price">₹1,650</span></li>
+                    <li><span class="pf-course">04</span><span class="pf-dish">8-course Onam sadhya, plated</span><span class="pf-tag">signature</span><span class="pf-price">₹3,400</span></li>
+                  </ul>
+                  <div class="pf-foot">
+                    <span class="pf-foot-meta">240 covers · single seating · since 2019</span>
+                    <span class="pf-foot-meta pf-foot-meta-2">PDF · ₹0 · share on WhatsApp</span>
+                  </div>
+                </div>
               </div>
+              <svg class="workshop-annotations" viewBox="0 0 600 460" aria-hidden="true">
+                <text x="20" y="44" class="workshop-anno-text" style="transform: rotate(-2deg); transform-origin: 20px 44px;">1 link</text>
+                <path d="M 60 60 C 40 70, 30 100, 40 130" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                <circle cx="60" cy="60" r="22" fill="none" stroke="currentColor" stroke-width="1.5" />
+
+                <text x="540" y="120" class="workshop-anno-text" style="transform: rotate(2deg); transform-origin: 540px 120px;">live updates</text>
+                <path d="M 560 110 C 580 130, 580 160, 540 180" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+
+                <text x="30" y="260" class="workshop-anno-text" style="transform: rotate(-1deg); transform-origin: 30px 260px;">2G-friendly</text>
+                <path d="M 90 260 C 60 250, 40 240, 30 220" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+
+                <text x="540" y="340" class="workshop-anno-text" style="transform: rotate(1deg); transform-origin: 540px 340px;">UPI · WhatsApp · PDF</text>
+                <path d="M 540 320 C 580 310, 590 290, 570 270" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                <path d="M 580 360 C 600 340, 580 320, 540 300" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+
+                <text x="240" y="440" class="workshop-anno-text" style="transform: rotate(-0.5deg); transform-origin: 240px 440px;">one tap to share</text>
+                <line x1="180" y1="430" x2="300" y2="430" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              </svg>
             </div>
-            <div class="showcase-grid" id="s-grid">
-              <div class="showcase-tile"><span class="tile-label">Case study</span><strong>Inventory automation for a retail chain</strong></div>
-              <div class="showcase-tile"><span class="tile-label">Case study</span><strong>Custom CRM for a logistics startup</strong></div>
-              <div class="showcase-tile"><span class="tile-label">Case study</span><strong>Field service app, 12 states</strong></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+<section class="story" id="story" data-rh-section="The evolution" data-rh-page="03">
+      <div class="container">
+        <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page 02<span class="folio-meta-sep">/</span>The evolution</p>
+        <div class="story-track">
+          <div class="story-step is-on">
+            <span class="story-num">2020</span>
+            <h2>A <em>Notion page</em>, a Drive folder, a LinkedIn attachment.</h2>
+            <p>Where your work used to live. Three links, three contexts, three places nobody opens. The PDF your client can't preview on their phone. The screenshot your recruiter lost in a DM.</p>
+            <div class="story-mock story-mock-old">
+              <span class="story-mock-label">/drive/aarav-mehta.pdf</span>
+              <span class="story-mock-line">4.7 MB · won't open on 2G</span>
+              <span class="story-mock-line">LinkedIn attachment · lost in DM</span>
+              <span class="story-mock-line">Notion page · 12 seconds to load</span>
             </div>
-            <div class="showcase-cta">
-              <button class="badge s-action">Download PDF</button>
-              <button class="badge muted s-action">Share on WhatsApp</button>
-              <button class="badge outline s-action">Copy link</button>
+          </div>
+          <div class="story-step">
+            <span class="story-num">2026</span>
+            <h2>One <em>link</em>. Every kind of work.</h2>
+            <p>Same person. Same work. One URL that loads in 800ms on a 2G phone in Dharavi, previews as a WhatsApp link card, reads as a LinkedIn OG image, and downloads as a single-tap PDF. Built once. Lands everywhere.</p>
+            <div class="story-mock story-mock-new">
+              <span class="story-mock-label story-mock-label-new">foliospace.in/aarav-mehta</span>
+              <span class="story-mock-line story-mock-line-new">800ms on 2G · 80KB total</span>
+              <span class="story-mock-line story-mock-line-new">WhatsApp preview · LinkedIn OG · PDF</span>
+              <span class="story-mock-line story-mock-line-new">One link · every channel</span>
             </div>
           </div>
         </div>
@@ -151,226 +337,210 @@
 
     <div class="marquee reveal">
         <div class="marquee-track" aria-hidden="true">
-          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> Students</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> Students</span>
           <span class="marquee-dot"></span>
-          <span class="marquee-chip accent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><path d="M6 17h12"/></svg> Chefs</span>
-          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12c0 2 .5 3.5 1.5 5l8-8c.5-.5 1.5-.5 2 0l5 5c1-1.5 1.5-3 1.5-5 0-5.5-4.5-10-10-10z"/></svg> Artists</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><path d="M6 17h12"/></svg> Chefs</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12c0 2 .5 3.5 1.5 5l8-8c.5-.5 1.5-.5 2 0l5 5c1-1.5 1.5-3 1.5-5 0-5.5-4.5-10-10-10z"/></svg> Artists</span>
           <span class="marquee-dot"></span>
-          <span class="marquee-chip dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Consultants</span>
-          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg> Developers</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Consultants</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg> Developers</span>
           <span class="marquee-dot"></span>
-          <span class="marquee-chip outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/></svg> Designers</span>
-          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg> Founders</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg> Designers</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg> Founders</span>
           <span class="marquee-dot"></span>
-          <span class="marquee-chip accent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Freelancers</span>
-          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg> Photographers</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Freelancers</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg> Photographers</span>
           <span class="marquee-dot"></span>
-          <span class="marquee-chip dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg> Writers</span>
-          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Marketers</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg> Writers</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Marketers</span>
           <span class="marquee-dot"></span>
-          <span class="marquee-chip outline"><span class="star"></span> ₹150 to start</span>
-          <span class="marquee-chip dark">60-second setup</span>
-          <span class="marquee-chip accent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Made in India 🇮🇳</span>
-          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg> WhatsApp-first</span>
-          <span class="marquee-chip outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg> PDF in one tap</span>
+          <span class="marquee-chip accent"><span class="star"></span> ₹150 to start</span>
+          <span class="marquee-chip">60-second setup</span>
+          <span class="marquee-chip accent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Made in India 🇮🇳</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> WhatsApp-first</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg> PDF in one tap</span>
           <span class="marquee-dot"></span>
-          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> Students</span>
-          <span class="marquee-chip accent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><path d="M6 17h12"/></svg> Chefs</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> Students</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><path d="M6 17h12"/></svg> Chefs</span>
           <span class="marquee-dot"></span>
-          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12c0 2 .5 3.5 1.5 5l8-8c.5-.5 1.5-.5 2 0l5 5c1-1.5 1.5-3 1.5-5 0-5.5-4.5-10-10-10z"/></svg> Artists</span>
-          <span class="marquee-chip dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Consultants</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12c0 2 .5 3.5 1.5 5l8-8c.5-.5 1.5-.5 2 0l5 5c1-1.5 1.5-3 1.5-5 0-5.5-4.5-10-10-10z"/></svg> Artists</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Consultants</span>
           <span class="marquee-dot"></span>
-          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg> Developers</span>
-          <span class="marquee-chip outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/></svg> Designers</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg> Developers</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg> Designers</span>
           <span class="marquee-dot"></span>
-          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg> Founders</span>
-          <span class="marquee-chip accent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Freelancers</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg> Founders</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Freelancers</span>
           <span class="marquee-dot"></span>
-          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg> Photographers</span>
-          <span class="marquee-chip dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg> Writers</span>
-          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Marketers</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg> Photographers</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg> Writers</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Marketers</span>
           <span class="marquee-dot"></span>
-          <span class="marquee-chip outline"><span class="star"></span> ₹150 to start</span>
-          <span class="marquee-chip dark">60-second setup</span>
-          <span class="marquee-chip accent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Made in India 🇮🇳</span>
-          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg> WhatsApp-first</span>
-          <span class="marquee-chip outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg> PDF in one tap</span>
+          <span class="marquee-chip accent"><span class="star"></span> ₹150 to start</span>
+          <span class="marquee-chip">60-second setup</span>
+          <span class="marquee-chip accent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Made in India 🇮🇳</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> WhatsApp-first</span>
+          <span class="marquee-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ico"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg> PDF in one tap</span>
         </div>
       </div>
 
-    <section id="who" class="who">
+    <section id="who" class="who" data-rh-section="Who's on it" data-rh-page="04">
       <div class="container">
-        <p class="section-label reveal">Who it's for</p>
-        <h2 class="reveal" data-scramble>If you've done <em>anything</em> worth showing, this is for you.</h2>
-        <ul class="who-grid reveal-stagger">
-          <li><span>🎓</span><div><strong>Students</strong><p>Land internships with work that speaks louder than grades.</p></div></li>
-          <li><span>👩‍🍳</span><div><strong>Chefs</strong><p>Show your menu, your plating, your kitchen — beautifully.</p></div></li>
-          <li><span>🎨</span><div><strong>Artists &amp; creators</strong><p>A gallery that loads in a blink, even on a flaky network.</p></div></li>
-          <li><span>💼</span><div><strong>Consultants &amp; freelancers</strong><p>Turn "send me your CV" into "wow, take my money".</p></div></li>
-          <li><span>👨‍💻</span><div><strong>Developers</strong><p>Ship your projects, repos, and talks — all in one place.</p></div></li>
-          <li><span>🧑‍💼</span><div><strong>Working professionals</strong><p>Side projects, talks, writing — visible at last.</p></div></li>
-        </ul>
-      </div>
-    </section>
-
-    <section id="features" class="features">
-      <div class="container">
-        <p class="section-label reveal">What you get</p>
-        <h2 class="reveal" data-scramble>Everything a portfolio needs.<br />Nothing it doesn't.</h2>
-        <div class="feature-grid reveal-stagger">
-          <article class="feature">
-            <h3>One link. Your whole story.</h3>
-            <p>foliospace.in/yourname — share it anywhere, it just works.</p>
-          </article>
-          <article class="feature">
-            <h3>Built for the chat era</h3>
-            <p>Previews that slap on WhatsApp, LinkedIn, and Instagram DMs.</p>
-          </article>
-          <article class="feature">
-            <h3>PDF in one tap</h3>
-            <p>Send a polished PDF when someone asks for "the formal version".</p>
-          </article>
-          <article class="feature">
-            <h3>Edit from your phone</h3>
-            <p>Your best work changes on the fly — so should your page.</p>
-          </article>
-          <article class="feature">
-            <h3>Inbox without exposure</h3>
-            <p>Leads land in WhatsApp or email — your address stays private.</p>
-          </article>
-          <article class="feature">
-            <h3>Costs less than your chai</h3>
-            <p>₹150 to start. ₹99/month after via UPI autopay. Cancel anytime.</p>
-          </article>
+        <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page 04<span class="folio-meta-sep">/</span>Who's on it</p>
+        <h2 class="reveal">If you've done <em>anything</em> worth showing, this is for you.</h2>
+        <div class="dossier-grid">
+          <ol class="dossier-list">
+            <li class="dossier-list-row"><span class="dossier-num">01</span><span class="dossier-text"><span class="dossier-mono dossier-mono-1">S</span><strong>Students</strong> — land internships with work that speaks louder than grades.</span></li>
+            <li class="dossier-list-row"><span class="dossier-num">02</span><span class="dossier-text"><span class="dossier-mono dossier-mono-2">C</span><strong>Chefs</strong> — show your menu, your plating, your kitchen — beautifully.</span></li>
+            <li class="dossier-list-row"><span class="dossier-num">03</span><span class="dossier-text"><span class="dossier-mono dossier-mono-3">A</span><strong>Artists &amp; creators</strong> — a gallery that loads in a blink, even on a flaky network.</span></li>
+            <li class="dossier-list-row"><span class="dossier-num">04</span><span class="dossier-text"><span class="dossier-mono dossier-mono-4">F</span><strong>Consultants &amp; freelancers</strong> — turn "send me your CV" into "wow, take my money".</span></li>
+            <li class="dossier-list-row"><span class="dossier-num">05</span><span class="dossier-text"><span class="dossier-mono dossier-mono-5">D</span><strong>Developers</strong> — ship your projects, repos, and talks — all in one place.</span></li>
+            <li class="dossier-list-row"><span class="dossier-num">06</span><span class="dossier-text"><span class="dossier-mono dossier-mono-6">W</span><strong>Working professionals</strong> — side projects, talks, writing — visible at last.</span></li>
+          </ol>
+          <ol class="dossier-list">
+            <li class="dossier-list-row"><span class="dossier-num">i</span><span class="dossier-text"><strong>One link.</strong> Your whole story. Share it anywhere, it just works.</span></li>
+            <li class="dossier-list-row"><span class="dossier-num">ii</span><span class="dossier-text"><strong>Chat-era previews.</strong> Slap on WhatsApp, LinkedIn, Instagram DMs.</span></li>
+            <li class="dossier-list-row"><span class="dossier-num">iii</span><span class="dossier-text"><strong>PDF in one tap.</strong> Send a polished version when someone asks for "the formal version".</span></li>
+            <li class="dossier-list-row"><span class="dossier-num">iv</span><span class="dossier-text"><strong>Edit from your phone.</strong> Your best work changes on the fly.</span></li>
+            <li class="dossier-list-row"><span class="dossier-num">v</span><span class="dossier-text"><strong>Inbox without exposure.</strong> Leads land in WhatsApp or email — your address stays private.</span></li>
+            <li class="dossier-list-row"><span class="dossier-num">vi</span><span class="dossier-text"><strong>Costs less than your chai.</strong> ₹150 to start, ₹99/month after.</span></li>
+          </ol>
         </div>
       </div>
     </section>
 
-    <section id="pricing" class="pricing">
+    <section id="pricing" class="pricing" data-rh-section="The receipt" data-rh-page="05">
       <div class="container">
-        <p class="section-label reveal">Pricing</p>
-        <h2 class="reveal" data-scramble>Pricing that doesn't make you think twice.</h2>
-        <div class="pricing-grid reveal-stagger">
-          <article class="plan">
-            <h3>Free</h3>
-            <p class="price">₹0<span>/forever</span></p>
-            <ul>
+        <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page 05<span class="folio-meta-sep">/</span>The receipt</p>
+        <h2 class="reveal">Pricing that doesn't make you think twice.</h2>
+
+        <div class="pricing-toggle" id="pricing-toggle">
+          <button class="is-on" data-cycle="monthly">Monthly</button>
+          <button data-cycle="yearly">Yearly <span class="pricing-save">Save 17%</span></button>
+        </div>
+        <div class="receipt-grid">
+          <article class="receipt">
+            <header class="receipt-header">
+              <h3>Solo</h3>
+              <span class="receipt-tier">Free, in India</span>
+            </header>
+            <p class="receipt-price">₹0 <span>/forever</span></p>
+            <p class="receipt-sub">No card, no UPI, no Aadhaar. Just sign up.</p>
+            <ul class="receipt-items">
               <li>1 clean template</li>
               <li>"Made with FolioSpace" badge</li>
               <li>foliospace.in/yourname link</li>
-              <li>Loads fast on any phone</li>
+              <li>Loads fast on a 2G phone in Dharavi</li>
             </ul>
             <a href="#join" class="btn btn-ghost">Start free</a>
           </article>
-          <article class="plan plan-featured">
-            <span class="plan-tag">Most loved</span>
-            <h3>Pro</h3>
-            <p class="price">₹150<span>setup</span></p>
-            <p class="price-sub">then ₹99/month · cancel anytime</p>
-            <ul>
+          <article class="receipt receipt-featured">
+            <header class="receipt-header">
+              <h3>Studio</h3>
+              <span class="receipt-tier">★ Most loved</span>
+            </header>
+            <p class="receipt-price is-monthly">₹150<span class="receipt-unit">once</span></p>
+            <p class="receipt-price is-yearly is-hidden">₹990<span class="receipt-unit">/yr</span></p>
+            <p class="receipt-sub is-monthly">then ₹99/month · cancel in two taps</p>
+            <p class="receipt-sub is-yearly is-hidden">then ₹99/month <span class="pricing-save">save ₹198</span></p>
+            <ul class="receipt-items">
               <li>Every template, unlocked</li>
               <li>One-tap PDF download</li>
-              <li>Contact form to your WhatsApp</li>
-              <li>Edit from your phone</li>
+              <li>Contact form to your WhatsApp (no email leak)</li>
+              <li>Edit from your phone, in any language</li>
               <li>No FolioSpace badge, ever</li>
             </ul>
-            <a href="#join" class="btn btn-primary magnetic">Claim my spot →</a>
+            <a href="#join" class="btn btn-primary">Claim my spot →</a>
           </article>
         </div>
       </div>
     </section>
 
-    <section class="stats">
+    <section class="stats" data-rh-section="By the numbers" data-rh-page="06">
       <div class="container">
-        <p class="section-label reveal">By the numbers</p>
-        <h2 class="reveal" data-scramble>Built for the speed of a tap.</h2>
-        <div class="stats-grid reveal-stagger">
+        <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page 06<span class="folio-meta-sep">/</span>By the numbers</p>
+        <h2 class="reveal">Built for the speed of a tap.</h2>
+        <div class="stats-band">
           <div class="stat">
             <strong><span data-count="80">0</span><span class="stat-unit">KB</span></strong>
             <span class="stat-label">first-load weight</span>
-            <div class="stat-bar"><div class="stat-fill" style="--w: 6%;"></div></div>
             <span class="stat-note">Most pages ship at 1.5MB. We don't.</span>
           </div>
           <div class="stat">
             <strong><span data-count="60">0</span><span class="stat-unit">s</span></strong>
             <span class="stat-label">to first portfolio</span>
-            <div class="stat-bar"><div class="stat-fill" style="--w: 12%;"></div></div>
             <span class="stat-note">Type → preview → live. That's it.</span>
           </div>
           <div class="stat">
             <strong><span data-count="3">0</span><span class="stat-unit">s</span></strong>
             <span class="stat-label">to WhatsApp-ready</span>
-            <div class="stat-bar"><div class="stat-fill" style="--w: 24%;"></div></div>
             <span class="stat-note">OG image + preview rendered on save.</span>
           </div>
           <div class="stat">
             <strong>₹<span data-count="99">0</span></strong>
             <span class="stat-label">per month after</span>
-            <div class="stat-bar"><div class="stat-fill" style="--w: 8%;"></div></div>
             <span class="stat-note">Less than your chai. UPI autopay.</span>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="horizontal" class="horizontal">
+    <section id="horizontal" class="horizontal" data-rh-section="One link · every kind of work" data-rh-page="07">
       <div class="container">
-        <p class="section-label reveal">One link, every kind of work</p>
-        <h2 class="reveal" data-scramble>Your story, however you tell it.</h2>
+        <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page 07<span class="folio-meta-sep">/</span>One link, every kind of work</p>
+        <h2 class="reveal">Your story, however you tell it.</h2>
       </div>
-      <div class="h-track-wrap">
-        <div class="h-track">
+      <div class="horizontal-strip">
           <article class="h-card">
-            <div class="h-avatar h-avatar-1">🎓</div>
+            <div class="h-avatar">S</div>
             <span class="h-role">Student · IIT Madras</span>
             <h3>Three projects, one link, four interviews.</h3>
             <p>Pre-final year, no CV. Just a FolioSpace link sent in the group chat.</p>
             <div class="h-foot"><span class="badge muted">PDF ready</span></div>
           </article>
           <article class="h-card">
-            <div class="h-avatar h-avatar-2">👩‍🍳</div>
+            <div class="h-avatar">C</div>
             <span class="h-role">Chef · Bangalore</span>
             <h3>Menus that load before the customer finishes asking.</h3>
             <p>Photos, plating, supplier story — all on one page that WhatsApp can preview.</p>
             <div class="h-foot"><span class="badge">Contact form</span></div>
           </article>
           <article class="h-card">
-            <div class="h-avatar h-avatar-3">🎨</div>
+            <div class="h-avatar">I</div>
             <span class="h-role">Illustrator · Mumbai</span>
             <h3>Portfolio that loads on a 2G network in Dharavi.</h3>
             <p>Hand-drawn thumbnails → under 80KB. Tap any tile to view in fullscreen.</p>
             <div class="h-foot"><span class="badge">All templates</span></div>
           </article>
           <article class="h-card">
-            <div class="h-avatar h-avatar-4">💼</div>
+            <div class="h-avatar">C</div>
             <span class="h-role">Consultant · Remote</span>
             <h3>"Send me your CV" → "wow, take my money".</h3>
             <p>Three case studies, one PDF, one contact button. Six figures closed in a week.</p>
             <div class="h-foot"><span class="badge">PDF in one tap</span></div>
           </article>
           <article class="h-card">
-            <div class="h-avatar h-avatar-5">👨‍💻</div>
+            <div class="h-avatar">D</div>
             <span class="h-role">Developer · Bengaluru</span>
             <h3>Repos, talks, OSS — all in one place, finally.</h3>
             <p>Auto-sync GitHub repos. One link that beats a long CV every time.</p>
             <div class="h-foot"><span class="badge">No badge</span></div>
           </article>
           <article class="h-card">
-            <div class="h-avatar h-avatar-6">🧑‍💼</div>
+            <div class="h-avatar">P</div>
             <span class="h-role">PM · Singapore</span>
             <h3>Side projects visible for the first time.</h3>
             <p>Talks, blog posts, weekend builds. Now recruiters find them.</p>
             <div class="h-foot"><span class="badge muted">Edit on mobile</span></div>
           </article>
-        </div>
       </div>
     </section>
 
-    <section id="faq" class="faq">
+    <section id="faq" class="faq" data-rh-section="Questions" data-rh-page="08">
       <div class="container">
-        <p class="section-label reveal">Questions</p>
-        <h2 class="reveal" data-scramble>The stuff you're wondering.</h2>
-        <div class="faq-list reveal-stagger">
+        <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page 08<span class="folio-meta-sep">/</span>Questions</p>
+        <h2 class="reveal">The stuff you're wondering.</h2>
+        <div class="faq-list reveal">
           <details class="faq-item">
             <summary>
               <span>Why ₹150 + ₹99/month?</span>
@@ -420,19 +590,48 @@
       </div>
     </section>
 
-    <section class="cta">
-      <div class="container reveal-stagger">
-        <h2 data-scramble>The first 100 get lifetime perks.</h2>
-        <p>Locked-in launch pricing, founder badge, and a say in what we build next.</p>
+    <section class="cta stamp" data-rh-section="Claim your spot" data-rh-page="09">
+      <div class="container">
+        <h2 class="stamp-headline">The first 100 get lifetime perks.</h2>
+        <p class="stamp-sub">Locked-in launch pricing, founder badge, and a say in what we build next.</p>
         <a href="#join" class="btn btn-primary btn-lg magnetic">Claim my spot →</a>
       </div>
     </section>
   </main>
 
-  <footer class="footer">
+  <div class="built-with" aria-label="How this page was built">
     <div class="container">
-      <span>© 2026 FolioSpace · Made with chai in India</span>
-      <span>Your story. One link. Done.</span>
+      <span class="built-with-line">Composed in <strong>FastAPI</strong> · Typeset in <strong>Instrument Sans</strong> &amp; <strong>DM Serif Display</strong> · Hand-tested in Mumbai</span>
+    </div>
+  </div>
+
+  <footer class="footer colophon">
+    <div class="container">
+      <span class="colophon-mark">FolioSpace</span>
+      <div class="colophon-center">
+        <svg class="colophon-printer-mark" viewBox="0 0 80 80" aria-hidden="true">
+          <circle cx="40" cy="40" r="36" fill="none" stroke="currentColor" stroke-width="1.25" />
+          <circle cx="40" cy="40" r="28" fill="none" stroke="currentColor" stroke-width="0.75" stroke-dasharray="2 3" />
+          <text x="40" y="34" text-anchor="middle" font-family="DM Serif Display, serif" font-style="italic" font-size="18" fill="currentColor">F</text>
+          <text x="40" y="52" text-anchor="middle" font-family="Instrument Sans, sans-serif" font-weight="700" font-size="7" letter-spacing="1.5" fill="currentColor">SPACE</text>
+          <path d="M 16 64 L 64 64" stroke="currentColor" stroke-width="0.75" />
+          <path d="M 22 68 L 58 68" stroke="currentColor" stroke-width="0.5" />
+        </svg>
+        <span class="colophon-tag">Your story. One link. Done.</span>
+        <span class="colophon-meta">© 2026 · Made with chai in India</span>
+        <span class="colophon-printed">Printed on the open web · Set in Instrument Sans &amp; DM Serif Display on cream</span>
+        <span class="colophon-anti">No AI imagery · No default fonts · No purple gradients · Hand-authored SVG</span>
+      </div>
+      <div class="colophon-spacer">
+        <span class="colophon-year">2026</span>
+        <span class="colophon-meta">Issue&nbsp;01 · The Waitlist Edition</span>
+      </div>
     </div>
   </footer>
+
+  <a class="share-float" id="share-float" href="#" target="_blank" rel="noopener" aria-label="Share FolioSpace on WhatsApp">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.05 4.91A9.82 9.82 0 0 0 12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.86 9.86 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.91-7.01zM12.04 20.15h-.01a8.18 8.18 0 0 1-4.17-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.23 8.23 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.25 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.55.12-.16.25-.63.81-.78.97-.14.16-.29.18-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.39.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.16.04-.31-.02-.43-.06-.12-.55-1.32-.75-1.81-.2-.48-.4-.41-.55-.42-.14-.01-.31-.01-.47-.01-.16 0-.43.06-.66.31-.23.25-.86.84-.86 2.06 0 1.22.89 2.4 1.01 2.57.12.16 1.76 2.69 4.27 3.77.6.26 1.06.41 1.43.52.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.2-.58.2-1.08.14-1.18-.06-.1-.23-.16-.48-.28z"/></svg>
+    <span>Share</span>
+  </a>
+
 {% endblock %}
