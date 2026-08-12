@@ -102,6 +102,38 @@ def draw_brand_mark(draw, x, y, size=56):
     )
 
 
+def draw_countdown_poster(draw, img, cx, top_y):
+    f_eyebrow = font_arial_bold(15)
+    eyebrow = "→ PUBLIC LAUNCH IN"
+    ew, _ = measure(draw, eyebrow, f_eyebrow)
+    draw.text((cx - ew // 2, top_y), eyebrow, fill=ACCENT, font=f_eyebrow)
+
+    f_days = font(220, "Bold")
+    days_text = "20"
+    dw, dh = measure(draw, days_text, f_days)
+    days_y = top_y + 35
+    img = highlight_text(img, cx - dw // 2, days_y, days_text, f_days, ACCENT, hl_alpha=85, pad_x=14)
+    draw = ImageDraw.Draw(img)
+    draw.text((cx - dw // 2, days_y), days_text, fill=INK, font=f_days)
+
+    f_label = font_arial_bold(18)
+    label = "DAYS TO LAUNCH"
+    lw, _ = measure(draw, label, f_label)
+    label_y = days_y + dh + 14
+    draw.text((cx - lw // 2, label_y), label, fill=MUTED, font=f_label)
+
+    f_date = font_helvetica_regular(20)
+    date_line1 = "September 2, 2026"
+    date_line2 = "12:00 AM IST"
+    d1w, _ = measure(draw, date_line1, f_date)
+    d2w, _ = measure(draw, date_line2, f_date)
+    date_y = label_y + 50
+    draw.text((cx - d1w // 2, date_y), date_line1, fill=INK, font=f_date)
+    draw.text((cx - d2w // 2, date_y + 28), date_line2, fill=MUTED, font=f_date)
+
+    return img, draw
+
+
 def main():
     img = Image.new("RGB", (W, H), CREAM)
     draw = ImageDraw.Draw(img)
@@ -144,9 +176,8 @@ def main():
     personas = "Chefs · developers · students · designers · artists"
     draw.text((80, persona_y), personas, fill=INK, font=f_persona)
 
-    f_launch = font_arial_bold(22)
-    launch_y = persona_y + 36
-    draw.text((80, launch_y), "→ Launching Sep 2, 2026 · 12:00 AM IST", fill=ACCENT, font=f_launch)
+    right_cx = 920
+    img, draw = draw_countdown_poster(draw, img, right_cx, top_y=195)
 
     out = Path(__file__).resolve().parent.parent / "app" / "static" / "img" / "og.png"
     out.parent.mkdir(parents=True, exist_ok=True)
