@@ -616,6 +616,11 @@ body.dark .workshop-annotations { color: var(--accent); }
 .workshop-right {
   position: relative;
 }
+.workshop-form {
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+}
 .workshop-card-wrap {
   position: relative;
   perspective: 1800px;
