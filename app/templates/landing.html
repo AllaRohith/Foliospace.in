@@ -133,39 +133,49 @@
               on WhatsApp or LinkedIn.
             </p>
 
-            <form id="join" class="signup-form hero-form-slim" autocomplete="off">
-              <div class="signup-row">
+            <form id="join" class="signup-form hero-form-slim signup-dossier" autocomplete="off">
+              <input
+                type="text"
+                name="website"
+                tabindex="-1"
+                autocomplete="off"
+                style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;"
+                aria-hidden="true"
+              />
+              <div class="signup-dossier-eyebrow">→ The waitlist edition · FolioSpace</div>
+              <h3 class="signup-dossier-title">Send me the launch email.</h3>
+              <hr class="signup-dossier-rule" />
+
+              <label class="signup-field">
+                <span class="signup-field-label">→ Email</span>
                 <input
-                  type="text"
-                  name="website"
-                  tabindex="-1"
-                  autocomplete="off"
-                  style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;"
-                  aria-hidden="true"
-                />
-                <input
+                  class="signup-field-input"
                   type="email"
                   name="email"
                   placeholder="you@email.com"
                   required
                   inputmode="email"
                   autocomplete="email"
-                  aria-label="Email address"
                 />
-                <select name="role" aria-label="What do you do?">
-                  <option value="">I am a…</option>
-                  <option value="student">Student</option>
-                  <option value="developer">Developer</option>
-                  <option value="designer">Designer</option>
-                  <option value="chef">Chef / culinary</option>
-                  <option value="artist">Artist / creator</option>
-                  <option value="consultant">Consultant / freelancer</option>
-                  <option value="employee">Working professional</option>
-                  <option value="other">Something else</option>
-                </select>
-                <button type="submit" class="btn btn-primary magnetic">Claim my spot →</button>
+              </label>
+
+              <div class="signup-field">
+                <span class="signup-field-label">→ Occupation</span>
+                <div class="signup-chips" role="radiogroup" aria-label="What do you do?">
+                  <label class="signup-chip"><input type="radio" name="role" value="student"><span>Student</span></label>
+                  <label class="signup-chip"><input type="radio" name="role" value="developer" checked><span>Developer</span></label>
+                  <label class="signup-chip"><input type="radio" name="role" value="designer"><span>Designer</span></label>
+                  <label class="signup-chip"><input type="radio" name="role" value="chef"><span>Chef</span></label>
+                  <label class="signup-chip"><input type="radio" name="role" value="artist"><span>Artist</span></label>
+                  <label class="signup-chip"><input type="radio" name="role" value="consultant"><span>Consultant</span></label>
+                  <label class="signup-chip"><input type="radio" name="role" value="employee"><span>Working pro</span></label>
+                  <label class="signup-chip"><input type="radio" name="role" value="other"><span>Other</span></label>
+                </div>
               </div>
+
+              <button type="submit" class="btn btn-primary magnetic signup-dossier-cta">Claim my spot →</button>
               <p class="form-msg" id="form-msg" role="status" aria-live="polite"></p>
+              <div class="signup-dossier-microcopy" id="signup-microcopy">→ 147 already in · no spam · delete on request</div>
             </form>
 
             <div class="hero-meta">

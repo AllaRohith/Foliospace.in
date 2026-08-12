@@ -268,6 +268,8 @@
           counterMini.hidden = false;
           animateNumber(counterMiniN, n);
         }
+        const micro = document.getElementById('signup-microcopy');
+        if (micro) micro.textContent = '→ ' + n + ' already in · no spam · delete on request';
       }
     } catch (e) {}
   }
