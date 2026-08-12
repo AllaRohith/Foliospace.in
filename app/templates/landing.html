@@ -180,8 +180,13 @@
                   <span class="showcase-tabs">
                     <button class="s-tab is-active" data-prof="chef">Chef</button>
                     <button class="s-tab" data-prof="developer">Developer</button>
+                    <button class="s-tab" data-prof="designer">Designer</button>
+                    <button class="s-tab" data-prof="writer">Writer</button>
+                    <button class="s-tab" data-prof="photographer">Photographer</button>
                     <button class="s-tab" data-prof="student">Student</button>
                     <button class="s-tab" data-prof="consultant">Consultant</button>
+                    <button class="s-tab" data-prof="founder">Founder</button>
+                    <span class="s-tab-indicator" aria-hidden="true"></span>
                   </span>
                 </div>
                 <div class="showcase-body" id="showcase-body"></div>
@@ -194,7 +199,6 @@
     </section>
 
     <section class="workshop" id="workshop" data-rh-section="The dossier" data-rh-page="02">
-      <div class="workshop-hairline" aria-hidden="true"></div>
       <div class="container">
         <div class="workshop-grid">
           <div class="workshop-left">
@@ -342,23 +346,101 @@
       <div class="container">
         <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page 04<span class="folio-meta-sep">/</span>Who's on it</p>
         <h2 class="reveal">If you've done <em>anything</em> worth showing, this is for you.</h2>
-        <div class="dossier-grid">
-          <ol class="dossier-list">
-            <li class="dossier-list-row"><span class="dossier-num">01</span><span class="dossier-text"><span class="dossier-mono dossier-mono-1">S</span><strong>Students</strong> — land internships with work that speaks louder than grades.</span></li>
-            <li class="dossier-list-row"><span class="dossier-num">02</span><span class="dossier-text"><span class="dossier-mono dossier-mono-2">C</span><strong>Chefs</strong> — show your menu, your plating, your kitchen — beautifully.</span></li>
-            <li class="dossier-list-row"><span class="dossier-num">03</span><span class="dossier-text"><span class="dossier-mono dossier-mono-3">A</span><strong>Artists &amp; creators</strong> — a gallery that loads in a blink, even on a flaky network.</span></li>
-            <li class="dossier-list-row"><span class="dossier-num">04</span><span class="dossier-text"><span class="dossier-mono dossier-mono-4">F</span><strong>Consultants &amp; freelancers</strong> — turn "send me your CV" into "wow, take my money".</span></li>
-            <li class="dossier-list-row"><span class="dossier-num">05</span><span class="dossier-text"><span class="dossier-mono dossier-mono-5">D</span><strong>Developers</strong> — ship your projects, repos, and talks — all in one place.</span></li>
-            <li class="dossier-list-row"><span class="dossier-num">06</span><span class="dossier-text"><span class="dossier-mono dossier-mono-6">W</span><strong>Working professionals</strong> — side projects, talks, writing — visible at last.</span></li>
-          </ol>
-          <ol class="dossier-list">
-            <li class="dossier-list-row"><span class="dossier-num">i</span><span class="dossier-text"><strong>One link.</strong> Your whole story. Share it anywhere, it just works.</span></li>
-            <li class="dossier-list-row"><span class="dossier-num">ii</span><span class="dossier-text"><strong>Chat-era previews.</strong> Slap on WhatsApp, LinkedIn, Instagram DMs.</span></li>
-            <li class="dossier-list-row"><span class="dossier-num">iii</span><span class="dossier-text"><strong>PDF in one tap.</strong> Send a polished version when someone asks for "the formal version".</span></li>
-            <li class="dossier-list-row"><span class="dossier-num">iv</span><span class="dossier-text"><strong>Edit from your phone.</strong> Your best work changes on the fly.</span></li>
-            <li class="dossier-list-row"><span class="dossier-num">v</span><span class="dossier-text"><strong>Inbox without exposure.</strong> Leads land in WhatsApp or email — your address stays private.</span></li>
-            <li class="dossier-list-row"><span class="dossier-num">vi</span><span class="dossier-text"><strong>Costs less than your chai.</strong> ₹150 to start, ₹99/month after.</span></li>
-          </ol>
+        <div class="who-superlist">
+          <ul class="who-list" id="who-list">
+            <li class="who-row is-active" data-prof="students">
+              <span class="who-accent"></span>
+              <h3 class="who-title">Students</h3>
+              <p class="who-desc">Land internships with work that speaks louder than grades. Your college projects, hackathon wins, and GSoC — laid out the way a recruiter actually reads them.</p>
+            </li>
+            <li class="who-row" data-prof="chefs">
+              <span class="who-accent"></span>
+              <h3 class="who-title">Chefs</h3>
+              <p class="who-desc">Your signature dishes, your plating, your kitchen — beautifully. Live menu, tasting-night bookings, press quotes — all under your name.</p>
+            </li>
+            <li class="who-row" data-prof="artists">
+              <span class="who-accent"></span>
+              <h3 class="who-title">Artists &amp; creators</h3>
+              <p class="who-desc">A gallery that loads in a blink — even on a flaky network. Paintings, photography, ceramics, video, anything visual. Lazy-loaded, but feels instant.</p>
+            </li>
+            <li class="who-row" data-prof="consultants">
+              <span class="who-accent"></span>
+              <h3 class="who-title">Consultants &amp; freelancers</h3>
+              <p class="who-desc">Turn "send me your CV" into "wow, take my money". Case studies, testimonials, a one-tap "book a call" — built so a six-figure week starts with a single link.</p>
+            </li>
+            <li class="who-row" data-prof="developers">
+              <span class="who-accent"></span>
+              <h3 class="who-title">Developers</h3>
+              <p class="who-desc">Ship your projects, repos, and talks — all in one place. Your OSS work, your conference talks, your "now" status. GitHub-fed, but human-curated.</p>
+            </li>
+            <li class="who-row" data-prof="working">
+              <span class="who-accent"></span>
+              <h3 class="who-title">Working professionals</h3>
+              <p class="who-desc">Side projects, talks, writing — visible at last. The work you do after 9pm, finally somewhere it lives. Share without posting on LinkedIn.</p>
+            </li>
+          </ul>
+          <div class="who-visual" aria-hidden="true">
+            <div class="who-visual-card who-visual-students is-active" data-prof="students">
+              <div class="who-visual-bar"><span class="who-visual-dot"></span>foliospace.in/priya-iyer</div>
+              <div class="who-visual-mono">PI</div>
+              <div class="who-visual-name">Priya Iyer</div>
+              <div class="who-visual-role">B.Tech CS · IIT Hyderabad · 2026</div>
+              <div class="who-visual-divider"></div>
+              <div class="who-visual-row"><strong>Razorpay SDE Intern</strong><span>May–Jul 2025</span></div>
+              <div class="who-visual-row"><strong>GSoC · OpenCV</strong><span>2024</span></div>
+              <div class="who-visual-row"><strong>JEE Advanced</strong><span>AIR 184</span></div>
+            </div>
+            <div class="who-visual-card who-visual-chefs" data-prof="chefs">
+              <div class="who-visual-bar"><span class="who-visual-dot"></span>foliospace.in/arjun-mehta</div>
+              <div class="who-visual-mono">AM</div>
+              <div class="who-visual-name">Arjun Mehta</div>
+              <div class="who-visual-role">Chef · South Indian tasting, Bengaluru</div>
+              <div class="who-visual-divider"></div>
+              <div class="who-visual-row"><strong>Nellore karam podi</strong><span>signature</span></div>
+              <div class="who-visual-row"><strong>Tasting menu</strong><span>₹2,400 / cover</span></div>
+              <div class="who-visual-row"><strong>Eater</strong><span>"must-book" 2025</span></div>
+            </div>
+            <div class="who-visual-card who-visual-artists" data-prof="artists">
+              <div class="who-visual-bar"><span class="who-visual-dot"></span>foliospace.in/lakshmi-rao</div>
+              <div class="who-visual-mono">LR</div>
+              <div class="who-visual-name">Lakshmi Rao</div>
+              <div class="who-visual-role">Photographer · Mumbai</div>
+              <div class="who-visual-divider"></div>
+              <div class="who-visual-row"><strong>Vogue India</strong><span>Aug 2026</span></div>
+              <div class="who-visual-row"><strong>Udaipur wedding</strong><span>4,200 frames</span></div>
+              <div class="who-visual-row"><strong>"Mills of Mumbai"</strong><span>ongoing</span></div>
+            </div>
+            <div class="who-visual-card who-visual-consultants" data-prof="consultants">
+              <div class="who-visual-bar"><span class="who-visual-dot"></span>foliospace.in/karthik-nair</div>
+              <div class="who-visual-mono">KN</div>
+              <div class="who-visual-name">Karthik Nair</div>
+              <div class="who-visual-role">Odoo ERP consultant · 14 yrs</div>
+              <div class="who-visual-divider"></div>
+              <div class="who-visual-row"><strong>Steel co. Surat</strong><span>₹2.4 Cr saved</span></div>
+              <div class="who-visual-row"><strong>D2C tea brand</strong><span>6→0 stockouts</span></div>
+              <div class="who-visual-row"><strong>Logistics Co.</strong><span>14-day go-live</span></div>
+            </div>
+            <div class="who-visual-card who-visual-developers" data-prof="developers">
+              <div class="who-visual-bar"><span class="who-visual-dot"></span>foliospace.in/ishita-varma</div>
+              <div class="who-visual-mono">IV</div>
+              <div class="who-visual-name">Ishita Varma</div>
+              <div class="who-visual-role">Frontend · Bengaluru</div>
+              <div class="who-visual-divider"></div>
+              <div class="who-visual-row"><strong>graphql-shield</strong><span>★ 6.2k OSS</span></div>
+              <div class="who-visual-row"><strong>JSConf India</strong><span>2025</span></div>
+              <div class="who-visual-row"><strong>Now</strong><span>building TanStack Start</span></div>
+            </div>
+            <div class="who-visual-card who-visual-working" data-prof="working">
+              <div class="who-visual-bar"><span class="who-visual-dot"></span>foliospace.in/deepak-rao</div>
+              <div class="who-visual-mono">DR</div>
+              <div class="who-visual-name">Deepak Rao</div>
+              <div class="who-visual-role">PM by day · writer by night</div>
+              <div class="who-visual-divider"></div>
+              <div class="who-visual-row"><strong>"After-hours"</strong><span>Substack · 2.1k subs</span></div>
+              <div class="who-visual-row"><strong>Bengaluru→Berlin</strong><span>travel essay</span></div>
+              <div class="who-visual-row"><strong>"Why I still code"</strong><span>linked essay</span></div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

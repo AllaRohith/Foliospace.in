@@ -400,29 +400,63 @@
       url: 'priya-iyer',
       monogram: 'PI',
       name: 'Priya Iyer',
-      role: 'Chef · South Indian fine dining, Bengaluru',
+      role: 'Chef · South Indian fine dining · Bengaluru · since 2019',
+      live: { views: 127, updated: 2, shares: 12 },
+      cta: { label: 'Reserve a tasting menu', sub: 'Private dining · 8 covers · 8 PM' },
       body: function () {
         return ''
           + '<div class="pf pf-chef">'
+          +   '<div class="pf-ticker">'
+          +     '<span class="pf-ticker-item"><span class="pf-live-dot"></span><strong>' + PROF.chef.live.views + '</strong> viewing now</span>'
+          +     '<span class="pf-ticker-sep">·</span>'
+          +     '<span class="pf-ticker-item">Updated <strong>' + PROF.chef.live.updated + ' min</strong> ago</span>'
+          +     '<span class="pf-ticker-sep">·</span>'
+          +     '<span class="pf-ticker-item">Shared <strong>' + PROF.chef.live.shares + '</strong>× today</span>'
+          +   '</div>'
           +   '<div class="pf-head">'
           +     '<div class="pf-monogram">' + PROF.chef.monogram + '</div>'
           +     '<div class="pf-head-meta">'
           +       '<h3 class="pf-name">' + PROF.chef.name + '</h3>'
           +       '<p class="pf-role">' + PROF.chef.role + '</p>'
           +     '</div>'
-          +     '<span class="pf-status"><span class="pf-status-dot"></span>Live menu</span>'
+          +     '<span class="pf-rating" title="4.9 from 240 covers"><span class="pf-stars">★★★★★</span><span class="pf-rating-n">4.9</span></span>'
           +   '</div>'
-          +   '<div class="pf-section-title">Today’s tasting menu</div>'
+          +   '<div class="pf-section-title">Signature dishes</div>'
           +   '<ul class="pf-menu">'
-          +     '<li><span class="pf-course">01</span><span class="pf-dish">Nellore karam podi, gongura leaf</span><span class="pf-tag">veg</span></li>'
-          +     '<li><span class="pf-course">02</span><span class="pf-dish">Palakkad millet risotto, morel</span><span class="pf-tag">gf</span></li>'
-          +     '<li><span class="pf-course">03</span><span class="pf-dish">Tellicherry pepper crab, appam</span></li>'
-          +     '<li><span class="pf-course">04</span><span class="pf-dish">8-course Onam sadhya, plated</span><span class="pf-tag">signature</span></li>'
+          +     '<li class="pf-dish-row" data-dish="01">'
+          +       '<span class="pf-course">01</span>'
+          +       '<span class="pf-dish">Nellore karam podi, gongura leaf</span>'
+          +       '<span class="pf-tag">veg</span>'
+          +       '<span class="pf-arrow">+</span>'
+          +       '<div class="pf-dish-detail"><em>The dish that put her on the map. Andhra lentil crumble, gongura greens, ghee tempering — plated on a banana-leaf tile. Featured at the 2023 Madras food festival.</em></div>'
+          +     '</li>'
+          +     '<li class="pf-dish-row" data-dish="02">'
+          +       '<span class="pf-course">02</span>'
+          +       '<span class="pf-dish">Palakkad millet risotto, morel</span>'
+          +       '<span class="pf-tag">gf</span>'
+          +       '<span class="pf-arrow">+</span>'
+          +       '<div class="pf-dish-detail"><em>Foxtail millet swapped in for arborio; finished with coconut milk and a wild morel shaved tableside. Born from a sabbatical in Kerala.</em></div>'
+          +     '</li>'
+          +     '<li class="pf-dish-row" data-dish="03">'
+          +       '<span class="pf-course">03</span>'
+          +       '<span class="pf-dish">Tellicherry pepper crab, appam</span>'
+          +       '<span class="pf-arrow">+</span>'
+          +       '<div class="pf-dish-detail"><em>Malabar black pepper crab with a lacy rice appam. Coastal technique, plated as a tasting portion.</em></div>'
+          +     '</li>'
+          +     '<li class="pf-dish-row" data-dish="04">'
+          +       '<span class="pf-course">04</span>'
+          +       '<span class="pf-dish">8-course Onam sadhya, plated</span>'
+          +       '<span class="pf-tag">signature</span>'
+          +       '<span class="pf-arrow">+</span>'
+          +       '<div class="pf-dish-detail"><em>The signature. Banana-leaf sadhya reimagined as nine single-serve courses. Booking-only, six weeks out.</em></div>'
+          +     '</li>'
           +   '</ul>'
-          +   '<div class="pf-foot">'
-          +     '<span class="pf-foot-meta">240 covers · single seating · since 2019</span>'
-          +     '<span class="pf-foot-meta pf-foot-meta-2">PDF · ₹0 · share on WhatsApp</span>'
+          +   '<div class="pf-section-title">In the press</div>'
+          +   '<div class="pf-press">'
+          +     '<p class="pf-press-quote">“Reimagining the sadhya as fine dining without losing its soul.”</p>'
+          +     '<p class="pf-press-meta">— Condé Nast Traveller · Best New Chef, Bengaluru 2024</p>'
           +   '</div>'
+          +   '<a class="pf-cta" href="#"><span class="pf-cta-label">' + PROF.chef.cta.label + '</span><span class="pf-cta-sub">' + PROF.chef.cta.sub + '</span><span class="pf-cta-arrow">→</span></a>'
           + '</div>';
       }
     },
@@ -430,34 +464,50 @@
       url: 'karan-desai',
       monogram: 'KD',
       name: 'Karan Desai',
-      role: 'Developer · Bengaluru · ex-Razorpay',
+      role: 'Backend engineer · ex-Razorpay · Bengaluru',
+      live: { views: 84, updated: 8, shares: 6 },
+      cta: { label: 'View GitHub', sub: '@karan-desai · 14 public repos' },
       body: function () {
         return ''
           + '<div class="pf pf-dev">'
+          +   '<div class="pf-ticker">'
+          +     '<span class="pf-ticker-item"><span class="pf-live-dot"></span><strong>' + PROF.developer.live.views + '</strong> viewing now</span>'
+          +     '<span class="pf-ticker-sep">·</span>'
+          +     '<span class="pf-ticker-item">Updated <strong>' + PROF.developer.live.updated + ' min</strong> ago</span>'
+          +     '<span class="pf-ticker-sep">·</span>'
+          +     '<span class="pf-ticker-item">Shared <strong>' + PROF.developer.live.shares + '</strong>× today</span>'
+          +   '</div>'
           +   '<div class="pf-head">'
           +     '<div class="pf-monogram">' + PROF.developer.monogram + '</div>'
           +     '<div class="pf-head-meta">'
           +       '<h3 class="pf-name">' + PROF.developer.name + '</h3>'
           +       '<p class="pf-role">' + PROF.developer.role + '</p>'
           +     '</div>'
-          +     '<span class="pf-status"><span class="pf-status-dot"></span>Building</span>'
+          +     '<span class="pf-rating" title="4.8 from 32 collaborators"><span class="pf-stars">★★★★★</span><span class="pf-rating-n">4.8</span></span>'
           +   '</div>'
-          +   '<div class="pf-dev-row">'
-          +     '<div class="pf-stat"><span class="pf-stat-num">6.2k</span><span class="pf-stat-label">★ graphql-shield</span></div>'
-          +     '<div class="pf-stat"><span class="pf-stat-num">14</span><span class="pf-stat-label">★ TinySlack</span></div>'
-          +     '<div class="pf-stat"><span class="pf-stat-num">2.4k</span><span class="pf-stat-label">★ edge-cache</span></div>'
-          +   '</div>'
-          +   '<div class="pf-contrib-grid">'
-          +     '<div class="pf-contrib-cell">Mon<br><span class="pf-contrib-bar" style="--h:60%"></span></div>'
-          +     '<div class="pf-contrib-cell">Tue<br><span class="pf-contrib-bar" style="--h:90%"></span></div>'
-          +     '<div class="pf-contrib-cell">Wed<br><span class="pf-contrib-bar" style="--h:40%"></span></div>'
-          +     '<div class="pf-contrib-cell">Thu<br><span class="pf-contrib-bar" style="--h:75%"></span></div>'
-          +     '<div class="pf-contrib-cell">Fri<br><span class="pf-contrib-bar" style="--h:55%"></span></div>'
-          +     '<div class="pf-contrib-cell">Sat<br><span class="pf-contrib-bar" style="--h:30%"></span></div>'
-          +     '<div class="pf-contrib-cell">Sun<br><span class="pf-contrib-bar" style="--h:20%"></span></div>'
-          +   '</div>'
-          +   '<div class="pf-section-title">Recent talks</div>'
-          +   '<div class="pf-dev-talk">JSConf India 2024 · runtime hacking</div>'
+          +   '<div class="pf-section-title">Selected projects</div>'
+          +   '<ul class="pf-proj-list">'
+          +     '<li class="pf-proj-row">'
+          +       '<div class="pf-proj-head"><strong>graphql-shield</strong><span class="pf-proj-stars" data-count="6200">★ 0</span></div>'
+          +       '<p class="pf-proj-desc">GraphQL permissions middleware. Used in production at Razorpay, Swiggy, Apollo.</p>'
+          +     '</li>'
+          +     '<li class="pf-proj-row">'
+          +       '<div class="pf-proj-head"><strong>edge-cache</strong><span class="pf-proj-stars" data-count="2400">★ 0</span></div>'
+          +       '<p class="pf-proj-desc">Tiny edge-cache layer for Cloudflare Workers. Zero-config, 4 KB.</p>'
+          +     '</li>'
+          +     '<li class="pf-proj-row">'
+          +       '<div class="pf-proj-head"><strong>TinySlack</strong><span class="pf-proj-stars" data-count="14">★ 0</span></div>'
+          +       '<p class="pf-proj-desc">Self-hosted Slack alternative in 600 lines of Go. Weekend project.</p>'
+          +     '</li>'
+          +   '</ul>'
+          +   '<div class="pf-section-title">Speaking</div>'
+          +   '<ul class="pf-talk-list">'
+          +     '<li class="pf-talk-row"><span class="pf-talk-year">2025</span><span class="pf-talk-body"><strong>JSConf India</strong> · Runtime hacking for fun and profit</span></li>'
+          +     '<li class="pf-talk-row"><span class="pf-talk-year">2024</span><span class="pf-talk-body"><strong>React India</strong> · Why your cache layer is wrong</span></li>'
+          +   '</ul>'
+          +   '<div class="pf-section-title">Now</div>'
+          +   '<p class="pf-now">Building a real-time permission system for OpenAI tools. Reading <em>Designing Data-Intensive Applications</em> for the third time. Open to staff roles, remote-first.</p>'
+          +   '<a class="pf-cta" href="#"><span class="pf-cta-label">' + PROF.developer.cta.label + '</span><span class="pf-cta-sub">' + PROF.developer.cta.sub + '</span><span class="pf-cta-arrow">→</span></a>'
           + '</div>';
       }
     },
@@ -465,41 +515,60 @@
       url: 'riya-sharma',
       monogram: 'RS',
       name: 'Riya Sharma',
-      role: 'Student · IIT Madras, CS ’26',
+      role: 'CS undergraduate · IIT Madras · Class of 2026',
+      live: { views: 53, updated: 14, shares: 4 },
+      cta: { label: 'Send a message', sub: 'Open to SDE internships · Summer 2026' },
       body: function () {
         return ''
           + '<div class="pf pf-student">'
+          +   '<div class="pf-ticker">'
+          +     '<span class="pf-ticker-item"><span class="pf-live-dot"></span><strong>' + PROF.student.live.views + '</strong> viewing now</span>'
+          +     '<span class="pf-ticker-sep">·</span>'
+          +     '<span class="pf-ticker-item">Updated <strong>' + PROF.student.live.updated + ' min</strong> ago</span>'
+          +     '<span class="pf-ticker-sep">·</span>'
+          +     '<span class="pf-ticker-item">Shared <strong>' + PROF.student.live.shares + '</strong>× today</span>'
+          +   '</div>'
           +   '<div class="pf-head">'
           +     '<div class="pf-monogram">' + PROF.student.monogram + '</div>'
           +     '<div class="pf-head-meta">'
           +       '<h3 class="pf-name">' + PROF.student.name + '</h3>'
           +       '<p class="pf-role">' + PROF.student.role + '</p>'
           +     '</div>'
-          +     '<span class="pf-status"><span class="pf-status-dot"></span>Open to work</span>'
+          +     '<span class="pf-rating" title="9.12 CGPA · top 5%"><span class="pf-stars">★★★★★</span><span class="pf-rating-n">9.12</span></span>'
           +   '</div>'
-          +   '<div class="pf-section-title">Projects</div>'
-          +   '<div class="pf-proj-grid">'
-          +     '<div class="pf-proj pf-proj-1">'
-          +       '<span class="pf-proj-tag">SIGN-LANG</span>'
-          +       '<strong>Real-time ISL translator</strong>'
-          +       '<span class="pf-proj-meta">React Native · TensorFlow Lite · 22k MAU</span>'
-          +     '</div>'
-          +     '<div class="pf-proj pf-proj-2">'
-          +       '<span class="pf-proj-tag">CNN PAPER</span>'
-          +       '<strong>Edge-detect on low-bandwidth</strong>'
-          +       '<span class="pf-proj-meta">IEEE Region 10 · 2025</span>'
-          +     '</div>'
-          +     '<div class="pf-proj pf-proj-3">'
-          +       '<span class="pf-proj-tag">TEDX</span>'
-          +       '<strong>“My code doesn’t work”</strong>'
-          +       '<span class="pf-proj-meta">Mar 2025 · 1,400 attendees</span>'
-          +     '</div>'
-          +     '<div class="pf-proj pf-proj-4">'
-          +       '<span class="pf-proj-tag">FELLOW</span>'
-          +       '<strong>MLH Spring 2025 Top 50</strong>'
-          +       '<span class="pf-proj-meta">MajorLeagueHacking · fellow</span>'
-          +     '</div>'
-          +   '</div>'
+          +   '<div class="pf-section-title">Experience</div>'
+          +   '<ul class="pf-experience">'
+          +     '<li class="pf-experience-row">'
+          +       '<div class="pf-experience-head"><strong>Razorpay</strong><span class="pf-experience-meta">SDE Intern · May–Jul 2025</span></div>'
+          +       '<p class="pf-experience-desc">Shipped a settlement reconciliation tool. Cut ops manual work by 6 hours/week.</p>'
+          +     '</li>'
+          +     '<li class="pf-experience-row">'
+          +       '<div class="pf-experience-head"><strong>Google Summer of Code</strong><span class="pf-experience-meta">OpenCV · Summer 2024</span></div>'
+          +       '<p class="pf-experience-desc">Contributed CUDA kernels to OpenCV’s stereo-matching module. Merged upstream.</p>'
+          +     '</li>'
+          +   '</ul>'
+          +   '<div class="pf-section-title">Projects · 4 of 12</div>'
+          +   '<ul class="pf-proj-list">'
+          +     '<li class="pf-proj-row">'
+          +       '<div class="pf-proj-head"><strong>Real-time ISL translator</strong><span class="pf-proj-tag">22k MAU</span></div>'
+          +       '<p class="pf-proj-desc">React Native + TensorFlow Lite. Built for an accessibility hackathon; still in use.</p>'
+          +     '</li>'
+          +     '<li class="pf-proj-row">'
+          +       '<div class="pf-proj-head"><strong>Edge-detect on 2G</strong><span class="pf-proj-tag">IEEE Region 10</span></div>'
+          +       '<p class="pf-proj-desc">CNN-based edge detection that runs on a 2014 Android phone over 2G.</p>'
+          +     '</li>'
+          +     '<li class="pf-proj-row">'
+          +       '<div class="pf-proj-head"><strong>“My code doesn’t work”</strong><span class="pf-proj-tag">TEDx</span></div>'
+          +       '<p class="pf-proj-desc">1,400-seat TEDx talk on debugging as a discipline. Mar 2025.</p>'
+          +     '</li>'
+          +   '</ul>'
+          +   '<div class="pf-section-title">Achievements</div>'
+          +   '<ul class="pf-achievement-list">'
+          +     '<li>JEE Advanced 2022 · AIR 184</li>'
+          +     '<li>MLH Spring 2025 · Top 50 Fellow</li>'
+          +     '<li>Codeforces Specialist · 1,612</li>'
+          +   '</ul>'
+          +   '<a class="pf-cta" href="#"><span class="pf-cta-label">' + PROF.student.cta.label + '</span><span class="pf-cta-sub">' + PROF.student.cta.sub + '</span><span class="pf-cta-arrow">→</span></a>'
           + '</div>';
       }
     },
@@ -507,26 +576,242 @@
       url: 'aarav-mehta',
       monogram: 'AM',
       name: 'Aarav Mehta',
-      role: 'Consultant · Odoo & Python · Mumbai',
+      role: 'Independent Odoo & Python consultant · Mumbai',
+      live: { views: 41, updated: 22, shares: 3 },
+      cta: { label: 'Book a free 30-min call', sub: 'Next slot · Wed 4 PM IST' },
       body: function () {
         return ''
           + '<div class="pf pf-consultant">'
+          +   '<div class="pf-ticker">'
+          +     '<span class="pf-ticker-item"><span class="pf-live-dot"></span><strong>' + PROF.consultant.live.views + '</strong> viewing now</span>'
+          +     '<span class="pf-ticker-sep">·</span>'
+          +     '<span class="pf-ticker-item">Updated <strong>' + PROF.consultant.live.updated + ' min</strong> ago</span>'
+          +     '<span class="pf-ticker-sep">·</span>'
+          +     '<span class="pf-ticker-item">Shared <strong>' + PROF.consultant.live.shares + '</strong>× today</span>'
+          +   '</div>'
           +   '<div class="pf-head">'
           +     '<div class="pf-monogram">' + PROF.consultant.monogram + '</div>'
           +     '<div class="pf-head-meta">'
           +       '<h3 class="pf-name">' + PROF.consultant.name + '</h3>'
           +       '<p class="pf-role">' + PROF.consultant.role + '</p>'
           +     '</div>'
-          +     '<span class="pf-status"><span class="pf-status-dot"></span>Available Q4</span>'
+          +     '<span class="pf-rating" title="4.9 from 18 retainer clients"><span class="pf-stars">★★★★★</span><span class="pf-rating-n">4.9</span></span>'
           +   '</div>'
-          +   '<div class="pf-section-title">Recent engagements</div>'
+          +   '<div class="pf-section-title">Who I work with</div>'
+          +   '<p class="pf-blurb">Series-A and growth-stage Indian companies (₹10 Cr – ₹200 Cr ARR) that need a fractional CTO without a ₹40 Lakh salary. Engagements run 8–24 weeks.</p>'
+          +   '<div class="pf-section-title">Selected engagements</div>'
           +   '<ul class="pf-cases">'
-          +     '<li><span class="pf-case-num">01</span><div class="pf-case-meta"><strong>Inventory automation</strong><span>Retail chain · 14 stores · 6 weeks</span></div><span class="pf-case-out">-42% stockouts</span></li>'
-          +     '<li><span class="pf-case-num">02</span><div class="pf-case-meta"><strong>Custom CRM</strong><span>Logistics startup · 8 users · 4 weeks</span></div><span class="pf-case-out">Shipped</span></li>'
-          +     '<li><span class="pf-case-num">03</span><div class="pf-case-meta"><strong>Field service app</strong><span>12 states · 240 technicians · 10 weeks</span></div><span class="pf-case-out">3.8× throughput</span></li>'
+          +     '<li class="pf-case-row">'
+          +       '<div class="pf-case-head"><strong>Inventory automation</strong><span class="pf-case-meta">Retail chain · 14 stores</span></div>'
+          +       '<p class="pf-case-out" data-count="-42" data-prefix="-" data-suffix="% stockouts in 6 weeks">-0% stockouts in 6 weeks</p>'
+          +     '</li>'
+          +     '<li class="pf-case-row">'
+          +       '<div class="pf-case-head"><strong>Custom CRM</strong><span class="pf-case-meta">Logistics startup · 8 users</span></div>'
+          +       '<p class="pf-case-out">Shipped in 4 weeks · still in daily use 18 months later</p>'
+          +     '</li>'
+          +     '<li class="pf-case-row">'
+          +       '<div class="pf-case-head"><strong>Field service app</strong><span class="pf-case-meta">240 technicians · 12 states</span></div>'
+          +       '<p class="pf-case-out" data-count="3.8" data-suffix="× technician throughput">0× technician throughput</p>'
+          +     '</li>'
           +   '</ul>'
           +   '<div class="pf-section-title">Testimonials</div>'
-          +   '<p class="pf-quote">“Cut our month-end close from 9 days to 2.” — CFO, retail client</p>'
+          +   '<p class="pf-press-quote">“Cut our month-end close from 9 days to 2. Worth every rupee.”</p>'
+          +   '<p class="pf-press-meta">— Priya Krishnan · CFO, Kirana Direct (retail chain)</p>'
+          +   '<a class="pf-cta" href="#"><span class="pf-cta-label">' + PROF.consultant.cta.label + '</span><span class="pf-cta-sub">' + PROF.consultant.cta.sub + '</span><span class="pf-cta-arrow">→</span></a>'
+          + '</div>';
+      }
+    },
+    designer: {
+      url: 'ananya-bose',
+      monogram: 'AB',
+      name: 'Ananya Bose',
+      role: 'Product designer · formerly Razorpay, CRED · Bengaluru',
+      live: { views: 96, updated: 5, shares: 8 },
+      cta: { label: 'View Dribbble', sub: '@ananya-bose · 142 shots' },
+      body: function () {
+        return ''
+          + '<div class="pf pf-designer">'
+          +   '<div class="pf-ticker">'
+          +     '<span class="pf-ticker-item"><span class="pf-live-dot"></span><strong>' + PROF.designer.live.views + '</strong> viewing now</span>'
+          +     '<span class="pf-ticker-sep">·</span>'
+          +     '<span class="pf-ticker-item">Updated <strong>' + PROF.designer.live.updated + ' min</strong> ago</span>'
+          +     '<span class="pf-ticker-sep">·</span>'
+          +     '<span class="pf-ticker-item">Shared <strong>' + PROF.designer.live.shares + '</strong>× today</span>'
+          +   '</div>'
+          +   '<div class="pf-head">'
+          +     '<div class="pf-monogram">' + PROF.designer.monogram + '</div>'
+          +     '<div class="pf-head-meta">'
+          +       '<h3 class="pf-name">' + PROF.designer.name + '</h3>'
+          +       '<p class="pf-role">' + PROF.designer.role + '</p>'
+          +     '</div>'
+          +     '<span class="pf-rating" title="4.9 from 23 clients"><span class="pf-stars">★★★★★</span><span class="pf-rating-n">4.9</span></span>'
+          +   '</div>'
+          +   '<div class="pf-section-title">Selected work · 2023–25</div>'
+          +   '<ul class="pf-proj-list">'
+          +     '<li class="pf-proj-row">'
+          +       '<div class="pf-proj-head"><strong>Razorpay Merchant Dashboard</strong><span class="pf-proj-tag">2024</span></div>'
+          +       '<p class="pf-proj-desc">Led redesign of the core payments dashboard. Settlements page adopted by 8M merchants.</p>'
+          +     '</li>'
+          +     '<li class="pf-proj-row">'
+          +       '<div class="pf-proj-head"><strong>Khata Book — credit line</strong><span class="pf-proj-tag">2023</span></div>'
+          +       '<p class="pf-proj-desc">First end-to-end credit product for India’s 60M kirana stores.</p>'
+          +     '</li>'
+          +     '<li class="pf-proj-row">'
+          +       '<div class="pf-proj-head"><strong>Indian Railways — booking flow</strong><span class="pf-proj-tag">2025 · in progress</span></div>'
+          +       '<p class="pf-proj-desc">Currently redesigning IRCTC. One of India’s most-trafficked products.</p>'
+          +     '</li>'
+          +   '</ul>'
+          +   '<div class="pf-section-title">Recognition</div>'
+          +   '<ul class="pf-achievement-list">'
+          +     '<li>Awwwards · Site of the Day · 2024</li>'
+          +     '<li>YourStory · 30 under 30 design · 2024</li>'
+          +     '<li>Speaker · Adobe MAX India · 2025</li>'
+          +   '</ul>'
+          +   '<a class="pf-cta" href="#"><span class="pf-cta-label">' + PROF.designer.cta.label + '</span><span class="pf-cta-sub">' + PROF.designer.cta.sub + '</span><span class="pf-cta-arrow">→</span></a>'
+          + '</div>';
+      }
+    },
+    writer: {
+      url: 'vikram-iyer',
+      monogram: 'VI',
+      name: 'Vikram Iyer',
+      role: 'Independent journalist · Delhi · politics & cities',
+      live: { views: 38, updated: 18, shares: 5 },
+      cta: { label: 'Read the full archive', sub: '140 essays · since 2017' },
+      body: function () {
+        return ''
+          + '<div class="pf pf-writer">'
+          +   '<div class="pf-ticker">'
+          +     '<span class="pf-ticker-item"><span class="pf-live-dot"></span><strong>' + PROF.writer.live.views + '</strong> viewing now</span>'
+          +     '<span class="pf-ticker-sep">·</span>'
+          +     '<span class="pf-ticker-item">Updated <strong>' + PROF.writer.live.updated + ' min</strong> ago</span>'
+          +     '<span class="pf-ticker-sep">·</span>'
+          +     '<span class="pf-ticker-item">Shared <strong>' + PROF.writer.live.shares + '</strong>× today</span>'
+          +   '</div>'
+          +   '<div class="pf-head">'
+          +     '<div class="pf-monogram">' + PROF.writer.monogram + '</div>'
+          +     '<div class="pf-head-meta">'
+          +       '<h3 class="pf-name">' + PROF.writer.name + '</h3>'
+          +       '<p class="pf-role">' + PROF.writer.role + '</p>'
+          +     '</div>'
+          +     '<span class="pf-rating" title="5 from 12 editors"><span class="pf-stars">★★★★★</span><span class="pf-rating-n">5.0</span></span>'
+          +   '</div>'
+          +   '<div class="pf-section-title">Latest essays</div>'
+          +   '<ul class="pf-essay-list">'
+          +     '<li class="pf-essay-row">'
+          +       '<div class="pf-essay-head"><strong>The last street-vendor of Chandni Chowk</strong></div>'
+          +       '<p class="pf-essay-meta">The Caravan · Aug 2026 · 14 min read</p>'
+          +     '</li>'
+          +     '<li class="pf-essay-row">'
+          +       '<div class="pf-essay-head"><strong>What Mumbai’s coastal road got right</strong></div>'
+          +       '<p class="pf-essay-meta">Mint · Jul 2026 · 9 min read</p>'
+          +     '</li>'
+          +     '<li class="pf-essay-row">'
+          +       '<div class="pf-essay-head"><strong>Inside India’s new Parliament</strong></div>'
+          +       '<p class="pf-essay-meta">The Atlantic · May 2026 · 22 min read</p>'
+          +     '</li>'
+          +   '</ul>'
+          +   '<div class="pf-section-title">Bylines</div>'
+          +   '<p class="pf-byline-grid">The Caravan · The Atlantic · Mint · Scroll · Hindustan Times · India Today</p>'
+          +   '<a class="pf-cta" href="#"><span class="pf-cta-label">' + PROF.writer.cta.label + '</span><span class="pf-cta-sub">' + PROF.writer.cta.sub + '</span><span class="pf-cta-arrow">→</span></a>'
+          + '</div>';
+      }
+    },
+    photographer: {
+      url: 'lakshmi-rao',
+      monogram: 'LR',
+      name: 'Lakshmi Rao',
+      role: 'Editorial & wedding photographer · Mumbai',
+      live: { views: 72, updated: 11, shares: 9 },
+      cta: { label: 'Book a shoot', sub: '2026 dates open · reply within 24h' },
+      body: function () {
+        return ''
+          + '<div class="pf pf-photographer">'
+          +   '<div class="pf-ticker">'
+          +     '<span class="pf-ticker-item"><span class="pf-live-dot"></span><strong>' + PROF.photographer.live.views + '</strong> viewing now</span>'
+          +     '<span class="pf-ticker-sep">·</span>'
+          +     '<span class="pf-ticker-item">Updated <strong>' + PROF.photographer.live.updated + ' min</strong> ago</span>'
+          +     '<span class="pf-ticker-sep">·</span>'
+          +     '<span class="pf-ticker-item">Shared <strong>' + PROF.photographer.live.shares + '</strong>× today</span>'
+          +   '</div>'
+          +   '<div class="pf-head">'
+          +     '<div class="pf-monogram">' + PROF.photographer.monogram + '</div>'
+          +     '<div class="pf-head-meta">'
+          +       '<h3 class="pf-name">' + PROF.photographer.name + '</h3>'
+          +       '<p class="pf-role">' + PROF.photographer.role + '</p>'
+          +     '</div>'
+          +     '<span class="pf-rating" title="4.9 from 86 couples"><span class="pf-stars">★★★★★</span><span class="pf-rating-n">4.9</span></span>'
+          +   '</div>'
+          +   '<div class="pf-section-title">Recent work</div>'
+          +   '<ul class="pf-proj-list">'
+          +     '<li class="pf-proj-row">'
+          +       '<div class="pf-proj-head"><strong>Vogue India — “Maharashtrian weddings”</strong><span class="pf-proj-tag">Editorial · Aug 2026</span></div>'
+          +       '<p class="pf-proj-desc">12-page editorial spread shot over 4 days in Pune.</p>'
+          +     '</li>'
+          +     '<li class="pf-proj-row">'
+          +       '<div class="pf-proj-head"><strong>Aanya & Rohan — Udaipur</strong><span class="pf-proj-tag">Wedding · Apr 2026</span></div>'
+          +       '<p class="pf-proj-desc">3-day wedding at the Oberoi Udaivilas. 4,200 final images.</p>'
+          +     '</li>'
+          +     '<li class="pf-proj-row">'
+          +       '<div class="pf-proj-head"><strong>“Mills of Mumbai” series</strong><span class="pf-proj-tag">Personal · ongoing</span></div>'
+          +       '<p class="pf-proj-desc">Long-running documentary on Mumbai’s last cotton mills. 6 of 14 shot.</p>'
+          +     '</li>'
+          +   '</ul>'
+          +   '<div class="pf-section-title">Recognition</div>'
+          +   '<ul class="pf-achievement-list">'
+          +     '<li>IPA · 2nd Place, Documentary · 2025</li>'
+          +     '<li>Featured · National Geographic India · 2024</li>'
+          +     '<li>Solo show · PhotoInk Gallery, Mumbai · 2023</li>'
+          +   '</ul>'
+          +   '<a class="pf-cta" href="#"><span class="pf-cta-label">' + PROF.photographer.cta.label + '</span><span class="pf-cta-sub">' + PROF.photographer.cta.sub + '</span><span class="pf-cta-arrow">→</span></a>'
+          + '</div>';
+      }
+    },
+    founder: {
+      url: 'aditi-shah',
+      monogram: 'AS',
+      name: 'Aditi Shah',
+      role: 'Indie maker · building Saaral, a Hindi reading app · Bengaluru',
+      live: { views: 64, updated: 7, shares: 7 },
+      cta: { label: 'Try the app', sub: 'Free · iOS + Android · 4.8 ★' },
+      body: function () {
+        return ''
+          + '<div class="pf pf-founder">'
+          +   '<div class="pf-ticker">'
+          +     '<span class="pf-ticker-item"><span class="pf-live-dot"></span><strong>' + PROF.founder.live.views + '</strong> viewing now</span>'
+          +     '<span class="pf-ticker-sep">·</span>'
+          +     '<span class="pf-ticker-item">Updated <strong>' + PROF.founder.live.updated + ' min</strong> ago</span>'
+          +     '<span class="pf-ticker-sep">·</span>'
+          +     '<span class="pf-ticker-item">Shared <strong>' + PROF.founder.live.shares + '</strong>× today</span>'
+          +   '</div>'
+          +   '<div class="pf-head">'
+          +     '<div class="pf-monogram">' + PROF.founder.monogram + '</div>'
+          +     '<div class="pf-head-meta">'
+          +       '<h3 class="pf-name">' + PROF.founder.name + '</h3>'
+          +       '<p class="pf-role">' + PROF.founder.role + '</p>'
+          +     '</div>'
+          +     '<span class="pf-rating" title="4.8 from 6.2k users"><span class="pf-stars">★★★★★</span><span class="pf-rating-n">4.8</span></span>'
+          +   '</div>'
+          +   '<div class="pf-section-title">Products</div>'
+          +   '<ul class="pf-proj-list">'
+          +     '<li class="pf-proj-row">'
+          +       '<div class="pf-proj-head"><strong>Saaral · Hindi reading</strong><span class="pf-proj-stars" data-count="6200">★ 0</span></div>'
+          +       '<p class="pf-proj-desc">A reading app for Hindi literature with one-tap dictionary. 6,200 paying users.</p>'
+          +     '</li>'
+          +     '<li class="pf-proj-row">'
+          +       '<div class="pf-proj-head"><strong>Postcard · micro-blogs</strong><span class="pf-proj-tag">acquired</span></div>'
+          +       '<p class="pf-proj-desc">A postcard-style microblog platform. Sold to an Indian media house in 2024.</p>'
+          +     '</li>'
+          +   '</ul>'
+          +   '<div class="pf-section-title">Traction · 2026</div>'
+          +   '<div class="pf-dev-row">'
+          +     '<div class="pf-stat"><span class="pf-stat-num" data-count="42" data-prefix="₹" data-suffix="L">₹0L</span><span class="pf-stat-label">ARR · year 2</span></div>'
+          +     '<div class="pf-stat"><span class="pf-stat-num" data-count="94" data-suffix="%">0%</span><span class="pf-stat-label">renewal rate</span></div>'
+          +     '<div class="pf-stat"><span class="pf-stat-num" data-count="0" data-suffix="">0</span><span class="pf-stat-label">employees</span></div>'
+          +   '</div>'
+          +   '<div class="pf-section-title">Now</div>'
+          +   '<p class="pf-now">Profitable since month 6. Adding a poetry-recitation feature. Considering a Hindi-English toggle. Email replies within 4 hours, always.</p>'
+          +   '<a class="pf-cta" href="#"><span class="pf-cta-label">' + PROF.founder.cta.label + '</span><span class="pf-cta-sub">' + PROF.founder.cta.sub + '</span><span class="pf-cta-arrow">→</span></a>'
           + '</div>';
       }
     },
@@ -535,8 +820,48 @@
   const showcaseBody = document.getElementById('showcase-body');
   const showcaseUrl = document.getElementById('s-url');
   const showcaseCaption = document.getElementById('showcase-caption');
-  const tabs = document.querySelectorAll('.s-tab');
+  const tabs = Array.from(document.querySelectorAll('.s-tab'));
+  const tabIndicator = document.querySelector('.s-tab-indicator');
+  const tabGrid = document.querySelector('.showcase-tabs');
+
+  function positionTabIndicator(tab) {
+    if (!tabIndicator || !tab || !tabGrid) return;
+    const gridRect = tabGrid.getBoundingClientRect();
+    const tabRect = tab.getBoundingClientRect();
+    tabIndicator.style.width = tabRect.width + 'px';
+    tabIndicator.style.transform = 'translateX(' + (tabRect.left - gridRect.left) + 'px) translateY(' + (tabRect.top - gridRect.top) + 'px)';
+    tabIndicator.style.height = tabRect.height + 'px';
+  }
+
   if (tabs.length && showcaseBody) {
+    function animateCount(el) {
+      const target = parseFloat(el.dataset.count);
+      const prefix = el.dataset.prefix || '';
+      const suffix = el.dataset.suffix || '';
+      if (!isFinite(target)) return;
+      const dur = 900;
+      const t0 = performance.now();
+      const decimals = (String(target).split('.')[1] || '').length;
+      function tick(now) {
+        const p = Math.min(1, (now - t0) / dur);
+        const eased = 1 - Math.pow(1 - p, 3);
+        const v = target * eased;
+        el.textContent = prefix + (decimals ? v.toFixed(decimals) : Math.round(v).toLocaleString('en-IN')) + suffix;
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function wireCard() {
+      showcaseBody.querySelectorAll('.pf-dish-row').forEach(function (row) {
+        row.addEventListener('click', function () { row.classList.toggle('is-open'); });
+      });
+      showcaseBody.querySelectorAll('.pf-case-row').forEach(function (row) {
+        row.addEventListener('click', function () { row.classList.toggle('is-open'); });
+      });
+      showcaseBody.querySelectorAll('[data-count]').forEach(animateCount);
+    }
+
     function switchProf(prof) {
       const p = PROF[prof];
       if (!p) return;
@@ -550,6 +875,7 @@
         showcaseBody.style.transform = 'translateY(0)';
         if (showcaseUrl) showcaseUrl.textContent = 'foliospace.in/' + p.url;
         if (showcaseCaption) showcaseCaption.textContent = 'Fig. 1 — foliospace.in/' + p.url;
+        wireCard();
       }, 200);
     }
     tabs.forEach(function (t) {
@@ -557,8 +883,37 @@
         if (t.classList.contains('is-active')) return;
         tabs.forEach(function (x) { x.classList.remove('is-active'); });
         t.classList.add('is-active');
+        positionTabIndicator(t);
         switchProf(t.dataset.prof);
       });
+    });
+
+    tabGrid && tabGrid.addEventListener('keydown', function (e) {
+      const active = tabs.findIndex(function (t) { return t.classList.contains('is-active'); });
+      if (active < 0) return;
+      const cols = 4;
+      let next = -1;
+      if (e.key === 'ArrowRight') next = (active + 1) % tabs.length;
+      else if (e.key === 'ArrowLeft') next = (active - 1 + tabs.length) % tabs.length;
+      else if (e.key === 'ArrowDown') next = (active + cols) % tabs.length;
+      else if (e.key === 'ArrowUp') next = (active - cols + tabs.length) % tabs.length;
+      else if (e.key === 'Home') next = 0;
+      else if (e.key === 'End') next = tabs.length - 1;
+      if (next >= 0 && next !== active) {
+        e.preventDefault();
+        tabs[next].click();
+        tabs[next].focus();
+      }
+    });
+
+    window.addEventListener('resize', function () {
+      const active = tabs.find(function (t) { return t.classList.contains('is-active'); });
+      if (active) positionTabIndicator(active);
+    });
+
+    requestAnimationFrame(function () {
+      const active = tabs.find(function (t) { return t.classList.contains('is-active'); });
+      if (active) positionTabIndicator(active);
     });
 
     document.querySelectorAll('.s-action').forEach(function (b) {
@@ -573,6 +928,42 @@
 
     switchProf('chef');
   }
+
+
+  (function () {
+    const list = document.getElementById('who-list');
+    if (!list) return;
+    const rows = Array.from(list.querySelectorAll('.who-row'));
+    const visuals = Array.from(document.querySelectorAll('.who-visual-card'));
+    if (!rows.length) return;
+
+    function activate(prof) {
+      rows.forEach(function (r) { r.classList.toggle('is-active', r.dataset.prof === prof); });
+      visuals.forEach(function (v) { v.classList.toggle('is-active', v.dataset.prof === prof); });
+    }
+
+    rows.forEach(function (r) {
+      r.addEventListener('mouseenter', function () { activate(r.dataset.prof); });
+      r.addEventListener('focus', function () { activate(r.dataset.prof); });
+      r.addEventListener('click', function () { activate(r.dataset.prof); });
+    });
+
+    let idx = 0;
+    let timer = null;
+    function cycle() {
+      idx = (idx + 1) % rows.length;
+      activate(rows[idx].dataset.prof);
+    }
+    function start() {
+      if (reduceMotion) return;
+      stop();
+      timer = setInterval(cycle, 3500);
+    }
+    function stop() { if (timer) { clearInterval(timer); timer = null; } }
+    list.addEventListener('mouseenter', stop);
+    list.addEventListener('mouseleave', start);
+    start();
+  })();
 
   const burger = document.querySelector('.nav-burger');
   const navLinks = document.querySelector('.nav-links');
