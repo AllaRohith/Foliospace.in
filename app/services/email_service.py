@@ -3,6 +3,7 @@ import logging
 from pathlib import Path
 
 import resend
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 logger = logging.getLogger(__name__)
 
@@ -13,9 +14,15 @@ PUBLIC_URL = os.getenv("PUBLIC_BASE_URL", "http://localhost:8000").rstrip("/")
 
 TEMPLATE_DIR = Path(__file__).resolve().parent.parent / "templates" / "emails"
 
+_jinja_env = Environment(
+    loader=FileSystemLoader(str(TEMPLATE_DIR)),
+    autoescape=select_autoescape(["html", "xml"]),
+)
 
-def _load_template(name: str) -> str:
-    return (TEMPLATE_DIR / name).read_text(encoding="utf-8")
+
+def _render_template(name: str, **context) -> str:
+    template = _jinja_env.get_template(name)
+    return template.render(**context)
 
 
 def send_welcome_email(to_email: str) -> tuple[bool, str]:
@@ -25,7 +32,7 @@ def send_welcome_email(to_email: str) -> tuple[bool, str]:
 
     try:
         resend.api_key = API_KEY
-        html = _load_template("welcome.html")
+        html = _render_template("welcome.html", public_url=PUBLIC_URL)
         subject = "You're on the FolioSpace waitlist"
         params = {
             "from": FROM_EMAIL,
