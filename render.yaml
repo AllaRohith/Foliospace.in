@@ -17,3 +17,5 @@ services:
         value: FolioSpace <hello@foliospace.in>
       - key: RESEND_REPLY_TO
         sync: false
+      - key: DATABASE_URL
+        sync: false
