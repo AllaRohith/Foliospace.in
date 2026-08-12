@@ -937,42 +937,6 @@
     switchProf('chef');
   }
 
-
-  (function () {
-    const list = document.getElementById('who-list');
-    if (!list) return;
-    const rows = Array.from(list.querySelectorAll('.who-row'));
-    const visuals = Array.from(document.querySelectorAll('.who-visual-card'));
-    if (!rows.length) return;
-
-    function activate(prof) {
-      rows.forEach(function (r) { r.classList.toggle('is-active', r.dataset.prof === prof); });
-      visuals.forEach(function (v) { v.classList.toggle('is-active', v.dataset.prof === prof); });
-    }
-
-    rows.forEach(function (r) {
-      r.addEventListener('mouseenter', function () { activate(r.dataset.prof); });
-      r.addEventListener('focus', function () { activate(r.dataset.prof); });
-      r.addEventListener('click', function () { activate(r.dataset.prof); });
-    });
-
-    let idx = 0;
-    let timer = null;
-    function cycle() {
-      idx = (idx + 1) % rows.length;
-      activate(rows[idx].dataset.prof);
-    }
-    function start() {
-      if (reduceMotion) return;
-      stop();
-      timer = setInterval(cycle, 3500);
-    }
-    function stop() { if (timer) { clearInterval(timer); timer = null; } }
-    list.addEventListener('mouseenter', stop);
-    list.addEventListener('mouseleave', start);
-    start();
-  })();
-
   const burger = document.querySelector('.nav-burger');
   const navLinks = document.querySelector('.nav-links');
   if (burger && navLinks) {
