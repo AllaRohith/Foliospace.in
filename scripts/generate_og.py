@@ -25,15 +25,44 @@ def font(size, weight="Regular"):
     for path in candidates.get(weight, candidates["Regular"]):
         if Path(path).exists():
             try:
-                return ImageFont.truetype(path, size)
-            except OSError:
+                face_index = 1 if weight == "Bold" else 0
+                return ImageFont.truetype(path, size, index=face_index)
+            except (OSError, TypeError):
                 continue
     return ImageFont.load_default()
+
+
+def font_arial_bold(size):
+    path = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
+    if Path(path).exists():
+        try:
+            return ImageFont.truetype(path, size)
+        except OSError:
+            pass
+    return font(size, "Bold")
 
 
 def measure(draw, text, fnt):
     bbox = draw.textbbox((0, 0), text, font=fnt)
     return bbox[2] - bbox[0], bbox[3] - bbox[1]
+
+
+def highlight_text(img, x, y, text, fnt, hl_color, hl_alpha=85, pad_x=12):
+    draw = ImageDraw.Draw(img)
+    bbox = draw.textbbox((0, 0), text, font=fnt)
+    w = bbox[2] - bbox[0]
+    h = bbox[3] - bbox[1]
+    overlay = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    od = ImageDraw.Draw(overlay)
+    bar_top = y + int(h * 0.28)
+    bar_bot = y + int(h * 0.88)
+    od.rectangle(
+        [x - pad_x, bar_top, x + w + pad_x, bar_bot],
+        fill=(*hl_color, hl_alpha),
+    )
+    img_rgba = img.convert("RGBA")
+    img_rgba.alpha_composite(overlay)
+    return img_rgba.convert("RGB")
 
 
 def main():
@@ -85,13 +114,15 @@ def main():
     draw.text((80, 340), title2, fill=INK, font=f_title)
 
     f_under = font(86, "Bold")
-    u_w, _ = measure(draw, "for everyone.", f_under)
-    draw.rectangle([80, 340 + 64, 80 + u_w, 340 + 78], fill=(255, 107, 53, 90))
+    img = highlight_text(img, 80, 340, "for everyone.", f_under, ACCENT, hl_alpha=85)
+    draw = ImageDraw.Draw(img)
 
     f_sub = font(26, "Regular")
     sub = "Students, chefs, artists, consultants, developers."
     draw.text((80, 460), sub, fill=MUTED, font=f_sub)
-    draw.text((80, 495), "One clean link. Built for WhatsApp and LinkedIn.", fill=MUTED, font=f_sub)
+
+    f_launch = font_arial_bold(22)
+    draw.text((80, 500), "→ Launching September 2, 2026", fill=ACCENT, font=f_launch)
 
     pill_x, pill_y, pill_w, pill_h = 80, 555, 240, 50
     draw.rounded_rectangle(
