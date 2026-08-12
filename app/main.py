@@ -24,6 +24,65 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 app.include_router(waitlist.router)
 
 
+ERROR_COPY = {
+    404: {
+        "code": "404",
+        "headline": 'This page hasn&rsquo;t been built <em>yet.</em>',
+        "sub": "Maybe it never will be. Either way, the door is back that way.",
+    },
+    422: {
+        "code": "422",
+        "headline": 'That data didn&rsquo;t add up.',
+        "sub": "Check the email and try once more. We're not picky, just specific.",
+    },
+    500: {
+        "code": "500",
+        "headline": 'Something <em>broke.</em>',
+        "sub": "It happens. We're already looking at it — try again in a minute.",
+    },
+    503: {
+        "code": "503",
+        "headline": 'We&rsquo;re briefly <em>asleep.</em>',
+        "sub": "Render's free tier wakes up when poked. Give it ~30 seconds and reload.",
+    },
+}
+
+
+def _render_error(request: Request, status_code: int):
+    copy = ERROR_COPY.get(status_code, ERROR_COPY[500])
+    return templates.TemplateResponse(
+        request,
+        "error.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": f"{copy['code']} — FolioSpace",
+            "description": "FolioSpace error page.",
+            **copy,
+        },
+        status_code=status_code,
+    )
+
+
+@app.exception_handler(404)
+async def not_found(request: Request, exc):
+    return _render_error(request, 404)
+
+
+@app.exception_handler(422)
+async def unprocessable(request: Request, exc):
+    return _render_error(request, 422)
+
+
+@app.exception_handler(500)
+async def server_error(request: Request, exc):
+    return _render_error(request, 500)
+
+
+@app.exception_handler(503)
+async def unavailable(request: Request, exc):
+    return _render_error(request, 503)
+
+
 @app.get("/")
 async def landing(request: Request):
     return templates.TemplateResponse(
@@ -34,6 +93,32 @@ async def landing(request: Request):
             "tagline": "Your story. One link. Done.",
             "page_title": "FolioSpace — Your portfolio. Your link. Done.",
             "description": "Stop sending CVs. Send a link. FolioSpace turns your work into a beautiful page that shines on WhatsApp and LinkedIn. ₹150 setup, ₹99/month.",
+        },
+    )
+
+
+@app.get("/privacy")
+async def privacy(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "privacy.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Privacy — FolioSpace",
+            "description": "FolioSpace privacy policy. What we collect, how we use it, and how to ask us to delete it.",
+        },
+    )
+
+
+@app.get("/terms")
+async def terms(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "terms.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Terms — FolioSpace",
+            "description": "FolioSpace terms of service. The rules of the road for using the waitlist and the eventual product.",
         },
     )
 

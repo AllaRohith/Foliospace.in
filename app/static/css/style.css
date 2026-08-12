@@ -3221,6 +3221,25 @@ body.dark .feature-icon { background: rgba(255, 107, 53, 0.12); color: var(--acc
   .nav-burger { display: flex; }
 }
 
+@media (max-width: 520px) {
+  .signup-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  .signup-row > input[type="email"],
+  .signup-row > select,
+  .signup-row > button {
+    width: 100%;
+    flex: 1 1 auto;
+  }
+  .signup-row > input[type="email"],
+  .signup-row > select {
+    font-size: 16px;
+  }
+  .signup-row > button { padding: 14px 18px; }
+}
+
 @media (max-width: 420px) {
   .ht-row-1, .ht-row-2 { font-size: clamp(28px, 8.5vw, 38px); }
   .hero-sub { font-size: 14px; }
@@ -3228,6 +3247,10 @@ body.dark .feature-icon { background: rgba(255, 107, 53, 0.12); color: var(--acc
   .showcase-hero h3 { font-size: 14px; }
   .showcase-tile strong { font-size: 12.5px; }
   .marquee-chip { font-size: 11.5px; padding: 5px 10px; }
+  .launch-grid { gap: 0; }
+  .launch-cell { min-width: 46px; padding: 4px 2px; }
+  .launch-sep { padding-bottom: 12px; }
+  .hero-launch { padding: 14px 10px; }
 }
 
 .hero-cta {

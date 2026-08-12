@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}Terms — FolioSpace{% endblock %}
+{% block description %}FolioSpace terms of service. The rules of the road for using the waitlist and the eventual product.{% endblock %}
+
+{% block content %}
+<style>
+  .legal {
+    background: var(--cream, #FAF7F2);
+    color: var(--ink, #0F1419);
+    padding: 96px 24px 120px;
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+  .legal-inner {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .legal-issue {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--accent, #FF6B35);
+    margin-bottom: 8px;
+  }
+  .legal-title {
+    font-family: Georgia, serif;
+    font-size: 56px;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+    margin: 0 0 8px;
+  }
+  .legal-title em {
+    font-style: italic;
+  }
+  .legal-meta {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted, #5C6470);
+    padding-top: 24px;
+    border-top: 1px solid var(--ink, #0F1419);
+    margin-bottom: 56px;
+  }
+  .legal-section {
+    border-top: 1px solid var(--line, #E8E3D9);
+    padding: 28px 0;
+  }
+  .legal-section:first-of-type {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .legal-section h2 {
+    font-family: Georgia, serif;
+    font-size: 24px;
+    line-height: 1.3;
+    font-weight: 400;
+    margin: 0 0 16px;
+  }
+  .legal-section h2 em {
+    font-style: italic;
+  }
+  .legal-section p {
+    font-size: 17px;
+    line-height: 1.6;
+    margin: 0 0 14px;
+    color: var(--ink, #0F1419);
+  }
+  .legal-section ul {
+    margin: 0 0 14px;
+    padding-left: 0;
+    list-style: none;
+  }
+  .legal-section li {
+    font-size: 17px;
+    line-height: 1.6;
+    padding: 6px 0 6px 32px;
+    position: relative;
+  }
+  .legal-section li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--accent, #FF6B35);
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight: 700;
+  }
+  .legal-section strong {
+    font-weight: 700;
+  }
+  .legal-section a {
+    color: var(--accent, #FF6B35);
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent, #FF6B35);
+    padding-bottom: 1px;
+  }
+  .legal-foot {
+    margin-top: 80px;
+    padding-top: 28px;
+    border-top: 1px solid var(--ink, #0F1419);
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted, #5C6470);
+  }
+  .legal-foot em {
+    font-family: Georgia, serif;
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 13px;
+    margin-left: 12px;
+  }
+</style>
+
+<main class="legal">
+  <div class="legal-inner">
+    <div class="legal-issue">→ Issue No. 03</div>
+    <h1 class="legal-title">The rules<br/><em>of the road.</em></h1>
+    <div class="legal-meta">Terms of Service · Last updated August 2026</div>
+
+    <div class="legal-section">
+      <h2>What <em>FolioSpace is.</em></h2>
+      <p>FolioSpace is a portfolio service for Indian professionals — chefs, students, consultants, developers, designers, and anyone with work to show. Right now we're in <strong>private beta</strong>: this website collects waitlist signups for the public launch on or around September 2, 2026.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>What <em>we promise.</em></h2>
+      <ul>
+        <li>We'll email you when we launch (and once or twice before that, no more).</li>
+        <li>We'll never sell or share your email.</li>
+        <li>We'll delete your data on request, and bulk-delete unconverted waitlist emails within 30 days of launch.</li>
+        <li>We'll be honest about what's working and what's not.</li>
+      </ul>
+    </div>
+
+    <div class="legal-section">
+      <h2>What <em>we don't promise.</em></h2>
+      <ul>
+        <li>A specific launch date — we aim for Sep 2, 2026, but if the product isn't ready, we slip.</li>
+        <li>Specific features or pricing that aren't listed on the site.</li>
+        <li>That the service will always be free or that prices won't change.</li>
+      </ul>
+    </div>
+
+    <div class="legal-section">
+      <h2>Acceptable <em>use.</em></h2>
+      <p>When the product launches, you agree to use FolioSpace lawfully. Don't use it for spam, harassment, scraping, distributing malware, hosting illegal content, or impersonating others. We may suspend or terminate accounts that violate these terms.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>Your <em>content.</em></h2>
+      <p>You own everything you upload to FolioSpace — your bio, photos, project files, contact info. We only use it to render your portfolio and to provide the service you signed up for. You can export or delete your content at any time.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>Our <em>content.</em></h2>
+      <p>The FolioSpace brand, code, templates, and design system are ours. Don't copy the site wholesale or resell the templates as your own product. You're welcome to reference and learn from them.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>Liability <em>and warranties.</em></h2>
+      <p>FolioSpace is provided "as is." We work hard to keep it running and your data safe, but we can't guarantee 100% uptime or that the service will never lose data. To the maximum extent permitted by law, our liability is limited to the fees you've paid us in the last 12 months (which, for the waitlist period, is zero).</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>Governing <em>law.</em></h2>
+      <p>These terms are governed by the laws of India. Any disputes will be handled in the courts of Hyderabad, where FolioSpace is built.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>Changes <em>to these terms.</em></h2>
+      <p>If we materially change these terms, we'll email everyone on the list and post a changelog. Continued use after that means you accept the new terms.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>Contact <em>us.</em></h2>
+      <p>Questions or complaints: <a href="mailto:rohit@foliospace.in">rohit@foliospace.in</a>. We reply within 48 hours.</p>
+    </div>
+
+    <div class="legal-foot">
+      FolioSpace <em>Printed on the open web.</em>
+    </div>
+  </div>
+</main>
+{% endblock %}

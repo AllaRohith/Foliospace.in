@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy — FolioSpace{% endblock %}
+{% block description %}FolioSpace privacy policy. What we collect, how we use it, and how to ask us to delete it.{% endblock %}
+
+{% block content %}
+<style>
+  .legal {
+    background: var(--cream, #FAF7F2);
+    color: var(--ink, #0F1419);
+    padding: 96px 24px 120px;
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+  .legal-inner {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .legal-issue {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--accent, #FF6B35);
+    margin-bottom: 8px;
+  }
+  .legal-title {
+    font-family: Georgia, serif;
+    font-size: 56px;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+    margin: 0 0 8px;
+  }
+  .legal-title em {
+    font-style: italic;
+  }
+  .legal-meta {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted, #5C6470);
+    padding-top: 24px;
+    border-top: 1px solid var(--ink, #0F1419);
+    margin-bottom: 56px;
+  }
+  .legal-section {
+    border-top: 1px solid var(--line, #E8E3D9);
+    padding: 28px 0;
+  }
+  .legal-section:first-of-type {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .legal-section h2 {
+    font-family: Georgia, serif;
+    font-size: 24px;
+    line-height: 1.3;
+    font-weight: 400;
+    margin: 0 0 16px;
+  }
+  .legal-section h2 em {
+    font-style: italic;
+  }
+  .legal-section p {
+    font-size: 17px;
+    line-height: 1.6;
+    margin: 0 0 14px;
+    color: var(--ink, #0F1419);
+  }
+  .legal-section ul {
+    margin: 0 0 14px;
+    padding-left: 0;
+    list-style: none;
+  }
+  .legal-section li {
+    font-size: 17px;
+    line-height: 1.6;
+    padding: 6px 0 6px 32px;
+    position: relative;
+  }
+  .legal-section li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--accent, #FF6B35);
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight: 700;
+  }
+  .legal-section strong {
+    font-weight: 700;
+  }
+  .legal-section a {
+    color: var(--accent, #FF6B35);
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent, #FF6B35);
+    padding-bottom: 1px;
+  }
+  .legal-foot {
+    margin-top: 80px;
+    padding-top: 28px;
+    border-top: 1px solid var(--ink, #0F1419);
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted, #5C6470);
+  }
+  .legal-foot em {
+    font-family: Georgia, serif;
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 13px;
+    margin-left: 12px;
+  }
+</style>
+
+<main class="legal">
+  <div class="legal-inner">
+    <div class="legal-issue">→ Issue No. 02</div>
+    <h1 class="legal-title">Your data.<br/><em>Our responsibility.</em></h1>
+    <div class="legal-meta">Privacy Policy · Last updated August 2026</div>
+
+    <div class="legal-section">
+      <h2>What <em>we collect.</em></h2>
+      <p>When you join the FolioSpace waitlist, we collect:</p>
+      <ul>
+        <li>Your <strong>email address</strong> — to contact you about the launch.</li>
+        <li>Your <strong>role</strong> (optional) — to understand who FolioSpace is for.</li>
+        <li>Your <strong>IP address</strong> — used only to prevent spam and abuse, then discarded within 30 days.</li>
+      </ul>
+      <p>That's it. No third-party trackers, no analytics scripts, no fingerprinting.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>How <em>we use it.</em></h2>
+      <p>We use your email for exactly two things:</p>
+      <ul>
+        <li>Send you a <strong>welcome email</strong> confirming you're on the list.</li>
+        <li>Send you <strong>one launch email</strong> when FolioSpace goes live, plus an optional reminder or two before that.</li>
+      </ul>
+      <p>We do not sell, rent, or share your email with anyone. Ever.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>Where <em>it lives.</em></h2>
+      <p>Email addresses are stored in a Postgres database hosted on Neon (US East region). Welcome and launch emails are sent via Resend, a transactional email provider. Both services are GDPR-compliant and use TLS in transit.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>Your <em>rights.</em></h2>
+      <p>You can ask us to <strong>delete your data at any time</strong>. Reply to any FolioSpace email with "delete" and we'll remove your record within 7 days. You can also email us directly at <a href="mailto:rohit@foliospace.in">rohit@foliospace.in</a>.</p>
+      <p>If you're an Indian resident, the Digital Personal Data Protection Act 2023 gives you the right to access, correct, and erase personal data held about you. The above deletion process satisfies that.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>How <em>long we keep it.</em></h2>
+      <p>If you joined the waitlist but never signed up when we launched, we'll delete your email within <strong>30 days of the public launch</strong>. After that, the waitlist table is dropped entirely.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>Children's <em>privacy.</em></h2>
+      <p>FolioSpace is not directed at children under 13. We do not knowingly collect data from anyone under 13. If a parent or guardian believes their child has signed up, email us and we'll delete the record.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>Changes <em>to this policy.</em></h2>
+      <p>If we ever change this policy in a material way, we'll email everyone on the list with the diff and a link to the updated version. We'll never change it silently.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>Get <em>in touch.</em></h2>
+      <p>Questions, complaints, or data requests: <a href="mailto:rohit@foliospace.in">rohit@foliospace.in</a>. We reply within 48 hours.</p>
+    </div>
+
+    <div class="legal-foot">
+      FolioSpace <em>Printed on the open web.</em>
+    </div>
+  </div>
+</main>
+{% endblock %}

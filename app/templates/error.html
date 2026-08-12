@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}{{ code }} — FolioSpace{% endblock %}
+{% block description %}FolioSpace error page{% endblock %}
+
+{% block content %}
+<style>
+  .err {
+    background: var(--cream, #FAF7F2);
+    color: var(--ink, #0F1419);
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 96px 24px;
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+  .err-inner {
+    max-width: 560px;
+    width: 100%;
+    text-align: center;
+  }
+  .err-issue {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--accent, #FF6B35);
+    margin-bottom: 16px;
+  }
+  .err-code {
+    font-family: Georgia, serif;
+    font-size: clamp(96px, 22vw, 180px);
+    line-height: 0.95;
+    font-weight: 400;
+    letter-spacing: -0.04em;
+    margin: 0;
+    color: var(--ink, #0F1419);
+  }
+  .err-code em {
+    font-style: italic;
+    color: var(--accent, #FF6B35);
+  }
+  .err-rule {
+    height: 1px;
+    background: var(--ink, #0F1419);
+    margin: 28px auto;
+    width: 80px;
+  }
+  .err-headline {
+    font-family: Georgia, serif;
+    font-size: clamp(24px, 4vw, 34px);
+    line-height: 1.2;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    margin: 0 0 16px;
+  }
+  .err-headline em {
+    font-style: italic;
+  }
+  .err-sub {
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--muted, #5C6470);
+    margin: 0 auto 36px;
+    max-width: 420px;
+  }
+  .err-cta {
+    display: inline-block;
+    padding: 14px 28px;
+    background: var(--ink, #0F1419);
+    color: var(--cream, #FAF7F2);
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+  .err-cta:hover {
+    transform: translateY(-1px);
+    background: var(--accent, #FF6B35);
+  }
+  .err-foot {
+    margin-top: 56px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line, #E8E3D9);
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted, #5C6470);
+  }
+  .err-foot em {
+    font-family: Georgia, serif;
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 12px;
+    margin-left: 8px;
+  }
+</style>
+
+<main class="err">
+  <div class="err-inner">
+    <div class="err-issue">→ Issue No. 0{{ code[0] }}</div>
+    <h1 class="err-code">{{ code }}<em>.</em></h1>
+    <div class="err-rule"></div>
+    <h2 class="err-headline">{{ headline|safe }}</h2>
+    <p class="err-sub">{{ sub }}</p>
+    <a href="/" class="err-cta">Back to foliospace.in &nbsp;→</a>
+    <div class="err-foot">
+      FolioSpace <em>Printed on the open web.</em>
+    </div>
+  </div>
+</main>
+{% endblock %}
