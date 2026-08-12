@@ -47,6 +47,34 @@
               <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:19px;line-height:1.55;color:#0F1419;">Thanks for signing up. You're one of the first to know when FolioSpace launches.</p>
             </td>
           </tr>
+          {% if show_launch %}
+          <tr>
+            <td style="padding:0 0 36px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top:1px solid #0F1419;border-bottom:1px solid #0F1419;">
+                <tr>
+                  <td align="center" style="padding:20px 0 14px;font-family:Helvetica,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.28em;color:#FF6B35;text-transform:uppercase;">→ Launching in</td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding:0 0 18px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+                      <tr>
+                        <td align="center" style="font-family:Georgia,'Times New Roman',serif;font-size:64px;line-height:1;color:#0F1419;font-weight:400;padding:0 4px;">{{ days_until_launch }}</td>
+                      </tr>
+                      <tr>
+                        <td align="center" style="padding-top:8px;font-family:Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:0.24em;color:#5C6470;text-transform:uppercase;">Days to launch</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding:0 0 22px;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:14px;color:#5C6470;line-height:1.5;">
+                    {{ launch_date_formatted }} · {{ launch_time_formatted }}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          {% endif %}
           <tr>
             <td style="padding:0;">
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top:1px solid #0F1419;">

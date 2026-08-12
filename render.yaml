@@ -19,3 +19,5 @@ services:
         sync: false
       - key: DATABASE_URL
         sync: false
+      - key: LAUNCH_DATE
+        sync: false

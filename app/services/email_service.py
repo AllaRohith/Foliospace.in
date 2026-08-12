@@ -1,5 +1,6 @@
 import os
 import logging
+from datetime import datetime, timezone
 from pathlib import Path
 
 import resend
@@ -11,6 +12,14 @@ API_KEY = os.getenv("RESEND_API_KEY")
 FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL", "FolioSpace <hello@foliospace.in>")
 REPLY_TO = os.getenv("RESEND_REPLY_TO", "rohit@foliospace.in")
 PUBLIC_URL = os.getenv("PUBLIC_BASE_URL", "http://localhost:8000").rstrip("/")
+
+_LAUNCH_DATE_STR = os.getenv("LAUNCH_DATE", "").strip()
+LAUNCH_DATE: datetime | None = None
+if _LAUNCH_DATE_STR:
+    try:
+        LAUNCH_DATE = datetime.fromisoformat(_LAUNCH_DATE_STR)
+    except ValueError:
+        logger.warning("LAUNCH_DATE env var is set but invalid: %s", _LAUNCH_DATE_STR)
 
 TEMPLATE_DIR = Path(__file__).resolve().parent.parent / "templates" / "emails"
 
@@ -25,6 +34,20 @@ def _render_template(name: str, **context) -> str:
     return template.render(**context)
 
 
+def _launch_context() -> dict:
+    if not LAUNCH_DATE:
+        return {"show_launch": False}
+    now = datetime.now(timezone.utc)
+    delta = LAUNCH_DATE - now
+    days = max(0, delta.days)
+    return {
+        "show_launch": True,
+        "days_until_launch": days,
+        "launch_date_formatted": LAUNCH_DATE.strftime("%-d %B %Y"),
+        "launch_time_formatted": LAUNCH_DATE.strftime("%-I:%M %p IST"),
+    }
+
+
 def send_welcome_email(to_email: str) -> tuple[bool, str]:
     if not API_KEY:
         logger.info("RESEND_API_KEY not set, skipping email to %s", to_email)
@@ -32,7 +55,8 @@ def send_welcome_email(to_email: str) -> tuple[bool, str]:
 
     try:
         resend.api_key = API_KEY
-        html = _render_template("welcome.html", public_url=PUBLIC_URL)
+        context = {"public_url": PUBLIC_URL, **_launch_context()}
+        html = _render_template("welcome.html", **context)
         subject = "You're on the FolioSpace waitlist"
         params = {
             "from": FROM_EMAIL,
