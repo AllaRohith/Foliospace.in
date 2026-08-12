@@ -2633,6 +2633,12 @@ body.dark .ticker-rail::after  { background: linear-gradient(-90deg, var(--cream
   .cmd-palette { padding-top: 8vh; }
 }
 
+@media (max-width: 480px) {
+  .cmd-k-fab { bottom: 12px; right: 12px; padding: 0; width: 40px; height: 40px; justify-content: center; }
+  .cmd-k-fab .cmd-k-icon { width: 24px; height: 24px; font-size: 10px; }
+  .share-float { display: none !important; }
+}
+
 [data-reveal] { opacity: 0; transform: translateY(40px); }
 [data-reveal].is-revealed { opacity: 1; transform: translateY(0); transition: opacity 0.9s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1); }
 
