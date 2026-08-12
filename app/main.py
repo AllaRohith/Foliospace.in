@@ -3,6 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
 import os
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from app.routers import waitlist
 
@@ -13,6 +14,8 @@ app = FastAPI(
     description="A portfolio for everyone. Built for WhatsApp, LinkedIn, and the Indian web.",
     version="0.1.0",
 )
+
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 

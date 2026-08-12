@@ -1,9 +1,11 @@
-import json
+import os
 import re
-from pathlib import Path
+import logging
 from datetime import datetime, timezone
 from fastapi import APIRouter, BackgroundTasks, Form, HTTPException, Request
 from fastapi.responses import JSONResponse
+import psycopg
+from psycopg.rows import dict_row
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -13,26 +15,33 @@ router = APIRouter(prefix="/api/waitlist", tags=["waitlist"])
 
 limiter = Limiter(key_func=get_remote_address)
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-DATA_DIR.mkdir(exist_ok=True)
-WAITLIST_FILE = DATA_DIR / "waitlist.json"
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+
+logger = logging.getLogger(__name__)
 
 EMAIL_RE = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 
 HONEYPOT_FIELD = "website"
 
-
-def _read_waitlist() -> list:
-    if not WAITLIST_FILE.exists():
-        return []
-    try:
-        return json.loads(WAITLIST_FILE.read_text())
-    except (json.JSONDecodeError, OSError):
-        return []
+if not DATABASE_URL:
+    logger.warning(
+        "DATABASE_URL is not set. The waitlist endpoints will return 503 until it is configured. "
+        "Set DATABASE_URL to your Postgres connection string (e.g. Neon)."
+    )
 
 
-def _write_waitlist(entries: list) -> None:
-    WAITLIST_FILE.write_text(json.dumps(entries, indent=2))
+def _connect():
+    if not DATABASE_URL:
+        raise HTTPException(status_code=503, detail="Waitlist database is not configured.")
+    conn = psycopg.connect(DATABASE_URL, row_factory=dict_row)
+    return conn
+
+
+def _count(conn) -> int:
+    with conn.cursor() as cur:
+        cur.execute("SELECT count(*) AS n FROM waitlist")
+        row = cur.fetchone()
+        return int(row["n"]) if row else 0
 
 
 @router.post("/join")
@@ -51,28 +60,36 @@ async def join_waitlist(
     if not EMAIL_RE.match(email):
         raise HTTPException(status_code=400, detail="Invalid email")
 
-    entries = _read_waitlist()
-    is_new = not any(e["email"] == email for e in entries)
+    role_clean = role.strip() or None
+    ip = request.client.host if request.client else None
+
+    is_new = False
+    with _connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO waitlist (email, role, created_at, ip)
+                VALUES (%s, %s, %s, %s)
+                ON CONFLICT (email) DO NOTHING
+                RETURNING id
+                """,
+                (email, role_clean, datetime.now(timezone.utc), ip),
+            )
+            row = cur.fetchone()
+            is_new = row is not None
+        total = _count(conn)
+        conn.commit()
 
     if is_new:
-        entries.append(
-            {
-                "email": email,
-                "role": role.strip() or None,
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "ip": request.client.host if request.client else None,
-            }
-        )
-        _write_waitlist(entries)
         background.add_task(email_service.send_welcome_email, email)
-        background.add_task(email_service.send_internal_notification, email, role.strip() or None)
+        background.add_task(email_service.send_internal_notification, email, role_clean)
 
     return JSONResponse(
         status_code=201 if is_new else 200,
         content={
             "ok": True,
             "new": is_new,
-            "count": len(entries),
+            "count": total,
             "message": "You're in. We'll email you when we launch." if is_new else "You're already on the list.",
         },
     )
@@ -80,4 +97,8 @@ async def join_waitlist(
 
 @router.get("/count")
 async def count():
-    return {"count": len(_read_waitlist())}
+    if not DATABASE_URL:
+        return {"count": 0, "configured": False}
+    with _connect() as conn:
+        total = _count(conn)
+    return {"count": total, "configured": True}
