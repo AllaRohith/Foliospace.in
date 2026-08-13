@@ -9,7 +9,10 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
+from starlette.middleware.sessions import SessionMiddleware
+
 from app.middleware import install_security
+from app.routers import admin
 from app.routers import waitlist
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -37,6 +40,22 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 install_security(app)
 
+_session_secret = os.getenv("ADMIN_SESSION_SECRET", "").strip()
+if not _session_secret:
+    if ENV == "production":
+        raise RuntimeError("ADMIN_SESSION_SECRET must be set in production.")
+    _session_secret = "dev-only-not-secret-change-me"
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=_session_secret,
+    session_cookie="fs_admin",
+    max_age=24 * 3600,
+    same_site="lax",
+    https_only=ENV == "production",
+    path="/",
+)
+
 app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=_proxy_trusted)
 
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
@@ -44,6 +63,7 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 app.include_router(waitlist.router)
+app.include_router(admin.router)
 
 
 ERROR_COPY = {

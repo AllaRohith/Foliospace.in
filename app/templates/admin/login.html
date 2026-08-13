@@ -1,0 +1,35 @@
+{% extends "admin/base.html" %}
+
+{% block body %}
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-eyebrow">Console · Restricted</div>
+    <h1 class="login-title"><em>Sign</em> in</h1>
+    <p class="login-sub">Internal access only. All activity is logged.</p>
+    <div class="login-rule"></div>
+
+    {% if locked %}
+      <div class="login-err is-warn">Too many attempts. Try again in a few minutes.</div>
+    {% elif error %}
+      <div class="login-err">{{ error if error is string else 'Invalid credentials.' }}</div>
+    {% endif %}
+
+    <form method="post" action="/admin/login" autocomplete="off" novalidate>
+      <div class="login-field">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          required
+          autofocus
+          autocomplete="current-password"
+          spellcheck="false"
+          autocapitalize="off"
+        />
+      </div>
+      <button type="submit" class="login-submit">Enter</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

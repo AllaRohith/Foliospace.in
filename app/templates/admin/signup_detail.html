@@ -1,0 +1,63 @@
+{% extends "admin/base.html" %}
+
+{% block body %}
+<div class="shell">
+  <nav class="nav" aria-label="Admin">
+    <div class="nav-left">
+      <a href="/admin/" class="brand"><span class="brand-mark">FolioSpace</span> <em style="font-style:italic;color:var(--accent)">· admin</em></a>
+      <span class="issue-tag">Console · Issue {{ issue }}</span>
+    </div>
+    <div class="nav-links">
+      <a href="/admin/">Dashboard</a>
+      <a href="/admin/signups" class="is-active">Signups</a>
+      <a href="/admin/signups/export.csv">Export</a>
+    </div>
+    <div class="nav-right">
+      <form method="post" action="/admin/logout">
+        <button type="submit" class="btn-link" style="background:none;border:0;padding:0;font:inherit;cursor:pointer;font-weight:700;font-size:11px;letter-spacing:.18em;text-transform:uppercase;">Sign out</button>
+      </form>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="eyebrow"><a href="/admin/signups" style="color:inherit">← Back to roster</a></div>
+    <h1 class="h1">Signup <em>#{{ '%04d'|format(row['id']) }}</em></h1>
+    <div class="rule-strong"></div>
+
+    <div class="detail-grid">
+      <div class="detail-card">
+        <div class="detail-row">
+          <div class="label">ID</div>
+          <div class="val">#{{ '%04d'|format(row['id']) }}</div>
+        </div>
+        <div class="detail-row">
+          <div class="label">Email</div>
+          <div class="val">{{ row['email'] }}</div>
+        </div>
+        <div class="detail-row">
+          <div class="label">Role</div>
+          <div class="val">{{ row['role'] or '— unspecified —' }}</div>
+        </div>
+        <div class="detail-row">
+          <div class="label">Joined</div>
+          <div class="val">{{ row['created_at'].strftime('%Y-%m-%d %H:%M:%S') }} UTC</div>
+        </div>
+        <div class="detail-row">
+          <div class="label">IP at signup</div>
+          <div class="val">{{ row['ip'] or '—' }}</div>
+        </div>
+      </div>
+
+      <aside class="detail-actions" aria-label="Actions">
+        <h3>Right to be forgotten</h3>
+        <p>Permanently removes this record. Cannot be undone.</p>
+        <form method="post" action="/admin/signups/{{ row['id'] }}/delete" onsubmit="return confirm('Delete {{ row['email'] }}? This is irreversible.');">
+          <button type="submit" class="btn btn-danger" style="width:100%">Delete record</button>
+        </form>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="foot">FolioSpace <em>Admin console · all access audited</em></footer>
+</div>
+{% endblock %}

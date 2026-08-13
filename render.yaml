@@ -21,3 +21,7 @@ services:
         sync: false
       - key: LAUNCH_DATE
         sync: false
+      - key: ADMIN_PASSWORD_HASH
+        sync: false
+      - key: ADMIN_SESSION_SECRET
+        sync: false

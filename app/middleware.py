@@ -103,11 +103,25 @@ class OriginCheckMiddleware(BaseHTTPMiddleware):
         self.allowed = {_origin_key(o) for o in (allowed_origins or _allowed_origins()) if o}
         self.allowed.discard("")
         self.safe_methods = {"GET", "HEAD", "OPTIONS"}
-        self.protected_paths = ("/api/waitlist/join",)
+        self.protected_paths = (
+            "/api/waitlist/join",
+            "/admin/login",
+            "/admin/logout",
+        )
+        self.protected_prefixes = (
+            "/admin/signups/",
+        )
+
+    def _is_protected(self, path: str) -> bool:
+        if any(path == p or path.startswith(p + "/") for p in self.protected_paths):
+            return True
+        if any(path.startswith(p) for p in self.protected_prefixes):
+            return path.endswith("/delete")
+        return False
 
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
-        if request.method not in self.safe_methods and any(path.startswith(p) for p in self.protected_paths):
+        if request.method not in self.safe_methods and self._is_protected(path):
             ctype = (request.headers.get("content-type") or "").split(";")[0].strip().lower()
             if ctype not in ALLOWED_FORM_CONTENT_TYPES:
                 return JSONResponse(
