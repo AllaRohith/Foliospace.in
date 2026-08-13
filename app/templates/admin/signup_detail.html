@@ -13,9 +13,11 @@
     <div class="nav-links">
       <a href="/admin/">Dashboard</a>
       <a href="/admin/signups" class="is-active">Signups</a>
+      <a href="/admin/audit">Audit</a>
       <a href="/admin/signups/export.csv">Export</a>
     </div>
     <div class="nav-right">
+      <button type="button" class="nav-link-btn" id="kbd-toggle" aria-label="Keyboard shortcuts">? Shortcuts</button>
       <form method="post" action="/admin/logout">
         <button type="submit" class="nav-link-btn">Sign out</button>
       </form>
@@ -84,5 +86,23 @@
     <span class="foot-sep">·</span>
     Admin Console <em>all access audited</em>
   </footer>
+</div>
+
+<div class="kbd-modal" id="kbd-modal" role="dialog" aria-modal="true" aria-labelledby="kbd-title">
+  <div class="kbd-card">
+    <h3 id="kbd-title"><em>Keyboard</em> shortcuts</h3>
+    <div class="kbd-sub">Press <kbd>?</kbd> any time</div>
+    <dl>
+      <dt><kbd>j</kbd></dt><dd>Next row</dd>
+      <dt><kbd>k</kbd></dt><dd>Previous row</dd>
+      <dt><kbd>/</kbd></dt><dd>Focus search</dd>
+      <dt><kbd>e</kbd></dt><dd>Export CSV</dd>
+      <dt><kbd>a</kbd></dt><dd>Audit log</dd>
+      <dt><kbd>d</kbd></dt><dd>Dashboard</dd>
+      <dt><kbd>s</kbd></dt><dd>Signups</dd>
+      <dt><kbd>?</kbd></dt><dd>This panel</dd>
+      <dt><kbd>esc</kbd></dt><dd>Close</dd>
+    </dl>
+  </div>
 </div>
 {% endblock %}

@@ -37,6 +37,22 @@ def _issue_label() -> str:
     return f"№ {d.strftime('%y')}·{d.strftime('%m')}·{d.strftime('%d')}"
 
 
+def _cold_open(last7: int, prev7: int, delta_pct: float, top_role: str, top_role_count: int, total: int) -> str:
+    if last7 == 0:
+        if total == 0:
+            return "Desk is quiet. No signups yet — the waitlist is open."
+        return f"{total} on the roster. None signed up this week."
+    parts = []
+    if prev7 == 0 and last7 > 0:
+        parts.append(f"{last7} signups this week — an open door.")
+    else:
+        sign = "+" if delta_pct >= 0 else ""
+        parts.append(f"{last7} signups this week, {sign}{delta_pct}% vs. last week.")
+    if top_role and top_role != "—":
+        parts.append(f"{top_role.capitalize()} leads at {top_role_count}.")
+    return " ".join(parts)
+
+
 templates.env.globals["issue"] = _issue_label()
 templates.env.globals["now"] = lambda: datetime.now(timezone.utc)
 
@@ -141,10 +157,14 @@ async def dashboard(request: Request):
 
     total = 0
     last7 = 0
+    prev7 = 0
     per_day = []
+    per_day_30 = []
     role_breakdown = []
     top_sources = []
     recent = []
+    top_role_7d = []
+    recent_audit = []
     if DATABASE_URL:
         try:
             with _connect() as conn:
@@ -161,6 +181,15 @@ async def dashboard(request: Request):
                     last7 = int((cur.fetchone() or {}).get("n") or 0)
                     cur.execute(
                         """
+                        SELECT count(*) AS n
+                          FROM waitlist
+                         WHERE created_at > NOW() - INTERVAL '14 days'
+                           AND created_at <= NOW() - INTERVAL '7 days'
+                        """
+                    )
+                    prev7 = int((cur.fetchone() or {}).get("n") or 0)
+                    cur.execute(
+                        """
                         SELECT date_trunc('day', created_at) AS d, count(*) AS n
                           FROM waitlist
                          WHERE created_at > NOW() - INTERVAL '14 days'
@@ -169,6 +198,16 @@ async def dashboard(request: Request):
                         """
                     )
                     per_day = [(row["d"], int(row["n"])) for row in cur.fetchall()]
+                    cur.execute(
+                        """
+                        SELECT date_trunc('day', created_at) AS d, count(*) AS n
+                          FROM waitlist
+                         WHERE created_at > NOW() - INTERVAL '30 days'
+                         GROUP BY 1
+                         ORDER BY 1
+                        """
+                    )
+                    per_day_30 = [(row["d"], int(row["n"])) for row in cur.fetchall()]
                     cur.execute(
                         """
                         SELECT COALESCE(role, '(unspecified)') AS role, count(*) AS n
@@ -199,9 +238,47 @@ async def dashboard(request: Request):
                         """
                     )
                     recent = list(cur.fetchall())
+                    if role_breakdown:
+                        cur.execute(
+                            """
+                            SELECT date_trunc('day', created_at) AS d, count(*) AS n
+                              FROM waitlist
+                             WHERE COALESCE(role, '(unspecified)') = %s
+                               AND created_at > NOW() - INTERVAL '7 days'
+                             GROUP BY 1
+                             ORDER BY 1
+                            """,
+                            (role_breakdown[0][0],),
+                        )
+                        top_role_7d = [(row["d"], int(row["n"])) for row in cur.fetchall()]
+                    cur.execute(
+                        """
+                        SELECT id, action, ip, target, created_at, metadata
+                          FROM admin_audit_log
+                         ORDER BY created_at DESC
+                         LIMIT 6
+                        """
+                    )
+                    recent_audit = list(cur.fetchall())
                 conn.commit()
         except psycopg.Error as e:
             logger.exception("dashboard query failed: %s", e)
+
+    if prev7 > 0:
+        delta_pct = round(((last7 - prev7) / prev7) * 100, 1)
+    elif last7 > 0:
+        delta_pct = 100.0
+    else:
+        delta_pct = 0.0
+
+    if role_breakdown:
+        top_role_name = role_breakdown[0][0]
+        top_role_count = role_breakdown[0][1]
+    else:
+        top_role_name = "—"
+        top_role_count = 0
+
+    cold_open = _cold_open(last7, prev7, delta_pct, top_role_name, top_role_count, total)
 
     admin_auth.audit(request, sid, "dashboard.view")
     response = templates.TemplateResponse(
@@ -213,10 +290,18 @@ async def dashboard(request: Request):
             "description": "FolioSpace admin dashboard.",
             "total": total,
             "last7": last7,
+            "prev7": prev7,
+            "delta_pct": delta_pct,
             "per_day": per_day,
+            "per_day_30": per_day_30,
             "role_breakdown": role_breakdown,
             "top_sources": top_sources,
             "recent": recent,
+            "top_role": top_role_name,
+            "top_role_count": top_role_count,
+            "top_role_7d": top_role_7d,
+            "recent_audit": recent_audit,
+            "cold_open": cold_open,
             "role_values": ROLE_VALUES,
         },
     )
@@ -468,3 +553,88 @@ async def signup_delete(signup_id: int, request: Request):
     if not deleted:
         raise HTTPException(status_code=404, detail="Not found.")
     return RedirectResponse("/admin/signups?msg=deleted", status_code=303)
+
+
+@router.get("/audit", response_class=HTMLResponse)
+async def audit_log(request: Request):
+    guard = _gate(request)
+    if isinstance(guard, RedirectResponse):
+        return guard
+    sid = guard
+
+    action = _sanitize(request.query_params.get("action", ""))[:64]
+    date_from = _sanitize(request.query_params.get("from", ""))[:10]
+    date_to = _sanitize(request.query_params.get("to", ""))[:10]
+    page_raw = _sanitize(request.query_params.get("page", "1"))[:6]
+    try:
+        page = max(1, int(page_raw))
+    except ValueError:
+        page = 1
+    offset = (page - 1) * PAGE_SIZE
+
+    where = []
+    params = []
+    if action:
+        where.append("action = %s")
+        params.append(action)
+    if date_from:
+        where.append("created_at >= %s")
+        params.append(date_from)
+    if date_to:
+        where.append("created_at < (%s)::date + INTERVAL '1 day'")
+        params.append(date_to)
+    where_sql = (" WHERE " + " AND ".join(where)) if where else ""
+
+    rows = []
+    total = 0
+    distinct_actions = []
+    if DATABASE_URL:
+        try:
+            with _connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(f"SELECT count(*) AS n FROM admin_audit_log{where_sql}", params)
+                    total = int((cur.fetchone() or {}).get("n") or 0)
+                    cur.execute(
+                        f"""
+                        SELECT id, session_id, ip, action, target, metadata, created_at
+                          FROM admin_audit_log{where_sql}
+                         ORDER BY created_at DESC
+                         LIMIT %s OFFSET %s
+                        """,
+                        [*params, PAGE_SIZE, offset],
+                    )
+                    rows = list(cur.fetchall())
+                    cur.execute(
+                        "SELECT DISTINCT action FROM admin_audit_log ORDER BY action"
+                    )
+                    distinct_actions = [r["action"] for r in cur.fetchall()]
+                conn.commit()
+        except psycopg.Error as e:
+            logger.exception("audit query failed: %s", e)
+
+    total_pages = max(1, (total + PAGE_SIZE - 1) // PAGE_SIZE)
+    admin_auth.audit(
+        request,
+        sid,
+        "audit.view",
+        metadata={"action": action, "from": date_from, "to": date_to, "page": page, "total": total},
+    )
+    response = templates.TemplateResponse(
+        request,
+        "admin/audit.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Audit · FolioSpace Admin",
+            "description": "FolioSpace admin audit log.",
+            "rows": rows,
+            "total": total,
+            "page": page,
+            "total_pages": total_pages,
+            "page_size": PAGE_SIZE,
+            "action": action,
+            "actions": distinct_actions,
+            "date_from": date_from,
+            "date_to": date_to,
+        },
+    )
+    return _no_cache(response)
