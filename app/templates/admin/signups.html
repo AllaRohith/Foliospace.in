@@ -1,28 +1,44 @@
 {% extends "admin/base.html" %}
 
+{% block title %}Signups · FolioSpace Admin{% endblock %}
+{% block description %}FolioSpace admin signups list.{% endblock %}
+
 {% block body %}
 <div class="shell">
   <nav class="nav" aria-label="Admin">
     <div class="nav-left">
-      <a href="/admin/" class="brand"><span class="brand-mark">FolioSpace</span> <em style="font-style:italic;color:var(--accent)">· admin</em></a>
-      <span class="issue-tag">Console · Issue {{ issue }}</span>
-    </div>
-    <div class="nav-links">
-      <a href="/admin/">Dashboard</a>
-      <a href="/admin/signups" class="is-active">Signups</a>
-      <a href="/admin/signups/export.csv">Export</a>
+      <a href="/admin/" class="brand">
+        <span class="brand-mark">F</span>
+        <span>FolioSpace</span>
+        <span class="brand-sub">Admin</span>
+      </a>
+      <div class="nav-links">
+        <a href="/admin/">Dashboard</a>
+        <a href="/admin/signups" class="is-active">Signups</a>
+        <a href="/admin/signups/export.csv">Export</a>
+      </div>
     </div>
     <div class="nav-right">
+      <span class="nav-user" title="Signed in">
+        <span class="nav-user-avatar">A</span>
+        <span>Admin</span>
+      </span>
       <form method="post" action="/admin/logout">
-        <button type="submit" class="btn-link" style="background:none;border:0;padding:0;font:inherit;cursor:pointer;font-weight:700;font-size:11px;letter-spacing:.18em;text-transform:uppercase;">Sign out</button>
+        <button type="submit" class="nav-link-btn">Sign out</button>
       </form>
     </div>
   </nav>
 
   <main class="main">
-    <div class="eyebrow">Live roster</div>
-    <h1 class="h1">The <em>waitlist</em></h1>
-    <div class="rule-strong"></div>
+    <div class="page-head">
+      <div>
+        <h1>Signups</h1>
+        <p>{{ total }} record{{ '' if total == 1 else 's' }} on the waitlist.</p>
+      </div>
+      <div class="page-head-actions">
+        <a href="/admin/signups/export.csv?{{ {'role': role, 'q': q, 'from': date_from, 'to': date_to}|urlencode }}" class="btn btn-sm">Export CSV</a>
+      </div>
+    </div>
 
     {% if msg == 'deleted' %}
       <div class="banner is-ok">Record deleted. GDPR hold lifted.</div>
@@ -48,12 +64,12 @@
         <input id="page" name="page" type="number" min="1" class="input" value="{{ page }}" style="width:80px;min-width:0" />
       </div>
       <div class="actions">
-        <a href="/admin/signups/export.csv?{{ {'role': role, 'q': q, 'from': date_from, 'to': date_to}|urlencode }}" class="btn btn-sm">Export CSV</a>
+        <a href="/admin/signups" class="btn btn-sm btn-ghost">Clear</a>
         <button type="submit" class="btn btn-sm btn-primary">Apply</button>
       </div>
     </form>
 
-    <div class="chips" style="margin: 4px 0 18px">
+    <div class="chips">
       <a href="/admin/signups?q={{ q }}&from={{ date_from }}&to={{ date_to }}" class="chip {{ '' if role else 'is-active' }}">All</a>
       {% for r in role_values %}
         <a
@@ -64,35 +80,37 @@
     </div>
 
     {% if rows %}
-      <table class="table">
-        <thead>
-          <tr>
-            <th style="width:60px">#</th>
-            <th>Email</th>
-            <th style="width:130px">Role</th>
-            <th style="width:170px">Joined</th>
-            <th style="width:120px" class="row-actions">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for r in rows %}
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
             <tr>
-              <td class="id">#{{ '%04d'|format(r['id']) }}</td>
-              <td class="email"><a href="/admin/signups/{{ r['id'] }}">{{ r['email'] }}</a></td>
-              <td><span class="role">{{ (r['role'] or '—') }}</span></td>
-              <td class="time">{{ r['created_at'].strftime('%Y-%m-%d %H:%M') }} UTC</td>
-              <td class="row-actions">
-                <form method="post" action="/admin/signups/{{ r['id'] }}/delete" style="display:inline" onsubmit="return confirm('Delete {{ r['email'] }}? This is irreversible (GDPR).');">
-                  <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                </form>
-              </td>
+              <th style="width:60px">#</th>
+              <th>Email</th>
+              <th style="width:120px">Role</th>
+              <th style="width:160px">Joined</th>
+              <th style="width:100px" class="row-actions">Actions</th>
             </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {% for r in rows %}
+              <tr>
+                <td class="id">#{{ '%04d'|format(r['id']) }}</td>
+                <td class="email"><a href="/admin/signups/{{ r['id'] }}">{{ r['email'] }}</a></td>
+                <td><span class="role">{{ (r['role'] or '—') }}</span></td>
+                <td class="time">{{ r['created_at'].strftime('%Y-%m-%d %H:%M') }} UTC</td>
+                <td class="row-actions">
+                  <form method="post" action="/admin/signups/{{ r['id'] }}/delete" style="display:inline" onsubmit="return confirm('Delete {{ r['email'] }}? This is irreversible (GDPR).');">
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
 
       <nav class="pagination" aria-label="Pagination">
-        <div class="pagination-meta">{{ total }} record{{ '' if total == 1 else 's' }} · page {{ page }} of {{ total_pages }}</div>
+        <div class="pagination-meta">Page {{ page }} of {{ total_pages }}</div>
         <div class="pagination-links">
           {% if page > 1 %}
             <a href="/admin/signups?{{ {'role': role, 'q': q, 'from': date_from, 'to': date_to, 'page': page - 1}|urlencode }}">← Prev</a>
@@ -111,6 +129,8 @@
     {% endif %}
   </main>
 
-  <footer class="foot">FolioSpace <em>Admin console · all access audited</em></footer>
+  <footer class="foot">
+    FolioSpace <span class="foot-sep">·</span> Admin console <span class="foot-sep">·</span> All access audited
+  </footer>
 </div>
 {% endblock %}

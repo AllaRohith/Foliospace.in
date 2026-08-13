@@ -1,28 +1,41 @@
 {% extends "admin/base.html" %}
 
+{% block title %}Signup #{{ '%04d'|format(row['id']) }} · FolioSpace Admin{% endblock %}
+{% block description %}FolioSpace signup detail.{% endblock %}
+
 {% block body %}
 <div class="shell">
   <nav class="nav" aria-label="Admin">
     <div class="nav-left">
-      <a href="/admin/" class="brand"><span class="brand-mark">FolioSpace</span> <em style="font-style:italic;color:var(--accent)">· admin</em></a>
-      <span class="issue-tag">Console · Issue {{ issue }}</span>
-    </div>
-    <div class="nav-links">
-      <a href="/admin/">Dashboard</a>
-      <a href="/admin/signups" class="is-active">Signups</a>
-      <a href="/admin/signups/export.csv">Export</a>
+      <a href="/admin/" class="brand">
+        <span class="brand-mark">F</span>
+        <span>FolioSpace</span>
+        <span class="brand-sub">Admin</span>
+      </a>
+      <div class="nav-links">
+        <a href="/admin/">Dashboard</a>
+        <a href="/admin/signups" class="is-active">Signups</a>
+        <a href="/admin/signups/export.csv">Export</a>
+      </div>
     </div>
     <div class="nav-right">
+      <span class="nav-user" title="Signed in">
+        <span class="nav-user-avatar">A</span>
+        <span>Admin</span>
+      </span>
       <form method="post" action="/admin/logout">
-        <button type="submit" class="btn-link" style="background:none;border:0;padding:0;font:inherit;cursor:pointer;font-weight:700;font-size:11px;letter-spacing:.18em;text-transform:uppercase;">Sign out</button>
+        <button type="submit" class="nav-link-btn">Sign out</button>
       </form>
     </div>
   </nav>
 
   <main class="main">
-    <div class="eyebrow"><a href="/admin/signups" style="color:inherit">← Back to roster</a></div>
-    <h1 class="h1">Signup <em>#{{ '%04d'|format(row['id']) }}</em></h1>
-    <div class="rule-strong"></div>
+    <div class="page-head">
+      <div>
+        <h1>Signup #{{ '%04d'|format(row['id']) }}</h1>
+        <p><a href="/admin/signups" style="color: var(--muted)">← Back to signups</a></p>
+      </div>
+    </div>
 
     <div class="detail-grid">
       <div class="detail-card">
@@ -32,11 +45,11 @@
         </div>
         <div class="detail-row">
           <div class="label">Email</div>
-          <div class="val">{{ row['email'] }}</div>
+          <div class="val text">{{ row['email'] }}</div>
         </div>
         <div class="detail-row">
           <div class="label">Role</div>
-          <div class="val">{{ row['role'] or '— unspecified —' }}</div>
+          <div class="val text">{{ row['role'] or '— unspecified —' }}</div>
         </div>
         <div class="detail-row">
           <div class="label">Joined</div>
@@ -68,12 +81,14 @@
         <h3>Right to be forgotten</h3>
         <p>Permanently removes this record. Cannot be undone.</p>
         <form method="post" action="/admin/signups/{{ row['id'] }}/delete" onsubmit="return confirm('Delete {{ row['email'] }}? This is irreversible.');">
-          <button type="submit" class="btn btn-danger" style="width:100%">Delete record</button>
+          <button type="submit" class="btn btn-danger">Delete record</button>
         </form>
       </aside>
     </div>
   </main>
 
-  <footer class="foot">FolioSpace <em>Admin console · all access audited</em></footer>
+  <footer class="foot">
+    FolioSpace <span class="foot-sep">·</span> Admin console <span class="foot-sep">·</span> All access audited
+  </footer>
 </div>
 {% endblock %}

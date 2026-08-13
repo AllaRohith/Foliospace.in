@@ -1,12 +1,19 @@
 {% extends "admin/base.html" %}
 
+{% block title %}Sign in · FolioSpace Admin{% endblock %}
+{% block description %}FolioSpace admin sign in.{% endblock %}
+
 {% block body %}
 <div class="login-wrap">
   <div class="login-card">
-    <div class="login-eyebrow">Console · Restricted</div>
-    <h1 class="login-title"><em>Sign</em> in</h1>
+    <div class="login-brand">
+      <span class="brand-mark">F</span>
+      <span class="login-brand-name">FolioSpace</span>
+      <span class="login-brand-tag">Admin</span>
+    </div>
+
+    <h1 class="login-title">Sign in to continue</h1>
     <p class="login-sub">Internal access only. All activity is logged.</p>
-    <div class="login-rule"></div>
 
     {% if locked %}
       <div class="login-err is-warn">Too many attempts. Try again in a few minutes.</div>
@@ -28,8 +35,10 @@
           autocapitalize="off"
         />
       </div>
-      <button type="submit" class="login-submit">Enter</button>
+      <button type="submit" class="login-submit">Sign in</button>
     </form>
+
+    <p class="login-note">All access is audited.</p>
   </div>
 </div>
 {% endblock %}
