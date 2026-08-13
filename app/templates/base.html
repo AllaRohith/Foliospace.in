@@ -77,6 +77,7 @@
     </div>
   </div>
   {% block content %}{% endblock %}
+  <script src="{{ request.url_for('static', path='js/utm.js') }}"></script>
   <script src="{{ request.url_for('static', path='js/main.js') }}"></script>
 </body>
 </html>

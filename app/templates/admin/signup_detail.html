@@ -46,6 +46,22 @@
           <div class="label">IP at signup</div>
           <div class="val">{{ row['ip'] or '—' }}</div>
         </div>
+        <div class="detail-row">
+          <div class="label">utm_source</div>
+          <div class="val">{{ row.get('utm_source') or '—' }}</div>
+        </div>
+        <div class="detail-row">
+          <div class="label">utm_medium</div>
+          <div class="val">{{ row.get('utm_medium') or '—' }}</div>
+        </div>
+        <div class="detail-row">
+          <div class="label">utm_campaign</div>
+          <div class="val">{{ row.get('utm_campaign') or '—' }}</div>
+        </div>
+        <div class="detail-row">
+          <div class="label">Referer</div>
+          <div class="val">{{ row.get('referer') or '—' }}</div>
+        </div>
       </div>
 
       <aside class="detail-actions" aria-label="Actions">

@@ -117,6 +117,26 @@
         {% endfor %}
       </div>
     </section>
+
+    <section class="panel" aria-label="Top sources">
+      <div class="panel-head">
+        <h2>Top <em>sources</em></h2>
+        <span class="meta">utm_source · top 5</span>
+      </div>
+      {% set max_src_n = (top_sources|map(attribute=1)|max) if top_sources else 1 %}
+      {% if max_src_n < 1 %}{% set max_src_n = 1 %}{% endif %}
+      <div class="role-list">
+        {% for src, n in top_sources %}
+          <div class="role-row">
+            <div class="role-name">{{ src }}</div>
+            <div class="role-bar"><div class="role-bar-fill" style="width: {{ (n / max_src_n * 100)|round(1) }}%"></div></div>
+            <div class="role-n">{{ n }}</div>
+          </div>
+        {% else %}
+          <div class="empty">No tagged traffic yet — share the link with <code>?utm_source=</code> to start attributing signups.</div>
+        {% endfor %}
+      </div>
+    </section>
   </main>
 
   <footer class="foot">FolioSpace <em>Admin console · all access audited</em></footer>

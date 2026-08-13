@@ -83,18 +83,35 @@ def send_welcome_email(to_email: str) -> tuple[bool, str]:
         return False, str(e)
 
 
-def send_internal_notification(email: str, role: str | None) -> tuple[bool, str]:
+def send_internal_notification(
+    email: str,
+    role: str | None,
+    utm_source: str | None = None,
+    utm_medium: str | None = None,
+    utm_campaign: str | None = None,
+) -> tuple[bool, str]:
     if not API_KEY:
         return False, "no_api_key"
     try:
         resend.api_key = API_KEY
         safe_email = _strip_control(email)[:254]
         safe_role = _strip_control(role) if role else None
+        safe_src = _strip_control(utm_source)[:64] if utm_source else None
+        safe_med = _strip_control(utm_medium)[:64] if utm_medium else None
+        safe_camp = _strip_control(utm_campaign)[:64] if utm_campaign else None
         body = (
             f"New waitlist signup\n\n"
             f"Email: {safe_email}\n"
             f"Role:  {safe_role or '(unspecified)'}\n"
         )
+        if safe_src or safe_med or safe_camp:
+            body += "\nAttribution:\n"
+            if safe_src:
+                body += f"  source:   {safe_src}\n"
+            if safe_med:
+                body += f"  medium:   {safe_med}\n"
+            if safe_camp:
+                body += f"  campaign: {safe_camp}\n"
         params = {
             "from": FROM_EMAIL,
             "to": [REPLY_TO],

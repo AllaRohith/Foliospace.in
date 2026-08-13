@@ -143,6 +143,7 @@ async def dashboard(request: Request):
     last7 = 0
     per_day = []
     role_breakdown = []
+    top_sources = []
     recent = []
     if DATABASE_URL:
         try:
@@ -179,7 +180,19 @@ async def dashboard(request: Request):
                     role_breakdown = [(row["role"], int(row["n"])) for row in cur.fetchall()]
                     cur.execute(
                         """
-                        SELECT id, email, role, created_at
+                        SELECT COALESCE(NULLIF(utm_source, ''), '(direct)') AS src,
+                               count(*) AS n
+                          FROM waitlist
+                         GROUP BY 1
+                         ORDER BY 2 DESC
+                         LIMIT 5
+                        """
+                    )
+                    top_sources = [(row["src"], int(row["n"])) for row in cur.fetchall()]
+                    cur.execute(
+                        """
+                        SELECT id, email, role, created_at,
+                               utm_source, utm_medium, utm_campaign
                           FROM waitlist
                          ORDER BY created_at DESC
                          LIMIT 8
@@ -202,6 +215,7 @@ async def dashboard(request: Request):
             "last7": last7,
             "per_day": per_day,
             "role_breakdown": role_breakdown,
+            "top_sources": top_sources,
             "recent": recent,
             "role_values": ROLE_VALUES,
         },
@@ -256,7 +270,8 @@ async def signups_list(request: Request):
                     total = int((cur.fetchone() or {}).get("n") or 0)
                     cur.execute(
                         f"""
-                        SELECT id, email, role, created_at
+                        SELECT id, email, role, created_at,
+                               utm_source, utm_medium, utm_campaign, referer
                           FROM waitlist{where_sql}
                          ORDER BY created_at DESC
                          LIMIT %s OFFSET %s
@@ -333,7 +348,7 @@ async def signup_export(request: Request):
             with _connect() as conn:
                 with conn.cursor() as cur:
                     cur.execute(
-                        f"SELECT id, email, role, created_at, ip FROM waitlist{where_sql} ORDER BY created_at DESC",
+                        f"SELECT id, email, role, created_at, ip, utm_source, utm_medium, utm_campaign, referer FROM waitlist{where_sql} ORDER BY created_at DESC",
                         params,
                     )
                     rows = list(cur.fetchall())
@@ -352,7 +367,10 @@ async def signup_export(request: Request):
     def stream():
         buf = io.StringIO()
         writer = csv.writer(buf)
-        writer.writerow(["id", "email", "role", "created_at", "ip"])
+        writer.writerow([
+            "id", "email", "role", "created_at",
+            "ip", "utm_source", "utm_medium", "utm_campaign", "referer",
+        ])
         yield buf.getvalue()
         buf.seek(0); buf.truncate(0)
         for row in rows:
@@ -361,7 +379,11 @@ async def signup_export(request: Request):
                 row["email"],
                 row["role"] or "",
                 row["created_at"].isoformat() if row.get("created_at") else "",
-                row["ip"] or "",
+                row.get("ip") or "",
+                row.get("utm_source") or "",
+                row.get("utm_medium") or "",
+                row.get("utm_campaign") or "",
+                row.get("referer") or "",
             ])
             yield buf.getvalue()
             buf.seek(0); buf.truncate(0)
@@ -388,7 +410,7 @@ async def signup_detail(signup_id: int, request: Request):
             with _connect() as conn:
                 with conn.cursor() as cur:
                     cur.execute(
-                        "SELECT id, email, role, created_at, ip FROM waitlist WHERE id = %s",
+                        "SELECT id, email, role, created_at, ip, utm_source, utm_medium, utm_campaign, referer FROM waitlist WHERE id = %s",
                         (signup_id,),
                     )
                     row = cur.fetchone()

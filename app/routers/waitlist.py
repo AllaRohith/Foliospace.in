@@ -27,7 +27,11 @@ HONEYPOT_FIELD = "website"
 MAX_EMAIL_LEN = 254
 MAX_ROLE_LEN = 32
 MAX_WEBSITE_LEN = 256
+MAX_UTM_LEN = 64
+MAX_REFERER_LEN = 256
 MAX_BODY_BYTES = 8 * 1024
+
+UTM_RE = re.compile(r"[^a-z0-9_./\-]")
 
 ROLE_VALUES = {
     "",
@@ -88,6 +92,19 @@ def _sanitize(value: str) -> str:
     return CONTROL_RE.sub("", value)
 
 
+def _clean_utm(value: str) -> str:
+    cleaned = _sanitize(value).strip().lower()
+    if not cleaned:
+        return ""
+    cleaned = UTM_RE.sub("", cleaned)
+    return cleaned[:MAX_UTM_LEN]
+
+
+def _clean_referer(value: str) -> str:
+    cleaned = _sanitize(value).strip()
+    return cleaned[:MAX_REFERER_LEN]
+
+
 def _check_content_type(request: Request) -> None:
     ctype = (request.headers.get("content-type") or "").split(";")[0].strip().lower()
     if ctype not in ALLOWED_CONTENT_TYPES:
@@ -113,6 +130,9 @@ async def join_waitlist(
     email: str = Form(...),
     role: str = Form(""),
     website: str = Form(""),
+    utm_source: str = Form(""),
+    utm_medium: str = Form(""),
+    utm_campaign: str = Form(""),
 ):
     _check_content_type(request)
     _check_body_size(request)
@@ -120,12 +140,24 @@ async def join_waitlist(
     email = _sanitize(email).strip().lower()
     role_clean_raw = _sanitize(role).strip().lower()
     website = _sanitize(website).strip()
+    utm_source = _clean_utm(utm_source)
+    utm_medium = _clean_utm(utm_medium)
+    utm_campaign = _clean_utm(utm_campaign)
+    referer = _clean_referer(request.headers.get("referer", ""))
 
     if website:
         logger.info("honeypot triggered from %s", request.client.host if request.client else "?")
         return JSONResponse(status_code=200, content={"ok": True, "message": "OK."})
 
-    if len(email) > MAX_EMAIL_LEN or len(role_clean_raw) > MAX_ROLE_LEN or len(website) > MAX_WEBSITE_LEN:
+    if (
+        len(email) > MAX_EMAIL_LEN
+        or len(role_clean_raw) > MAX_ROLE_LEN
+        or len(website) > MAX_WEBSITE_LEN
+        or len(utm_source) > MAX_UTM_LEN
+        or len(utm_medium) > MAX_UTM_LEN
+        or len(utm_campaign) > MAX_UTM_LEN
+        or len(referer) > MAX_REFERER_LEN
+    ):
         raise HTTPException(status_code=400, detail="Invalid input length.")
 
     if role_clean_raw not in ROLE_VALUES:
@@ -143,12 +175,24 @@ async def join_waitlist(
             with conn.cursor() as cur:
                 cur.execute(
                     """
-                    INSERT INTO waitlist (email, role, created_at, ip)
-                    VALUES (%s, %s, %s, %s)
+                    INSERT INTO waitlist (
+                        email, role, created_at, ip,
+                        utm_source, utm_medium, utm_campaign, referer
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                     ON CONFLICT (email) DO NOTHING
                     RETURNING id
                     """,
-                    (email, role_clean, datetime.now(timezone.utc), ip),
+                    (
+                        email,
+                        role_clean,
+                        datetime.now(timezone.utc),
+                        ip,
+                        utm_source or None,
+                        utm_medium or None,
+                        utm_campaign or None,
+                        referer or None,
+                    ),
                 )
                 row = cur.fetchone()
                 is_new = row is not None
@@ -161,7 +205,14 @@ async def join_waitlist(
 
     if is_new:
         background.add_task(email_service.send_welcome_email, email)
-        background.add_task(email_service.send_internal_notification, email, role_clean)
+        background.add_task(
+            email_service.send_internal_notification,
+            email,
+            role_clean,
+            utm_source or None,
+            utm_medium or None,
+            utm_campaign or None,
+        )
 
     return JSONResponse(
         status_code=201 if is_new else 200,
