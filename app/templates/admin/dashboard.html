@@ -7,22 +7,15 @@
 <div class="shell">
   <nav class="nav" aria-label="Admin">
     <div class="nav-left">
-      <a href="/admin/" class="brand">
-        <span class="brand-mark">F</span>
-        <span>FolioSpace</span>
-        <span class="brand-sub">Admin</span>
-      </a>
-      <div class="nav-links">
-        <a href="/admin/" class="is-active">Dashboard</a>
-        <a href="/admin/signups">Signups</a>
-        <a href="/admin/signups/export.csv">Export</a>
-      </div>
+      <a href="/admin/" class="brand"><span class="brand-mark">FolioSpace</span> <span class="brand-sub">Admin</span></a>
+      <span class="issue-tag">Console · Issue Nº {{ issue }}</span>
+    </div>
+    <div class="nav-links">
+      <a href="/admin/" class="is-active">Dashboard</a>
+      <a href="/admin/signups">Signups</a>
+      <a href="/admin/signups/export.csv">Export</a>
     </div>
     <div class="nav-right">
-      <span class="nav-user" title="Signed in">
-        <span class="nav-user-avatar">A</span>
-        <span>Admin</span>
-      </span>
       <form method="post" action="/admin/logout">
         <button type="submit" class="nav-link-btn">Sign out</button>
       </form>
@@ -31,23 +24,19 @@
 
   <main class="main">
     <div class="page-head">
-      <div>
-        <h1>Dashboard</h1>
-        <p>How the waitlist is moving today.</p>
-      </div>
-      <div class="page-head-actions">
-        <a href="/admin/signups" class="btn btn-sm">View all signups</a>
-      </div>
+      <div class="eyebrow">Daily Operations</div>
+      <h1>The <em>desk</em> today</h1>
+      <div class="rule"></div>
     </div>
 
     <section class="stat-row" aria-label="Headline numbers">
       <div class="stat">
         <div class="stat-num">{{ total }}</div>
-        <div class="stat-label">Total signups</div>
+        <div class="stat-label">Total Waitlist</div>
       </div>
       <div class="stat">
-        <div class="stat-num">{{ last7 }}<span class="unit">last 7d</span></div>
-        <div class="stat-label">Last seven days</div>
+        <div class="stat-num">{{ last7 }}<span class="unit">7d</span></div>
+        <div class="stat-label">Last Seven Days</div>
       </div>
       <div class="stat">
         {% if role_breakdown %}
@@ -56,49 +45,49 @@
           <div class="stat-label">{{ top_role[0]|capitalize }}</div>
         {% else %}
           <div class="stat-num">0</div>
-          <div class="stat-label">Top role</div>
+          <div class="stat-label">Top Role</div>
         {% endif %}
       </div>
       <div class="stat">
         {% if per_day %}
           {% set latest = per_day[-1] %}
           <div class="stat-num">{{ latest[1] }}</div>
-          <div class="stat-label">{{ latest[0].strftime('%a %d %b') if latest[0] else 'Latest day' }}</div>
+          <div class="stat-label">{{ latest[0].strftime('%a %d %b') if latest[0] else 'Latest Day' }}</div>
         {% else %}
           <div class="stat-num">0</div>
-          <div class="stat-label">No activity</div>
+          <div class="stat-label">No Activity</div>
         {% endif %}
       </div>
     </section>
 
     <section class="panel" aria-label="Daily signups">
       <div class="panel-head">
-        <h2>Signups, last 14 days</h2>
+        <h2>Signups, last <em>14 days</em></h2>
         <span class="meta">{{ per_day|length }} day{{ '' if per_day|length == 1 else 's' }}</span>
       </div>
       {% set max_n = (per_day|map(attribute=1)|max) if per_day else 1 %}
       {% if max_n < 1 %}{% set max_n = 1 %}{% endif %}
-      <svg class="spark" viewBox="0 0 560 64" preserveAspectRatio="none" role="img" aria-label="Daily signup counts">
-        <line x1="0" y1="32" x2="560" y2="32" stroke="#E4E4E7" stroke-width="1" stroke-dasharray="2 4"/>
+      <svg class="spark" viewBox="0 0 560 80" preserveAspectRatio="none" role="img" aria-label="Daily signup counts">
+        <line x1="0" y1="40" x2="560" y2="40" stroke="#E8E3D9" stroke-width="1"/>
         {% set w = 560.0 / (per_day|length if per_day|length > 0 else 1) %}
         {% for d, n in per_day %}
           {% set x = (loop.index0 * w) + (w / 2) %}
-          {% set h = (n / max_n) * 48.0 %}
-          {% set y = 56 - h %}
-          <line x1="{{ '%.2f'|format(x) }}" y1="56" x2="{{ '%.2f'|format(x) }}" y2="{{ '%.2f'|format(y) }}" stroke="#0A0A0A" stroke-width="{{ '%.2f' % (w * 0.55 if w * 0.55 < 6 else 6) }}" stroke-linecap="round"/>
+          {% set h = (n / max_n) * 64.0 %}
+          {% set y = 72 - h %}
+          <line x1="{{ '%.2f'|format(x) }}" y1="72" x2="{{ '%.2f'|format(x) }}" y2="{{ '%.2f'|format(y) }}" stroke="#FF6B35" stroke-width="{{ '%.2f' % (w * 0.6 if w * 0.6 < 6 else 6) }}" stroke-linecap="round"/>
           {% if per_day|length <= 14 %}
-            <text x="{{ '%.2f'|format(x) }}" y="62" font-size="9" fill="#A1A1AA" text-anchor="middle">{{ d.strftime('%d') if d else '' }}</text>
+            <text x="{{ '%.2f'|format(x) }}" y="78" font-size="9" fill="#5C6470" text-anchor="middle">{{ d.strftime('%d') if d else '' }}</text>
           {% endif %}
         {% endfor %}
         {% if not per_day %}
-          <text x="280" y="36" font-size="12" fill="#A1A1AA" text-anchor="middle">No signups yet in this window.</text>
+          <text x="280" y="42" font-size="13" fill="#5C6470" text-anchor="middle" font-family="Instrument Serif, serif" font-style="italic">No signups yet in this window.</text>
         {% endif %}
       </svg>
     </section>
 
     <section class="panel" aria-label="Role breakdown">
       <div class="panel-head">
-        <h2>Role breakdown</h2>
+        <h2>Role <em>breakdown</em></h2>
         <span class="meta">{{ role_breakdown|length }} categor{{ 'y' if role_breakdown|length == 1 else 'ies' }}</span>
       </div>
       {% set max_role_n = (role_breakdown|map(attribute=1)|max) if role_breakdown else 1 %}
@@ -111,14 +100,17 @@
             <div class="role-n">{{ n }}</div>
           </div>
         {% else %}
-          <div class="empty">No signups yet.</div>
+          <div class="empty">
+            <div class="empty-italic">No signups yet.</div>
+            <div class="empty-sub">The desk is quiet</div>
+          </div>
         {% endfor %}
       </div>
     </section>
 
     <section class="panel" aria-label="Top sources">
       <div class="panel-head">
-        <h2>Top sources</h2>
+        <h2>Top <em>sources</em></h2>
         <span class="meta">utm_source · top 5</span>
       </div>
       {% set max_src_n = (top_sources|map(attribute=1)|max) if top_sources else 1 %}
@@ -131,14 +123,17 @@
             <div class="role-n">{{ n }}</div>
           </div>
         {% else %}
-          <div class="empty">No tagged traffic yet. Share the link with <code>?utm_source=</code> to start attributing signups.</div>
+          <div class="empty">
+            <div class="empty-italic">No tagged traffic yet.</div>
+            <div class="empty-sub">Share the link with <code>?utm_source=</code> to start attributing</div>
+          </div>
         {% endfor %}
       </div>
     </section>
 
     <section class="panel" aria-label="Recent signups">
       <div class="panel-head">
-        <h2>Recent arrivals</h2>
+        <h2>Recent <em>arrivals</em></h2>
         <span class="meta">Latest 8</span>
       </div>
       <div class="recent-list">
@@ -149,14 +144,19 @@
             <div class="recent-time">{{ r['created_at'].strftime('%Y-%m-%d %H:%M') }} UTC</div>
           </div>
         {% else %}
-          <div class="empty">No signups yet.</div>
+          <div class="empty">
+            <div class="empty-italic">No signups yet.</div>
+            <div class="empty-sub">The desk is quiet</div>
+          </div>
         {% endfor %}
       </div>
     </section>
   </main>
 
   <footer class="foot">
-    FolioSpace <span class="foot-sep">·</span> Admin console <span class="foot-sep">·</span> All access audited
+    FolioSpace <em>Printed on the open web</em>
+    <span class="foot-sep">·</span>
+    Admin Console <em>all access audited</em>
   </footer>
 </div>
 {% endblock %}

@@ -7,22 +7,15 @@
 <div class="shell">
   <nav class="nav" aria-label="Admin">
     <div class="nav-left">
-      <a href="/admin/" class="brand">
-        <span class="brand-mark">F</span>
-        <span>FolioSpace</span>
-        <span class="brand-sub">Admin</span>
-      </a>
-      <div class="nav-links">
-        <a href="/admin/">Dashboard</a>
-        <a href="/admin/signups" class="is-active">Signups</a>
-        <a href="/admin/signups/export.csv">Export</a>
-      </div>
+      <a href="/admin/" class="brand"><span class="brand-mark">FolioSpace</span> <span class="brand-sub">Admin</span></a>
+      <span class="issue-tag">Console · Issue Nº {{ issue }}</span>
+    </div>
+    <div class="nav-links">
+      <a href="/admin/">Dashboard</a>
+      <a href="/admin/signups" class="is-active">Signups</a>
+      <a href="/admin/signups/export.csv">Export</a>
     </div>
     <div class="nav-right">
-      <span class="nav-user" title="Signed in">
-        <span class="nav-user-avatar">A</span>
-        <span>Admin</span>
-      </span>
       <form method="post" action="/admin/logout">
         <button type="submit" class="nav-link-btn">Sign out</button>
       </form>
@@ -31,13 +24,9 @@
 
   <main class="main">
     <div class="page-head">
-      <div>
-        <h1>Signups</h1>
-        <p>{{ total }} record{{ '' if total == 1 else 's' }} on the waitlist.</p>
-      </div>
-      <div class="page-head-actions">
-        <a href="/admin/signups/export.csv?{{ {'role': role, 'q': q, 'from': date_from, 'to': date_to}|urlencode }}" class="btn btn-sm">Export CSV</a>
-      </div>
+      <div class="eyebrow">Live Roster</div>
+      <h1>The <em>waitlist</em></h1>
+      <div class="rule"></div>
     </div>
 
     {% if msg == 'deleted' %}
@@ -47,8 +36,8 @@
     {% endif %}
 
     <form method="get" action="/admin/signups" class="filters" role="search">
-      <div class="field" style="min-width:200px;flex:1">
-        <label class="field-label" for="q">Search email</label>
+      <div class="field" style="min-width:220px;flex:1">
+        <label class="field-label" for="q">Search Email</label>
         <input id="q" name="q" type="search" class="input" value="{{ q or '' }}" placeholder="name@example.com" />
       </div>
       <div class="field">
@@ -61,10 +50,11 @@
       </div>
       <div class="field">
         <label class="field-label" for="page">Page</label>
-        <input id="page" name="page" type="number" min="1" class="input" value="{{ page }}" style="width:80px;min-width:0" />
+        <input id="page" name="page" type="number" min="1" class="input" value="{{ page }}" style="width:90px;min-width:0" />
       </div>
       <div class="actions">
         <a href="/admin/signups" class="btn btn-sm btn-ghost">Clear</a>
+        <a href="/admin/signups/export.csv?{{ {'role': role, 'q': q, 'from': date_from, 'to': date_to}|urlencode }}" class="btn btn-sm">Export CSV</a>
         <button type="submit" class="btn btn-sm btn-primary">Apply</button>
       </div>
     </form>
@@ -75,7 +65,7 @@
         <a
           href="/admin/signups?role={{ r }}&q={{ q }}&from={{ date_from }}&to={{ date_to }}"
           class="chip {{ 'is-active' if role == r else '' }}"
-        >{{ r }}</a>
+        >{{ r|capitalize }}</a>
       {% endfor %}
     </div>
 
@@ -84,11 +74,11 @@
         <table class="table">
           <thead>
             <tr>
-              <th style="width:60px">#</th>
+              <th style="width:64px">#</th>
               <th>Email</th>
-              <th style="width:120px">Role</th>
-              <th style="width:160px">Joined</th>
-              <th style="width:100px" class="row-actions">Actions</th>
+              <th style="width:130px">Role</th>
+              <th style="width:170px">Joined</th>
+              <th style="width:120px" class="row-actions">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -96,7 +86,7 @@
               <tr>
                 <td class="id">#{{ '%04d'|format(r['id']) }}</td>
                 <td class="email"><a href="/admin/signups/{{ r['id'] }}">{{ r['email'] }}</a></td>
-                <td><span class="role">{{ (r['role'] or '—') }}</span></td>
+                <td><span class="role">{{ (r['role'] or '—')|capitalize }}</span></td>
                 <td class="time">{{ r['created_at'].strftime('%Y-%m-%d %H:%M') }} UTC</td>
                 <td class="row-actions">
                   <form method="post" action="/admin/signups/{{ r['id'] }}/delete" style="display:inline" onsubmit="return confirm('Delete {{ r['email'] }}? This is irreversible (GDPR).');">
@@ -110,7 +100,7 @@
       </div>
 
       <nav class="pagination" aria-label="Pagination">
-        <div class="pagination-meta">Page {{ page }} of {{ total_pages }}</div>
+        <div class="pagination-meta">{{ total }} record{{ '' if total == 1 else 's' }} · page {{ page }} of {{ total_pages }}</div>
         <div class="pagination-links">
           {% if page > 1 %}
             <a href="/admin/signups?{{ {'role': role, 'q': q, 'from': date_from, 'to': date_to, 'page': page - 1}|urlencode }}">← Prev</a>
@@ -125,12 +115,17 @@
         </div>
       </nav>
     {% else %}
-      <div class="empty">No signups match these filters.</div>
+      <div class="empty">
+        <div class="empty-italic">No signups match these filters.</div>
+        <div class="empty-sub">Adjust the search or clear filters to widen the net</div>
+      </div>
     {% endif %}
   </main>
 
   <footer class="foot">
-    FolioSpace <span class="foot-sep">·</span> Admin console <span class="foot-sep">·</span> All access audited
+    FolioSpace <em>Printed on the open web</em>
+    <span class="foot-sep">·</span>
+    Admin Console <em>all access audited</em>
   </footer>
 </div>
 {% endblock %}

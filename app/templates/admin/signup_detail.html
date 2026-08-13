@@ -7,22 +7,15 @@
 <div class="shell">
   <nav class="nav" aria-label="Admin">
     <div class="nav-left">
-      <a href="/admin/" class="brand">
-        <span class="brand-mark">F</span>
-        <span>FolioSpace</span>
-        <span class="brand-sub">Admin</span>
-      </a>
-      <div class="nav-links">
-        <a href="/admin/">Dashboard</a>
-        <a href="/admin/signups" class="is-active">Signups</a>
-        <a href="/admin/signups/export.csv">Export</a>
-      </div>
+      <a href="/admin/" class="brand"><span class="brand-mark">FolioSpace</span> <span class="brand-sub">Admin</span></a>
+      <span class="issue-tag">Console · Issue Nº {{ issue }}</span>
+    </div>
+    <div class="nav-links">
+      <a href="/admin/">Dashboard</a>
+      <a href="/admin/signups" class="is-active">Signups</a>
+      <a href="/admin/signups/export.csv">Export</a>
     </div>
     <div class="nav-right">
-      <span class="nav-user" title="Signed in">
-        <span class="nav-user-avatar">A</span>
-        <span>Admin</span>
-      </span>
       <form method="post" action="/admin/logout">
         <button type="submit" class="nav-link-btn">Sign out</button>
       </form>
@@ -31,10 +24,9 @@
 
   <main class="main">
     <div class="page-head">
-      <div>
-        <h1>Signup #{{ '%04d'|format(row['id']) }}</h1>
-        <p><a href="/admin/signups" style="color: var(--muted)">← Back to signups</a></p>
-      </div>
+      <a href="/admin/signups" class="detail-back">← Back to roster</a>
+      <h1>Signup <em>#{{ '%04d'|format(row['id']) }}</em></h1>
+      <div class="rule"></div>
     </div>
 
     <div class="detail-grid">
@@ -56,7 +48,7 @@
           <div class="val">{{ row['created_at'].strftime('%Y-%m-%d %H:%M:%S') }} UTC</div>
         </div>
         <div class="detail-row">
-          <div class="label">IP at signup</div>
+          <div class="label">IP at Signup</div>
           <div class="val">{{ row['ip'] or '—' }}</div>
         </div>
         <div class="detail-row">
@@ -78,17 +70,19 @@
       </div>
 
       <aside class="detail-actions" aria-label="Actions">
-        <h3>Right to be forgotten</h3>
+        <h3>Right to be <em>forgotten</em></h3>
         <p>Permanently removes this record. Cannot be undone.</p>
         <form method="post" action="/admin/signups/{{ row['id'] }}/delete" onsubmit="return confirm('Delete {{ row['email'] }}? This is irreversible.');">
-          <button type="submit" class="btn btn-danger">Delete record</button>
+          <button type="submit" class="btn btn-danger">Delete Record</button>
         </form>
       </aside>
     </div>
   </main>
 
   <footer class="foot">
-    FolioSpace <span class="foot-sep">·</span> Admin console <span class="foot-sep">·</span> All access audited
+    FolioSpace <em>Printed on the open web</em>
+    <span class="foot-sep">·</span>
+    Admin Console <em>all access audited</em>
   </footer>
 </div>
 {% endblock %}
