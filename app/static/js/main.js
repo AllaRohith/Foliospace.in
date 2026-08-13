@@ -261,7 +261,11 @@
       const n = data.count || 0;
       if (n > 0) {
         if (counter && counterText) {
-          counterText.innerHTML = '<strong>' + n + '</strong> ' + (n === 1 ? 'person has' : 'people have') + ' already joined the waitlist';
+          counterText.textContent = '';
+          const strong = document.createElement('strong');
+          strong.textContent = String(n);
+          counterText.appendChild(strong);
+          counterText.appendChild(document.createTextNode(' ' + (n === 1 ? 'person has' : 'people have') + ' already joined the waitlist'));
           counter.hidden = false;
         }
         if (counterMini && counterMiniN) {
@@ -1016,7 +1020,13 @@
     if (!cmdList) return;
     const filtered = CMD_ACTIONS.filter(function (a) { return a.label.toLowerCase().includes(q.toLowerCase()); });
     if (!filtered.length) {
-      cmdList.innerHTML = '<li class="cmd-palette-empty">No matches for "' + q + '"</li>';
+      cmdList.innerHTML = '<li class="cmd-palette-empty">No matches for “</li>';
+      const span = document.createElement('span');
+      span.textContent = q;
+      cmdList.lastElementChild.appendChild(span);
+      const tail = document.createElement('span');
+      tail.textContent = '”';
+      cmdList.lastElementChild.appendChild(tail);
       return;
     }
     activeIdx = 0;

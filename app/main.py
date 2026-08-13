@@ -1,21 +1,43 @@
+import os
+from pathlib import Path
+
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pathlib import Path
-import os
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
+from app.middleware import install_security
 from app.routers import waitlist
 
 BASE_DIR = Path(__file__).resolve().parent
+
+ENV = os.getenv("ENV", "production").lower()
+DEBUG = ENV in ("dev", "development", "local") and os.getenv("DEBUG", "0") == "1"
+
+_proxy_trusted = (
+    {"*.render.com", "render.com", "127.0.0.1", "localhost"}
+    if ENV == "production"
+    else "*"
+)
 
 app = FastAPI(
     title="FolioSpace",
     description="A portfolio for everyone. Built for WhatsApp, LinkedIn, and the Indian web.",
     version="0.1.0",
+    docs_url=None if not DEBUG else "/docs",
+    redoc_url=None if not DEBUG else "/redoc",
+    openapi_url=None if not DEBUG else "/openapi.json",
 )
 
-app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
+app.state.limiter = Limiter(key_func=get_remote_address)
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+install_security(app)
+
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=_proxy_trusted)
 
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
@@ -151,4 +173,4 @@ async def sitemap():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=int(os.getenv("PORT", 8000)), reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=int(os.getenv("PORT", 8000)), reload=DEBUG)

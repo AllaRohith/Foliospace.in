@@ -19,9 +19,34 @@ DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
 logger = logging.getLogger(__name__)
 
-EMAIL_RE = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+CONTROL_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+EMAIL_RE = re.compile(r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$")
 
 HONEYPOT_FIELD = "website"
+
+MAX_EMAIL_LEN = 254
+MAX_ROLE_LEN = 32
+MAX_WEBSITE_LEN = 256
+MAX_BODY_BYTES = 8 * 1024
+
+ROLE_VALUES = {
+    "",
+    "student",
+    "developer",
+    "designer",
+    "chef",
+    "artist",
+    "consultant",
+    "writer",
+    "researcher",
+    "founder",
+    "other",
+}
+
+ALLOWED_CONTENT_TYPES = {
+    "application/x-www-form-urlencoded",
+    "multipart/form-data",
+}
 
 if not DATABASE_URL:
     logger.warning(
@@ -44,6 +69,42 @@ def _count(conn) -> int:
         return int(row["n"]) if row else 0
 
 
+def _purge_old_ips(conn) -> int:
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            UPDATE waitlist
+               SET ip = NULL
+             WHERE ip IS NOT NULL
+               AND created_at < NOW() - INTERVAL '30 days'
+            """
+        )
+        return cur.rowcount
+
+
+def _sanitize(value: str) -> str:
+    if not value:
+        return ""
+    return CONTROL_RE.sub("", value)
+
+
+def _check_content_type(request: Request) -> None:
+    ctype = (request.headers.get("content-type") or "").split(";")[0].strip().lower()
+    if ctype not in ALLOWED_CONTENT_TYPES:
+        raise HTTPException(status_code=415, detail="Unsupported Content-Type.")
+
+
+def _check_body_size(request: Request) -> None:
+    cl = request.headers.get("content-length")
+    if cl is None:
+        return
+    try:
+        if int(cl) > MAX_BODY_BYTES:
+            raise HTTPException(status_code=413, detail="Payload too large.")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid Content-Length.")
+
+
 @router.post("/join")
 @limiter.limit("5/minute")
 async def join_waitlist(
@@ -53,32 +114,50 @@ async def join_waitlist(
     role: str = Form(""),
     website: str = Form(""),
 ):
+    _check_content_type(request)
+    _check_body_size(request)
+
+    email = _sanitize(email).strip().lower()
+    role_clean_raw = _sanitize(role).strip().lower()
+    website = _sanitize(website).strip()
+
     if website:
+        logger.info("honeypot triggered from %s", request.client.host if request.client else "?")
         return JSONResponse(status_code=200, content={"ok": True, "message": "OK."})
 
-    email = email.strip().lower()
-    if not EMAIL_RE.match(email):
-        raise HTTPException(status_code=400, detail="Invalid email")
+    if len(email) > MAX_EMAIL_LEN or len(role_clean_raw) > MAX_ROLE_LEN or len(website) > MAX_WEBSITE_LEN:
+        raise HTTPException(status_code=400, detail="Invalid input length.")
 
-    role_clean = role.strip() or None
+    if role_clean_raw not in ROLE_VALUES:
+        raise HTTPException(status_code=400, detail="Invalid role.")
+
+    if not EMAIL_RE.match(email):
+        raise HTTPException(status_code=400, detail="Invalid email.")
+
+    role_clean = role_clean_raw or None
     ip = request.client.host if request.client else None
 
     is_new = False
-    with _connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO waitlist (email, role, created_at, ip)
-                VALUES (%s, %s, %s, %s)
-                ON CONFLICT (email) DO NOTHING
-                RETURNING id
-                """,
-                (email, role_clean, datetime.now(timezone.utc), ip),
-            )
-            row = cur.fetchone()
-            is_new = row is not None
-        total = _count(conn)
-        conn.commit()
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO waitlist (email, role, created_at, ip)
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (email) DO NOTHING
+                    RETURNING id
+                    """,
+                    (email, role_clean, datetime.now(timezone.utc), ip),
+                )
+                row = cur.fetchone()
+                is_new = row is not None
+            total = _count(conn)
+            purged = _purge_old_ips(conn)
+            conn.commit()
+    except psycopg.Error as e:
+        logger.exception("database error during waitlist insert: %s", e)
+        raise HTTPException(status_code=503, detail="Waitlist temporarily unavailable.")
 
     if is_new:
         background.add_task(email_service.send_welcome_email, email)
@@ -96,9 +175,16 @@ async def join_waitlist(
 
 
 @router.get("/count")
-async def count():
+@limiter.limit("60/minute")
+async def count(request: Request):
     if not DATABASE_URL:
         return {"count": 0, "configured": False}
-    with _connect() as conn:
-        total = _count(conn)
+    try:
+        with _connect() as conn:
+            total = _count(conn)
+            _purge_old_ips(conn)
+            conn.commit()
+    except psycopg.Error as e:
+        logger.exception("database error during count: %s", e)
+        return {"count": 0, "configured": True, "degraded": True}
     return {"count": total, "configured": True}

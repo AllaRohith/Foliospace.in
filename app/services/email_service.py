@@ -1,10 +1,19 @@
 import os
+import re
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
 import resend
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+_CONTROL_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f\r\n]")
+
+
+def _strip_control(value: str) -> str:
+    if not value:
+        return ""
+    return _CONTROL_RE.sub("", value)
 
 logger = logging.getLogger(__name__)
 
@@ -79,15 +88,17 @@ def send_internal_notification(email: str, role: str | None) -> tuple[bool, str]
         return False, "no_api_key"
     try:
         resend.api_key = API_KEY
+        safe_email = _strip_control(email)[:254]
+        safe_role = _strip_control(role) if role else None
         body = (
             f"New waitlist signup\n\n"
-            f"Email: {email}\n"
-            f"Role:  {role or '(unspecified)'}\n"
+            f"Email: {safe_email}\n"
+            f"Role:  {safe_role or '(unspecified)'}\n"
         )
         params = {
             "from": FROM_EMAIL,
             "to": [REPLY_TO],
-            "subject": f"New waitlist signup: {email}",
+            "subject": f"New waitlist signup: {safe_email}"[:200],
             "text": body,
         }
         resend.Emails.send(params)
