@@ -18,6 +18,7 @@
       </a>
 
       <nav class="nav-links" id="nav-links" aria-label="Primary">
+        <div class="nav-indicator" aria-hidden="true"></div>
         <a href="#who" data-section="who" class="nav-link">
           <span>Who it's for</span>
         </a>
@@ -72,6 +73,16 @@
         <span>Quick nav</span>
       </div>
 
+      <button class="nav-theme" id="nav-theme" aria-label="Toggle dark mode" aria-pressed="false" type="button">
+        <svg class="nav-theme-icon nav-theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+        <svg class="nav-theme-icon nav-theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+
       <a href="#join" class="nav-cta">
         <span>Join waitlist</span>
         <span class="nav-cta-arrow">→</span>
@@ -80,21 +91,11 @@
       <button class="nav-burger" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
         <span></span><span></span><span></span>
       </button>
-
-      <div class="nav-indicator" aria-hidden="true"></div>
     </div>
   </header>
 
   <main>
-    <div class="running-head" id="running-head" aria-hidden="true">
-      <div class="running-head-inner">
-        <span class="running-head-issue">FolioSpace</span>
-        <span class="running-head-sep">·</span>
-        <span class="running-head-section" id="rh-section">Issue 01</span>
-        <span class="running-head-page" id="rh-page">Page 01</span>
-      </div>
-    </div>
-    <section class="cover" data-rh-section="Cover" data-rh-page="01">
+    <section class="cover">
       <div class="cover-grain" aria-hidden="true">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
           <filter id="cover-noise">
@@ -148,7 +149,7 @@
       </div>
     </section>
 
-    <section class="workshop" id="workshop" data-rh-section="The dossier" data-rh-page="02">
+    <section class="workshop" id="workshop">
       <div class="container">
         <div class="workshop-grid">
           <div class="workshop-left">
@@ -213,7 +214,7 @@
       </div>
     </section>
 
-<section class="story" id="story" data-rh-section="The evolution" data-rh-page="03">
+<section class="story" id="story">
       <div class="container">
         <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page 02<span class="folio-meta-sep">/</span>The evolution</p>
         <div class="story-track">
@@ -318,7 +319,7 @@
       </div>
     </div>
 
-    <section id="who" class="who" data-rh-section="Who's on it" data-rh-page="04">
+    <section id="who" class="who">
       <div class="container">
         <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page 04<span class="folio-meta-sep">/</span>Who's on it</p>
         <h2 class="reveal">If you've done <em>anything</em> worth showing, this is for you.</h2>
@@ -359,7 +360,7 @@
       </div>
     </section>
 
-    <section id="pricing" class="pricing" data-rh-section="The receipt" data-rh-page="05">
+    <section id="pricing" class="pricing">
       <div class="container">
         <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page 05<span class="folio-meta-sep">/</span>The receipt</p>
         <h2 class="reveal">Pricing that doesn't make you think twice.</h2>
@@ -406,7 +407,7 @@
       </div>
     </section>
 
-    <section class="stats" data-rh-section="By the numbers" data-rh-page="06">
+    <section class="stats">
       <div class="container">
         <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page 06<span class="folio-meta-sep">/</span>By the numbers</p>
         <h2 class="reveal">Built for the speed of a tap.</h2>
@@ -435,7 +436,7 @@
       </div>
     </section>
 
-    <section id="horizontal" class="horizontal" data-rh-section="One link · every kind of work" data-rh-page="07">
+    <section id="horizontal" class="horizontal">
       <div class="container">
         <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page 07<span class="folio-meta-sep">/</span>One link, every kind of work</p>
         <h2 class="reveal">Your story, however you tell it.</h2>
@@ -486,7 +487,7 @@
       </div>
     </section>
 
-    <section id="faq" class="faq" data-rh-section="Questions" data-rh-page="08">
+    <section id="faq" class="faq">
       <div class="container">
         <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page 08<span class="folio-meta-sep">/</span>Questions</p>
         <h2 class="reveal">The stuff you're wondering.</h2>
@@ -540,7 +541,7 @@
       </div>
     </section>
 
-    <section class="cta stamp" data-rh-section="Claim your spot" data-rh-page="09">
+    <section class="cta stamp">
       <div class="container">
         <div class="ticket">
           <div class="ticket-stub">

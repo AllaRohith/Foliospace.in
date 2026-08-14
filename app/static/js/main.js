@@ -271,34 +271,6 @@
     update();
   }
 
-  (function () {
-    if (reduceMotion) return;
-    const sections = document.querySelectorAll('main > section');
-    if (!sections.length) return;
-    let depthTick = false;
-    function updateDepth() {
-      const vh = window.innerHeight;
-      sections.forEach(function (s) {
-        const r = s.getBoundingClientRect();
-        const center = r.top + r.height / 2;
-        const vpCenter = vh / 2;
-        const dist = (center - vpCenter) / vh;
-        const absDist = Math.min(0.8, Math.abs(dist));
-        const z = -absDist * 40;
-        const scale = 1 - absDist * 0.015;
-        s.style.transform = 'translateZ(' + z + 'px) scale(' + scale + ')';
-      });
-      depthTick = false;
-    }
-    window.addEventListener('scroll', function () {
-      if (!depthTick) {
-        requestAnimationFrame(updateDepth);
-        depthTick = true;
-      }
-    }, { passive: true });
-    updateDepth();
-  })();
-
   document.querySelectorAll('.magnetic').forEach(function (btn) {
     btn.addEventListener('mousemove', function (e) {
       const r = btn.getBoundingClientRect();
@@ -411,7 +383,13 @@
     closePalette();
     if (a.action === 'theme') {
       document.body.classList.toggle('dark');
-      localStorage.setItem('fs-theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+      const dark = document.body.classList.contains('dark');
+      localStorage.setItem('fs-theme', dark ? 'dark' : 'light');
+      const navBtn = document.getElementById('nav-theme');
+      if (navBtn) {
+        navBtn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+        navBtn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+      }
       return;
     }
     if (a.action === 'scrollTop') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
@@ -438,22 +416,38 @@
   }
   (function () {
     const nav = document.querySelector('.nav');
+    const navLinks = document.querySelector('.nav-links');
     const indicator = document.querySelector('.nav-indicator');
     const links = document.querySelectorAll('.nav-link[data-section]');
-    if (!nav || !indicator || !links.length) return;
+    if (!nav || !navLinks || !indicator || !links.length) return;
 
     const sections = Array.from(links).map(function (a) {
       return { link: a, target: document.getElementById(a.dataset.section) };
     }).filter(function (s) { return s.target; });
 
     let activeIdx = -1;
+    let indicatorVisible = false;
+
+    function showIndicator() {
+      if (indicatorVisible) return;
+      indicatorVisible = true;
+      indicator.classList.add('is-on');
+    }
+
+    function hideIndicator() {
+      if (!indicatorVisible) return;
+      indicatorVisible = false;
+      indicator.classList.remove('is-on');
+    }
 
     function moveIndicator(link) {
-      if (!link || activeIdx === -1 && !link) return;
+      if (!link) return;
       const r = link.getBoundingClientRect();
-      const nr = nav.getBoundingClientRect();
-      indicator.style.width = r.width + 'px';
-      indicator.style.left = (r.left - nr.left) + 'px';
+      const nr = navLinks.getBoundingClientRect();
+      const pad = 4;
+      indicator.style.width = (r.width + pad * 2) + 'px';
+      indicator.style.left = (r.left - nr.left - pad) + 'px';
+      showIndicator();
     }
 
     function setActive(idx) {
@@ -461,7 +455,7 @@
       activeIdx = idx;
       links.forEach(function (l, i) { l.classList.toggle('is-active', i === idx); });
       if (idx >= 0) moveIndicator(sections[idx].link);
-      else indicator.style.opacity = '0';
+      else hideIndicator();
     }
 
     if ('IntersectionObserver' in window) {
@@ -482,13 +476,46 @@
 
     nav.addEventListener('mouseleave', function () {
       if (activeIdx >= 0) moveIndicator(sections[activeIdx].link);
-      else indicator.style.opacity = '0';
+      else hideIndicator();
     });
+
+    window.addEventListener('resize', function () {
+      if (activeIdx >= 0) moveIndicator(sections[activeIdx].link);
+    }, { passive: true });
 
     window.addEventListener('scroll', function () {
       const scrolled = window.scrollY > 80;
       nav.dataset.state = scrolled ? 'scrolled' : 'top';
     }, { passive: true });
+  })();
+
+  (function () {
+    const btn = document.getElementById('nav-theme');
+    if (!btn) return;
+
+    const KEY = 'fs-theme';
+    let theme = 'light';
+    try {
+      const stored = localStorage.getItem(KEY);
+      if (stored === 'dark' || stored === 'light') theme = stored;
+    } catch (e) {}
+
+    function apply(next, persist) {
+      theme = next;
+      const dark = next === 'dark';
+      document.body.classList.toggle('dark', dark);
+      btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+      btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+      if (persist) {
+        try { localStorage.setItem(KEY, next); } catch (e) {}
+      }
+    }
+
+    apply(theme, false);
+
+    btn.addEventListener('click', function () {
+      apply(theme === 'dark' ? 'light' : 'dark', true);
+    });
   })();
 
   (function () {
@@ -606,32 +633,4 @@
       });
     }
   });
-
-  const rhSection = document.getElementById('rh-section');
-  const rhPage = document.getElementById('rh-page');
-  const rhSections = Array.from(document.querySelectorAll('section[data-rh-section]'));
-  function updateRunningHead() {
-    const vh = window.innerHeight;
-    let active = rhSections[0];
-    let bestRatio = 0;
-    rhSections.forEach(function (s) {
-      const r = s.getBoundingClientRect();
-      const visible = Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0));
-      const ratio = visible / Math.min(r.height, vh);
-      if (ratio > bestRatio) { bestRatio = ratio; active = s; }
-    });
-    if (active) {
-      rhSection.textContent = active.getAttribute('data-rh-section');
-      rhPage.textContent = 'Page ' + active.getAttribute('data-rh-page');
-    }
-  }
-  if (rhSection && rhPage && rhSections.length) {
-    updateRunningHead();
-    let raf = null;
-    window.addEventListener('scroll', function () {
-      if (raf) return;
-      raf = requestAnimationFrame(function () { raf = null; updateRunningHead(); });
-    }, { passive: true });
-    window.addEventListener('resize', updateRunningHead);
-  }
 })();
