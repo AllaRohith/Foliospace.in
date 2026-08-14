@@ -3,106 +3,70 @@
 {% block title %}Signup #{{ '%04d'|format(row['id']) }} · FolioSpace Admin{% endblock %}
 {% block description %}FolioSpace signup detail.{% endblock %}
 
+{% set nav_active = 'signups' %}
+{% set nav_signups_badge = '' %}
+
 {% block body %}
-<div class="shell">
-  <nav class="nav" aria-label="Admin">
-    <div class="nav-left">
-      <a href="/admin/" class="brand"><span class="brand-mark">FolioSpace</span> <span class="brand-sub">Admin</span></a>
-      <span class="issue-tag">Console · Issue Nº {{ issue }}</span>
-    </div>
-    <div class="nav-links">
-      <a href="/admin/">Dashboard</a>
-      <a href="/admin/signups" class="is-active">Signups</a>
-      <a href="/admin/audit">Audit</a>
-      <a href="/admin/signups/export.csv">Export</a>
-    </div>
-    <div class="nav-right">
-      <button type="button" class="nav-link-btn" id="kbd-toggle" aria-label="Keyboard shortcuts">? Shortcuts</button>
-      <form method="post" action="/admin/logout">
-        <button type="submit" class="nav-link-btn">Sign out</button>
-      </form>
-    </div>
-  </nav>
-
-  <main class="main">
-    <div class="page-head">
-      <a href="/admin/signups" class="detail-back">← Back to roster</a>
-      <h1>Signup <em>#{{ '%04d'|format(row['id']) }}</em></h1>
-      <div class="rule"></div>
-    </div>
-
-    <div class="detail-grid">
-      <div class="detail-card">
-        <div class="detail-row">
-          <div class="label">ID</div>
-          <div class="val">#{{ '%04d'|format(row['id']) }}</div>
-        </div>
-        <div class="detail-row">
-          <div class="label">Email</div>
-          <div class="val text">{{ row['email'] }}</div>
-        </div>
-        <div class="detail-row">
-          <div class="label">Role</div>
-          <div class="val text">{{ row['role'] or '— unspecified —' }}</div>
-        </div>
-        <div class="detail-row">
-          <div class="label">Joined</div>
-          <div class="val">{{ row['created_at'].strftime('%Y-%m-%d %H:%M:%S') }} UTC</div>
-        </div>
-        <div class="detail-row">
-          <div class="label">IP at Signup</div>
-          <div class="val">{{ row['ip'] or '—' }}</div>
-        </div>
-        <div class="detail-row">
-          <div class="label">utm_source</div>
-          <div class="val">{{ row.get('utm_source') or '—' }}</div>
-        </div>
-        <div class="detail-row">
-          <div class="label">utm_medium</div>
-          <div class="val">{{ row.get('utm_medium') or '—' }}</div>
-        </div>
-        <div class="detail-row">
-          <div class="label">utm_campaign</div>
-          <div class="val">{{ row.get('utm_campaign') or '—' }}</div>
-        </div>
-        <div class="detail-row">
-          <div class="label">Referer</div>
-          <div class="val">{{ row.get('referer') or '—' }}</div>
-        </div>
-      </div>
-
-      <aside class="detail-actions" aria-label="Actions">
-        <h3>Right to be <em>forgotten</em></h3>
-        <p>Permanently removes this record. Cannot be undone.</p>
-        <form method="post" action="/admin/signups/{{ row['id'] }}/delete" onsubmit="return confirm('Delete {{ row['email'] }}? This is irreversible.');">
-          <button type="submit" class="btn btn-danger">Delete Record</button>
-        </form>
-      </aside>
-    </div>
-  </main>
-
-  <footer class="foot">
-    FolioSpace <em>Printed on the open web</em>
-    <span class="foot-sep">·</span>
-    Admin Console <em>all access audited</em>
-  </footer>
+<div class="breadcrumbs">
+  <a href="/admin/">Admin</a>
+  <span class="sep">/</span>
+  <a href="/admin/signups">Signups</a>
+  <span class="sep">/</span>
+  <span class="here">#{{ '%04d'|format(row['id']) }}</span>
 </div>
 
-<div class="kbd-modal" id="kbd-modal" role="dialog" aria-modal="true" aria-labelledby="kbd-title">
-  <div class="kbd-card">
-    <h3 id="kbd-title"><em>Keyboard</em> shortcuts</h3>
-    <div class="kbd-sub">Press <kbd>?</kbd> any time</div>
-    <dl>
-      <dt><kbd>j</kbd></dt><dd>Next row</dd>
-      <dt><kbd>k</kbd></dt><dd>Previous row</dd>
-      <dt><kbd>/</kbd></dt><dd>Focus search</dd>
-      <dt><kbd>e</kbd></dt><dd>Export CSV</dd>
-      <dt><kbd>a</kbd></dt><dd>Audit log</dd>
-      <dt><kbd>d</kbd></dt><dd>Dashboard</dd>
-      <dt><kbd>s</kbd></dt><dd>Signups</dd>
-      <dt><kbd>?</kbd></dt><dd>This panel</dd>
-      <dt><kbd>esc</kbd></dt><dd>Close</dd>
-    </dl>
+<div class="page-head">
+  <a href="/admin/signups" class="detail-back">← Back to roster</a>
+  <h1>Signup <em>#{{ '%04d'|format(row['id']) }}</em></h1>
+  <div class="rule"></div>
+</div>
+
+<div class="detail-grid">
+  <div class="detail-card">
+    <div class="detail-row">
+      <div class="label">ID</div>
+      <div class="val">#{{ '%04d'|format(row['id']) }}</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Email</div>
+      <div class="val text">{{ row['email'] }}</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Role</div>
+      <div class="val text">{{ row['role'] or '— unspecified —' }}</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Joined</div>
+      <div class="val">{{ row['created_at'].strftime('%Y-%m-%d %H:%M:%S') }} UTC</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">IP at Signup</div>
+      <div class="val">{{ row['ip'] or '—' }}</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">utm_source</div>
+      <div class="val">{{ row.get('utm_source') or '—' }}</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">utm_medium</div>
+      <div class="val">{{ row.get('utm_medium') or '—' }}</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">utm_campaign</div>
+      <div class="val">{{ row.get('utm_campaign') or '—' }}</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Referer</div>
+      <div class="val">{{ row.get('referer') or '—' }}</div>
+    </div>
   </div>
+
+  <aside class="detail-actions" aria-label="Actions">
+    <h3>Right to be <em>forgotten</em></h3>
+    <p>Permanently removes this record. Cannot be undone.</p>
+    <form method="post" action="/admin/signups/{{ row['id'] }}/delete" onsubmit="return confirm('Delete {{ row['email'] }}? This is irreversible.');">
+      <button type="submit" class="btn btn-danger">Delete Record</button>
+    </form>
+  </aside>
 </div>
 {% endblock %}

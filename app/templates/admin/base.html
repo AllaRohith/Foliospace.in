@@ -15,8 +15,118 @@
 
   <link rel="stylesheet" href="{{ request.url_for('static', path='css/admin.css') }}" />
 </head>
-<body>
-  {% block body %}{% endblock %}
+<body class="{{ 'app-body' if show_chrome | default(true) else 'login-body' }}">
+  {% set _show_chrome = show_chrome | default(true) %}
+  {% set _nav_active = nav_active | default('') %}
+  {% set _signup_badge = nav_signups_badge | default(0) %}
+  {% set _audit_badge = nav_audit_badge | default(0) %}
+
+  {% if _nav_active == '' and _show_chrome %}
+    {% set _path = request.url.path %}
+    {% if _path.startswith('/admin/signups') %}{% set _nav_active = 'signups' %}
+    {% elif _path.startswith('/admin/audit') %}{% set _nav_active = 'audit' %}
+    {% elif _path.startswith('/admin/') %}{% set _nav_active = 'dashboard' %}
+    {% endif %}
+  {% endif %}
+
+  {% if _show_chrome %}
+  <aside class="sidebar" aria-label="Admin navigation">
+    <div class="sidebar-brand">
+      <a href="/admin/" class="brand"><span class="brand-mark">FolioSpace</span> <span class="brand-sub">Admin</span></a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Workspace</div>
+      <nav class="sidebar-nav">
+        <a href="/admin/" class="sidebar-item {{ 'is-active' if _nav_active == 'dashboard' else '' }}">
+          <svg class="sidebar-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="2" y="2" width="5" height="6"/><rect x="9" y="2" width="5" height="3"/><rect x="9" y="7" width="5" height="7"/><rect x="2" y="10" width="5" height="4"/></svg>
+          <span class="sidebar-label">Dashboard</span>
+        </a>
+        <a href="/admin/signups" class="sidebar-item {{ 'is-active' if _nav_active == 'signups' else '' }}">
+          <svg class="sidebar-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 3h12M2 8h12M2 13h12"/></svg>
+          <span class="sidebar-label">Signups</span>
+          {% if _signup_badge %}<span class="sidebar-badge">{{ _signup_badge }}</span>{% endif %}
+        </a>
+        <a href="/admin/audit" class="sidebar-item {{ 'is-active' if _nav_active == 'audit' else '' }}">
+          <svg class="sidebar-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 2v12l5-3 5 3V2z"/></svg>
+          <span class="sidebar-label">Audit</span>
+          {% if _audit_badge %}<span class="sidebar-badge">{{ _audit_badge }}</span>{% endif %}
+        </a>
+      </nav>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Operations</div>
+      <nav class="sidebar-nav">
+        <a href="/admin/signups/export.csv" class="sidebar-item">
+          <svg class="sidebar-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M8 2v8m0 0L5 7m3 3 3-3M3 13h10"/></svg>
+          <span class="sidebar-label">Export CSV</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="sidebar-foot">
+      <div class="sidebar-foot-status">Signed in <em>· admin</em></div>
+      <div class="sidebar-foot-row">
+        <span class="sidebar-foot-kbd"><kbd>⌘</kbd><kbd>K</kbd></span>
+        <span class="sidebar-foot-kbd"><kbd>?</kbd></span>
+        <form method="post" action="/admin/logout" class="sidebar-foot-out">
+          <button type="submit" class="sidebar-link-btn">Sign out</button>
+        </form>
+      </div>
+    </div>
+  </aside>
+  {% endif %}
+
+  <div class="app">
+    {% if _show_chrome %}
+    <header class="app-bar" role="banner">
+      <div class="app-bar-left">
+        <button type="button" class="hamburger" id="sidebar-toggle" aria-label="Toggle navigation">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12"/></svg>
+        </button>
+        <div class="app-bar-issue">Issue Nº {{ issue }} · {{ now().strftime('%Y-%m-%d') }} UTC</div>
+      </div>
+      <div class="app-bar-search">
+        <span class="search-kbd"><kbd>⌘</kbd><kbd>K</kbd></span>
+        <input type="search" id="search" class="search" placeholder="Search signups, audits…" autocomplete="off" />
+      </div>
+      <div class="app-bar-right">
+        <button type="button" class="app-bar-btn" id="kbd-toggle" aria-label="Keyboard shortcuts">Shortcuts <kbd>?</kbd></button>
+      </div>
+    </header>
+    {% endif %}
+
+    <main class="main {{ 'main--chrome' if _show_chrome else 'main--login' }}">
+      {% block body %}{% endblock %}
+    </main>
+
+    <footer class="foot">
+      FolioSpace <em>Printed on the open web</em>
+      <span class="foot-sep">·</span>
+      Admin Console <em>all access audited</em>
+    </footer>
+  </div>
+
+  <div class="kbd-modal" id="kbd-modal" role="dialog" aria-modal="true" aria-labelledby="kbd-title">
+    <div class="kbd-card">
+      <h3 id="kbd-title"><em>Keyboard</em> shortcuts</h3>
+      <div class="kbd-sub">Press <kbd>?</kbd> any time</div>
+      <dl>
+        <dt><kbd>⌘</kbd><kbd>K</kbd></dt><dd>Focus search</dd>
+        <dt><kbd>/</kbd></dt><dd>Focus search</dd>
+        <dt><kbd>j</kbd></dt><dd>Next row</dd>
+        <dt><kbd>k</kbd></dt><dd>Previous row</dd>
+        <dt><kbd>e</kbd></dt><dd>Export CSV</dd>
+        <dt><kbd>a</kbd></dt><dd>Audit log</dd>
+        <dt><kbd>d</kbd></dt><dd>Dashboard</dd>
+        <dt><kbd>s</kbd></dt><dd>Signups</dd>
+        <dt><kbd>?</kbd></dt><dd>This panel</dd>
+        <dt><kbd>esc</kbd></dt><dd>Close</dd>
+      </dl>
+    </div>
+  </div>
+
   <script src="{{ request.url_for('static', path='js/admin.js') }}" defer></script>
 </body>
 </html>

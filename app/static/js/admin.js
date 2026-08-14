@@ -86,6 +86,29 @@
     modal.setAttribute("aria-hidden", "true");
   }
 
+  function initSidebarToggle() {
+    var btn = document.getElementById("sidebar-toggle");
+    var sidebar = document.querySelector(".sidebar");
+    if (!btn || !sidebar) return;
+    btn.addEventListener("click", function () { sidebar.classList.toggle("is-open"); });
+    document.addEventListener("click", function (e) {
+      if (!sidebar.classList.contains("is-open")) return;
+      if (sidebar.contains(e.target) || btn.contains(e.target)) return;
+      sidebar.classList.remove("is-open");
+    });
+  }
+
+  function initSearchSubmit() {
+    var search = document.getElementById("search");
+    if (!search) return;
+    search.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        var q = encodeURIComponent(search.value || "");
+        window.location.href = "/admin/signups?q=" + q;
+      }
+    });
+  }
+
   function initKeyboard() {
     var modal = document.getElementById("kbd-modal");
     var toggle = document.getElementById("kbd-toggle");
@@ -134,9 +157,9 @@
         closeModal(modal);
         return;
       }
-      if (k === "/") {
-        var search = document.getElementById("q");
-        if (search) { search.focus(); e.preventDefault(); }
+      if (k === "/" || (e.metaKey && k.toLowerCase() === "k") || (e.ctrlKey && k.toLowerCase() === "k")) {
+        var search = document.getElementById("search") || document.getElementById("q");
+        if (search) { search.focus(); search.select && search.select(); e.preventDefault(); }
         return;
       }
       if (k === "j") { rowNav(1); e.preventDefault(); return; }
@@ -157,6 +180,8 @@
   function init() {
     initCountUps();
     initChartTooltip();
+    initSidebarToggle();
+    initSearchSubmit();
     initKeyboard();
   }
 })();
