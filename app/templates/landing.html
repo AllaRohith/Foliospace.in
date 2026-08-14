@@ -94,106 +94,89 @@
         <span class="running-head-page" id="rh-page">Page 01</span>
       </div>
     </div>
-    <section class="hero hero-asymmetric" data-rh-section="Cover" data-rh-page="01">
-      <div class="hero-folio" aria-hidden="true">
-        <span class="folio-issue">No. 01</span>
-        <span class="folio-rule"></span>
-        <span class="folio-label">The Waitlist Edition · Sep 2026</span>
+    <section class="cover" data-rh-section="Cover" data-rh-page="01">
+      <div class="cover-grain" aria-hidden="true">
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <filter id="cover-noise">
+            <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/>
+            <feColorMatrix type="matrix" values="0 0 0 0 0.06 0 0 0 0 0.08 0 0 0 0 0.10 0 0 0 0.85 0"/>
+          </filter>
+          <rect width="100%" height="100%" filter="url(#cover-noise)"/>
+        </svg>
       </div>
-      <svg class="hero-scurve" viewBox="0 0 1440 900" aria-hidden="true">
-        <path d="M 0 720 C 240 540, 480 360, 720 360 S 1120 540, 1440 240" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-      </svg>
-      <div class="container">
-        <div class="hero-asymmetric-grid">
-          <div class="hero-left">
-            <div class="hero-mark-row">
-              <span class="hero-mark">
-                <span class="mark-eyebrow">Private beta</span>
-              </span>
-              <span class="hero-eyebrow-text">
-                <span id="counter-mini" hidden><strong id="counter-mini-n">0</strong> already in</span>
-                <span class="hero-eyebrow-text-sep" hidden>·</span>
-                <span>doors open soon</span>
-              </span>
-            </div>
+      <div class="cover-glow" aria-hidden="true"></div>
+      <span class="cover-vertical" aria-hidden="true">
+        <span>Pan-Indian pros · waitlist open · 2026 edition</span>
+      </span>
+      <div class="container cover-container">
+        <div class="cover-eyebrow">
+          <span class="cover-eyebrow-num">№ 01</span>
+          <span class="cover-eyebrow-rule"></span>
+          <span class="cover-eyebrow-text">Cover Story · The Waitlist Edition</span>
+        </div>
 
-            <h1 class="hero-title">
-              <span class="ht-row ht-row-1">
-                <span class="ht-display" data-split>Stop sending</span>
-                <span class="ht-serif ht-strike">PDFs.</span>
-              </span>
-              <span class="ht-row ht-row-2">
-                <span class="ht-display" data-split>Start sharing a link that lands.</span>
-              </span>
-            </h1>
+        <h1 class="cover-headline">
+          <span class="cover-headline-line">A folio that</span>
+          <span class="cover-headline-line">lands <em>everywhere.</em></span>
+        </h1>
 
-            <p class="hero-sub">
-              One page for everything you've built. Loads fast, looks sharp,
-              and makes you unforgettable the moment someone taps your name
-              on WhatsApp or LinkedIn.
-            </p>
+        <div class="cover-sub">
+          One page · every kind of work · built for WhatsApp, LinkedIn, and the open Indian web.
+        </div>
 
-            <div class="hero-launch" id="launch" data-launch="2026-09-02T00:00:00+05:30">
-              <div class="launch-label">
-                <span class="launch-dot"></span>
-                Public launch in
-              </div>
-              <div class="launch-grid" aria-live="polite">
-                <div class="launch-cell"><strong id="ld-d">00</strong><span>days</span></div>
-                <div class="launch-sep">:</div>
-                <div class="launch-cell"><strong id="ld-h">00</strong><span>hrs</span></div>
-                <div class="launch-sep">:</div>
-                <div class="launch-cell"><strong id="ld-m">00</strong><span>min</span></div>
-                <div class="launch-sep">:</div>
-                <div class="launch-cell"><strong id="ld-s">00</strong><span>sec</span></div>
-              </div>
-              <div class="launch-foot">
-                <span>Sep 2, 2026 · 12:00 AM IST</span>
-              </div>
-            </div>
+        <div class="cover-cta-row">
+          <a href="#join" class="cover-cta">
+            <span>Make yours in 60s</span>
+            <span class="cover-cta-arrow">→</span>
+          </a>
+          <span class="cover-cta-meta">No card now · one email at launch</span>
+        </div>
 
-            <div class="hero-meta">
-              <span>₹150 to start</span>
-              <span class="sep">·</span>
-              <span>less than a pizza / month after</span>
-              <span class="sep">·</span>
-              <span>cancel in two taps</span>
-            </div>
+        <div class="cover-counter" id="cover-counter" aria-live="polite">
+          <span class="cover-counter-num" id="cover-counter-n">0</span>
+          <span class="cover-counter-period">.</span>
+          <span class="cover-counter-label">on the waitlist</span>
+        </div>
 
-            <ul class="hero-strip" aria-label="What's included">
-              <li><span class="hero-strip-dot"></span>Custom foliospace.in/yourname</li>
-              <li><span class="hero-strip-dot"></span>WhatsApp preview card</li>
-              <li><span class="hero-strip-dot"></span>LinkedIn OG image</li>
-              <li><span class="hero-strip-dot"></span>One-tap PDF</li>
-              <li><span class="hero-strip-dot"></span>Edit from any phone</li>
-            </ul>
-          </div>
+        <div class="cover-stamp" aria-hidden="true">
+          <span>2026 Version.</span>
+        </div>
+      </div>
 
-          <div class="hero-right">
-            <div class="showcase-card-wrap">
-              <div class="showcase-card" id="showcase-card">
-                <div class="showcase-bar">
-                  <span class="dot-r"></span>
-                  <span class="dot-y"></span>
-                  <span class="dot-g"></span>
-                  <span class="showcase-url" id="s-url">foliospace.in/priya-iyer</span>
-                  <span class="showcase-tabs">
-                    <button class="s-tab is-active" data-prof="chef">Chef</button>
-                    <button class="s-tab" data-prof="developer">Developer</button>
-                    <button class="s-tab" data-prof="designer">Designer</button>
-                    <button class="s-tab" data-prof="writer">Writer</button>
-                    <button class="s-tab" data-prof="photographer">Photographer</button>
-                    <button class="s-tab" data-prof="student">Student</button>
-                    <button class="s-tab" data-prof="consultant">Consultant</button>
-                    <button class="s-tab" data-prof="founder">Founder</button>
-                    <span class="s-tab-indicator" aria-hidden="true"></span>
-                  </span>
-                </div>
-                <div class="showcase-body" id="showcase-body"></div>
-              </div>
-              <p class="showcase-caption" id="showcase-caption">Fig. 1 — foliospace.in/priya-iyer</p>
-            </div>
-          </div>
+      <div class="cover-marquee" aria-hidden="true">
+        <div class="cover-marquee-track">
+          <span class="cover-marquee-item">foliospace.in/priya-iyer</span>
+          <span class="cover-marquee-sep">·</span>
+          <span class="cover-marquee-item">foliospace.in/arjun-menon</span>
+          <span class="cover-marquee-sep">·</span>
+          <span class="cover-marquee-item">foliospace.in/lakshmi-pillai</span>
+          <span class="cover-marquee-sep">·</span>
+          <span class="cover-marquee-item">foliospace.in/aarav-mehta</span>
+          <span class="cover-marquee-sep">·</span>
+          <span class="cover-marquee-item">foliospace.in/sara-rao</span>
+          <span class="cover-marquee-sep">·</span>
+          <span class="cover-marquee-item">foliospace.in/karan-kapoor</span>
+          <span class="cover-marquee-sep">·</span>
+          <span class="cover-marquee-item">foliospace.in/priya-shetty</span>
+          <span class="cover-marquee-sep">·</span>
+          <span class="cover-marquee-item">foliospace.in/vikram-iyer</span>
+          <span class="cover-marquee-sep">·</span>
+          <span class="cover-marquee-item">foliospace.in/priya-iyer</span>
+          <span class="cover-marquee-sep">·</span>
+          <span class="cover-marquee-item">foliospace.in/arjun-menon</span>
+          <span class="cover-marquee-sep">·</span>
+          <span class="cover-marquee-item">foliospace.in/lakshmi-pillai</span>
+          <span class="cover-marquee-sep">·</span>
+          <span class="cover-marquee-item">foliospace.in/aarav-mehta</span>
+          <span class="cover-marquee-sep">·</span>
+          <span class="cover-marquee-item">foliospace.in/sara-rao</span>
+          <span class="cover-marquee-sep">·</span>
+          <span class="cover-marquee-item">foliospace.in/karan-kapoor</span>
+          <span class="cover-marquee-sep">·</span>
+          <span class="cover-marquee-item">foliospace.in/priya-shetty</span>
+          <span class="cover-marquee-sep">·</span>
+          <span class="cover-marquee-item">foliospace.in/vikram-iyer</span>
+          <span class="cover-marquee-sep">·</span>
         </div>
       </div>
     </section>

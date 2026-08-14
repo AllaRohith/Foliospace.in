@@ -14,6 +14,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.middleware import install_security
 from app.routers import admin
 from app.routers import waitlist
+from app.routers import stats
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -63,6 +64,7 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 app.include_router(waitlist.router)
+app.include_router(stats.router)
 app.include_router(admin.router)
 
 
