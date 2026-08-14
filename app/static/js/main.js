@@ -638,6 +638,16 @@
     btn.addEventListener('click', function () {
       apply(theme === 'dark' ? 'light' : 'dark', true);
     });
+
+    const sun = document.getElementById('nav-theme-mobile-sun');
+    const moon = document.getElementById('nav-theme-mobile-moon');
+    function syncMobile() {
+      if (sun) sun.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
+      if (moon) moon.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+    }
+    syncMobile();
+    if (sun) sun.addEventListener('click', function () { apply('light', true); syncMobile(); });
+    if (moon) moon.addEventListener('click', function () { apply('dark', true); syncMobile(); });
   })();
 
   (function () {
