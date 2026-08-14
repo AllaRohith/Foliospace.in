@@ -87,7 +87,7 @@ body.dark .badge.muted,
 body.dark .badge.outline { background: transparent; color: var(--fg); border-color: var(--line); }
 body.dark .nav { background: rgba(11, 14, 18, 0.78); border-color: var(--line); }
 
-body { background: var(--bg); color: var(--fg); font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace; font-size: 16.5px; line-height: 1.7; letter-spacing: 0.01em; transition: background 0.4s ease, color 0.4s ease; }
+body { background: var(--bg); color: var(--fg); font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 16.5px; line-height: 1.7; letter-spacing: 0.01em; transition: background 0.4s ease, color 0.4s ease; }
 
 * { box-sizing: border-box; }
 *::before, *::after { box-sizing: border-box; }
@@ -97,7 +97,7 @@ html, body { margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 
 body {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: var(--text-base);
   line-height: 1.55;
   color: var(--fg);
@@ -188,7 +188,7 @@ main > section {
   main > section { transform: none !important; transition: none !important; }
 }
 
-em, .italic { font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace; font-style: italic; font-weight: 400; }
+em, .italic { font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-style: italic; font-weight: 400; }
 
 h1, h2, h3, h4, h5, h6 {
   color: var(--ink);
@@ -261,7 +261,7 @@ img, svg { max-width: 100%; display: block; }
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: italic;
   font-weight: 400;
   font-size: 22px;
@@ -606,7 +606,7 @@ body.dark .workshop-annotations { color: var(--accent); }
 }
 .workshop-line { display: block; }
 .workshop-line-1, .workshop-line-3 {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: italic;
   font-weight: 400;
   font-size: clamp(36px, 5vw, 64px);
@@ -614,7 +614,7 @@ body.dark .workshop-annotations { color: var(--accent); }
   letter-spacing: -0.02em;
 }
 .workshop-line-2 {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-weight: 900;
   font-size: clamp(36px, 5vw, 64px);
   color: var(--ink);
@@ -625,7 +625,7 @@ body.dark .workshop-annotations { color: var(--accent); }
   border-top: 1px solid var(--line);
 }
 .workshop-quote {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: italic;
   font-size: 18px;
   line-height: 1.5;
@@ -670,7 +670,7 @@ body.dark .workshop-annotations { color: var(--accent); }
 }
 .workshop.is-on .workshop-annotations { opacity: 1; transform: translateY(0); }
 .workshop-anno-text {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: italic;
   font-size: 14px;
   fill: var(--accent);
@@ -687,7 +687,7 @@ body.dark .workshop-annotations { color: var(--accent); }
 }
 .workshop-squiggle svg { display: block; }
 .workshop-squiggle-label {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: italic;
   font-size: 14px;
   margin-top: 2px;
@@ -762,7 +762,7 @@ body.dark .workshop-annotations { color: var(--accent); }
 }
 @keyframes folioWipe { to { clip-path: inset(0 0 0 0); } }
 .hero-folio .folio-issue {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-variation-settings: 'opsz' 14, 'SOFT' 0, 'WONK' 0;
   font-weight: 600;
   color: var(--accent);
@@ -861,7 +861,7 @@ body.dark .workshop-annotations { color: var(--accent); }
 .ht-row-1 {
   font-size: clamp(36px, 5.5vw, 76px);
   font-weight: 800;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-optical-sizing: auto;
   font-variation-settings: 'opsz' 96, 'wght' 800;
   color: var(--ink);
@@ -880,7 +880,7 @@ body.dark .workshop-annotations { color: var(--accent); }
 }
 
 .ht-display {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-optical-sizing: auto;
   font-variation-settings: 'opsz' 96, 'wght' 800;
   letter-spacing: -0.04em;
@@ -888,7 +888,7 @@ body.dark .workshop-annotations { color: var(--accent); }
 }
 
 .ht-serif {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: italic;
   font-weight: 400;
   letter-spacing: -0.02em;
@@ -1101,7 +1101,7 @@ body.dark .workshop-annotations { color: var(--accent); }
 .launch-cell strong {
   display: inline-block;
   overflow: hidden;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-optical-sizing: auto;
   font-variation-settings: 'SOFT' 15, 'WONK' 1;
   font-size: clamp(28px, 4vw, 40px);
@@ -1121,7 +1121,7 @@ body.dark .workshop-annotations { color: var(--accent); }
 }
 
 .launch-sep {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: clamp(24px, 3.4vw, 34px);
   font-weight: 600;
   color: var(--accent);
@@ -1288,7 +1288,7 @@ body.dark .workshop-annotations { color: var(--accent); }
   margin-left: 14px;
   font-size: 13.5px;
   color: var(--muted);
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .showcase-tabs {
@@ -1408,7 +1408,7 @@ body.dark .s-tab.is-active { background: var(--cream); color: var(--ink); border
   padding-top: 8px;
 }
 
-.pf { font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace; }
+.pf { font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
 .pf-head {
   display: flex;
   align-items: center;
@@ -1423,7 +1423,7 @@ body.dark .s-tab.is-active { background: var(--cream); color: var(--ink); border
   border-radius: 12px;
   background: var(--ink);
   color: var(--cream);
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-variation-settings: 'opsz' 36, 'SOFT' 25, 'WONK' 1;
   font-weight: 500;
   font-size: 18px;
@@ -1485,7 +1485,7 @@ body.dark .pf-monogram { background: var(--cream); color: var(--ink); }
 
 .pf-chef .pf-menu { list-style: none; padding: 0; margin: 0 0 4px; }
 .pf-course {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-variation-settings: 'opsz' 18, 'SOFT' 25, 'WONK' 1;
   font-weight: 500;
   font-size: 13px;
@@ -1503,7 +1503,7 @@ body.dark .pf-monogram { background: var(--cream); color: var(--ink); }
   border-radius: 999px;
 }
 .pf-price {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-variation-settings: 'opsz' 30, 'SOFT' 20, 'WONK' 0;
   font-weight: 500;
   font-size: 13px;
@@ -1529,7 +1529,7 @@ body.dark .pf-price { color: var(--cream); }
   gap: 2px;
 }
 .pf-dev .pf-stat-num {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-variation-settings: 'opsz' 48, 'SOFT' 25, 'WONK' 1;
   font-weight: 500;
   font-size: 28px;
@@ -1620,7 +1620,7 @@ body.dark .pf-price { color: var(--cream); }
 }
 .pf-consultant .pf-cases li:last-child { border-bottom: 0; }
 .pf-consultant .pf-case-num {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-variation-settings: 'opsz' 18, 'SOFT' 25, 'WONK' 1;
   font-weight: 500;
   font-size: 13px;
@@ -1644,7 +1644,7 @@ body.dark .pf-price { color: var(--cream); }
   padding: 12px 14px;
   background: var(--cream-2);
   border-radius: 10px;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: italic;
   font-size: 14px;
   color: var(--ink);
@@ -1661,7 +1661,7 @@ body.dark .pf-price { color: var(--cream); }
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   margin-bottom: 10px;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 12.5px;
   letter-spacing: 0.04em;
   color: var(--muted);
@@ -1696,7 +1696,7 @@ body.dark .pf-ticker-item strong { color: var(--cream); }
   letter-spacing: 1px;
 }
 .pf-rating-n {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-variation-settings: 'opsz' 24, 'SOFT' 25, 'WONK' 1;
   font-weight: 600;
   color: var(--ink);
@@ -1762,7 +1762,7 @@ body.dark .pf-talk-head strong { color: var(--cream); }
 .pf-proj-stars,
 .pf-essay-meta,
 .pf-experience-meta {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 12px;
   letter-spacing: 0.06em;
   color: var(--muted);
@@ -1784,7 +1784,7 @@ body.dark .pf-talk-head strong { color: var(--cream); }
   padding: 10px 12px;
   background: var(--cream-2);
   border-radius: 8px;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: italic;
   font-size: 13.5px;
   color: var(--ink);
@@ -1815,7 +1815,7 @@ body.dark .pf-byline-grid { background: var(--card-bg-2); }
   padding: 14px 16px;
   background: var(--cream-2);
   border-radius: 10px;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: italic;
   font-size: 14.5px;
   line-height: 1.5;
@@ -1859,7 +1859,7 @@ body.dark .pf-cta:hover { background: #fff; }
 }
 .pf-cta-arrow {
   font-size: 18px;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   transition: transform 0.25s ease;
 }
 .pf-cta:hover .pf-cta-arrow { transform: translateX(4px); }
@@ -1881,7 +1881,7 @@ body.dark .pf-cta:hover { background: #fff; }
 }
 body.dark .pf-stat { background: var(--card-bg-2); }
 .pf-stat-num {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-variation-settings: 'opsz' 48, 'SOFT' 25, 'WONK' 1;
   font-weight: 500;
   font-size: 24px;
@@ -1928,7 +1928,7 @@ body.dark .pf-stat-num { color: var(--cream); }
 }
 .pf-dish-name { font-size: 13.5px; font-weight: 600; color: var(--ink); }
 body.dark .pf-dish-name { color: var(--cream); }
-.pf-dish-sub { font-size: 13.5px; color: var(--muted); font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace; font-style: italic; }
+.pf-dish-sub { font-size: 13.5px; color: var(--muted); font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-style: italic; }
 .pf-dish-arrow {
   width: 22px;
   height: 22px;
@@ -1960,7 +1960,7 @@ body.dark .pf-dish-row.is-open .pf-dish-arrow {
   padding: 14px 16px;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: italic;
   font-size: 14.5px;
   line-height: 1.5;
@@ -1972,7 +1972,7 @@ body.dark .pf-dish-row.is-open .pf-dish-arrow {
 .pf-press::after {
   content: '“';
   position: absolute;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-variation-settings: 'opsz' 72, 'SOFT' 100;
   font-style: normal;
   color: var(--accent);
@@ -1984,7 +1984,7 @@ body.dark .pf-dish-row.is-open .pf-dish-arrow {
 .pf-press-meta {
   display: block;
   margin-top: 8px;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: normal;
   font-size: 12px;
   letter-spacing: 0.08em;
@@ -2066,7 +2066,7 @@ body.dark .pf-press { color: var(--cream); }
 body.dark .stat { background: var(--card-bg); }
 .stat:hover { border-color: var(--ink); }
 .stat strong {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-optical-sizing: auto;
   font-variation-settings: 'SOFT' 20, 'WONK' 1;
   font-size: clamp(40px, 5vw, 56px);
@@ -2268,7 +2268,7 @@ body.dark .stat { background: var(--card-bg); }
   justify-content: space-between;
   padding: 9px 24px;
   border-bottom: 1px solid var(--line);
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 13px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -2304,7 +2304,7 @@ body.dark .stat { background: var(--card-bg); }
 }
 
 .ticker-head-c {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: italic;
   letter-spacing: 0;
   text-transform: none;
@@ -2317,7 +2317,7 @@ body.dark .stat { background: var(--card-bg); }
   margin: 0 6px;
   color: var(--line);
   font-style: normal;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .ticker-head-r {
@@ -2372,7 +2372,7 @@ body.dark .stat { background: var(--card-bg); }
 }
 
 .ticker-eyebrow {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.22em;
@@ -2384,7 +2384,7 @@ body.dark .stat { background: var(--card-bg); }
 }
 
 .ticker-headline {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: italic;
   font-size: 19px;
   line-height: 1;
@@ -2767,7 +2767,7 @@ body.dark .who-icon { background: rgba(255, 107, 53, 0.12); color: var(--accent)
 }
 .dossier-list-row:last-child { border-bottom: 0; }
 .dossier-num {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-variation-settings: 'opsz' 30, 'SOFT' 25, 'WONK' 1;
   font-weight: 500;
   font-size: 13px;
@@ -2777,7 +2777,7 @@ body.dark .who-icon { background: rgba(255, 107, 53, 0.12); color: var(--accent)
   flex-shrink: 0;
 }
 .dossier-text strong {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-weight: 700;
   color: var(--ink);
   letter-spacing: -0.01em;
@@ -2795,7 +2795,7 @@ body.dark .who-icon { background: rgba(255, 107, 53, 0.12); color: var(--accent)
   border-radius: 5px;
   background: var(--ink);
   color: var(--cream);
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-variation-settings: 'opsz' 18, 'SOFT' 25, 'WONK' 1;
   font-weight: 500;
   font-size: 13px;
@@ -2867,7 +2867,7 @@ body.dark .dossier-mono-6 { background: #6B5B3F; }
 .who-row:hover .who-accent { height: 72px; }
 .who-title {
   margin: 0 0 6px;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-weight: 700;
   font-size: 26px;
   letter-spacing: -0.015em;
@@ -2878,7 +2878,7 @@ body.dark .dossier-mono-6 { background: #6B5B3F; }
 body.dark .who-title { color: var(--cream); }
 .who-desc {
   margin: 0;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 15px;
   line-height: 1.55;
   color: var(--muted);
@@ -2933,7 +2933,7 @@ body.dark .who-row:hover .who-desc { color: var(--who-hover-fg, var(--cream)); }
   text-transform: uppercase;
 }
 .receipt-tier {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -2941,7 +2941,7 @@ body.dark .who-row:hover .who-desc { color: var(--who-hover-fg, var(--cream)); }
 }
 .receipt-featured .receipt-tier { color: var(--accent); }
 .receipt-price {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-variation-settings: 'opsz' 50, 'SOFT' 15, 'WONK' 0;
   font-weight: 500;
   font-size: 56px;
@@ -2951,7 +2951,7 @@ body.dark .who-row:hover .who-desc { color: var(--who-hover-fg, var(--cream)); }
   color: inherit;
 }
 .receipt-price .receipt-unit {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -2963,7 +2963,7 @@ body.dark .who-row:hover .who-desc { color: var(--who-hover-fg, var(--cream)); }
   margin: 0;
   font-size: 13px;
   opacity: 0.7;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 .receipt-items {
   list-style: none;
@@ -2973,7 +2973,7 @@ body.dark .who-row:hover .who-desc { color: var(--who-hover-fg, var(--cream)); }
   flex-direction: column;
   gap: 8px;
   font-size: 14px;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 .receipt-items li {
   padding: 8px 0;
@@ -3021,7 +3021,7 @@ body.dark .receipt-featured .receipt-tier { color: #fff; }
 .stats-band .stat:hover { background: var(--accent-50); }
 body.dark .stats-band .stat:hover { background: rgba(255, 107, 53, 0.10); }
 .stats-band .stat strong {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-variation-settings: 'opsz' 80, 'SOFT' 20, 'WONK' 1;
   font-weight: 500;
   font-size: clamp(40px, 5vw, 56px);
@@ -3108,7 +3108,7 @@ body.dark .stats-band .stat strong { color: var(--ink); }
   border: 1px solid rgba(250, 247, 242, 0.25);
   background: #1A2128;
   color: var(--accent);
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-variation-settings: 'opsz' 24, 'SOFT' 25, 'WONK' 1;
   font-weight: 500;
   font-size: 13px;
@@ -3118,7 +3118,7 @@ body.dark .stats-band .stat strong { color: var(--ink); }
 }
 .orbit-node-1 .orbit-dot { background: var(--accent); color: #fff; border-color: var(--accent); }
 .orbit-node h3 {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: italic;
   font-weight: 400;
   font-size: 28px;
@@ -3202,7 +3202,7 @@ body.dark .ticket::after { background-image: radial-gradient(circle at center, #
   flex-direction: column;
   align-items: center;
   text-align: center;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   position: relative;
 }
 .ticket-stub-label {
@@ -3213,7 +3213,7 @@ body.dark .ticket::after { background-image: radial-gradient(circle at center, #
   opacity: 0.85;
 }
 .ticket-stub-num {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: italic;
   font-weight: 500;
   font-size: 96px;
@@ -3222,7 +3222,7 @@ body.dark .ticket::after { background-image: radial-gradient(circle at center, #
   color: #fff;
 }
 .ticket-stub-sep {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: italic;
   font-size: 32px;
   line-height: 1;
@@ -3230,7 +3230,7 @@ body.dark .ticket::after { background-image: radial-gradient(circle at center, #
   margin: 4px 0 6px;
 }
 .ticket-stub-cap {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: italic;
   font-weight: 500;
   font-size: 40px;
@@ -3253,7 +3253,7 @@ body.dark .ticket::after { background-image: radial-gradient(circle at center, #
   flex-direction: column;
 }
 .ticket-eyebrow {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.26em;
@@ -3262,7 +3262,7 @@ body.dark .ticket::after { background-image: radial-gradient(circle at center, #
   margin-bottom: 10px;
 }
 .stamp-headline {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-variation-settings: 'opsz' 80, 'SOFT' 30, 'WONK' 1;
   font-weight: 500;
   font-size: clamp(28px, 4vw, 44px);
@@ -3279,7 +3279,7 @@ body.dark .stamp-headline { color: var(--ink); }
   color: var(--accent);
 }
 .stamp-sub {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   color: var(--muted);
   margin: 0 0 24px;
@@ -3307,7 +3307,7 @@ body.dark .ticket-perks {
   align-items: start;
 }
 .ticket-perk-num {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: italic;
   font-weight: 500;
   font-size: 28px;
@@ -3320,7 +3320,7 @@ body.dark .ticket-perks {
   gap: 4px;
 }
 .ticket-perk-body strong {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-weight: 700;
   font-size: 15px;
   letter-spacing: -0.005em;
@@ -3329,7 +3329,7 @@ body.dark .ticket-perks {
 }
 body.dark .ticket-perk-body strong { color: var(--cream); }
 .ticket-perk-body span {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 13px;
   line-height: 1.55;
   color: var(--muted);
@@ -3343,7 +3343,7 @@ body.dark .ticket-perk-body span { color: rgba(250, 247, 242, 0.65); }
   flex-wrap: wrap;
 }
 .ticket-cta-foot {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 13px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -3383,7 +3383,7 @@ body.dark .ticket-perk-body span { color: rgba(250, 247, 242, 0.65); }
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   background: var(--cream-2);
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.16em;
@@ -3405,7 +3405,7 @@ body.dark .built-with strong { color: var(--cream); }
   background: var(--cream);
   border-bottom: 1px solid var(--line);
   padding: 8px 0;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.18em;
@@ -3434,7 +3434,7 @@ body.dark .running-head-issue { color: var(--cream); }
 .running-head-section {
   color: var(--ink);
   font-style: italic;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-variation-settings: 'opsz' 14, 'SOFT' 20, 'WONK' 0;
   font-weight: 500;
   font-size: 13px;
@@ -3443,7 +3443,7 @@ body.dark .running-head-issue { color: var(--cream); }
 }
 body.dark .running-head-section { color: var(--cream); }
 .running-head-page {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-variation-settings: 'opsz' 14, 'SOFT' 20, 'WONK' 1;
   font-weight: 500;
   color: var(--accent);
@@ -3472,7 +3472,7 @@ body.dark .colophon { border-color: var(--cream); }
   align-items: center;
 }
 .colophon-mark {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: italic;
   font-weight: 400;
   font-size: clamp(48px, 7vw, 88px);
@@ -3498,7 +3498,7 @@ body.dark .colophon { border-color: var(--cream); }
   padding: 0 24px;
 }
 .colophon-meta {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.18em;
@@ -3506,7 +3506,7 @@ body.dark .colophon { border-color: var(--cream); }
   color: var(--muted);
 }
 .colophon-tag {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-variation-settings: 'opsz' 30, 'SOFT' 20, 'WONK' 0;
   font-weight: 500;
   font-style: italic;
@@ -3514,7 +3514,7 @@ body.dark .colophon { border-color: var(--cream); }
   color: var(--ink);
 }
 .colophon-anti {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -3537,7 +3537,7 @@ body.dark .colophon-anti { border-color: rgba(250, 247, 242, 0.15); }
 }
 body.dark .colophon-printer-mark { color: var(--accent); }
 .colophon-printed {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-variation-settings: 'opsz' 14, 'SOFT' 20, 'WONK' 0;
   font-weight: 400;
   font-style: italic;
@@ -3556,7 +3556,7 @@ body.dark .colophon-printer-mark { color: var(--accent); }
   text-align: right;
 }
 .colophon-spacer .colophon-year {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-variation-settings: 'opsz' 60, 'SOFT' 25, 'WONK' 1;
   font-weight: 500;
   font-size: clamp(24px, 3vw, 40px);
@@ -3565,7 +3565,7 @@ body.dark .colophon-printer-mark { color: var(--accent); }
   line-height: 1;
 }
 .colophon-spacer .colophon-meta {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 13px;
   letter-spacing: 0.04em;
   color: var(--muted);
@@ -3602,7 +3602,7 @@ body.dark .h-card { border-top-color: var(--ink); }
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-weight: 700;
   font-size: 13px;
   display: flex;
@@ -3614,7 +3614,7 @@ body.dark .h-card { border-top-color: var(--ink); }
 }
 body.dark .h-card .h-avatar { background: var(--ink-2); color: var(--ink); }
 .h-card .h-role { font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 8px; }
-.h-card h3 { font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace; font-size: 17px; line-height: 1.3; margin: 0 0 8px; font-weight: 700; }
+.h-card h3 { font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 17px; line-height: 1.3; margin: 0 0 8px; font-weight: 700; }
 .h-card p { font-size: 14px; color: var(--muted); margin: 0; line-height: 1.5; }
 .h-card .h-foot { margin-top: 12px; display: flex; gap: 6px; }
 .h-card .badge { font-size: 13px; padding: 4px 8px; background: transparent; color: var(--ink); border: 1px solid var(--line); }
@@ -3697,7 +3697,7 @@ body.dark .feature-icon { background: rgba(255, 107, 53, 0.12); color: var(--acc
 }
 .plan h3 { margin: 0 0 12px; font-size: 18px; }
 .plan .price {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-optical-sizing: auto;
   font-variation-settings: 'SOFT' 15, 'WONK' 0;
   font-size: 36px;
@@ -4090,7 +4090,7 @@ body.dark .hero-cta-pre { background: rgba(21, 25, 30, 0.55); }
 .showcase-caption {
   text-align: center;
   margin: 16px 0 0;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: italic;
   font-size: 13px;
   color: var(--muted);
@@ -4530,7 +4530,7 @@ body.dark .brand-mark { color: var(--cream); }
 }
 .demo-step-num {
   display: inline-block;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-optical-sizing: auto;
   font-variation-settings: 'opsz' 60, 'SOFT' 20, 'WONK' 1;
   font-weight: 500;
@@ -4593,7 +4593,7 @@ body.dark .story { background: #1A2128;
 .story-step:first-child.is-active { border-left-width: 2px; padding-left: 30px; }
 .story-num {
   display: inline-block;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-optical-sizing: auto;
   font-variation-settings: 'opsz' 90, 'SOFT' 25, 'WONK' 1;
   font-weight: 500;
@@ -4614,7 +4614,7 @@ body.dark .story { background: #1A2128;
   line-height: 1.2;
 }
 .story-step h2 em {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-style: italic;
   font-weight: 400;
   color: var(--accent);
@@ -4639,7 +4639,7 @@ body.dark .story { background: #1A2128;
   background: rgba(250, 247, 242, 0.05);
   border: 1px solid rgba(250, 247, 242, 0.18);
   border-radius: 8px;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   max-width: 360px;
 }
 .story-mock-label {
@@ -4699,7 +4699,7 @@ body.dark .signup-dossier {
   border-color: var(--ink-2);
 }
 .signup-dossier-eyebrow {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.22em;
@@ -4708,7 +4708,7 @@ body.dark .signup-dossier {
   margin-bottom: 6px;
 }
 .signup-dossier-title {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: clamp(20px, 2.6vw, 24px);
   line-height: 1.18;
   font-weight: 400;
@@ -4727,7 +4727,7 @@ body.dark .signup-dossier {
 }
 .signup-field-label {
   display: block;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.22em;
@@ -4770,7 +4770,7 @@ body.dark .signup-field-input:focus { background: var(--ink-2); border-color: va
   background: var(--cream);
   border: 1px solid var(--line);
   cursor: pointer;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 12.5px;
   font-weight: 600;
   color: var(--ink);
@@ -4811,7 +4811,7 @@ body.dark .signup-chip:has(input:checked) { background: var(--accent); color: va
 }
 .signup-dossier-microcopy {
   margin-top: 12px;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.2em;
@@ -4831,14 +4831,20 @@ body.dark .signup-chip:has(input:checked) { background: var(--accent); color: va
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  min-height: clamp(640px, 88vh, 860px);
-  padding: 200px 0 120px;
+  min-height: clamp(480px, 72vh, 640px);
+  padding: 140px 0 80px;
   display: flex;
   align-items: center;
   justify-content: center;
   background:
-    radial-gradient(ellipse 80% 60% at 20% 0%, rgba(255, 107, 53, 0.07), transparent 60%),
-    radial-gradient(ellipse 70% 50% at 95% 100%, rgba(15, 20, 25, 0.05), transparent 65%),
+    radial-gradient(ellipse 44% 40% at 50% 52%, rgba(250, 247, 242, 0.68), transparent 72%),
+    radial-gradient(ellipse 30% 22% at 80% 16%, rgba(250, 247, 242, 0.48), transparent 70%),
+    radial-gradient(ellipse 22% 18% at 12% 78%, rgba(250, 247, 242, 0.42), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 8% 4%, rgba(255, 107, 53, 0.32), transparent 62%),
+    radial-gradient(ellipse 55% 45% at 94% 98%, rgba(232, 90, 36, 0.28), transparent 60%),
+    radial-gradient(ellipse 44% 34% at 84% 30%, rgba(255, 107, 53, 0.20), transparent 64%),
+    radial-gradient(ellipse 34% 26% at 12% 88%, rgba(232, 90, 36, 0.18), transparent 64%),
+    radial-gradient(ellipse 50% 26% at 50% 52%, rgba(255, 107, 53, 0.08), transparent 70%),
     linear-gradient(180deg, var(--cream) 0%, var(--cream-2) 100%);
   color: var(--ink);
 }
@@ -4848,7 +4854,7 @@ body.dark .signup-chip:has(input:checked) { background: var(--accent); color: va
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  opacity: 0.42;
+  opacity: 0.38;
   mix-blend-mode: multiply;
 }
 
@@ -4868,8 +4874,40 @@ body.dark .signup-chip:has(input:checked) { background: var(--accent); color: va
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle 360px at 14% 64%, rgba(255, 107, 53, 0.10), transparent 70%),
-    radial-gradient(circle 480px at 88% 22%, rgba(15, 20, 25, 0.06), transparent 70%);
+    radial-gradient(circle 460px at 24% 26%, rgba(255, 107, 53, 0.22), transparent 64%),
+    radial-gradient(circle 420px at 82% 74%, rgba(232, 90, 36, 0.20), transparent 64%),
+    radial-gradient(circle 280px at 60% 14%, rgba(255, 107, 53, 0.12), transparent 68%);
+}
+
+.cover-stars {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.cover-star-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: block;
+  line-height: 0;
+}
+
+.cover-star {
+  fill: var(--ink);
+  display: block;
+  animation: coverStarTwinkle 5s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+@keyframes coverStarTwinkle {
+  0%, 100% { filter: opacity(1); transform: scale(1); }
+  50%      { filter: opacity(0.55); transform: scale(0.82); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cover-star { animation: none; }
 }
 
 .cover > .cover-container {
@@ -4880,14 +4918,14 @@ body.dark .signup-chip:has(input:checked) { background: var(--accent); color: va
 }
 
 .cover-headline {
-  margin: 0 0 36px;
+  margin: 0 0 28px;
   padding: 0;
   font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
   font-weight: 400;
   font-style: normal;
-  font-size: clamp(112px, 18vw, 280px);
-  line-height: 0.92;
-  letter-spacing: -0.03em;
+  font-size: clamp(72px, 11vw, 160px);
+  line-height: 0.94;
+  letter-spacing: -0.02em;
   color: var(--ink);
 }
 
@@ -4898,7 +4936,7 @@ body.dark .signup-chip:has(input:checked) { background: var(--accent); color: va
 .cover-tagline {
   margin: 0 auto;
   max-width: 520px;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.22em;
@@ -4914,25 +4952,30 @@ body.dark .signup-chip:has(input:checked) { background: var(--accent); color: va
 /* responsive -------------------------------------------------------- */
 
 @media (max-width: 1024px) {
-  .cover { padding: 168px 0 96px; min-height: clamp(560px, 80vh, 720px); }
+  .cover { padding: 120px 0 72px; min-height: clamp(420px, 64vh, 560px); }
 }
 
 @media (max-width: 880px) {
-  .cover { padding: 140px 0 80px; min-height: 0; }
-  .cover-headline { font-size: clamp(72px, 16vw, 144px); }
+  .cover { padding: 100px 0 64px; min-height: 0; }
+  .cover-headline { font-size: clamp(56px, 12vw, 96px); }
 }
 
 @media (max-width: 560px) {
-  .cover { padding: 112px 0 64px; }
-  .cover-headline { font-size: clamp(56px, 16vw, 104px); margin-bottom: 28px; }
+  .cover { padding: 84px 0 52px; }
+  .cover-headline { font-size: clamp(44px, 12vw, 72px); margin-bottom: 22px; }
   .cover-tagline { font-size: 12.5px; letter-spacing: 0.18em; padding: 14px 0; }
 }
 
 /* dark-mode overrides for cover (preserves cream aesthetic for the hero) */
 body.dark .cover {
   background:
-    radial-gradient(ellipse 80% 60% at 20% 0%, rgba(255, 107, 53, 0.12), transparent 60%),
-    radial-gradient(ellipse 70% 50% at 95% 100%, rgba(15, 20, 25, 0.25), transparent 65%),
+    radial-gradient(ellipse 44% 40% at 50% 52%, rgba(250, 247, 242, 0.80), transparent 72%),
+    radial-gradient(ellipse 30% 22% at 80% 16%, rgba(250, 247, 242, 0.56), transparent 70%),
+    radial-gradient(ellipse 22% 18% at 12% 78%, rgba(250, 247, 242, 0.50), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 8% 4%, rgba(255, 107, 53, 0.42), transparent 62%),
+    radial-gradient(ellipse 55% 45% at 94% 98%, rgba(232, 90, 36, 0.36), transparent 60%),
+    radial-gradient(ellipse 44% 34% at 84% 30%, rgba(255, 107, 53, 0.26), transparent 64%),
+    radial-gradient(ellipse 34% 26% at 12% 88%, rgba(232, 90, 36, 0.22), transparent 64%),
     linear-gradient(180deg, var(--cream) 0%, var(--cream-2) 100%);
 }
-body.dark .cover-grain { opacity: 0.34; }
+body.dark .cover-grain { opacity: 0.30; }
