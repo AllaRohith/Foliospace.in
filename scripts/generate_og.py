@@ -9,18 +9,68 @@ ACCENT = (255, 107, 53)
 MUTED = (92, 100, 112)
 HAIRLINE = (232, 227, 217)
 
+FONT_DIR = Path(__file__).resolve().parent.parent / "app" / "static" / "fonts"
+STALINIST = FONT_DIR / "StalinistOne-Regular.ttf"
+SAIRA = FONT_DIR / "Saira-Variable.ttf"
+SAIRA_ITALIC = FONT_DIR / "Saira-Italic-Variable.ttf"
+
 
 def font(size, weight="Regular"):
+    if weight in ("Bold", "SemiBold", "Medium"):
+        return _saira(size, weight)
+    if weight == "Italic":
+        return _saira_italic(size, "Regular")
+    if weight == "ItalicMedium":
+        return _saira_italic(size, "Medium")
+    return _saira(size, "Regular")
+
+
+def _saira(size, weight="Regular"):
+    if not SAIRA.exists():
+        return _fallback(size, "Regular")
+    try:
+        f = ImageFont.truetype(str(SAIRA), size)
+        try:
+            f.set_variation_by_name(weight)
+        except (AttributeError, OSError):
+            pass
+        return f
+    except (OSError, TypeError):
+        return _fallback(size, "Regular")
+
+
+def _saira_italic(size, weight="Regular"):
+    if not SAIRA_ITALIC.exists():
+        return _fallback(size, "Regular")
+    try:
+        f = ImageFont.truetype(str(SAIRA_ITALIC), size)
+        try:
+            f.set_variation_by_name(weight)
+        except (AttributeError, OSError):
+            pass
+        return f
+    except (OSError, TypeError):
+        return _fallback(size, "Regular")
+
+
+def _stalinist(size):
+    if not STALINIST.exists():
+        return _fallback(size, "Bold")
+    try:
+        return ImageFont.truetype(str(STALINIST), size)
+    except (OSError, TypeError):
+        return _fallback(size, "Bold")
+
+
+def _fallback(size, weight="Regular"):
     candidates = {
         "Bold": [
+            "/System/Library/Fonts/Supplemental/Arial Black.ttf",
             "/System/Library/Fonts/Helvetica.ttc",
-            "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
-            "/Library/Fonts/Arial Bold.ttf",
         ],
         "Regular": [
             "/System/Library/Fonts/Helvetica.ttc",
             "/System/Library/Fonts/Supplemental/Arial.ttf",
-            "/Library/Fonts/Arial.ttf",
         ],
     }
     for path in candidates.get(weight, candidates["Regular"]):
@@ -33,24 +83,28 @@ def font(size, weight="Regular"):
     return ImageFont.load_default()
 
 
-def font_arial_bold(size):
-    path = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
-    if Path(path).exists():
-        try:
-            return ImageFont.truetype(path, size)
-        except OSError:
-            pass
-    return font(size, "Bold")
+def font_saira_bold(size):
+    return _saira(size, "Bold")
 
 
-def font_helvetica_regular(size):
-    path = "/System/Library/Fonts/Helvetica.ttc"
-    if Path(path).exists():
-        try:
-            return ImageFont.truetype(path, size, index=0)
-        except (OSError, TypeError):
-            pass
-    return font(size, "Regular")
+def font_saira_semibold(size):
+    return _saira(size, "SemiBold")
+
+
+def font_saira_medium(size):
+    return _saira(size, "Medium")
+
+
+def font_saira_regular(size):
+    return _saira(size, "Regular")
+
+
+def font_saira_italic(size):
+    return _saira_italic(size, "Regular")
+
+
+def font_stalinist(size):
+    return _stalinist(size)
 
 
 def measure(draw, text, fnt):
@@ -103,12 +157,12 @@ def draw_brand_mark(draw, x, y, size=56):
 
 
 def draw_countdown_poster(draw, img, cx, top_y):
-    f_eyebrow = font_arial_bold(15)
+    f_eyebrow = font_saira_bold(15)
     eyebrow = "→ PUBLIC LAUNCH IN"
     ew, _ = measure(draw, eyebrow, f_eyebrow)
     draw.text((cx - ew // 2, top_y), eyebrow, fill=ACCENT, font=f_eyebrow)
 
-    f_days = font(220, "Bold")
+    f_days = font_stalinist(180)
     days_text = "20"
     dw, dh = measure(draw, days_text, f_days)
     days_y = top_y + 35
@@ -116,13 +170,13 @@ def draw_countdown_poster(draw, img, cx, top_y):
     draw = ImageDraw.Draw(img)
     draw.text((cx - dw // 2, days_y), days_text, fill=INK, font=f_days)
 
-    f_label = font_arial_bold(18)
+    f_label = font_saira_bold(18)
     label = "DAYS TO LAUNCH"
     lw, _ = measure(draw, label, f_label)
     label_y = days_y + dh + 14
     draw.text((cx - lw // 2, label_y), label, fill=MUTED, font=f_label)
 
-    f_date = font_helvetica_regular(20)
+    f_date = font_saira_regular(20)
     date_line1 = "September 2, 2026"
     date_line2 = "12:00 AM IST"
     d1w, _ = measure(draw, date_line1, f_date)
@@ -145,34 +199,34 @@ def main():
     mark_x, mark_y = 80, 70
     draw_brand_mark(draw, mark_x, mark_y, mark_size)
 
-    f_brand = font(34, "Bold")
-    draw.text((mark_x + mark_size + 18, mark_y + 10), "FolioSpace", fill=INK, font=f_brand)
+    f_brand = font_stalinist(34)
+    draw.text((mark_x + mark_size + 18, mark_y + 8), "FolioSpace", fill=INK, font=f_brand)
 
     y_eyebrow = 170
-    f_eyebrow = font_arial_bold(15)
+    f_eyebrow = font_saira_bold(15)
     draw.text((80, y_eyebrow), "→ PRIVATE BETA  ·  WAITLIST OPEN", fill=ACCENT, font=f_eyebrow)
 
-    y_lead = 195
-    f_small_lead = font(50, "Bold")
+    y_lead = 200
+    f_small_lead = font_saira_semibold(50)
     draw.text((80, y_lead), "Stop sending", fill=INK, font=f_small_lead)
 
     y_pdfs = y_lead + 60
-    f_big_pdfs = font(110, "Bold")
+    f_big_pdfs = font_stalinist(120)
     img = highlight_text(img, 80, y_pdfs, "PDFs.", f_big_pdfs, ACCENT, hl_alpha=90, pad_x=10)
     draw = ImageDraw.Draw(img)
     draw.text((80, y_pdfs), "PDFs.", fill=INK, font=f_big_pdfs)
 
-    y_sub1 = y_pdfs + 125
-    f_sub = font(50, "Bold")
+    y_sub1 = y_pdfs + 130
+    f_sub = font_saira_semibold(46)
     draw.text((80, y_sub1), "Start sharing a link", fill=INK, font=f_sub)
-    y_sub2 = y_sub1 + 55
+    y_sub2 = y_sub1 + 52
     draw.text((80, y_sub2), "that lands.", fill=INK, font=f_sub)
 
-    f_for = font(22, "Regular")
-    draw.text((80, y_sub2 + 72), "For Indian professionals.", fill=MUTED, font=f_for)
+    f_for = font_saira_regular(22)
+    draw.text((80, y_sub2 + 70), "For Indian professionals.", fill=MUTED, font=f_for)
 
-    f_persona = font(20, "Bold")
-    persona_y = y_sub2 + 102
+    f_persona = font_saira_bold(18)
+    persona_y = y_sub2 + 100
     personas = "Chefs · developers · students · designers · artists"
     draw.text((80, persona_y), personas, fill=INK, font=f_persona)
 

@@ -1,7 +1,26 @@
 (function () {
-  
+
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const isDesktop = window.matchMedia('(min-width: 900px)').matches && window.matchMedia('(hover: hover)').matches;
+
+  (function () {
+    var root = document.documentElement;
+    var reveal = function () { root.classList.remove('is-curtain-closed'); };
+    if (reduceMotion) { reveal(); return; }
+    var half = document.querySelector('.cover-curtain-half');
+    if (!half) { reveal(); return; }
+    var done = false;
+    var fire = function () {
+      if (done) return;
+      done = true;
+      reveal();
+    };
+    half.addEventListener('animationend', function (e) {
+      if (e.animationName === 'coverCurtainOpenL' || e.animationName === 'coverCurtainOpenR') fire();
+    });
+    setTimeout(fire, 3000);
+  })();
+
 
   (function () {
     if (reduceMotion) return;
@@ -119,6 +138,26 @@
   });
 
   (function () {
+    const stats = document.querySelector('.stats');
+    if (!stats) return;
+    if (!('IntersectionObserver' in window)) {
+      stats.classList.add('is-in-view');
+      stats.querySelectorAll('[data-count]').forEach(animateCount);
+      return;
+    }
+    const io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          stats.classList.add('is-in-view');
+          stats.querySelectorAll('[data-count]').forEach(animateCount);
+          io.unobserve(stats);
+        }
+      });
+    }, { threshold: 0.2, rootMargin: '0px 0px -6% 0px' });
+    io.observe(stats);
+  })();
+
+  (function () {
     const wrap = document.querySelector('.h-track-wrap');
     const track = document.querySelector('.h-track');
     if (!wrap || !track) return;
@@ -126,6 +165,32 @@
     const clone = track.innerHTML;
     track.insertAdjacentHTML('beforeend', clone);
     track.style.width = 'max-content';
+  })();
+
+  (function () {
+    const counter = document.getElementById('cover-counter');
+    if (!counter) return;
+    const numEl = counter.querySelector('[data-count]');
+    if (!numEl) return;
+    const target = Number(numEl.getAttribute('data-count') || 0);
+
+    function setValue(v) {
+      numEl.textContent = String(v);
+    }
+
+    async function poll() {
+      try {
+        const res = await fetch('/api/stats', { headers: { Accept: 'application/json' } });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (typeof data.total === 'number') setValue(data.total);
+      } catch (e) {
+        // network errors are silent — the badge keeps the SSR fallback
+      }
+    }
+
+    poll();
+    setInterval(poll, 15000);
   })();
 
   (function () {
@@ -138,18 +203,75 @@
   (function () {
     const story = document.getElementById('story');
     if (!story) return;
-    const steps = story.querySelectorAll('.story-step');
-    function update() {
-      const r = story.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const traveled = -r.top;
-      const total = Math.max(1, r.height - vh * 0.4);
-      const ratio = Math.min(1, Math.max(0, traveled / total));
-      const idx = Math.min(steps.length - 1, Math.max(0, Math.floor(ratio * steps.length)));
-      steps.forEach(function (s, i) { s.classList.toggle('is-active', i === idx); });
+
+    if (!('IntersectionObserver' in window)) {
+      story.classList.add('is-in-view');
+      return;
     }
-    window.addEventListener('scroll', update, { passive: true });
-    update();
+
+    const io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          story.classList.add('is-in-view');
+        }
+      });
+    }, { threshold: 0.18, rootMargin: '0px 0px -8% 0px' });
+
+    io.observe(story);
+  })();
+
+  (function () {
+    const who = document.querySelector('.who');
+    if (!who) return;
+    if (!('IntersectionObserver' in window)) {
+      who.classList.add('is-in-view');
+      return;
+    }
+    const io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          who.classList.add('is-in-view');
+          io.unobserve(who);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    io.observe(who);
+  })();
+
+  (function () {
+    const pricing = document.querySelector('.pricing');
+    if (!pricing) return;
+    if (!('IntersectionObserver' in window)) {
+      pricing.classList.add('is-in-view');
+      return;
+    }
+    const io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          pricing.classList.add('is-in-view');
+          io.unobserve(pricing);
+        }
+      });
+    }, { threshold: 0.14, rootMargin: '0px 0px -6% 0px' });
+    io.observe(pricing);
+  })();
+
+  (function () {
+    const stampCta = document.querySelector('.cta.stamp');
+    if (!stampCta) return;
+    if (!('IntersectionObserver' in window)) {
+      stampCta.classList.add('is-in-view');
+      return;
+    }
+    const io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          stampCta.classList.add('is-in-view');
+          io.unobserve(stampCta);
+        }
+      });
+    }, { threshold: 0.18, rootMargin: '0px 0px -8% 0px' });
+    io.observe(stampCta);
   })();
 
   document.addEventListener('keydown', function (e) {
@@ -545,19 +667,24 @@
     const toggle = document.getElementById('pricing-toggle');
     if (!toggle) return;
     const buttons = toggle.querySelectorAll('button');
+    const monthlyEls = document.querySelectorAll('.receipt-price-monthly, .receipt-unit-monthly, .receipt-sub-monthly');
+    const yearlyEls = document.querySelectorAll('.receipt-price-yearly, .receipt-unit-yearly, .receipt-sub-yearly');
+    const saveStamp = document.querySelector('.receipt-save-stamp');
+
+    function apply(cycle) {
+      monthlyEls.forEach(function (el) { el.classList.toggle('is-hidden', cycle !== 'monthly'); });
+      yearlyEls.forEach(function (el) { el.classList.toggle('is-hidden', cycle !== 'yearly'); });
+      if (saveStamp) {
+        saveStamp.classList.toggle('is-on', cycle === 'yearly');
+      }
+    }
+
     buttons.forEach(function (b) {
       b.addEventListener('click', function () {
         if (b.classList.contains('is-on')) return;
         buttons.forEach(function (x) { x.classList.remove('is-on'); });
         b.classList.add('is-on');
-        const cycle = b.dataset.cycle;
-        document.querySelectorAll('.price.is-monthly, .price.is-yearly, .price-sub.is-monthly, .price-sub.is-yearly').forEach(function (el) {
-          if (el.classList.contains('is-monthly')) {
-            el.classList.toggle('is-hidden', cycle !== 'monthly');
-          } else {
-            el.classList.toggle('is-hidden', cycle !== 'yearly');
-          }
-        });
+        apply(b.dataset.cycle);
       });
     });
   })();
