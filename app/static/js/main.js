@@ -32,42 +32,22 @@
 
 
   (function () {
-    const cover = document.querySelector('.cover');
-    const coverN = document.getElementById('cover-counter-n');
-    if (!cover) return;
+    const micro = document.getElementById('signup-microcopy');
+    if (!micro) return;
 
-    function animateNumber(el, target) {
-      if (!el) return;
-      const start = parseInt(el.textContent || '0', 10) || 0;
-      if (start === target) { el.textContent = String(target); return; }
-      if (reduceMotion) { el.textContent = String(target); return; }
-      const dur = 900;
-      const t0 = performance.now();
-      function tick(now) {
-        const p = Math.min(1, (now - t0) / dur);
-        const eased = 1 - Math.pow(1 - p, 3);
-        const v = Math.round(start + (target - start) * eased);
-        el.textContent = String(v);
-        if (p < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-    }
-
-    async function loadStats() {
+    async function refreshMicrocopy() {
       try {
         const res = await fetch('/api/stats', { cache: 'no-store' });
         if (!res.ok) return;
         const data = await res.json();
         const n = parseInt(data.total, 10);
-        if (!Number.isFinite(n)) return;
-        animateNumber(coverN, n);
-        const micro = document.getElementById('signup-microcopy');
-        if (micro && n > 0) micro.textContent = '→ ' + n + ' already in · no spam · delete on request';
+        if (!Number.isFinite(n) || n <= 0) return;
+        micro.textContent = '→ ' + n + ' already in · no spam · delete on request';
       } catch (e) {}
     }
-    loadStats();
-    setInterval(loadStats, 15000);
-    document.addEventListener('visibilitychange', function () { if (!document.hidden) loadStats(); });
+    refreshMicrocopy();
+    setInterval(refreshMicrocopy, 15000);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) refreshMicrocopy(); });
   })();
 
   const navWrap = document.querySelector('.nav-wrap');
@@ -194,7 +174,7 @@
     }
   });
 
-  async function reloadCoverCounter() {
+  async function refreshMicrocopy() {
     try {
       const res = await fetch('/api/stats', { cache: 'no-store' });
       if (!res.ok) return;
@@ -228,7 +208,7 @@
         if (!res.ok) { setMsg(body.detail || 'Something went wrong. Try again.', 'err'); return; }
         setMsg(body.message || "You're in.", 'ok');
         form.reset();
-        reloadCoverCounter();
+        refreshMicrocopy();
       } catch (err) {
         setMsg('Network error. Try again.', 'err');
       } finally {

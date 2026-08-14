@@ -4831,8 +4831,11 @@ body.dark .signup-chip:has(input:checked) { background: var(--accent); color: va
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  min-height: clamp(680px, 92vh, 880px);
-  padding: 168px 0 96px;
+  min-height: clamp(640px, 88vh, 860px);
+  padding: 200px 0 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background:
     radial-gradient(ellipse 80% 60% at 20% 0%, rgba(255, 107, 53, 0.07), transparent 60%),
     radial-gradient(ellipse 70% 50% at 95% 100%, rgba(15, 20, 25, 0.05), transparent 65%),
@@ -4873,294 +4876,56 @@ body.dark .signup-chip:has(input:checked) { background: var(--accent); color: va
   position: relative;
   z-index: 3;
   max-width: 1280px;
-}
-
-.cover-vertical {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  z-index: 4;
-  transform: rotate(-90deg) translateX(50%);
-  transform-origin: left center;
-  white-space: nowrap;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 12.5px;
-  font-weight: 700;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: var(--ink);
-  opacity: 0.72;
-}
-
-.cover-vertical span {
-  display: inline-block;
-}
-
-.cover-eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 36px;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--ink);
-}
-
-.cover-eyebrow-num {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
-  font-variation-settings: 'opsz' 14, 'SOFT' 0, 'WONK' 0;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--accent);
-  letter-spacing: 0.12em;
-}
-
-.cover-eyebrow-rule {
-  flex: 0 0 56px;
-  height: 1px;
-  background: var(--ink);
-  opacity: 0.6;
-}
-
-.cover-eyebrow-text {
-  opacity: 0.78;
+  text-align: center;
 }
 
 .cover-headline {
-  margin: 0 0 28px;
+  margin: 0 0 36px;
   padding: 0;
   font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
   font-weight: 400;
   font-style: normal;
-  font-size: clamp(64px, 13vw, 184px);
-  line-height: 0.94;
-  letter-spacing: -0.02em;
+  font-size: clamp(112px, 18vw, 280px);
+  line-height: 0.92;
+  letter-spacing: -0.03em;
   color: var(--ink);
-  max-width: 14ch;
 }
 
 .cover-headline-line {
   display: block;
 }
 
-.cover-headline em {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
-  font-style: italic;
-  font-weight: 400;
-  color: var(--accent);
-  letter-spacing: -0.015em;
-}
-
-.cover-sub {
-  margin: 0 0 32px;
-  max-width: 560px;
+.cover-tagline {
+  margin: 0 auto;
+  max-width: 520px;
   font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
   font-size: 14px;
   font-weight: 500;
-  letter-spacing: 0.04em;
-  line-height: 1.5;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  line-height: 1;
   color: var(--ink);
-  opacity: 0.86;
+  opacity: 0.78;
   border-top: 1px solid var(--line-strong);
   border-bottom: 1px solid var(--line-strong);
-  padding: 14px 0;
-}
-
-.cover-cta-row {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  flex-wrap: wrap;
-  margin-top: 36px;
-}
-
-.cover-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 28px 16px 24px;
-  background: var(--ink);
-  color: var(--cream);
-  text-decoration: none;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  border: 1px solid var(--ink);
-  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
-}
-
-.cover-cta:hover {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--cream);
-  transform: translateY(-1px);
-}
-
-.cover-cta-arrow {
-  display: inline-block;
-  transition: transform 0.2s ease;
-}
-
-.cover-cta:hover .cover-cta-arrow {
-  transform: translateX(4px);
-}
-
-.cover-cta-meta {
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ink);
-  opacity: 0.55;
-}
-
-.cover-counter {
-  position: absolute;
-  right: 24px;
-  bottom: 96px;
-  z-index: 5;
-  width: 132px;
-  height: 132px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: var(--ink);
-  color: var(--cream);
-  border-radius: 50%;
-  border: 2px solid var(--cream);
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
-  font-variation-settings: 'opsz' 96, 'SOFT' 0, 'WONK' 0;
-  text-align: center;
-  line-height: 1;
-  padding: 12px;
-}
-
-.cover-counter-num {
-  font-size: 56px;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
-}
-
-.cover-counter-period {
-  position: absolute;
-  bottom: 28px;
-  right: 22px;
-  font-size: 24px;
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.cover-counter-label {
-  position: absolute;
-  bottom: -28px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 12.5px;
-  font-weight: 700;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--ink);
-  opacity: 0.72;
-  white-space: nowrap;
-}
-
-.cover-stamp {
-  position: absolute;
-  right: 184px;
-  bottom: 56px;
-  z-index: 4;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
-  font-style: italic;
-  font-size: 14px;
-  color: var(--ink);
-  opacity: 0.58;
-  letter-spacing: 0.02em;
-}
-
-.cover-marquee {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 4;
-  background: var(--cream-2);
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--ink);
-  padding: 14px 0;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.cover-marquee-track {
-  display: inline-flex;
-  align-items: center;
-  gap: 18px;
-  padding-left: 100%;
-  animation: coverMarquee 48s linear infinite;
-  font-family: 'Stalinist One', 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 13.5px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ink);
-}
-
-.cover-marquee-item {
-  display: inline-block;
-}
-
-.cover-marquee-sep {
-  opacity: 0.4;
-}
-
-@keyframes coverMarquee {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cover-marquee-track { animation: none; padding-left: 16px; }
+  padding: 18px 0;
 }
 
 /* responsive -------------------------------------------------------- */
 
 @media (max-width: 1024px) {
-  .cover { padding: 140px 0 88px; }
-  .cover-counter { width: 112px; height: 112px; right: 16px; bottom: 88px; }
-  .cover-counter-num { font-size: 46px; }
-  .cover-stamp { right: 152px; bottom: 48px; font-size: 13.5px; }
+  .cover { padding: 168px 0 96px; min-height: clamp(560px, 80vh, 720px); }
 }
 
 @media (max-width: 880px) {
-  .cover { padding: 120px 0 80px; min-height: 0; }
-  .cover-headline { font-size: clamp(54px, 12vw, 96px); }
-  .cover-vertical { display: none; }
-  .cover-counter {
-    position: static;
-    margin: 36px auto 0;
-    width: 100px;
-    height: 100px;
-  }
-  .cover-counter-num { font-size: 40px; }
-  .cover-stamp { display: none; }
+  .cover { padding: 140px 0 80px; min-height: 0; }
+  .cover-headline { font-size: clamp(72px, 16vw, 144px); }
 }
 
 @media (max-width: 560px) {
-  .cover { padding: 96px 0 72px; }
-  .cover-headline { font-size: clamp(44px, 12vw, 72px); }
-  .cover-sub { font-size: 13px; padding: 12px 0; }
-  .cover-cta { padding: 14px 20px; font-size: 13.5px; }
-  .cover-marquee-track { font-size: 12.5px; gap: 14px; }
-  .cover-eyebrow { margin-bottom: 24px; flex-wrap: wrap; }
+  .cover { padding: 112px 0 64px; }
+  .cover-headline { font-size: clamp(56px, 16vw, 104px); margin-bottom: 28px; }
+  .cover-tagline { font-size: 12.5px; letter-spacing: 0.18em; padding: 14px 0; }
 }
 
 /* dark-mode overrides for cover (preserves cream aesthetic for the hero) */
