@@ -62,7 +62,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .brand-sub {
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -98,7 +98,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .sidebar-section-label {
   font-family: var(--label);
-  font-size: 9px;
+  font-size: 12.5px;
   font-weight: 700;
   letter-spacing: 0.24em;
   text-transform: uppercase;
@@ -119,7 +119,7 @@ input, select, textarea, button { font-family: inherit; }
   gap: 10px;
   padding: 8px 20px 8px 17px;
   font-family: var(--label);
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -156,7 +156,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .sidebar-badge {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
   background: var(--cream);
@@ -180,7 +180,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .sidebar-foot-status {
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -194,7 +194,7 @@ input, select, textarea, button { font-family: inherit; }
   font-weight: 400;
   text-transform: none;
   letter-spacing: 0;
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--ink);
   margin-left: 4px;
 }
@@ -209,7 +209,7 @@ input, select, textarea, button { font-family: inherit; }
 .sidebar-foot-kbd { display: inline-flex; gap: 2px; align-items: center; }
 .sidebar-foot-kbd kbd {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 12px;
   padding: 2px 6px;
   background: var(--cream);
   border: 1px solid var(--line-strong);
@@ -224,7 +224,7 @@ input, select, textarea, button { font-family: inherit; }
   background: none;
   border: 0;
   padding: 0;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -278,7 +278,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .app-bar-issue {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -311,7 +311,7 @@ input, select, textarea, button { font-family: inherit; }
   border-color: var(--ink);
   background: #fff;
 }
-.search::placeholder { color: var(--muted); font-family: var(--mono); font-size: 12px; }
+.search::placeholder { color: var(--muted); font-family: var(--mono); font-size: 13.5px; }
 
 .search-kbd {
   position: absolute;
@@ -324,7 +324,7 @@ input, select, textarea, button { font-family: inherit; }
 }
 .search-kbd kbd {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 12px;
   padding: 2px 5px;
   background: var(--cream-2);
   border: 1px solid var(--line-strong);
@@ -345,7 +345,7 @@ input, select, textarea, button { font-family: inherit; }
   align-items: center;
   gap: 8px;
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -360,7 +360,7 @@ input, select, textarea, button { font-family: inherit; }
 .app-bar-btn:hover { background: var(--ink); color: var(--cream); border-color: var(--ink); }
 .app-bar-btn kbd {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 12px;
   padding: 1px 5px;
   background: var(--cream-2);
   border: 1px solid var(--line-strong);
@@ -378,7 +378,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .breadcrumbs {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   margin-bottom: 8px;
   font-variant-numeric: tabular-nums;
@@ -405,7 +405,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .page-head .eyebrow {
   font-family: var(--label);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.24em;
   text-transform: uppercase;
@@ -494,7 +494,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .stat-label {
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -536,7 +536,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .panel-head .meta {
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -561,7 +561,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .role-name {
   font-family: var(--label);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -585,7 +585,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .role-n {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 13.5px;
   text-align: right;
   color: var(--ink-2);
   font-variant-numeric: tabular-nums;
@@ -619,7 +619,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .recent-time {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -627,7 +627,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .recent-role {
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -651,7 +651,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .field-label {
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -691,7 +691,7 @@ input, select, textarea, button { font-family: inherit; }
   border: 1px solid var(--line-strong);
   border-radius: 999px;
   font-family: var(--label);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -724,7 +724,7 @@ input, select, textarea, button { font-family: inherit; }
   align-items: center;
   justify-content: center;
   font-family: var(--label);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -782,7 +782,7 @@ input, select, textarea, button { font-family: inherit; }
 }
 
 .btn-sm {
-  font-size: 10px;
+  font-size: 12px;
   padding: 7px 12px;
   letter-spacing: 0.18em;
 }
@@ -803,7 +803,7 @@ input, select, textarea, button { font-family: inherit; }
 .table thead th {
   text-align: left;
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -826,7 +826,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .table .id {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
@@ -845,7 +845,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .table .role {
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -855,7 +855,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .table .time {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -880,7 +880,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .empty-sub {
   font-family: var(--label);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -893,7 +893,7 @@ input, select, textarea, button { font-family: inherit; }
   padding: 2px 6px;
   border: 1px solid var(--line);
   border-radius: 0;
-  font-size: 12px;
+  font-size: 13.5px;
 }
 
 .pagination {
@@ -905,13 +905,13 @@ input, select, textarea, button { font-family: inherit; }
   background: var(--cream-2);
   border: 1px solid var(--line-strong);
   border-radius: 0;
-  font-size: 12px;
+  font-size: 13.5px;
 }
 
 .pagination-meta {
   font-family: var(--mono);
   color: var(--muted);
-  font-size: 11px;
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -924,7 +924,7 @@ input, select, textarea, button { font-family: inherit; }
   border: 1px solid var(--line-strong);
   border-radius: 0;
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -972,7 +972,7 @@ input, select, textarea, button { font-family: inherit; }
   padding: 22px 32px 24px;
   border-top: 1px solid var(--ink);
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.24em;
   text-transform: uppercase;
@@ -1035,7 +1035,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .login-eyebrow {
   font-family: var(--label);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.24em;
   text-transform: uppercase;
@@ -1098,7 +1098,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .login-field label {
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -1131,7 +1131,7 @@ input, select, textarea, button { font-family: inherit; }
   padding: 14px;
   border-radius: 0;
   font-family: var(--label);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.24em;
   text-transform: uppercase;
@@ -1146,7 +1146,7 @@ input, select, textarea, button { font-family: inherit; }
   margin-top: 22px;
   text-align: center;
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -1181,7 +1181,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .detail-row .label {
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -1231,7 +1231,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .detail-back {
   font-family: var(--label);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -1254,7 +1254,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .cold-open .kicker {
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.24em;
   text-transform: uppercase;
@@ -1272,7 +1272,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .cold-open .stamp {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -1284,13 +1284,13 @@ input, select, textarea, button { font-family: inherit; }
   gap: 4px;
   margin-top: 8px;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 13.5px;
   font-variant-numeric: tabular-nums;
 }
 
 .delta .arrow {
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
@@ -1301,7 +1301,7 @@ input, select, textarea, button { font-family: inherit; }
 
 .delta .ctx {
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -1324,7 +1324,7 @@ input, select, textarea, button { font-family: inherit; }
 .stat .sub {
   margin-top: 6px;
   font-family: var(--label);
-  font-size: 9px;
+  font-size: 12.5px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -1352,13 +1352,13 @@ input, select, textarea, button { font-family: inherit; }
 .chart .pt-hover { fill: var(--accent); }
 .chart .label {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 12px;
   fill: var(--muted);
   font-variant-numeric: tabular-nums;
 }
 .chart .label.k {
   font-family: var(--label);
-  font-size: 9px;
+  font-size: 12.5px;
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -1371,7 +1371,7 @@ input, select, textarea, button { font-family: inherit; }
   background: var(--ink);
   color: var(--cream);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   border-radius: 0;
@@ -1382,7 +1382,7 @@ input, select, textarea, button { font-family: inherit; }
 }
 .chart-tip .tip-day {
   font-family: var(--label);
-  font-size: 9px;
+  font-size: 12.5px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -1418,7 +1418,7 @@ input, select, textarea, button { font-family: inherit; }
 }
 .audit-strip .strip-head a {
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -1432,7 +1432,7 @@ input, select, textarea, button { font-family: inherit; }
   gap: 14px;
   padding: 10px 0;
   border-bottom: 1px dashed var(--line);
-  font-size: 12px;
+  font-size: 13.5px;
   align-items: baseline;
 }
 .audit-strip .strip-row:last-child { border-bottom: 0; }
@@ -1440,11 +1440,11 @@ input, select, textarea, button { font-family: inherit; }
   font-family: var(--mono);
   color: var(--muted);
   font-variant-numeric: tabular-nums;
-  font-size: 11px;
+  font-size: 13px;
 }
 .audit-strip .strip-row .act {
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -1454,12 +1454,12 @@ input, select, textarea, button { font-family: inherit; }
   font-family: var(--mono);
   color: var(--ink-2);
   font-variant-numeric: tabular-nums;
-  font-size: 11px;
+  font-size: 13px;
   word-break: break-all;
 }
 .audit-strip .strip-row .ip {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -1467,13 +1467,13 @@ input, select, textarea, button { font-family: inherit; }
 
 .audit-table .id-cell {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
 .audit-table .act-cell {
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -1481,13 +1481,13 @@ input, select, textarea, button { font-family: inherit; }
 }
 .audit-table .target-cell {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--ink-2);
   font-variant-numeric: tabular-nums;
 }
 .audit-table .meta-cell {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   max-width: 280px;
   word-break: break-word;
@@ -1532,7 +1532,7 @@ input, select, textarea, button { font-family: inherit; }
 .kbd-modal h3 em { font-style: italic; color: var(--accent); }
 .kbd-modal .kbd-sub {
   font-family: var(--label);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.24em;
   text-transform: uppercase;
@@ -1543,7 +1543,7 @@ input, select, textarea, button { font-family: inherit; }
 .kbd-modal dt { display: flex; gap: 4px; align-items: center; }
 .kbd-modal dd {
   font-family: var(--label);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -1552,7 +1552,7 @@ input, select, textarea, button { font-family: inherit; }
 }
 .kbd-modal kbd {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   padding: 3px 8px;
   background: var(--cream-2);
   border: 1px solid var(--line-strong);
@@ -1586,7 +1586,7 @@ input, select, textarea, button { font-family: inherit; }
   .stat-row { grid-template-columns: repeat(2, 1fr); }
   .stat:nth-child(2n) { border-right: 0; }
   .stat:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
-  .table { font-size: 12px; }
+  .table { font-size: 13.5px; }
   .table thead th, .table tbody td { padding: 10px 12px; }
   .detail-grid { grid-template-columns: 1fr; }
   .role-row { grid-template-columns: 100px 1fr 50px; }
@@ -1603,5 +1603,5 @@ input, select, textarea, button { font-family: inherit; }
   .actions { margin-left: 0; width: 100%; }
   .table .email { word-break: break-all; }
   .app-bar-btn { display: none; }
-  .search { padding-left: 56px; font-size: 12px; }
+  .search { padding-left: 56px; font-size: 13.5px; }
 }
