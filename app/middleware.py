@@ -88,6 +88,11 @@ def _security_headers(response: Response) -> None:
     response.headers.setdefault("Cross-Origin-Opener-Policy", "same-origin")
     response.headers.setdefault("X-DNS-Prefetch-Control", "off")
     response.headers.setdefault("X-Permitted-Cross-Domain-Policies", "none")
+    ctype = (response.headers.get("content-type") or "").split(";")[0].strip().lower()
+    if ctype == "text/html":
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):

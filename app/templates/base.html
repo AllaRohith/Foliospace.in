@@ -13,7 +13,7 @@
   <meta property="og:description" content="{% block og_description %}{{ description }}{% endblock %}" />
   <meta property="og:url" content="{{ request.url }}" />
   <meta property="og:site_name" content="{{ site_name }}" />
-  <meta property="og:image" content="{{ request.url_for('static', path='img/og.png') }}" />
+  <meta property="og:image" content="{{ request.url_for('static', path='img/og.png') }}?v={{ asset_v }}" />
   <meta property="og:image:alt" content="FolioSpace — A portfolio for everyone. ₹150 setup, ₹99/month." />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -21,14 +21,14 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="{% block twitter_title %}{{ page_title }}{% endblock %}" />
   <meta name="twitter:description" content="{% block twitter_description %}{{ description }}{% endblock %}" />
-  <meta name="twitter:image" content="{{ request.url_for('static', path='img/og.png') }}" />
+  <meta name="twitter:image" content="{{ request.url_for('static', path='img/og.png') }}?v={{ asset_v }}" />
 
-  <link rel="icon" type="image/svg+xml" href="{{ request.url_for('static', path='img/favicon.svg') }}" />
+  <link rel="icon" type="image/svg+xml" href="{{ request.url_for('static', path='img/favicon.svg') }}?v={{ asset_v }}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Stalinist+One&family=Saira:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}" />
+  <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}?v={{ asset_v }}" />
   <script>document.documentElement.classList.add('is-curtain-closed');</script>
 </head>
 <body>
@@ -77,7 +77,7 @@
     </div>
   </div>
   {% block content %}{% endblock %}
-  <script src="{{ request.url_for('static', path='js/utm.js') }}"></script>
-  <script src="{{ request.url_for('static', path='js/main.js') }}"></script>
+  <script src="{{ request.url_for('static', path='js/utm.js') }}?v={{ asset_v }}"></script>
+  <script src="{{ request.url_for('static', path='js/main.js') }}?v={{ asset_v }}"></script>
 </body>
 </html>

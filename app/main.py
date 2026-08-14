@@ -62,6 +62,7 @@ app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=_proxy_trusted)
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
+templates.env.globals["asset_v"] = (os.getenv("RENDER_GIT_COMMIT") or os.getenv("GIT_COMMIT") or "dev")[:8]
 
 app.include_router(waitlist.router)
 app.include_router(stats.router)
