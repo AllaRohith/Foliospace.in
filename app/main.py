@@ -195,10 +195,13 @@ async def sitemap():
     from fastapi.responses import PlainTextResponse
     base = os.getenv("PUBLIC_BASE_URL", "https://foliospace.in").rstrip("/")
     today = datetime.now(timezone.utc).date().isoformat()
+    legal_lastmod = "2026-08-15"
     body = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
         f'  <url><loc>{base}/</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>\n'
+        f'  <url><loc>{base}/privacy</loc><lastmod>{legal_lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>\n'
+        f'  <url><loc>{base}/terms</loc><lastmod>{legal_lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>\n'
         '</urlset>\n'
     )
     return PlainTextResponse(content=body, media_type="application/xml")

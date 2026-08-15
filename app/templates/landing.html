@@ -1,5 +1,52 @@
 {% extends "base.html" %}
 
+{% block jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://foliospace.in/#org",
+      "name": "FolioSpace",
+      "alternateName": "Folio Space",
+      "url": "https://foliospace.in",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://foliospace.in/static/img/og.png",
+        "width": 1200,
+        "height": 630
+      },
+      "description": "One-page portfolio for every Indian professional — chefs, developers, students, consultants, shop owners, agencies, founders.",
+      "foundingDate": "2026",
+      "areaServed": {
+        "@type": "Country",
+        "name": "India"
+      },
+      "priceRange": "₹₹"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://foliospace.in/#site",
+      "url": "https://foliospace.in",
+      "name": "FolioSpace",
+      "inLanguage": "en-IN",
+      "publisher": { "@id": "https://foliospace.in/#org" }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://foliospace.in/#webpage",
+      "url": "https://foliospace.in",
+      "name": "FolioSpace — A portfolio for every Indian professional",
+      "isPartOf": { "@id": "https://foliospace.in/#site" },
+      "about": { "@id": "https://foliospace.in/#org" },
+      "inLanguage": "en-IN"
+    }
+  ]
+}
+</script>
+{% endblock %}
+
 {% block content %}
   <header class="nav-wrap" id="nav-wrap">
     <div class="nav" data-state="top">
@@ -199,11 +246,16 @@
         </div>
       </div>
 
-      <a href="#workshop" class="cover-counter" id="cover-counter" aria-label="People on the waitlist">
-        <span class="cover-counter-ring" aria-hidden="true"></span>
-        <span class="cover-counter-num" data-count="16">0</span>
-        <span class="cover-counter-dot">.</span>
-        <span class="cover-counter-label">on the waitlist</span>
+      <a href="#workshop" class="cover-stub" id="cover-counter" aria-label="People on the waitlist">
+        <span class="cover-stub-stub" aria-hidden="true">
+          <span class="cover-stub-num" data-count="16">0</span>
+          <span class="cover-stub-cap">folios</span>
+        </span>
+        <span class="cover-stub-perf" aria-hidden="true"></span>
+        <span class="cover-stub-main" aria-hidden="true">
+          <span class="cover-stub-eyebrow">No.</span>
+          <span class="cover-stub-tag">on the waitlist</span>
+        </span>
       </a>
 
       <div class="cover-marquee" aria-hidden="true">

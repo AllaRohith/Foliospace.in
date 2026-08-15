@@ -6444,60 +6444,83 @@ body.dark .signup-chip:has(input:checked) { background: var(--accent); color: va
   opacity: 0.62;
 }
 
-.cover-counter {
+.cover-stub {
   position: absolute;
-  right: 32px;
-  bottom: 110px;
+  right: 28px;
+  bottom: 120px;
   z-index: 5;
+  display: inline-flex;
+  align-items: stretch;
+  text-decoration: none;
+  background: var(--ink);
+  color: var(--cream);
+  font-family: 'Saira', sans-serif;
+  border-radius: 4px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 6px 18px rgba(15, 20, 25, 0.25);
+  opacity: 0;
+  transform: rotate(-3deg);
+  animation: coverStampIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.95s forwards;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.cover-stub:hover {
+  transform: rotate(0deg) translateY(-2px);
+}
+.cover-stub-stub {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: clamp(96px, 11vw, 132px);
-  height: clamp(96px, 11vw, 132px);
-  border-radius: 50%;
-  background: var(--ink);
-  color: var(--cream);
-  text-decoration: none;
-  border: 2px solid var(--cream);
-  box-shadow: 0 0 0 4px var(--ink);
-  opacity: 0;
-  transform: scale(0.7) rotate(-12deg);
-  animation: coverStampIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.95s forwards;
-  transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+  padding: 12px 12px 10px;
+  min-width: 64px;
+  gap: 2px;
 }
-.cover-counter:hover {
-  transform: scale(1.05) rotate(-4deg);
-}
-.cover-counter-ring {
-  position: absolute;
-  inset: -10px;
-  border-radius: 50%;
-  border: 1px dashed rgba(250, 247, 242, 0.45);
-  opacity: 0;
-  animation: coverRingIn 0.6s ease 1.4s forwards;
-}
-.cover-counter-num {
+.cover-stub-num {
   font-family: 'Stalinist One', 'Arial Black', sans-serif;
-  font-size: clamp(28px, 4vw, 44px);
+  font-size: 28px;
   font-weight: 400;
   line-height: 1;
   letter-spacing: -0.02em;
   color: var(--cream);
-  margin-bottom: 2px;
+  font-variant-numeric: tabular-nums;
 }
-.cover-counter-dot {
-  display: none;
-}
-.cover-counter-label {
-  font-family: 'Saira', sans-serif;
-  font-size: 9px;
-  font-weight: 600;
+.cover-stub-cap {
+  font-size: 8.5px;
+  font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: rgba(250, 247, 242, 0.7);
-  text-align: center;
-  padding: 0 6px;
+  color: rgba(250, 247, 242, 0.65);
+}
+.cover-stub-perf {
+  align-self: stretch;
+  width: 0;
+  border-left: 1px dashed rgba(250, 247, 242, 0.35);
+  margin: 6px 0;
+}
+.cover-stub-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 10px 14px 9px 12px;
+  min-width: 96px;
+  gap: 3px;
+}
+.cover-stub-eyebrow {
+  font-family: 'Stalinist One', 'Arial Black', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  line-height: 1;
+}
+.cover-stub-tag {
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(250, 247, 242, 0.78);
+  line-height: 1.2;
 }
 
 .cover-marquee {
@@ -6706,12 +6729,12 @@ body.dark .signup-chip:has(input:checked) { background: var(--accent); color: va
 @media (prefers-reduced-motion: reduce) {
   .cover-eyebrow, .cover-headline-line, .cover-tagline, .cover-cta-row,
   .cover-countdown,
-  .cover-vertical, .cover-counter, .cover-counter-ring, .cover-marquee {
+  .cover-vertical, .cover-stub, .cover-marquee {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
-  .cover-counter { transform: rotate(-6deg) !important; }
+  .cover-stub { transform: rotate(-2deg) !important; }
   .cover-marquee-track { animation: none !important; }
   .cover-stars { display: none !important; }
   .cover-star { animation: none !important; opacity: 0 !important; }
@@ -6738,14 +6761,14 @@ body.dark .signup-chip:has(input:checked) { background: var(--accent); color: va
   .cover { padding: 88px 0 56px; justify-content: flex-start; }
   .cover-headline { font-size: clamp(56px, 12vw, 96px); }
   .cover-vertical { display: none; }
-  .cover-counter {
+  .cover-stub {
     position: static;
     margin: 28px auto 0;
-    width: 96px;
-    height: 96px;
   }
-  .cover-counter-ring { inset: -8px; }
-  .cover-counter-num { font-size: 28px; }
+  .cover-stub-num { font-size: 24px; }
+  .cover-stub-cap, .cover-stub-tag { font-size: 8px; }
+  .cover-stub-main { min-width: 80px; padding: 9px 12px 8px 10px; }
+  .cover-stub-stub { min-width: 56px; padding: 10px 12px 9px; }
   .cover-cta-row { margin-top: 28px; }
   .cover-marquee-item { font-size: 11px; letter-spacing: 0.14em; }
 }
@@ -6767,10 +6790,10 @@ body.dark .signup-chip:has(input:checked) { background: var(--accent); color: va
 }
 
 @media (max-width: 480px) {
-  .cover-counter { width: 80px; height: 80px; margin: 24px auto 0; }
-  .cover-counter-ring { inset: -6px; }
-  .cover-counter-num { font-size: 24px; }
-  .cover-counter-label { font-size: clamp(8.5px, 2.2vw, 11px); letter-spacing: 0.12em; }
+  .cover-stub { margin: 20px auto 0; }
+  .cover-stub-num { font-size: 22px; }
+  .cover-stub-main { min-width: 72px; padding: 8px 10px 7px 8px; }
+  .cover-stub-stub { min-width: 50px; padding: 8px 10px 7px; }
 }
 
 @media (max-width: 480px) {
@@ -6781,9 +6804,10 @@ body.dark .signup-chip:has(input:checked) { background: var(--accent); color: va
   .cover { padding: 64px 0 36px; }
   .cover-headline { font-size: clamp(28px, 8vw, 38px); margin-bottom: 14px; line-height: 0.95; letter-spacing: -0.03em; }
   .cover-tagline { font-size: 11.5px; letter-spacing: 0.14em; padding: 10px 0; }
-  .cover-counter { width: 72px; height: 72px; }
-  .cover-counter-num { font-size: 22px; }
-  .cover-counter-label { font-size: 8.5px; letter-spacing: 0.1em; }
+  .cover-stub { margin: 18px auto 0; }
+  .cover-stub-num { font-size: 20px; }
+  .cover-stub-main { min-width: 64px; padding: 7px 9px 6px 7px; }
+  .cover-stub-stub { min-width: 46px; padding: 7px 9px 6px; }
   .cover-countdown { font-size: 11.5px; letter-spacing: 0.14em; padding: 10px 0; gap: 12px; }
   .cover-countdown-num { gap: 6px; letter-spacing: 0.12em; }
   .cover-countdown-cell > span { font-size: 13px; min-width: 1.5ch; }
@@ -6804,9 +6828,6 @@ body.dark .signup-chip:has(input:checked) { background: var(--accent); color: va
   .cover-countdown-eyebrow { font-size: 9.5px; }
   .cover-cta { padding: 12px 18px !important; font-size: 14px !important; }
   .cover-cta-row { margin-top: 24px; }
-  .cover-counter { width: 68px; height: 68px; margin: 18px auto 0; }
-  .cover-counter-num { font-size: 20px; }
-  .cover-counter-label { font-size: 8px; letter-spacing: 0.08em; }
   .cover-eyebrow { font-size: 11px; letter-spacing: 0.18em; gap: 10px; }
   .cover-eyebrow-line { width: 24px; }
 }
