@@ -471,7 +471,7 @@
     { label: 'Hero — top of page', hint: 'Nav', icon: '↑', href: '#top' },
     { label: 'Who it\'s for', hint: 'Section', icon: 'W', href: '#who' },
     { label: 'Features & roadmap', hint: 'Page', icon: 'F', href: '/features', accent: true },
-    { label: 'Space Community', hint: 'Page', icon: 'C', href: '/space-community', accent: true },
+    { label: 'Space Community', hint: 'Marketplace', icon: 'C', href: '/space-community', accent: true },
     { label: 'Pricing', hint: 'Section', icon: '₹', href: '#pricing', accent: true },
     { label: 'FAQ', hint: 'Section', icon: '?', href: '#faq' },
     { label: 'Join the waitlist', hint: 'Action', icon: '→', href: '#join', accent: true },

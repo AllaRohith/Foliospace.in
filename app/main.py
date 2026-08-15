@@ -207,7 +207,7 @@ async def space_community(request: Request):
         {
             "site_name": "FolioSpace",
             "page_title": "Space Community — FolioSpace",
-            "description": "Every FolioSpace user, in one searchable directory. Filter by role, city, or craft.",
+            "description": "The FolioSpace marketplace. Find a chef, developer, consultant, or shop — by name, company, category, profession, or place.",
         },
     )
 

@@ -9,18 +9,19 @@
       "@type": "WebPage",
       "@id": "https://foliospace.in/space-community#webpage",
       "url": "https://foliospace.in/space-community",
-      "name": "Space Community — FolioSpace",
+      "name": "Space Community — FolioSpace marketplace",
       "isPartOf": { "@id": "https://foliospace.in/#site" },
-      "about": { "@id": "https://foliospace.in/space-community#directory" },
+      "about": { "@id": "https://foliospace.in/space-community#marketplace" },
       "inLanguage": "en-IN"
     },
     {
       "@type": "ItemList",
-      "@id": "https://foliospace.in/space-community#directory",
-      "name": "FolioSpace community directory",
+      "@id": "https://foliospace.in/space-community#marketplace",
+      "name": "FolioSpace marketplace",
       "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "Searchable by craft", "url": "https://foliospace.in/space-community#craft" },
-        { "@type": "ListItem", "position": 2, "name": "Searchable by place", "url": "https://foliospace.in/space-community#place" }
+        { "@type": "ListItem", "position": 1, "name": "Search by name or company", "url": "https://foliospace.in/space-community#search" },
+        { "@type": "ListItem", "position": 2, "name": "Filter by profession, category, company size, or place", "url": "https://foliospace.in/space-community#filters" },
+        { "@type": "ListItem", "position": 3, "name": "Hire directly — built into every folio", "url": "https://foliospace.in/space-community#hire" }
       ]
     }
   ]
@@ -32,23 +33,92 @@
   {% include "partials/_nav.html" %}
 
   <main>
-    <section class="community-page-hero">
-      <div class="container">
-        <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page F2<span class="folio-meta-sep">/</span>The directory</p>
-        <h1 class="reveal">The directory of <em>every FolioSpace user.</em></h1>
-        <p class="community-page-lead reveal">Two filters, one page. The directory is searchable by craft and by place — because a chef in Kochi deserves to be found next to a developer in Guwahati, not buried under a follower count.</p>
-        <div class="community-search" aria-disabled="true">
-          <svg class="community-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="11" cy="11" r="7"/>
-            <path d="m21 21-4.3-4.3"/>
-          </svg>
-          <input class="community-search-input" type="search" placeholder="Search folios by name, craft, or city…" disabled aria-label="Search the directory" />
-          <span class="community-search-badge">Ships at launch</span>
+    <section class="cover community-cover">
+      <div class="cover-grain" aria-hidden="true">
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <filter id="community-noise">
+            <feTurbulence type="fractalNoise" baseFrequency="0.78" numOctaves="2" stitchTiles="stitch"/>
+            <feColorMatrix type="matrix" values="0 0 0 0 0.06 0 0 0 0 0.08 0 0 0 0 0.10 0 0 0 0.78 0"/>
+          </filter>
+          <rect width="100%" height="100%" filter="url(#community-noise)"/>
+        </svg>
+      </div>
+      <div class="cover-stars" aria-hidden="true">
+        <span class="cover-star-pin" style="left:11.4vw;top:18.2vh;"><svg class="cover-star cover-star--sparkle4" style="opacity:0.42;" width="0.62vw" height="0.62vw" viewBox="-0.589 -0.589 1.178 1.178"><path d="M 0 -0.589 L 0.106 -0.106 L 0.589 0 L 0.106 0.106 L 0 0.589 L -0.106 0.106 L -0.589 0 L -0.106 -0.106 Z"/></svg></span>
+        <span class="cover-star-pin" style="left:24.7vw;top:9.6vh;"><svg class="cover-star cover-star--dot" style="opacity:0.55;" width="0.48vw" height="0.48vw" viewBox="-1 -1 2 2"><circle cx="0" cy="0" r="1"/></svg></span>
+        <span class="cover-star-pin" style="left:36.9vw;top:13.4vh;"><svg class="cover-star cover-star--sparkle5" style="opacity:0.31;" width="0.84vw" height="0.84vw" viewBox="-0.840 -0.840 1.680 1.680"><polygon points="0.000,-0.840 0.208,-0.286 0.798,-0.260 0.336,0.109 0.494,0.722 0.000,0.378 -0.494,0.722 -0.336,0.109 -0.798,-0.260 -0.208,-0.286"/></svg></span>
+        <span class="cover-star-pin" style="left:55.3vw;top:6.8vh;"><svg class="cover-star cover-star--plus" style="opacity:0.48;animation-delay:3.21s;animation-duration:5.62s;" width="0.42vw" height="0.42vw" viewBox="-0.210 -0.210 0.420 0.420"><path d="M -0.092 -0.210 L 0.092 -0.210 L 0.092 -0.092 L 0.210 -0.092 L 0.210 0.092 L 0.092 0.092 L 0.092 0.210 L -0.092 0.210 L -0.092 0.092 L -0.210 0.092 L -0.210 -0.092 L -0.092 -0.092 Z"/></svg></span>
+        <span class="cover-star-pin" style="left:68.1vw;top:16.3vh;"><svg class="cover-star cover-star--sparkle4" style="opacity:0.37;" width="0.56vw" height="0.56vw" viewBox="-0.532 -0.532 1.064 1.064"><path d="M 0 -0.532 L 0.096 -0.096 L 0.532 0 L 0.096 0.096 L 0 0.532 L -0.096 0.096 L -0.532 0 L -0.096 -0.096 Z"/></svg></span>
+        <span class="cover-star-pin" style="left:82.5vw;top:11.2vh;"><svg class="cover-star cover-star--dot" style="opacity:0.41;" width="0.36vw" height="0.36vw" viewBox="-1 -1 2 2"><circle cx="0" cy="0" r="1"/></svg></span>
+        <span class="cover-star-pin" style="left:91.2vw;top:21.8vh;"><svg class="cover-star cover-star--sparkle4" style="opacity:0.29;animation-delay:2.04s;animation-duration:6.78s;" width="0.7vw" height="0.7vw" viewBox="-0.665 -0.665 1.330 1.330"><path d="M 0 -0.665 L 0.120 -0.120 L 0.665 0 L 0.120 0.120 L 0 0.665 L -0.120 0.120 L -0.665 0 L -0.120 -0.120 Z"/></svg></span>
+        <span class="cover-star-pin" style="left:8.6vw;top:48.4vh;"><svg class="cover-star cover-star--sparkle5" style="opacity:0.44;" width="1.05vw" height="1.05vw" viewBox="-1.050 -1.050 2.100 2.100"><polygon points="0.000,-1.050 0.260,-0.357 0.998,-0.325 0.420,0.136 0.618,0.901 0.000,0.472 -0.618,0.901 -0.420,0.136 -0.998,-0.325 -0.260,-0.357"/></svg></span>
+        <span class="cover-star-pin" style="left:18.9vw;top:71.6vh;"><svg class="cover-star cover-star--dot" style="opacity:0.36;" width="0.42vw" height="0.42vw" viewBox="-1 -1 2 2"><circle cx="0" cy="0" r="1"/></svg></span>
+        <span class="cover-star-pin" style="left:33.2vw;top:62.9vh;"><svg class="cover-star cover-star--plus" style="opacity:0.5;animation-delay:4.81s;animation-duration:4.92s;" width="0.5vw" height="0.5vw" viewBox="-0.250 -0.250 0.500 0.500"><path d="M -0.110 -0.250 L 0.110 -0.250 L 0.110 -0.110 L 0.250 -0.110 L 0.250 0.110 L 0.110 0.110 L 0.110 0.250 L -0.110 0.250 L -0.110 0.110 L -0.250 0.110 L -0.250 -0.110 L -0.110 -0.110 Z"/></svg></span>
+        <span class="cover-star-pin" style="left:47.4vw;top:78.2vh;"><svg class="cover-star cover-star--sparkle4" style="opacity:0.34;" width="0.58vw" height="0.58vw" viewBox="-0.551 -0.551 1.102 1.102"><path d="M 0 -0.551 L 0.099 -0.099 L 0.551 0 L 0.099 0.099 L 0 0.551 L -0.099 0.099 L -0.551 0 L -0.099 -0.099 Z"/></svg></span>
+        <span class="cover-star-pin" style="left:62.8vw;top:66.4vh;"><svg class="cover-star cover-star--dot" style="opacity:0.46;" width="0.38vw" height="0.38vw" viewBox="-1 -1 2 2"><circle cx="0" cy="0" r="1"/></svg></span>
+        <span class="cover-star-pin" style="left:74.5vw;top:74.1vh;"><svg class="cover-star cover-star--sparkle4" style="opacity:0.38;animation-delay:1.62s;animation-duration:5.18s;" width="0.66vw" height="0.66vw" viewBox="-0.627 -0.627 1.254 1.254"><path d="M 0 -0.627 L 0.113 -0.113 L 0.627 0 L 0.113 0.113 L 0 0.627 L -0.113 0.113 L -0.627 0 L -0.113 -0.113 Z"/></svg></span>
+        <span class="cover-star-pin" style="left:86.1vw;top:55.3vh;"><svg class="cover-star cover-star--sparkle5" style="opacity:0.32;" width="0.88vw" height="0.88vw" viewBox="-0.880 -0.880 1.760 1.760"><polygon points="0.000,-0.880 0.218,-0.299 0.836,-0.272 0.351,0.114 0.517,0.756 0.000,0.395 -0.517,0.756 -0.351,0.114 -0.836,-0.272 -0.218,-0.299"/></svg></span>
+        <span class="cover-star-pin" style="left:93.7vw;top:84.7vh;"><svg class="cover-star cover-star--plus" style="opacity:0.43;animation-delay:6.27s;animation-duration:3.84s;" width="0.44vw" height="0.44vw" viewBox="-0.220 -0.220 0.440 0.440"><path d="M -0.097 -0.220 L 0.097 -0.220 L 0.097 -0.097 L 0.220 -0.097 L 0.220 0.097 L 0.097 0.097 L 0.097 0.220 L -0.097 0.220 L -0.097 0.097 L -0.220 0.097 L -0.220 -0.097 L -0.097 -0.097 Z"/></svg></span>
+        <span class="cover-star-pin" style="left:14.2vw;top:88.1vh;"><svg class="cover-star cover-star--sparkle4" style="opacity:0.27;" width="0.51vw" height="0.51vw" viewBox="-0.484 -0.484 0.969 0.969"><path d="M 0 -0.484 L 0.087 -0.087 L 0.484 0 L 0.087 0.087 L 0 0.484 L -0.087 0.087 L -0.484 0 L -0.087 -0.087 Z"/></svg></span>
+        <span class="cover-star-pin" style="left:39.7vw;top:91.4vh;"><svg class="cover-star cover-star--dot" style="opacity:0.39;" width="0.4vw" height="0.4vw" viewBox="-1 -1 2 2"><circle cx="0" cy="0" r="1"/></svg></span>
+        <span class="cover-star-pin" style="left:81.3vw;top:32.1vh;"><svg class="cover-star cover-star--sparkle4" style="opacity:0.4;animation-delay:5.47s;animation-duration:4.6s;" width="0.72vw" height="0.72vw" viewBox="-0.684 -0.684 1.368 1.368"><path d="M 0 -0.684 L 0.123 -0.123 L 0.684 0 L 0.123 0.123 L 0 0.684 L -0.123 0.123 L -0.684 0 L -0.123 -0.123 Z"/></svg></span>
+        <span class="cover-star-pin" style="left:5.4vw;top:34.7vh;"><svg class="cover-star cover-star--plus" style="opacity:0.34;" width="0.46vw" height="0.46vw" viewBox="-0.230 -0.230 0.460 0.460"><path d="M -0.101 -0.230 L 0.101 -0.230 L 0.101 -0.101 L 0.230 -0.101 L 0.230 0.101 L 0.101 0.101 L 0.101 0.230 L -0.101 0.230 L -0.101 0.101 L -0.230 0.101 L -0.230 -0.101 L -0.101 -0.101 Z"/></svg></span>
+        <span class="cover-star-pin" style="left:64.7vw;top:88.3vh;"><svg class="cover-star cover-star--sparkle5" style="opacity:0.36;animation-delay:2.84s;animation-duration:6.13s;" width="0.79vw" height="0.79vw" viewBox="-0.790 -0.790 1.580 1.580"><polygon points="0.000,-0.790 0.195,-0.269 0.751,-0.244 0.315,0.102 0.464,0.679 0.000,0.354 -0.464,0.679 -0.315,0.102 -0.751,-0.244 -0.195,-0.269"/></svg></span>
+        <span class="cover-star-pin" style="left:28.6vw;top:36.8vh;"><svg class="cover-star cover-star--dot" style="opacity:0.31;" width="0.34vw" height="0.34vw" viewBox="-1 -1 2 2"><circle cx="0" cy="0" r="1"/></svg></span>
+        <span class="cover-star-pin" style="left:71.9vw;top:42.5vh;"><svg class="cover-star cover-star--sparkle4" style="opacity:0.45;animation-delay:7.16s;animation-duration:5.05s;" width="0.6vw" height="0.6vw" viewBox="-0.570 -0.570 1.140 1.140"><path d="M 0 -0.57 L 0.103 -0.103 L 0.570 0 L 0.103 0.103 L 0 0.570 L -0.103 0.103 L -0.570 0 L -0.103 -0.103 Z"/></svg></span>
+        <span class="cover-star-pin" style="left:45.8vw;top:28.4vh;"><svg class="cover-star cover-star--plus" style="opacity:0.38;" width="0.4vw" height="0.4vw" viewBox="-0.200 -0.200 0.400 0.400"><path d="M -0.088 -0.200 L 0.088 -0.200 L 0.088 -0.088 L 0.200 -0.088 L 0.200 0.088 L 0.088 0.088 L 0.088 0.200 L -0.088 0.200 L -0.088 0.088 L -0.200 0.088 L -0.200 -0.088 L -0.088 -0.088 Z"/></svg></span>
+        <span class="cover-star-pin" style="left:88.4vw;top:68.2vh;"><svg class="cover-star cover-star--sparkle5" style="opacity:0.28;" width="0.92vw" height="0.92vw" viewBox="-0.920 -0.920 1.840 1.840"><polygon points="0.000,-0.920 0.227,-0.313 0.874,-0.284 0.367,0.119 0.540,0.790 0.000,0.413 -0.540,0.790 -0.367,0.119 -0.874,-0.284 -0.227,-0.313"/></svg></span>
+      </div>
+      <div class="cover-glow" aria-hidden="true"></div>
+
+      <div class="cover-curtain" aria-hidden="true">
+        <span class="cover-curtain-rod"></span>
+        <div class="cover-curtain-half cover-curtain-half--l">
+          <span class="cover-curtain-fold cover-curtain-fold--1"></span>
+          <span class="cover-curtain-fold cover-curtain-fold--2"></span>
+          <span class="cover-curtain-fold cover-curtain-fold--3"></span>
         </div>
-        <div class="community-filters" aria-disabled="true" aria-label="Filter the directory">
-          <div class="community-filters-group">
-            <span class="community-filters-label">By role</span>
-            <div class="community-filters-row">
+        <div class="cover-curtain-half cover-curtain-half--r">
+          <span class="cover-curtain-fold cover-curtain-fold--1"></span>
+          <span class="cover-curtain-fold cover-curtain-fold--2"></span>
+          <span class="cover-curtain-fold cover-curtain-fold--3"></span>
+        </div>
+        <span class="cover-curtain-label cover-curtain-label--l">SPACE</span>
+        <span class="cover-curtain-label cover-curtain-label--r">MARKET</span>
+      </div>
+
+      <span class="cover-vertical" aria-hidden="true">
+        <span class="cover-vertical-text">The marketplace · ships with launch · FolioSpace · 2026</span>
+      </span>
+
+      <div class="container cover-container">
+        <div class="cover-eyebrow">
+          <span class="cover-eyebrow-line"></span>
+          <span class="cover-eyebrow-text">№ 02 — The marketplace</span>
+        </div>
+
+        <h1 class="cover-headline">
+          <span class="cover-headline-line">Find a chef.</span>
+          <span class="cover-headline-line"><em>Find a developer.</em></span>
+        </h1>
+
+        <p class="cover-tagline">Every FolioSpace pro · searchable in one place.</p>
+
+        <div class="community-cover-search">
+          <div class="community-search" aria-disabled="true">
+            <svg class="community-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"/>
+              <path d="m21 21-4.3-4.3"/>
+            </svg>
+            <input class="community-search-input" type="search" placeholder="Search by name, company, or category…" disabled aria-label="Search the marketplace" />
+            <span class="community-search-badge">Ships with launch</span>
+          </div>
+        </div>
+
+        <div class="community-cover-filters" aria-disabled="true" aria-label="Filter the marketplace">
+          <div class="community-cover-filters-group">
+            <span class="community-cover-filters-label">Profession</span>
+            <div class="community-cover-filters-row">
               <button type="button" class="filter-chip" disabled>Chef</button>
               <button type="button" class="filter-chip" disabled>Developer</button>
               <button type="button" class="filter-chip" disabled>Consultant</button>
@@ -57,9 +127,29 @@
               <button type="button" class="filter-chip" disabled>Shop</button>
             </div>
           </div>
-          <div class="community-filters-group">
-            <span class="community-filters-label">By city</span>
-            <div class="community-filters-row">
+          <div class="community-cover-filters-group">
+            <span class="community-cover-filters-label">Category</span>
+            <div class="community-cover-filters-row">
+              <button type="button" class="filter-chip" disabled>Booking</button>
+              <button type="button" class="filter-chip" disabled>Menu</button>
+              <button type="button" class="filter-chip" disabled>Case study</button>
+              <button type="button" class="filter-chip" disabled>Repo</button>
+              <button type="button" class="filter-chip" disabled>Lesson</button>
+              <button type="button" class="filter-chip" disabled>Catalogue</button>
+            </div>
+          </div>
+          <div class="community-cover-filters-group">
+            <span class="community-cover-filters-label">Company size</span>
+            <div class="community-cover-filters-row">
+              <button type="button" class="filter-chip" disabled>Solo</button>
+              <button type="button" class="filter-chip" disabled>2–5</button>
+              <button type="button" class="filter-chip" disabled>6–20</button>
+              <button type="button" class="filter-chip" disabled>20+</button>
+            </div>
+          </div>
+          <div class="community-cover-filters-group">
+            <span class="community-cover-filters-label">Place</span>
+            <div class="community-cover-filters-row">
               <button type="button" class="filter-chip" disabled>Mumbai</button>
               <button type="button" class="filter-chip" disabled>Delhi</button>
               <button type="button" class="filter-chip" disabled>Bengaluru</button>
@@ -68,6 +158,52 @@
               <button type="button" class="filter-chip" disabled>Hyderabad</button>
             </div>
           </div>
+        </div>
+
+        <div class="cover-cta-row">
+          <a href="/" class="btn btn-ghost cover-cta">← Back to FolioSpace</a>
+          <span class="cover-cta-foot">Ships at launch · 2026</span>
+        </div>
+      </div>
+
+      <a href="/" class="cover-stub" aria-label="The marketplace ships with launch">
+        <span class="cover-stub-stub" aria-hidden="true">
+          <span class="cover-stub-num">02</span>
+          <span class="cover-stub-cap">issue</span>
+        </span>
+        <span class="cover-stub-perf" aria-hidden="true"></span>
+        <span class="cover-stub-main" aria-hidden="true">
+          <span class="cover-stub-eyebrow">Issue</span>
+          <span class="cover-stub-tag">№ 02</span>
+        </span>
+      </a>
+
+      <div class="cover-marquee" aria-hidden="true">
+        <div class="cover-marquee-track">
+          <span class="cover-marquee-item">foliospace.in/chef-mumbai</span>
+          <span class="cover-marquee-dot">·</span>
+          <span class="cover-marquee-item">foliospace.in/dev-bengaluru</span>
+          <span class="cover-marquee-dot">·</span>
+          <span class="cover-marquee-item">foliospace.in/consultant-delhi</span>
+          <span class="cover-marquee-dot">·</span>
+          <span class="cover-marquee-item">foliospace.in/studio-kochi</span>
+          <span class="cover-marquee-dot">·</span>
+          <span class="cover-marquee-item">foliospace.in/founder-hyderabad</span>
+          <span class="cover-marquee-dot">·</span>
+          <span class="cover-marquee-item">foliospace.in/student-guwahati</span>
+          <span class="cover-marquee-dot">·</span>
+          <span class="cover-marquee-item">foliospace.in/chef-mumbai</span>
+          <span class="cover-marquee-dot">·</span>
+          <span class="cover-marquee-item">foliospace.in/dev-bengaluru</span>
+          <span class="cover-marquee-dot">·</span>
+          <span class="cover-marquee-item">foliospace.in/consultant-delhi</span>
+          <span class="cover-marquee-dot">·</span>
+          <span class="cover-marquee-item">foliospace.in/studio-kochi</span>
+          <span class="cover-marquee-dot">·</span>
+          <span class="cover-marquee-item">foliospace.in/founder-hyderabad</span>
+          <span class="cover-marquee-dot">·</span>
+          <span class="cover-marquee-item">foliospace.in/student-guwahati</span>
+          <span class="cover-marquee-dot">·</span>
         </div>
       </div>
     </section>
