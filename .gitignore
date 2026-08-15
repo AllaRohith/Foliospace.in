@@ -11,3 +11,9 @@ data/waitlist.json
 .claude/
 .idea/
 .vscode/
+.agents/
+.kiro/
+node_modules/
+package.json
+package-lock.json
+skills-lock.json
