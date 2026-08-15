@@ -6891,3 +6891,93 @@ body.dark .cover-grain { opacity: 0.30; }
   }
   .cmd-k-fab:active { transform: scale(0.96); }
 }
+
+.features-page-hero {
+  padding: 140px 0 56px;
+  background: var(--cream);
+}
+.features-page-hero .container { max-width: var(--container); }
+.features-page-hero h1 {
+  font-family: "Stalinist One", serif;
+  font-size: clamp(40px, 6vw, 72px);
+  line-height: 0.96;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  max-width: 720px;
+  margin: 24px 0 32px;
+}
+.features-page-hero h1 em {
+  font-family: "Stalinist One", serif;
+  font-style: italic;
+  color: var(--accent);
+}
+.features-page-lead {
+  font-size: 19px;
+  line-height: 1.55;
+  color: var(--muted);
+  max-width: 640px;
+  margin-bottom: 56px;
+}
+
+.features-page-row {
+  padding: 32px 0;
+  background: var(--cream);
+}
+.features-page-row + .features-page-row {
+  padding-top: 0;
+}
+.features-page-row .who-dir-row {
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+  padding: 32px 0;
+  align-items: center;
+}
+
+.features-page-cta {
+  padding: 96px 0 140px;
+  background: var(--cream);
+  border-top: 1px solid var(--line);
+}
+.features-page-cta-line {
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--ink);
+  max-width: 560px;
+  margin-bottom: 32px;
+}
+
+.features-teaser-lead {
+  max-width: 640px;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1.55;
+  margin: 16px 0 56px;
+}
+.features-teaser-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 56px;
+}
+.features-teaser-cta { display: inline-flex; }
+
+@media (max-width: 720px) {
+  .features-page-hero { padding: 96px 0 32px; }
+  .features-page-hero h1 { margin: 16px 0 24px; }
+  .features-page-lead { font-size: 17px; margin-bottom: 40px; }
+  .features-page-row { padding: 16px 0; }
+  .features-page-row .who-dir-row { padding: 24px 0; }
+  .features-page-cta { padding: 64px 0 96px; }
+  .features-teaser-grid { grid-template-columns: 1fr; }
+  .features-teaser-lead { font-size: 16px; margin: 12px 0 40px; }
+}
+
+body.dark .features-page-hero,
+body.dark .features-page-row,
+body.dark .features-page-cta { background: var(--ink-2); }
+body.dark .features-page-row .who-dir-row { border-bottom-color: var(--line); }
+body.dark .features-page-lead,
+body.dark .features-teaser-lead { color: var(--line); }
+body.dark .features-page-cta-line { color: var(--cream); }
+body.dark .features-page-cta { border-top-color: var(--line); }
+body.dark #features-teaser { background: var(--ink-2); }

@@ -48,100 +48,7 @@
 {% endblock %}
 
 {% block content %}
-  <header class="nav-wrap" id="nav-wrap">
-    <div class="nav" data-state="top">
-      <a href="/" class="brand">
-        <span class="brand-mark">
-          <svg viewBox="0 0 56 56" aria-hidden="true">
-            <path fill="currentColor" d="M 8 8 L 8 48 L 16 48 L 16 33 L 30 33 L 30 26 L 16 26 L 16 15 L 38 15 L 38 8 Z"/>
-            <rect x="32" y="40" width="10" height="10" fill="#FF6B35"/>
-          </svg>
-        </span>
-        <span class="brand-name">FolioSpace</span>
-      </a>
-
-      <nav class="nav-links" id="nav-links" aria-label="Primary">
-        <div class="nav-indicator" aria-hidden="true"></div>
-        <a href="#who" data-section="who" class="nav-link">
-          <span>Who it's for</span>
-        </a>
-        <div class="nav-mega" data-trigger="features">
-          <a href="#features" data-section="features" class="nav-link">
-            <span>Features</span>
-            <span class="nav-link-arrow">↓</span>
-          </a>
-          <div class="nav-mega-panel" role="menu">
-            <div class="mega-grid">
-              <a href="#features" class="mega-item" role="menuitem">
-                <div>
-                  <strong>Built for the chat era</strong>
-                  <span>WhatsApp + LinkedIn previews that slap</span>
-                </div>
-              </a>
-              <a href="#features" class="mega-item" role="menuitem">
-                <div>
-                  <strong>PDF in one tap</strong>
-                  <span>Send a polished PDF on demand</span>
-                </div>
-              </a>
-              <a href="#features" class="mega-item" role="menuitem">
-                <div>
-                  <strong>Edit from phone</strong>
-                  <span>Your page keeps up with your work</span>
-                </div>
-              </a>
-              <a href="#features" class="mega-item" role="menuitem">
-                <div>
-                  <strong>Inbox without exposure</strong>
-                  <span>Leads via WhatsApp, not your email</span>
-                </div>
-              </a>
-            </div>
-            <div class="mega-foot">
-              <a href="#pricing" class="mega-foot-link">Pricing →</a>
-              <span class="mega-foot-meta">₹150 setup · ₹99/mo</span>
-            </div>
-          </div>
-        </div>
-        <a href="#pricing" data-section="pricing" class="nav-link">
-          <span>Pricing</span>
-        </a>
-        <a href="#faq" data-section="faq" class="nav-link">
-          <span>FAQ</span>
-        </a>
-        <div class="nav-theme-mobile">
-          <span>Theme</span>
-          <button id="nav-theme-mobile-sun" type="button" aria-label="Light mode">☀</button>
-          <button id="nav-theme-mobile-moon" type="button" aria-label="Dark mode">🌙</button>
-        </div>
-      </nav>
-
-      <div class="nav-search" id="nav-search">
-        <kbd>⌘K</kbd>
-        <span>Quick nav</span>
-      </div>
-
-      <button class="nav-theme" id="nav-theme" aria-label="Toggle dark mode" aria-pressed="false" type="button">
-        <svg class="nav-theme-icon nav-theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="4"/>
-          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
-        </svg>
-        <svg class="nav-theme-icon nav-theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-      </button>
-
-      <a href="#join" class="nav-cta">
-        <span class="nav-cta-text-full">Join waitlist</span>
-        <span class="nav-cta-text-short">Join</span>
-        <span class="nav-cta-arrow">→</span>
-      </a>
-
-      <button class="nav-burger" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
+  {% include "partials/_nav.html" %}
 
   <main>
     <section class="cover">
@@ -576,7 +483,7 @@
             <div class="who-dir-body">
               <h3 class="who-dir-title">Developers.</h3>
               <span class="who-dir-tag">Repos · talks · OSS</span>
-              <p class="who-dir-desc">Ship your projects, repos, and talks — all in one place. Your OSS work, your conference talks, your "now" status. GitHub-fed, but human-curated.</p>
+              <p class="who-dir-desc">Ship your projects, repos, and talks — all in one place. Your OSS work, your conference talks, your "now" status. GitHub integration coming — paste a username, pick what to show.</p>
             </div>
             <span class="who-dir-arrow" aria-hidden="true">→</span>
           </article>
@@ -755,7 +662,7 @@
               <div class="h-avatar">D</div>
               <span class="h-role">Developer · Pan-India</span>
               <h3>Repos, talks, OSS — all in one place, finally.</h3>
-              <p>Auto-sync GitHub repos. One link that beats a long CV every time.</p>
+              <p>Repos, talks, OSS — all in one place, finally. GitHub import on the way.</p>
               <div class="h-foot"><span class="badge">No badge</span></div>
             </article>
             <article class="h-card">
@@ -799,7 +706,7 @@
               <div class="h-avatar">D</div>
               <span class="h-role">Developer · Pan-India</span>
               <h3>Repos, talks, OSS — all in one place, finally.</h3>
-              <p>Auto-sync GitHub repos. One link that beats a long CV every time.</p>
+              <p>Repos, talks, OSS — all in one place, finally. GitHub import on the way.</p>
               <div class="h-foot"><span class="badge">No badge</span></div>
             </article>
             <article class="h-card">
@@ -865,6 +772,33 @@
             </div>
           </details>
         </div>
+      </div>
+    </section>
+
+    <section id="features-teaser" class="features">
+      <div class="container">
+        <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page 09<span class="folio-meta-sep">/</span>What's building next</p>
+        <h2 class="reveal">Two integrations <em>on the way.</em></h2>
+        <p class="features-teaser-lead reveal">GitHub + LinkedIn. Here's what's coming, in plain English — read the full roadmap.</p>
+
+        <div class="features-teaser-grid">
+          <article class="h-card reveal">
+            <div class="h-avatar">G</div>
+            <span class="h-role">Coming soon</span>
+            <h3>GitHub.</h3>
+            <p>Pinned repos, contribution graph, languages. Paste a username.</p>
+            <div class="h-foot"><span class="badge outline">Roadmap</span></div>
+          </article>
+          <article class="h-card reveal">
+            <div class="h-avatar">L</div>
+            <span class="h-role">Coming soon</span>
+            <h3>LinkedIn.</h3>
+            <p>Experience, education, certs — the whole profile. Auto-refreshing.</p>
+            <div class="h-foot"><span class="badge outline">Roadmap</span></div>
+          </article>
+        </div>
+
+        <a href="/features" class="btn btn-ghost features-teaser-cta">See the full roadmap →</a>
       </div>
     </section>
 
@@ -950,39 +884,6 @@
     </section>
   </main>
 
-  <div class="built-with" aria-label="How this page was built">
-    <div class="container">
-      <span class="built-with-line">Composed in <strong>FastAPI</strong> · Typeset in <strong>Stalinist One</strong> &amp; <strong>Saira</strong> · Hand-tested</span>
-    </div>
-  </div>
-
-  <footer class="footer colophon">
-    <div class="container">
-      <span class="colophon-mark">FolioSpace</span>
-      <div class="colophon-center">
-        <svg class="colophon-printer-mark" viewBox="0 0 80 80" aria-hidden="true">
-          <circle cx="40" cy="40" r="36" fill="none" stroke="currentColor" stroke-width="1.25" />
-          <circle cx="40" cy="40" r="28" fill="none" stroke="currentColor" stroke-width="0.75" stroke-dasharray="2 3" />
-          <text x="40" y="34" text-anchor="middle" font-family="Stalinist One, serif" font-style="italic" font-size="18" fill="currentColor">F</text>
-          <text x="40" y="52" text-anchor="middle" font-family="Stalinist One, sans-serif" font-weight="700" font-size="7" letter-spacing="1.5" fill="currentColor">SPACE</text>
-          <path d="M 16 64 L 64 64" stroke="currentColor" stroke-width="0.75" />
-          <path d="M 22 68 L 58 68" stroke="currentColor" stroke-width="0.5" />
-        </svg>
-        <span class="colophon-tag">Your story. One link. Done.</span>
-        <span class="colophon-meta">© 2026 · Made with code in India</span>
-        <span class="colophon-printed">Printed on the open web · Set in Stalinist One &amp; Saira on cream</span>
-        <span class="colophon-anti">No AI imagery · No default fonts · No purple gradients · Hand-authored SVG</span>
-      </div>
-      <div class="colophon-spacer">
-        <span class="colophon-year">2026</span>
-        <span class="colophon-meta">Issue&nbsp;01 · The Waitlist Edition</span>
-      </div>
-    </div>
-  </footer>
-
-  <a class="share-float" id="share-float" href="#" target="_blank" rel="noopener" aria-label="Share FolioSpace on WhatsApp">
-    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.05 4.91A9.82 9.82 0 0 0 12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.86 9.86 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.91-7.01zM12.04 20.15h-.01a8.18 8.18 0 0 1-4.17-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.23 8.23 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.25 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.55.12-.16.25-.63.81-.78.97-.14.16-.29.18-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.39.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.16.04-.31-.02-.43-.06-.12-.55-1.32-.75-1.81-.2-.48-.4-.41-.55-.42-.14-.01-.31-.01-.47-.01-.16 0-.43.06-.66.31-.23.25-.86.84-.86 2.06 0 1.22.89 2.4 1.01 2.57.12.16 1.76 2.69 4.27 3.77.6.26 1.06.41 1.43.52.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.2-.58.2-1.08.14-1.18-.06-.1-.23-.16-.48-.28z"/></svg>
-    <span>Share</span>
-  </a>
+  {% include "partials/_footer.html" %}
 
 {% endblock %}

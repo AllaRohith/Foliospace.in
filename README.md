@@ -28,10 +28,12 @@ app/
 ├── templates/
 │   ├── base.html         Layout, OG/Twitter meta, fonts
 │   ├── landing.html      One-page site
+│   ├── features.html     Integration roadmap page (GitHub + LinkedIn, no auth)
 │   ├── privacy.html
 │   ├── terms.html
 │   ├── error.html
 │   ├── emails/welcome.html
+│   ├── partials/         Shared nav (_nav.html) and footer (_footer.html)
 │   └── admin/            dashboard, signups, signup_detail, audit, login, base
 └── static/
     ├── css/style.css     Design system

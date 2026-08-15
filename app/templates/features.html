@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://foliospace.in/features#webpage",
+      "url": "https://foliospace.in/features",
+      "name": "Features — FolioSpace",
+      "isPartOf": { "@id": "https://foliospace.in/#site" },
+      "about": { "@id": "https://foliospace.in/features#roadmap" },
+      "inLanguage": "en-IN"
+    },
+    {
+      "@type": "ItemList",
+      "@id": "https://foliospace.in/features#roadmap",
+      "name": "FolioSpace integration roadmap",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "GitHub", "url": "https://foliospace.in/features#github" },
+        { "@type": "ListItem", "position": 2, "name": "LinkedIn", "url": "https://foliospace.in/features#linkedin" }
+      ]
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+  {% include "partials/_nav.html" %}
+
+  <main>
+    <section class="features-page-hero">
+      <div class="container">
+        <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page F1<span class="folio-meta-sep">/</span>The roadmap</p>
+        <h1 class="reveal">What's <em>building next.</em></h1>
+        <p class="features-page-lead reveal">Two integrations, when they ship. We're listing them here because you'd rather know what's coming than find out in a tweet. No waitlist for this — the page itself is the announcement.</p>
+      </div>
+    </section>
+
+    <section id="github" class="features-page-row">
+      <div class="container">
+        <article class="who-dir-row">
+          <div class="who-dir-num">/01</div>
+          <div class="who-dir-mark who-dir-mark--5" aria-hidden="true">G</div>
+          <div class="who-dir-body">
+            <h2 class="who-dir-title">GitHub.</h2>
+            <span class="who-dir-tag">Repos · contribution graph · pinned</span>
+            <p class="who-dir-desc">Paste a username, get your pinned repos, contribution graph, languages, and a clean project grid on your folio — auto-refreshing. You choose which repos are public and which stay private.</p>
+            <span class="badge outline">Coming soon</span>
+          </div>
+          <span class="who-dir-arrow" aria-hidden="true">→</span>
+        </article>
+      </div>
+    </section>
+
+    <section id="linkedin" class="features-page-row">
+      <div class="container">
+        <article class="who-dir-row">
+          <div class="who-dir-num">/02</div>
+          <div class="who-dir-mark who-dir-mark--4" aria-hidden="true">L</div>
+          <div class="who-dir-body">
+            <h2 class="who-dir-title">LinkedIn.</h2>
+            <span class="who-dir-tag">Experience · education · certs · everything</span>
+            <p class="who-dir-desc">Pull your full LinkedIn profile — every role, every company, every project, education, certifications, the works. Edits on LinkedIn reflect on your folio. The boring CV, automated — so you can write the interesting bits yourself.</p>
+            <span class="badge outline">Coming soon</span>
+          </div>
+          <span class="who-dir-arrow" aria-hidden="true">→</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="features-page-cta">
+      <div class="container">
+        <p class="features-page-cta-line">Two integrations. Honest copy. No countdown gimmicks. When they ship, they'll be on this page, in plain English.</p>
+        <a href="/" class="btn btn-ghost">← Back to FolioSpace</a>
+      </div>
+    </section>
+  </main>
+
+  {% include "partials/_footer.html" %}
+{% endblock %}

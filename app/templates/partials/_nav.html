@@ -1,0 +1,95 @@
+{% set home = '' if request.url.path == '/' else '/' %}
+<header class="nav-wrap" id="nav-wrap">
+    <div class="nav" data-state="top">
+      <a href="/" class="brand">
+        <span class="brand-mark">
+          <svg viewBox="0 0 56 56" aria-hidden="true">
+            <path fill="currentColor" d="M 8 8 L 8 48 L 16 48 L 16 33 L 30 33 L 30 26 L 16 26 L 16 15 L 38 15 L 38 8 Z"/>
+            <rect x="32" y="40" width="10" height="10" fill="#FF6B35"/>
+          </svg>
+        </span>
+        <span class="brand-name">FolioSpace</span>
+      </a>
+
+      <nav class="nav-links" id="nav-links" aria-label="Primary">
+        <div class="nav-indicator" aria-hidden="true"></div>
+        <a href="{{ home }}#who" data-section="who" class="nav-link">
+          <span>Who it's for</span>
+        </a>
+        <div class="nav-mega" data-trigger="features">
+          <a href="/features" class="nav-link">
+            <span>Features</span>
+            <span class="nav-link-arrow">↓</span>
+          </a>
+          <div class="nav-mega-panel" role="menu">
+            <div class="mega-grid">
+              <a href="/features#github" class="mega-item" role="menuitem">
+                <div>
+                  <strong>GitHub integration</strong>
+                  <span>Pinned repos · contribution graph · auto-sync</span>
+                </div>
+              </a>
+              <a href="/features#linkedin" class="mega-item" role="menuitem">
+                <div>
+                  <strong>LinkedIn integration</strong>
+                  <span>Experience · education · certs · everything</span>
+                </div>
+              </a>
+              <a href="/features" class="mega-item" role="menuitem">
+                <div>
+                  <strong>The full roadmap</strong>
+                  <span>Plain English, no countdown gimmicks</span>
+                </div>
+              </a>
+              <a href="/features" class="mega-item" role="menuitem">
+                <div>
+                  <strong>More on the way</strong>
+                  <span>You vote on what builds next</span>
+                </div>
+              </a>
+            </div>
+            <div class="mega-foot">
+              <a href="{{ home }}#pricing" class="mega-foot-link">Pricing →</a>
+              <span class="mega-foot-meta">₹150 setup · ₹99/mo</span>
+            </div>
+          </div>
+        </div>
+        <a href="{{ home }}#pricing" data-section="pricing" class="nav-link">
+          <span>Pricing</span>
+        </a>
+        <a href="{{ home }}#faq" data-section="faq" class="nav-link">
+          <span>FAQ</span>
+        </a>
+        <div class="nav-theme-mobile">
+          <span>Theme</span>
+          <button id="nav-theme-mobile-sun" type="button" aria-label="Light mode">☀</button>
+          <button id="nav-theme-mobile-moon" type="button" aria-label="Dark mode">🌙</button>
+        </div>
+      </nav>
+
+      <div class="nav-search" id="nav-search">
+        <kbd>⌘K</kbd>
+        <span>Quick nav</span>
+      </div>
+
+      <button class="nav-theme" id="nav-theme" aria-label="Toggle dark mode" aria-pressed="false" type="button">
+        <svg class="nav-theme-icon nav-theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+        <svg class="nav-theme-icon nav-theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+
+      <a href="{{ home }}#join" class="nav-cta">
+        <span class="nav-cta-text-full">Join waitlist</span>
+        <span class="nav-cta-text-short">Join</span>
+        <span class="nav-cta-arrow">→</span>
+      </a>
+
+      <button class="nav-burger" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>

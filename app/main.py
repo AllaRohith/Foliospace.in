@@ -177,6 +177,19 @@ async def terms(request: Request):
     )
 
 
+@app.get("/features")
+async def features(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "features.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Features — FolioSpace",
+            "description": "GitHub + LinkedIn import are next on the FolioSpace roadmap. See exactly what each integration pulls, the honest limits, and when to expect them.",
+        },
+    )
+
+
 @app.get("/robots.txt")
 async def robots():
     from fastapi.responses import PlainTextResponse
@@ -202,6 +215,7 @@ async def sitemap():
         f'  <url><loc>{base}/</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>\n'
         f'  <url><loc>{base}/privacy</loc><lastmod>{legal_lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>\n'
         f'  <url><loc>{base}/terms</loc><lastmod>{legal_lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>\n'
+        f'  <url><loc>{base}/features</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>\n'
         '</urlset>\n'
     )
     return PlainTextResponse(content=body, media_type="application/xml")

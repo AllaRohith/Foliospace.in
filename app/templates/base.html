@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0F1419" />
   <title>{% block title %}{{ page_title }}{% endblock %}</title>
   <meta name="description" content="{% block description %}{{ description }}{% endblock %}" />
-  <link rel="canonical" href="{{ request.url_for('landing') }}" />
+  <link rel="canonical" href="{% block canonical %}{{ request.url }}{% endblock %}" />
 
   <meta property="og:type" content="website" />
   <meta property="og:title" content="{% block og_title %}{{ page_title }}{% endblock %}" />

@@ -470,9 +470,9 @@
   const CMD_ACTIONS = [
     { label: 'Hero — top of page', hint: 'Nav', icon: '↑', href: '#top' },
     { label: 'Who it\'s for', hint: 'Section', icon: 'W', href: '#who' },
-    { label: 'Features', hint: 'Section', icon: 'F', href: '#features' },
+    { label: 'Features & roadmap', hint: 'Page', icon: 'F', href: '/features', accent: true },
     { label: 'Pricing', hint: 'Section', icon: '₹', href: '#pricing', accent: true },
-    { label: 'FAQ', hint: 'Section', icon: '?', href: '.faq' },
+    { label: 'FAQ', hint: 'Section', icon: '?', href: '#faq' },
     { label: 'Join the waitlist', hint: 'Action', icon: '→', href: '#join', accent: true },
     { label: 'See the cover story', hint: 'Action', icon: '◉', href: '.cover' },
     { label: 'Scroll to top', hint: 'Action', icon: '↑', action: 'scrollTop' },
@@ -538,6 +538,7 @@
     }
     if (a.action === 'scrollTop') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
     if (a.href) {
+      if (a.href.startsWith('/')) { window.location.href = a.href; return; }
       const el = document.querySelector(a.href);
       if (el) { el.scrollIntoView({ behavior: 'smooth' }); return; }
     }
