@@ -29,6 +29,7 @@ app/
 │   ├── base.html         Layout, OG/Twitter meta, fonts
 │   ├── landing.html      One-page site
 │   ├── features.html     Integration roadmap page (GitHub + LinkedIn, no auth)
+│   ├── community.html    Searchable directory page (every FolioSpace user, no auth)
 │   ├── privacy.html
 │   ├── terms.html
 │   ├── error.html

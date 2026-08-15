@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://foliospace.in/community#webpage",
+      "url": "https://foliospace.in/community",
+      "name": "Community — FolioSpace",
+      "isPartOf": { "@id": "https://foliospace.in/#site" },
+      "about": { "@id": "https://foliospace.in/community#directory" },
+      "inLanguage": "en-IN"
+    },
+    {
+      "@type": "ItemList",
+      "@id": "https://foliospace.in/community#directory",
+      "name": "FolioSpace community directory",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Searchable by craft", "url": "https://foliospace.in/community#craft" },
+        { "@type": "ListItem", "position": 2, "name": "Searchable by place", "url": "https://foliospace.in/community#place" }
+      ]
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+  {% include "partials/_nav.html" %}
+
+  <main>
+    <section class="community-page-hero">
+      <div class="container">
+        <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page F2<span class="folio-meta-sep">/</span>The directory</p>
+        <h1 class="reveal">The directory of <em>every FolioSpace user.</em></h1>
+        <p class="community-page-lead reveal">Two filters, one page. The directory is searchable by craft and by place — because a chef in Kochi deserves to be found next to a developer in Guwahati, not buried under a follower count.</p>
+      </div>
+    </section>
+
+    <section id="craft" class="community-page-row">
+      <div class="container">
+        <article class="who-dir-row">
+          <div class="who-dir-num">/01</div>
+          <div class="who-dir-mark who-dir-mark--2" aria-hidden="true">C</div>
+          <div class="who-dir-body">
+            <h2 class="who-dir-title">By craft.</h2>
+            <span class="who-dir-tag">Chefs · devs · students · consultants · shops · founders</span>
+            <p class="who-dir-desc">Each folio tile carries the maker's craft — chef, developer, consultant, founder, anything. A small image, a one-line tag-line, the city. Browsing feels like flipping through a hand-edited anthology, not a feed.</p>
+            <span class="badge outline">Ships at launch</span>
+          </div>
+          <span class="who-dir-arrow" aria-hidden="true">→</span>
+        </article>
+      </div>
+    </section>
+
+    <section id="place" class="community-page-row">
+      <div class="container">
+        <article class="who-dir-row">
+          <div class="who-dir-num">/02</div>
+          <div class="who-dir-mark who-dir-mark--3" aria-hidden="true">P</div>
+          <div class="who-dir-body">
+            <h2 class="who-dir-title">By place.</h2>
+            <span class="who-dir-tag">Pan-India · city · region · remote</span>
+            <p class="who-dir-desc">The directory is pan-Indian, sortable by city. A chef in Kochi next to a developer in Guwahati. No clout sorting, no follower counts — just a real human, a real folio, sorted by where they actually work.</p>
+            <span class="badge outline">Ships at launch</span>
+          </div>
+          <span class="who-dir-arrow" aria-hidden="true">→</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="community-page-cta">
+      <div class="container">
+        <p class="community-page-cta-line">Every folio, in one searchable place. When it ships, you'll find it here.</p>
+        <a href="/" class="btn btn-ghost">← Back to FolioSpace</a>
+      </div>
+    </section>
+  </main>
+
+  {% include "partials/_footer.html" %}
+{% endblock %}

@@ -190,6 +190,19 @@ async def features(request: Request):
     )
 
 
+@app.get("/community")
+async def community(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "community.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Community — FolioSpace",
+            "description": "Every FolioSpace user, in one searchable directory. Filter by role, city, or craft.",
+        },
+    )
+
+
 @app.get("/robots.txt")
 async def robots():
     from fastapi.responses import PlainTextResponse
@@ -216,6 +229,7 @@ async def sitemap():
         f'  <url><loc>{base}/privacy</loc><lastmod>{legal_lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>\n'
         f'  <url><loc>{base}/terms</loc><lastmod>{legal_lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>\n'
         f'  <url><loc>{base}/features</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>\n'
+        f'  <url><loc>{base}/community</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>\n'
         '</urlset>\n'
     )
     return PlainTextResponse(content=body, media_type="application/xml")
