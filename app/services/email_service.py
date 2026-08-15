@@ -20,13 +20,17 @@ FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL", "FolioSpace <hello@foliospace.in>")
 REPLY_TO = os.getenv("RESEND_REPLY_TO", "rohit@foliospace.in")
 PUBLIC_URL = os.getenv("PUBLIC_BASE_URL", "http://localhost:8000").rstrip("/")
 
-_LAUNCH_DATE_STR = os.getenv("LAUNCH_DATE", "").strip()
+_DEFAULT_LAUNCH_DATE_STR = "2026-09-02T00:00:00+05:30"
+_LAUNCH_DATE_STR = os.getenv("LAUNCH_DATE", "").strip() or _DEFAULT_LAUNCH_DATE_STR
 LAUNCH_DATE: datetime | None = None
-if _LAUNCH_DATE_STR:
+try:
+    LAUNCH_DATE = datetime.fromisoformat(_LAUNCH_DATE_STR)
+except ValueError:
+    logger.warning("LAUNCH_DATE env var is set but invalid: %s", _LAUNCH_DATE_STR)
     try:
-        LAUNCH_DATE = datetime.fromisoformat(_LAUNCH_DATE_STR)
+        LAUNCH_DATE = datetime.fromisoformat(_DEFAULT_LAUNCH_DATE_STR)
     except ValueError:
-        logger.warning("LAUNCH_DATE env var is set but invalid: %s", _LAUNCH_DATE_STR)
+        logger.warning("default LAUNCH_DATE is unparseable: %s", _DEFAULT_LAUNCH_DATE_STR)
 
 TEMPLATE_DIR = Path(__file__).resolve().parent.parent / "templates" / "emails"
 

@@ -71,7 +71,7 @@ In the Render dashboard for the `foliospace` service → **Environment**:
 | `RESEND_API_KEY`             | *(leave empty for now — emails skip gracefully)*                         |
 | `ADMIN_SESSION_SECRET`       | Run `python -c "import secrets; print(secrets.token_urlsafe(64))"` locally and paste the output. **Required.** App hard-crashes without it. |
 | `ADMIN_PASSWORD_HASH`        | Run `python -c "from app.services.admin_auth import hash_password; print(hash_password('YOUR_PASSWORD'))"` locally with your chosen admin password and paste the output. **Required** to log into `/admin`. |
-| `LAUNCH_DATE`                | ISO-8601 date like `2026-09-02T00:00:00+05:30`. **Required** to render the countdown in the welcome email. |
+| `LAUNCH_DATE`                | ISO-8601 date like `2026-09-02T00:00:00+05:30`. Defaults to that value if unset. Used by the hero countdown timer AND the welcome-email countdown copy. |
 | `INTERNAL_TRUST_TOKEN`       | Optional. Run `python -c "import secrets; print(secrets.token_urlsafe(32))"` locally. Lets trusted internal callers send POSTs to `/api/waitlist/join` or `/admin/login` without an Origin/Referer by passing the same value in `X-Internal-Token`. Leave empty in production to keep CSRF protection strict. |
 
 > **Generate the secret and password hash on the same machine you'll commit from**, not in the Render dashboard. They never need to be re-typed anywhere else.
