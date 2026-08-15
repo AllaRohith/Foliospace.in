@@ -4,9 +4,9 @@ from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
+from app.rate_limit import limiter
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from starlette.middleware.sessions import SessionMiddleware
@@ -18,7 +18,8 @@ from app.routers import stats
 
 BASE_DIR = Path(__file__).resolve().parent
 
-ENV = os.getenv("ENV", "production").lower()
+_RAW_ENV = os.getenv("ENV") or os.getenv("APP_ENV") or "production"
+ENV = _RAW_ENV.lower()
 DEBUG = ENV in ("dev", "development", "local") and os.getenv("DEBUG", "0") == "1"
 
 _proxy_trusted = (
@@ -36,7 +37,7 @@ app = FastAPI(
     openapi_url=None if not DEBUG else "/openapi.json",
 )
 
-app.state.limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 install_security(app)
@@ -128,6 +129,11 @@ async def unavailable(request: Request, exc):
     return _render_error(request, 503)
 
 
+@app.get("/healthz")
+async def healthz():
+    return {"ok": True}
+
+
 @app.get("/")
 async def landing(request: Request):
     return templates.TemplateResponse(
@@ -137,7 +143,7 @@ async def landing(request: Request):
             "site_name": "FolioSpace",
             "tagline": "Your story. One link. Done.",
             "page_title": "FolioSpace — Your portfolio. Your link. Done.",
-            "description": "Stop sending CVs. Send a link. FolioSpace turns your work into a beautiful page that shines on WhatsApp and LinkedIn. ₹150 setup, ₹99/month.",
+            "description": "Stop sending CVs. Send a link. FolioSpace is one page for every Indian professional — chefs, developers, students, consultants, shop owners, agencies, founders. ₹150 setup, ₹99/month.",
         },
     )
 
@@ -182,9 +188,10 @@ async def robots():
 
 @app.get("/sitemap.xml")
 async def sitemap():
+    from datetime import datetime, timezone
     from fastapi.responses import PlainTextResponse
     base = os.getenv("PUBLIC_BASE_URL", "https://foliospace.in").rstrip("/")
-    today = "2026-08-11"
+    today = datetime.now(timezone.utc).date().isoformat()
     body = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'

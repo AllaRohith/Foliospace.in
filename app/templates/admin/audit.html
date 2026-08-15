@@ -6,12 +6,15 @@
 {% set nav_active = 'audit' %}
 {% set nav_audit_badge = total %}
 
-{% block body %}
+{% block breadcrumbs %}
 <div class="breadcrumbs">
   <a href="/admin/">Admin</a>
   <span class="sep">/</span>
   <span class="here">Audit</span>
 </div>
+{% endblock %}
+
+{% block body %}
 
 <div class="page-head">
   <div class="eyebrow">Forensics</div>

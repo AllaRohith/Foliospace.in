@@ -6,23 +6,17 @@ from fastapi import APIRouter, BackgroundTasks, Form, HTTPException, Request
 from fastapi.responses import JSONResponse
 import psycopg
 from psycopg.rows import dict_row
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-
 from app.services import email_service
+from app.utils.text import strip_control, strip_control as _sanitize
+from app.rate_limit import limiter
 
 router = APIRouter(prefix="/api/waitlist", tags=["waitlist"])
-
-limiter = Limiter(key_func=get_remote_address)
 
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
 logger = logging.getLogger(__name__)
 
-CONTROL_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 EMAIL_RE = re.compile(r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$")
-
-HONEYPOT_FIELD = "website"
 
 MAX_EMAIL_LEN = 254
 MAX_ROLE_LEN = 32
@@ -31,7 +25,7 @@ MAX_UTM_LEN = 64
 MAX_REFERER_LEN = 256
 MAX_BODY_BYTES = 8 * 1024
 
-UTM_RE = re.compile(r"[^a-z0-9_./\-]")
+UTM_RE = re.compile(r"[^a-z0-9_./\-+]")
 
 ROLE_VALUES = {
     "",
@@ -44,6 +38,9 @@ ROLE_VALUES = {
     "writer",
     "researcher",
     "founder",
+    "employee",
+    "shop",
+    "business",
     "other",
 }
 
@@ -86,10 +83,24 @@ def _purge_old_ips(conn) -> int:
         return cur.rowcount
 
 
+_PURGE_LAST_RUN: dict[str, float] = {}
+_PURGE_INTERVAL_SECONDS = 24 * 60 * 60
+
+
+def _maybe_purge_old_ips(conn) -> None:
+    now = datetime.now(timezone.utc).timestamp()
+    last = _PURGE_LAST_RUN.get("ip")
+    if last is not None and (now - last) < _PURGE_INTERVAL_SECONDS:
+        return
+    try:
+        _purge_old_ips(conn)
+        _PURGE_LAST_RUN["ip"] = now
+    except psycopg.Error as e:
+        logger.warning("deferred _purge_old_ips skipped: %s", e)
+
+
 def _sanitize(value: str) -> str:
-    if not value:
-        return ""
-    return CONTROL_RE.sub("", value)
+    return strip_control(value)
 
 
 def _clean_utm(value: str) -> str:
@@ -197,21 +208,41 @@ async def join_waitlist(
                 row = cur.fetchone()
                 is_new = row is not None
             total = _count(conn)
-            purged = _purge_old_ips(conn)
+            _maybe_purge_old_ips(conn)
             conn.commit()
     except psycopg.Error as e:
         logger.exception("database error during waitlist insert: %s", e)
         raise HTTPException(status_code=503, detail="Waitlist temporarily unavailable.")
 
     if is_new:
-        background.add_task(email_service.send_welcome_email, email)
+        def _log_welcome(email: str) -> None:
+            ok, info = email_service.send_welcome_email(email)
+            if not ok:
+                logger.warning("welcome email failed for %s: %s", email, info)
+
+        def _log_internal(
+            email: str,
+            role_clean: str | None,
+            utm_source: str | None,
+            utm_medium: str | None,
+            utm_campaign: str | None,
+            referer: str | None,
+        ) -> None:
+            ok, info = email_service.send_internal_notification(
+                email, role_clean, utm_source, utm_medium, utm_campaign, referer,
+            )
+            if not ok:
+                logger.warning("internal notification failed for %s: %s", email, info)
+
+        background.add_task(_log_welcome, email)
         background.add_task(
-            email_service.send_internal_notification,
+            _log_internal,
             email,
             role_clean,
             utm_source or None,
             utm_medium or None,
             utm_campaign or None,
+            referer or None,
         )
 
     return JSONResponse(
@@ -233,7 +264,7 @@ async def count(request: Request):
     try:
         with _connect() as conn:
             total = _count(conn)
-            _purge_old_ips(conn)
+            _maybe_purge_old_ips(conn)
             conn.commit()
     except psycopg.Error as e:
         logger.exception("database error during count: %s", e)

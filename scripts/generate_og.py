@@ -223,11 +223,11 @@ def main():
     draw.text((80, y_sub2), "that lands.", fill=INK, font=f_sub)
 
     f_for = font_saira_regular(22)
-    draw.text((80, y_sub2 + 70), "For Indian professionals.", fill=MUTED, font=f_for)
+    draw.text((80, y_sub2 + 70), "For every Indian professional.", fill=MUTED, font=f_for)
 
     f_persona = font_saira_bold(18)
     persona_y = y_sub2 + 100
-    personas = "Chefs · developers · students · designers · artists"
+    personas = "Chefs · devs · students · consultants · shops · agencies"
     draw.text((80, persona_y), personas, fill=INK, font=f_persona)
 
     right_cx = 920

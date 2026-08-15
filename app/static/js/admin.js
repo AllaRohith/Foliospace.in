@@ -32,6 +32,7 @@
     var tip = document.getElementById("chart-tip");
     var tipDay = document.getElementById("tip-day");
     var tipN = document.getElementById("tip-n");
+    var tipPlural = document.getElementById("tip-plural");
     if (!chart || !tip || !tipDay || !tipN) return;
     var wrap = chart.parentElement;
     var pts = chart.querySelectorAll(".pt");
@@ -57,7 +58,8 @@
       var nRaw = pts[bestI].getAttribute("data-n") || "0";
       var n = parseInt(nRaw, 10);
       tipDay.textContent = day;
-      tipN.textContent = n + " signup" + (n === 1 ? "" : "s");
+      tipN.textContent = n;
+      if (tipPlural) tipPlural.textContent = n === 1 ? "" : "s";
       var wrapRect = wrap.getBoundingClientRect();
       var pRect = pts[bestI].getBoundingClientRect();
       var px = (pRect.left + pRect.width / 2) - wrapRect.left;
@@ -107,6 +109,18 @@
         window.location.href = "/admin/signups?q=" + q;
       }
     });
+  }
+
+  function initConfirmForms() {
+    document.addEventListener("submit", function (e) {
+      var form = e.target;
+      if (!form || form.tagName !== "FORM") return;
+      var msg = form.getAttribute("data-confirm");
+      if (msg && !window.confirm(msg)) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      }
+    }, true);
   }
 
   function initKeyboard() {
@@ -182,6 +196,7 @@
     initChartTooltip();
     initSidebarToggle();
     initSearchSubmit();
+    initConfirmForms();
     initKeyboard();
   }
 })();

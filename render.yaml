@@ -2,10 +2,11 @@ services:
   - type: web
     name: foliospace
     env: python
+    region: oregon
     plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
-    healthCheckPath: /
+    healthCheckPath: /healthz
     envVars:
       - key: APP_ENV
         value: production
@@ -24,4 +25,6 @@ services:
       - key: ADMIN_PASSWORD_HASH
         sync: false
       - key: ADMIN_SESSION_SECRET
+        sync: false
+      - key: INTERNAL_TRUST_TOKEN
         sync: false

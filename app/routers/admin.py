@@ -10,19 +10,17 @@ import psycopg
 from fastapi import APIRouter, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response, StreamingResponse
 from psycopg.rows import dict_row
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 
 from app.services import admin_auth
+from app.routers.waitlist import EMAIL_RE
+from app.utils.text import strip_control, strip_control as _sanitize
+from app.rate_limit import limiter
 
 router = APIRouter(prefix="/admin", tags=["admin"])
-
-limiter = Limiter(key_func=get_remote_address)
 
 logger = logging.getLogger(__name__)
 
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
-CONTROL_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = BASE_DIR / "templates"
@@ -53,13 +51,15 @@ def _cold_open(last7: int, prev7: int, delta_pct: float, top_role: str, top_role
     return " ".join(parts)
 
 
-templates.env.globals["issue"] = _issue_label()
+templates.env.globals["issue"] = lambda: _issue_label()
 templates.env.globals["now"] = lambda: datetime.now(timezone.utc)
 
-ROLE_VALUES = ["student", "developer", "designer", "chef", "artist", "consultant", "writer", "researcher", "founder", "other"]
+ROLE_VALUES = [
+    "student", "developer", "designer", "chef", "artist",
+    "consultant", "writer", "researcher", "founder",
+    "employee", "shop", "business", "other",
+]
 PAGE_SIZE = 50
-
-EMAIL_RE = re.compile(r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$")
 
 
 def _connect():
@@ -73,9 +73,21 @@ def _connect():
 
 
 def _sanitize(value: str) -> str:
-    if not value:
+    return strip_control(value) if value else ""
+
+
+def _anonymize_ip(ip: str | None) -> str:
+    if not ip:
         return ""
-    return CONTROL_RE.sub("", value)
+    if ":" in ip:
+        parts = ip.split(":")
+        if len(parts) >= 3:
+            return ":".join(parts[:2]) + ":…"
+        return "::…"
+    parts = ip.split(".")
+    if len(parts) == 4:
+        return ".".join(parts[:3]) + ".0"
+    return ip[: ip.rfind(".") + 1] + "0" if "." in ip else "0.0.0.0"
 
 
 def _no_cache(response: Response) -> Response:
@@ -454,7 +466,7 @@ async def signup_export(request: Request):
         writer = csv.writer(buf)
         writer.writerow([
             "id", "email", "role", "created_at",
-            "ip", "utm_source", "utm_medium", "utm_campaign", "referer",
+            "ip_subnet", "utm_source", "utm_medium", "utm_campaign", "referer",
         ])
         yield buf.getvalue()
         buf.seek(0); buf.truncate(0)
@@ -464,7 +476,7 @@ async def signup_export(request: Request):
                 row["email"],
                 row["role"] or "",
                 row["created_at"].isoformat() if row.get("created_at") else "",
-                row.get("ip") or "",
+                _anonymize_ip(row.get("ip")),
                 row.get("utm_source") or "",
                 row.get("utm_medium") or "",
                 row.get("utm_campaign") or "",
@@ -490,6 +502,7 @@ async def signup_detail(signup_id: int, request: Request):
     sid = guard
 
     row = None
+    audit_rows = []
     if DATABASE_URL:
         try:
             with _connect() as conn:
@@ -499,6 +512,18 @@ async def signup_detail(signup_id: int, request: Request):
                         (signup_id,),
                     )
                     row = cur.fetchone()
+                    if row:
+                        cur.execute(
+                            """
+                            SELECT id, session_id, ip, action, target, metadata, created_at
+                              FROM admin_audit_log
+                             WHERE target = %s
+                             ORDER BY created_at DESC
+                             LIMIT 10
+                            """,
+                            (str(signup_id),),
+                        )
+                        audit_rows = cur.fetchall()
                 conn.commit()
         except psycopg.Error as e:
             logger.exception("signup_detail query failed: %s", e)
@@ -516,6 +541,7 @@ async def signup_detail(signup_id: int, request: Request):
             "description": "FolioSpace signup detail.",
             "row": row,
             "signup_id": signup_id,
+            "audit_rows": audit_rows,
         },
     )
     return _no_cache(response)

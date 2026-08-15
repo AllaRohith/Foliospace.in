@@ -7,13 +7,11 @@ from pathlib import Path
 import resend
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-_CONTROL_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f\r\n]")
+from app.utils.text import strip_control as _strip_control
 
 
 def _strip_control(value: str) -> str:
-    if not value:
-        return ""
-    return _CONTROL_RE.sub("", value)
+    return strip_control(value) if value else ""
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +41,22 @@ def _render_template(name: str, **context) -> str:
     return template.render(**context)
 
 
+def _first_name_from_email(email: str) -> str:
+    if not email:
+        return "there"
+    local = email.split("@", 1)[0].strip()
+    if not local:
+        return "there"
+    for sep in (".", "_", "-", "+", "·", "•", "、", "．"):
+        if sep in local:
+            local = local.split(sep, 1)[0]
+            break
+    local = "".join(ch for ch in local if ch.isalpha() or ch == " ")
+    if not local:
+        return "there"
+    return local[:1].upper() + local[1:].lower()
+
+
 def _launch_context() -> dict:
     if not LAUNCH_DATE:
         return {"show_launch": False}
@@ -52,9 +66,25 @@ def _launch_context() -> dict:
     return {
         "show_launch": True,
         "days_until_launch": days,
-        "launch_date_formatted": LAUNCH_DATE.strftime("%-d %B %Y"),
-        "launch_time_formatted": LAUNCH_DATE.strftime("%-I:%M %p IST"),
+        "launch_date_formatted": _format_day(LAUNCH_DATE),
+        "launch_time_formatted": _format_time(LAUNCH_DATE),
     }
+
+
+def _format_day(dt: datetime) -> str:
+    return f"{dt.day} {_month_name(dt.month)} {dt.year}"
+
+
+def _format_time(dt: datetime) -> str:
+    hour12 = dt.hour % 12 or 12
+    minute = f"{dt.minute:02d}"
+    suffix = "AM" if dt.hour < 12 else "PM"
+    return f"{hour12}:{minute} {suffix} IST"
+
+
+def _month_name(m: int) -> str:
+    return ["", "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"][m]
 
 
 def send_welcome_email(to_email: str) -> tuple[bool, str]:
@@ -64,7 +94,11 @@ def send_welcome_email(to_email: str) -> tuple[bool, str]:
 
     try:
         resend.api_key = API_KEY
-        context = {"public_url": PUBLIC_URL, **_launch_context()}
+        context = {
+            "public_url": PUBLIC_URL,
+            "first_name": _first_name_from_email(to_email),
+            **_launch_context(),
+        }
         html = _render_template("welcome.html", **context)
         subject = "You're on the FolioSpace waitlist"
         params = {
@@ -89,6 +123,7 @@ def send_internal_notification(
     utm_source: str | None = None,
     utm_medium: str | None = None,
     utm_campaign: str | None = None,
+    referer: str | None = None,
 ) -> tuple[bool, str]:
     if not API_KEY:
         return False, "no_api_key"
@@ -99,6 +134,7 @@ def send_internal_notification(
         safe_src = _strip_control(utm_source)[:64] if utm_source else None
         safe_med = _strip_control(utm_medium)[:64] if utm_medium else None
         safe_camp = _strip_control(utm_campaign)[:64] if utm_campaign else None
+        safe_ref = _strip_control(referer)[:256] if referer else None
         body = (
             f"New waitlist signup\n\n"
             f"Email: {safe_email}\n"
@@ -112,9 +148,12 @@ def send_internal_notification(
                 body += f"  medium:   {safe_med}\n"
             if safe_camp:
                 body += f"  campaign: {safe_camp}\n"
+        if safe_ref:
+            body += f"\nReferer: {safe_ref}\n"
         params = {
             "from": FROM_EMAIL,
             "to": [REPLY_TO],
+            "reply_to": REPLY_TO,
             "subject": f"New waitlist signup: {safe_email}"[:200],
             "text": body,
         }

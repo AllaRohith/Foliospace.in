@@ -24,22 +24,26 @@ Free-tier deploy path: Render (web) + Neon (Postgres) + GoDaddy DNS. No credit c
 
 ### 2. Run the schema against Neon
 
-Two options, pick whichever is easier:
+Run all three migrations in order. Each is idempotent.
 
 **Option A — Neon's web SQL editor:**
 - Neon dashboard → your project → SQL Editor
-- Paste the contents of `scripts/init_db.sql` and run
+- Paste and run `scripts/init_db.sql`
+- Paste and run `scripts/admin_init_db.sql` (admin tables — sessions, audit log)
+- Paste and run `scripts/waitlist_utm.sql` (UTM columns + index on `waitlist`)
 
 **Option B — psql from your terminal:**
 ```bash
 psql "<paste-the-neon-connection-string-here>" -f scripts/init_db.sql
+psql "<paste-the-neon-connection-string-here>" -f scripts/admin_init_db.sql
+psql "<paste-the-neon-connection-string-here>" -f scripts/waitlist_utm.sql
 ```
 
 Verify with:
 ```bash
-psql "<connection-string>" -c "\d waitlist"
+psql "<connection-string>" -c "\dt"
 ```
-You should see the table and `waitlist_email_lower_idx`.
+You should see `waitlist`, `admin_sessions`, and `admin_audit_log` (plus their indexes).
 
 ### 3. Create a Render account (verify no card asked)
 
@@ -56,14 +60,21 @@ You should see the table and `waitlist_email_lower_idx`.
 
 In the Render dashboard for the `foliospace` service → **Environment**:
 
-| Key              | Value                                                              |
-|------------------|--------------------------------------------------------------------|
-| `DATABASE_URL`   | The Neon connection string from step 1                             |
-| `PUBLIC_BASE_URL`| `https://foliospace.in`                                            |
-| `RESEND_API_KEY` | *(leave empty for now — emails skip gracefully)*                   |
-| `RESEND_REPLY_TO`| `rohit@foliospace.in`                                              |
+| Key                          | Value / how to set                                                       |
+|------------------------------|--------------------------------------------------------------------------|
+| `DATABASE_URL`               | The Neon connection string from step 1                                   |
+| `PUBLIC_BASE_URL`            | `https://foliospace.in`                                                  |
+| `APP_ENV`                    | `production` (already set in `render.yaml` — leave it)                   |
+| `ENV`                        | `production` (already set in `render.yaml` — leave it)                   |
+| `RESEND_FROM_EMAIL`          | `FolioSpace <hello@foliospace.in>` (already set in `render.yaml`)         |
+| `RESEND_REPLY_TO`            | `rohit@foliospace.in`                                                    |
+| `RESEND_API_KEY`             | *(leave empty for now — emails skip gracefully)*                         |
+| `ADMIN_SESSION_SECRET`       | Run `python -c "import secrets; print(secrets.token_urlsafe(64))"` locally and paste the output. **Required.** App hard-crashes without it. |
+| `ADMIN_PASSWORD_HASH`        | Run `python -c "from app.services.admin_auth import hash_password; print(hash_password('YOUR_PASSWORD'))"` locally with your chosen admin password and paste the output. **Required** to log into `/admin`. |
+| `LAUNCH_DATE`                | ISO-8601 date like `2026-09-02T00:00:00+05:30`. **Required** to render the countdown in the welcome email. |
+| `INTERNAL_TRUST_TOKEN`       | Optional. Run `python -c "import secrets; print(secrets.token_urlsafe(32))"` locally. Lets trusted internal callers send POSTs to `/api/waitlist/join` or `/admin/login` without an Origin/Referer by passing the same value in `X-Internal-Token`. Leave empty in production to keep CSRF protection strict. |
 
-`APP_ENV` and `RESEND_FROM_EMAIL` are baked into `render.yaml`. Don't touch them.
+> **Generate the secret and password hash on the same machine you'll commit from**, not in the Render dashboard. They never need to be re-typed anywhere else.
 
 Save. Render will redeploy automatically.
 

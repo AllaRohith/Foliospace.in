@@ -6,12 +6,15 @@
 {% set nav_active = 'signups' %}
 {% set nav_signups_badge = total %}
 
-{% block body %}
+{% block breadcrumbs %}
 <div class="breadcrumbs">
   <a href="/admin/">Admin</a>
   <span class="sep">/</span>
   <span class="here">Signups</span>
 </div>
+{% endblock %}
+
+{% block body %}
 
 <div class="page-head">
   <div class="eyebrow">Live Roster</div>

@@ -19,8 +19,7 @@ FAIL_WINDOW_MINUTES = int(os.getenv("ADMIN_LOGIN_FAIL_WINDOW_MINUTES", "15"))
 LOCKOUT_TRIGGER_FAILS = int(os.getenv("ADMIN_LOGIN_FAILS_TRIGGER", "10"))
 
 SESSION_COOKIE = "fs_admin"
-SESSION_KEY = "admin_id"
-
+SESSION_KEY = "admin_session_id"
 LOGIN_INVALID_MESSAGE = "Invalid credentials."
 
 if not DATABASE_URL:
@@ -139,12 +138,15 @@ def _slide_session(sid: str) -> bool:
                            expires_at = NOW() + make_interval(hours => %s)
                      WHERE id = %s
                        AND expires_at > NOW()
+                       AND last_used_at > NOW() - make_interval(mins => %s)
                     RETURNING id
                     """,
-                    (SESSION_TTL_HOURS, sid),
+                    (SESSION_TTL_HOURS, sid, IDLE_TTL_MINUTES),
                 )
                 row = cur.fetchone()
                 if not row:
+                    cur.execute("DELETE FROM admin_sessions WHERE id = %s", (sid,))
+                    conn.commit()
                     return False
                 _purge_old_sessions(conn)
             conn.commit()
@@ -189,8 +191,8 @@ def audit(
     metadata: dict | None = None,
 ) -> None:
     ip = _client_ip(request)
-    logger.info("admin.audit action=%s ip=%s target=%s sid=%s", action, ip, target, sid or "-")
     if not DATABASE_URL:
+        logger.info("admin.audit (no-db) action=%s ip=%s target=%s sid=%s", action, ip, target, sid or "-")
         return
     try:
         meta_json = json.dumps(metadata, default=str) if metadata else None
@@ -205,5 +207,6 @@ def audit(
                     (sid, ip, action, target, meta_json),
                 )
             conn.commit()
+        logger.info("admin.audit action=%s ip=%s target=%s sid=%s", action, ip, target, sid or "-")
     except psycopg.Error as e:
         logger.exception("audit insert failed: %s", e)

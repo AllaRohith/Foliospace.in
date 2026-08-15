@@ -52,21 +52,11 @@
 
   (function () {
     const micro = document.getElementById('signup-microcopy');
-    if (!micro) return;
-
-    async function refreshMicrocopy() {
-      try {
-        const res = await fetch('/api/stats', { cache: 'no-store' });
-        if (!res.ok) return;
-        const data = await res.json();
-        const n = parseInt(data.total, 10);
-        if (!Number.isFinite(n) || n <= 0) return;
-        micro.textContent = '→ ' + n + ' already in · no spam · delete on request';
-      } catch (e) {}
+    if (micro) {
+      refreshMicrocopy();
+      setInterval(refreshMicrocopy, 15000);
+      document.addEventListener('visibilitychange', function () { if (!document.hidden) refreshMicrocopy(); });
     }
-    refreshMicrocopy();
-    setInterval(refreshMicrocopy, 15000);
-    document.addEventListener('visibilitychange', function () { if (!document.hidden) refreshMicrocopy(); });
   })();
 
   const navWrap = document.querySelector('.nav-wrap');

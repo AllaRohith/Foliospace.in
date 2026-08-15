@@ -8,3 +8,6 @@ data/waitlist.json
 *.log
 .pytest_cache/
 .mypy_cache/
+.claude/
+.idea/
+.vscode/

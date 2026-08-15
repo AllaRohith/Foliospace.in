@@ -8,12 +8,9 @@ from fastapi.responses import JSONResponse
 import psycopg
 from psycopg.rows import dict_row
 
-from slowapi import Limiter
-from slowapi.util import get_remote_address
+from app.rate_limit import limiter
 
 router = APIRouter(prefix="/api", tags=["stats"])
-
-limiter = Limiter(key_func=get_remote_address)
 
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 

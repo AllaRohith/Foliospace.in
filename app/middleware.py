@@ -7,8 +7,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.requests import Request
 from starlette.responses import Response, JSONResponse
 
-
-_CONTROL_RE = re.compile(r"[\x00-\x1f\x7f]")
+from app.utils.text import strip_control as _strip_control, strip_control_strict as _strip_control_strict
 
 ALLOWED_FORM_CONTENT_TYPES = {
     "application/x-www-form-urlencoded",
@@ -16,12 +15,6 @@ ALLOWED_FORM_CONTENT_TYPES = {
 }
 
 MAX_FORM_BODY_BYTES = 8 * 1024
-
-
-def _strip_control(value: str) -> str:
-    if not value:
-        return ""
-    return _CONTROL_RE.sub("", value)
 
 
 def _allowed_hosts() -> list[str]:
@@ -72,7 +65,7 @@ def _csp() -> str:
         "manifest-src 'self'",
         "worker-src 'self' blob:",
     ]
-    if os.getenv("ENV", "production") == "production":
+    if (os.getenv("ENV") or os.getenv("APP_ENV") or "production").lower() == "production":
         parts.append("upgrade-insecure-requests")
     return "; ".join(parts)
 
@@ -103,7 +96,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 
 class OriginCheckMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app, allowed_origins: list[str] | None = None):
+    def __init__(self, app, allowed_origins: list[str] | None = None, trust_internal_token: str | None = None):
         super().__init__(app)
         self.allowed = {_origin_key(o) for o in (allowed_origins or _allowed_origins()) if o}
         self.allowed.discard("")
@@ -116,6 +109,7 @@ class OriginCheckMiddleware(BaseHTTPMiddleware):
         self.protected_prefixes = (
             "/admin/signups/",
         )
+        self.trust_internal_token = (trust_internal_token or os.getenv("INTERNAL_TRUST_TOKEN") or "").strip()
 
     def _is_protected(self, path: str) -> bool:
         if any(path == p or path.startswith(p + "/") for p in self.protected_paths):
@@ -124,9 +118,15 @@ class OriginCheckMiddleware(BaseHTTPMiddleware):
             return path.endswith("/delete")
         return False
 
+    def _is_trusted_internal(self, request: Request) -> bool:
+        if not self.trust_internal_token:
+            return False
+        provided = request.headers.get("x-internal-token", "").strip()
+        return bool(provided) and provided == self.trust_internal_token
+
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
-        if request.method not in self.safe_methods and self._is_protected(path):
+        if request.method not in self.safe_methods and self._is_protected(path) and not self._is_trusted_internal(request):
             ctype = (request.headers.get("content-type") or "").split(";")[0].strip().lower()
             if ctype not in ALLOWED_FORM_CONTENT_TYPES:
                 return JSONResponse(
@@ -146,7 +146,7 @@ class OriginCheckMiddleware(BaseHTTPMiddleware):
                         {"ok": False, "message": "Invalid Content-Length."},
                         status_code=400,
                     )
-            origin = _strip_control(request.headers.get("origin", ""))
+            origin = _strip_control_strict(request.headers.get("origin", ""))
             referer = _strip_control(request.headers.get("referer", ""))
             if origin:
                 if _origin_key(origin) not in self.allowed:
