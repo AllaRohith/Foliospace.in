@@ -130,30 +130,21 @@ def highlight_text(img, x, y, text, fnt, hl_color, hl_alpha=85, pad_x=14):
     return img_rgba.convert("RGB")
 
 
+F_PATH = [
+    (8, 8), (8, 48), (16, 48), (16, 33), (30, 33),
+    (30, 26), (16, 26), (16, 15), (38, 15), (38, 8),
+]
+ACC_X, ACC_Y, ACC_W = 32, 40, 10
+
+
 def draw_brand_mark(draw, x, y, size=56):
-    draw.rounded_rectangle(
-        [x, y, x + size, y + size],
-        radius=14,
-        fill=INK,
-    )
-    half = size // 2
-    draw.rectangle(
-        [x + 10, y + 10, x + 10 + half - 5, y + 10 + half - 5],
-        fill=CREAM,
-    )
-    draw.rectangle(
-        [x + half + 5, y + 10, x + size - 10, y + 10 + half - 5],
-        fill=CREAM,
-    )
-    draw.rectangle(
-        [x + 10, y + half + 5, x + 10 + half - 5, y + size - 10],
-        fill=CREAM,
-    )
-    draw.rounded_rectangle(
-        [x + half + 5, y + half + 5, x + size - 10, y + size - 10],
-        radius=4,
-        fill=ACCENT,
-    )
+    scale = size / 56
+    poly = [(x + int(px * scale), y + int(py * scale)) for px, py in F_PATH]
+    draw.polygon(poly, fill=INK)
+    ax = x + int(ACC_X * scale)
+    ay = y + int(ACC_Y * scale)
+    aw = max(1, int(ACC_W * scale))
+    draw.rectangle([ax, ay, ax + aw, ay + aw], fill=ACCENT)
 
 
 def draw_countdown_poster(draw, img, cx, top_y):
@@ -200,7 +191,15 @@ def main():
     draw_brand_mark(draw, mark_x, mark_y, mark_size)
 
     f_brand = font_stalinist(34)
-    draw.text((mark_x + mark_size + 18, mark_y + 8), "FolioSpace", fill=INK, font=f_brand)
+    word_x = mark_x + mark_size + 18
+    draw.text((word_x, mark_y + 8), "FolioSpace", fill=INK, font=f_brand)
+    word_bbox = draw.textbbox((0, 0), "FolioSpace", font=f_brand)
+    word_w = word_bbox[2] - word_bbox[0]
+    word_h = word_bbox[3] - word_bbox[1]
+    acc_size = 12
+    acc_x = word_x + word_w + 4
+    acc_y = mark_y + 8 + word_h - acc_size - 4
+    draw.rectangle([acc_x, acc_y, acc_x + acc_size, acc_y + acc_size], fill=ACCENT)
 
     y_eyebrow = 170
     f_eyebrow = font_saira_bold(15)
