@@ -136,6 +136,8 @@ async def healthz():
 
 @app.get("/")
 async def landing(request: Request):
+    from app.services.email_service import LAUNCH_DATE as _LD
+    launch_iso = _LD.isoformat() if _LD else ""
     return templates.TemplateResponse(
         request,
         "landing.html",
@@ -144,6 +146,7 @@ async def landing(request: Request):
             "tagline": "Your story. One link. Done.",
             "page_title": "FolioSpace — Your portfolio. Your link. Done.",
             "description": "Stop sending CVs. Send a link. FolioSpace is one page for every Indian professional — chefs, developers, students, consultants, shop owners, agencies, founders. ₹150 setup, ₹99/month.",
+            "launch_iso": launch_iso,
         },
     )
 

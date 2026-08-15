@@ -188,6 +188,38 @@
     if (canvas) canvas.remove();
   })();
 
+  (function () {
+    const root = document.getElementById('cover-countdown');
+    if (!root) return;
+    const iso = root.getAttribute('data-launch');
+    if (!iso) return;
+    const target = new Date(iso).getTime();
+    if (!Number.isFinite(target)) return;
+    const now = Date.now();
+    if (target <= now) return;
+    root.hidden = false;
+    const dEl = root.querySelector('[data-d]');
+    const hEl = root.querySelector('[data-h]');
+    const mEl = root.querySelector('[data-m]');
+    const sEl = root.querySelector('[data-s]');
+    function pad(n) { return n < 10 ? '0' + n : String(n); }
+    function tick() {
+      const left = Math.max(0, target - Date.now());
+      const total = Math.floor(left / 1000);
+      const d = Math.floor(total / 86400);
+      const h = Math.floor((total % 86400) / 3600);
+      const m = Math.floor((total % 3600) / 60);
+      const s = total % 60;
+      if (dEl) dEl.textContent = pad(d);
+      if (hEl) hEl.textContent = pad(h);
+      if (mEl) mEl.textContent = pad(m);
+      if (sEl) sEl.textContent = pad(s);
+      if (left <= 0) clearInterval(handle);
+    }
+    const handle = setInterval(tick, 1000);
+    tick();
+  })();
+
   const konami = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
   let kIdx = 0;
   (function () {
