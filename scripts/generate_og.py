@@ -198,7 +198,7 @@ def main():
     word_h = word_bbox[3] - word_bbox[1]
     acc_size = 12
     acc_x = word_x + word_w + 4
-    acc_y = mark_y + 8 + word_h - acc_size - 4
+    acc_y = mark_y + 8 + word_bbox[3] - acc_size - 2
     draw.rectangle([acc_x, acc_y, acc_x + acc_size, acc_y + acc_size], fill=ACCENT)
 
     y_eyebrow = 170
