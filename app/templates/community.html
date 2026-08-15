@@ -7,20 +7,20 @@
   "@graph": [
     {
       "@type": "WebPage",
-      "@id": "https://foliospace.in/community#webpage",
-      "url": "https://foliospace.in/community",
-      "name": "Community — FolioSpace",
+      "@id": "https://foliospace.in/space-community#webpage",
+      "url": "https://foliospace.in/space-community",
+      "name": "Space Community — FolioSpace",
       "isPartOf": { "@id": "https://foliospace.in/#site" },
-      "about": { "@id": "https://foliospace.in/community#directory" },
+      "about": { "@id": "https://foliospace.in/space-community#directory" },
       "inLanguage": "en-IN"
     },
     {
       "@type": "ItemList",
-      "@id": "https://foliospace.in/community#directory",
+      "@id": "https://foliospace.in/space-community#directory",
       "name": "FolioSpace community directory",
       "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "Searchable by craft", "url": "https://foliospace.in/community#craft" },
-        { "@type": "ListItem", "position": 2, "name": "Searchable by place", "url": "https://foliospace.in/community#place" }
+        { "@type": "ListItem", "position": 1, "name": "Searchable by craft", "url": "https://foliospace.in/space-community#craft" },
+        { "@type": "ListItem", "position": 2, "name": "Searchable by place", "url": "https://foliospace.in/space-community#place" }
       ]
     }
   ]
@@ -37,6 +37,38 @@
         <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page F2<span class="folio-meta-sep">/</span>The directory</p>
         <h1 class="reveal">The directory of <em>every FolioSpace user.</em></h1>
         <p class="community-page-lead reveal">Two filters, one page. The directory is searchable by craft and by place — because a chef in Kochi deserves to be found next to a developer in Guwahati, not buried under a follower count.</p>
+        <div class="community-search" aria-disabled="true">
+          <svg class="community-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m21 21-4.3-4.3"/>
+          </svg>
+          <input class="community-search-input" type="search" placeholder="Search folios by name, craft, or city…" disabled aria-label="Search the directory" />
+          <span class="community-search-badge">Ships at launch</span>
+        </div>
+        <div class="community-filters" aria-disabled="true" aria-label="Filter the directory">
+          <div class="community-filters-group">
+            <span class="community-filters-label">By role</span>
+            <div class="community-filters-row">
+              <button type="button" class="filter-chip" disabled>Chef</button>
+              <button type="button" class="filter-chip" disabled>Developer</button>
+              <button type="button" class="filter-chip" disabled>Consultant</button>
+              <button type="button" class="filter-chip" disabled>Founder</button>
+              <button type="button" class="filter-chip" disabled>Student</button>
+              <button type="button" class="filter-chip" disabled>Shop</button>
+            </div>
+          </div>
+          <div class="community-filters-group">
+            <span class="community-filters-label">By city</span>
+            <div class="community-filters-row">
+              <button type="button" class="filter-chip" disabled>Mumbai</button>
+              <button type="button" class="filter-chip" disabled>Delhi</button>
+              <button type="button" class="filter-chip" disabled>Bengaluru</button>
+              <button type="button" class="filter-chip" disabled>Kochi</button>
+              <button type="button" class="filter-chip" disabled>Guwahati</button>
+              <button type="button" class="filter-chip" disabled>Hyderabad</button>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
