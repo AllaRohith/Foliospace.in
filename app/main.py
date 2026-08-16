@@ -79,21 +79,25 @@ ERROR_COPY = {
         "code": "404",
         "headline": 'This page hasn&rsquo;t been built <em>yet.</em>',
         "sub": "Maybe it never will be. Either way, the door is back that way.",
+        "description": "That page doesn't exist (yet) on FolioSpace — your portfolio link for every Indian professional.",
     },
     422: {
         "code": "422",
         "headline": 'That data didn&rsquo;t add up.',
         "sub": "Check the email and try once more. We're not picky, just specific.",
+        "description": "The form data didn't validate. FolioSpace needs a real email and a real role before adding you to the waitlist.",
     },
     500: {
         "code": "500",
         "headline": 'Something <em>broke.</em>',
         "sub": "It happens. We're already looking at it — try again in a minute.",
+        "description": "FolioSpace hit an unexpected error. The team has been notified — try again in a minute.",
     },
     503: {
         "code": "503",
         "headline": 'We&rsquo;re briefly <em>asleep.</em>',
         "sub": "Render's free tier wakes up when poked. Give it ~30 seconds and reload.",
+        "description": "FolioSpace is briefly unavailable — the free Render tier spins down after inactivity. Give it ~30 seconds and reload.",
     },
 }
 
@@ -149,7 +153,7 @@ async def landing(request: Request):
             "site_name": "FolioSpace",
             "tagline": "Your story. One link. Done.",
             "page_title": "FolioSpace — Your portfolio. Your link. Done.",
-            "description": "Stop sending CVs. Send a link. FolioSpace is one page for every Indian professional — chefs, developers, students, consultants, shop owners, agencies, founders. ₹150 setup, ₹99/month.",
+            "description": "One link for every Indian pro — chefs, devs, students, consultants, shops, founders. ₹150 setup, ₹99/mo.",
             "launch_iso": launch_iso,
         },
     )
@@ -163,7 +167,7 @@ async def privacy(request: Request):
         {
             "site_name": "FolioSpace",
             "page_title": "Privacy — FolioSpace",
-            "description": "FolioSpace privacy policy. What we collect, how we use it, and how to ask us to delete it.",
+            "description": "FolioSpace privacy policy. What we collect when you join the waitlist, how we use it, retention, and how to ask us to delete it.",
         },
     )
 
@@ -176,7 +180,7 @@ async def terms(request: Request):
         {
             "site_name": "FolioSpace",
             "page_title": "Terms — FolioSpace",
-            "description": "FolioSpace terms of service. The rules of the road for using the waitlist and the eventual product.",
+            "description": "FolioSpace terms of service. Rules for the waitlist, conduct, refunds, liability, and what to expect when the product launches.",
         },
     )
 
@@ -222,6 +226,7 @@ async def robots():
     content = (
         "User-agent: *\n"
         "Allow: /\n"
+        "Disallow: /admin/\n"
         f"Sitemap: {base}/sitemap.xml\n"
     )
     return PlainTextResponse(content=content, media_type="text/plain")
@@ -237,7 +242,7 @@ async def sitemap():
     body = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-        f'  <url><loc>{base}/</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>\n'
+        f'  <url><loc>{base}/</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>\n'
         f'  <url><loc>{base}/privacy</loc><lastmod>{legal_lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>\n'
         f'  <url><loc>{base}/terms</loc><lastmod>{legal_lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>\n'
         f'  <url><loc>{base}/features</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>\n'
