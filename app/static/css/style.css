@@ -306,9 +306,10 @@ body.dark .nav[data-state="scrolled"] {
 }
 .brand, body.dark .brand, .brand-name, body.dark .brand-name { color: var(--ink); }
 .brand:hover { text-decoration: none; transform: translateX(-1px); }
-.brand .brand-name { line-height: 1; }
+.brand .brand-name { line-height: 1; max-width: 9ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .brand .brand-name { line-height: 1; }
+@media (max-width: 480px) { .brand .brand-name { max-width: 7ch; } }
 
 .brand-mark {
   width: 26px;
@@ -422,6 +423,7 @@ body.dark .brand-mark { color: var(--cream); }
   position: relative;
   overflow: hidden;
   isolation: isolate;
+  min-height: 44px;
 }
 .btn::after {
   content: "";
@@ -442,6 +444,7 @@ body.dark .brand-mark { color: var(--cream); }
 
 .btn-sm { padding: 8px 14px; font-size: 13px; min-height: 36px; }
 .btn-lg { padding: 14px 22px; font-size: 16px; min-height: 48px; }
+@media (max-width: 720px) { .btn { min-height: 44px; } .btn-sm { min-height: 36px; padding: 8px 14px; } }
 
 .btn-primary {
   background: var(--ink);
@@ -2752,6 +2755,7 @@ body.dark .ticker-rail::after  { background: linear-gradient(-90deg, var(--cream
   cursor: pointer;
   transition: background 0.12s ease;
   font-size: 14.5px;
+  min-height: 44px;
 }
 .cmd-palette-item.is-active,
 .cmd-palette-item:hover { background: var(--cream-2); }
@@ -3515,7 +3519,7 @@ body.dark .who-row:hover .who-desc { color: var(--who-hover-fg, var(--cream)); }
 @media (max-width: 480px) {
   .receipt { padding: 24px 18px 22px; }
   .receipt-seal { width: 60px; height: 60px; top: 10px; right: 10px; }
-  .receipt-seal-text { font-size: 8px; letter-spacing: 0.18em; }
+  .receipt-seal-text { font-size: 10px; letter-spacing: 0.18em; }
   .receipt-price { font-size: 40px; }
   .receipt-featured { padding-bottom: 52px; }
   .receipt-featured .receipt-save-stamp { font-size: 12px; padding: 4px 10px; }
@@ -4188,9 +4192,9 @@ body.dark .ticket-corner-mark { color: rgba(250, 247, 242, 0.35); }
   border-bottom: 1px solid var(--line);
   background: var(--cream-2);
   font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: clamp(10.5px, 2.8vw, 12.5px);
+  font-size: clamp(12px, 2.8vw, 13px);
   font-weight: 700;
-  letter-spacing: clamp(0.08em, 1.4vw, 0.16em);
+  letter-spacing: clamp(0.06em, 1.4vw, 0.14em);
   text-transform: uppercase;
   color: var(--muted);
   text-align: center;
@@ -4266,7 +4270,7 @@ body.dark .colophon { border-color: var(--cream); }
 }
 .colophon-anti {
   font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -5086,6 +5090,13 @@ body.dark .nav-indicator {
 .nav-cta:hover .nav-cta-arrow { transform: translateX(3px); }
 .nav-cta-text-short { display: none; }
 .nav-theme-mobile { display: none; }
+@media (max-width: 380px) {
+  .nav-cta { padding: 10px 14px !important; font-size: 12.5px; min-height: 44px; }
+}
+@media (max-width: 340px) {
+  .nav-cta { padding: 8px 11px !important; font-size: 11.5px; min-height: 44px; gap: 6px; }
+  .nav-burger { min-width: 44px; min-height: 44px; padding: 0 6px; }
+}
 
 .nav-theme {
   display: inline-flex;
@@ -5344,6 +5355,7 @@ body.dark .nav-theme:hover { background: rgba(255, 255, 255, 0.08); }
 .demo-pin {
   position: relative;
   min-height: 80vh;
+  min-height: 80dvh;
   background: #1A2128;
   color: #FAF7F2;
   padding: 120px 0;
@@ -6017,7 +6029,7 @@ body.dark .signup-dossier {
   border-radius: 10px;
   padding: 12px 14px;
   font-family: inherit;
-  font-size: 15px;
+  font-size: 16px;
   color: var(--ink);
   outline: 0;
   transition: border-color 0.2s ease, background 0.2s ease;
@@ -6040,8 +6052,8 @@ body.dark .signup-field-input:focus { background: var(--ink-2); border-color: va
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 16px;
-  min-height: 40px;
+  padding: 10px 14px;
+  min-height: 44px;
   border-radius: 999px;
   background: var(--cream);
   border: 1px solid var(--line);
@@ -6476,6 +6488,9 @@ body.dark .signup-chip:has(input:checked) { background: var(--accent); color: va
   animation: coverMarquee 44s linear infinite;
   width: max-content;
 }
+@media (max-width: 720px) {
+  .cover-marquee-track { animation-play-state: paused !important; }
+}
 .cover-marquee-item {
   font-family: 'Saira', sans-serif;
   font-size: 12px;
@@ -6750,8 +6765,8 @@ body.dark .signup-chip:has(input:checked) { background: var(--accent); color: va
 @media (max-width: 340px) {
   .cover { padding: 56px 0 32px; }
   .cover-headline { font-size: clamp(28px, 9.5vw, 44px); margin-bottom: 14px; letter-spacing: -0.03em; }
-  .cover-tagline { font-size: 11px; letter-spacing: 0.12em; padding: 8px 0; max-width: 260px; }
-  .cover-countdown { font-size: 10.5px; letter-spacing: 0.1em; padding: 8px 0; gap: 10px; }
+  .cover-tagline { font-size: 12px; letter-spacing: 0.12em; padding: 8px 0; max-width: 260px; }
+  .cover-countdown { font-size: 11px; letter-spacing: 0.1em; padding: 8px 0; gap: 10px; }
   .cover-countdown-num { gap: 4px; letter-spacing: 0.08em; }
   .cover-countdown-cell > span { font-size: 12px; min-width: 1.4ch; }
   .cover-countdown-cell > em { font-size: 9px; }
@@ -6772,7 +6787,7 @@ body.dark .signup-chip:has(input:checked) { background: var(--accent); color: va
 @media (max-height: 380px) and (orientation: landscape) {
   .cover { padding: 40px 0 20px; }
   .cover-headline { font-size: clamp(28px, 7vh, 44px); line-height: 1; margin-bottom: 8px; }
-  .cover-tagline { font-size: 10.5px; padding: 4px 0; letter-spacing: 0.18em; }
+  .cover-tagline { font-size: 12px; padding: 4px 0; letter-spacing: 0.18em; }
 }
 
 @media (max-height: 720px) and (min-width: 1024px) and (orientation: landscape) {
@@ -6826,6 +6841,10 @@ body.dark .cover-grain { opacity: 0.30; }
 .features-page-hero {
   padding: 140px 0 56px;
   background: var(--cream);
+}
+@media (max-width: 720px) {
+  .features-page-hero { padding: 64px 0 24px; }
+  .features-pills { margin-top: 16px; }
 }
 .features-page-hero .container { max-width: var(--container); }
 .features-page-hero h1 {
@@ -6925,6 +6944,15 @@ body.dark #features-teaser { background: var(--ink-2); }
   font-style: italic;
   color: var(--accent-text);
 }
+.community-cover .cover-headline {
+  max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+@media (max-width: 480px) {
+  .community-cover .cover-headline { font-size: clamp(28px, 8vw, 44px); line-height: 1.02; }
+}
 .community-cover .cover-tagline {
   font-size: clamp(13px, 1.6vw, 17px);
   letter-spacing: 0.12em;
@@ -6962,6 +6990,7 @@ body.dark #features-teaser { background: var(--ink-2); }
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
+  padding-right: 8px;
 }
 
 .community-cover-stub-meta {
@@ -7042,6 +7071,7 @@ body.dark .features-page-hero .folio-meta { color: var(--cream); }
   display: inline-flex;
   align-items: center;
   padding: 7px 14px;
+  min-height: 33px;
   border-radius: 999px;
   border: 1px solid var(--line);
   background: transparent;
@@ -7052,6 +7082,7 @@ body.dark .features-page-hero .folio-meta { color: var(--cream); }
   text-decoration: none;
   transition: color 0.18s ease, border-color 0.18s ease;
 }
+@media (max-width: 720px) { .features-pill { min-height: 44px; padding: 10px 16px; } }
 .features-pill:hover { color: var(--accent-text); border-color: var(--accent-text); text-decoration: none; }
 body.dark .features-pill { border-color: var(--line); color: var(--fg); }
 body.dark .features-pill:hover { border-color: var(--accent-text); color: var(--accent-text); }
@@ -7100,6 +7131,9 @@ body.dark .features-pill:hover { border-color: var(--accent-text); color: var(--
   background: var(--cream-2);
   white-space: nowrap;
 }
+@media (max-width: 480px) {
+  .community-search-badge { display: none; }
+}
 body.dark .community-search { background: var(--ink-2); border-color: var(--cream); }
 body.dark .community-search-icon { color: var(--line); }
 body.dark .community-search-input { color: var(--cream); }
@@ -7129,7 +7163,7 @@ body.dark .community-search-badge { background: var(--cream-2); color: var(--lin
   display: inline-flex;
   align-items: center;
   padding: 8px 14px;
-  min-height: 36px;
+  min-height: 44px;
   border-radius: 999px;
   border: 1px solid var(--line);
   background: transparent;
