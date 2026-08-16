@@ -2972,6 +2972,11 @@ body.dark .who-dir-row { border-bottom-color: rgba(250, 247, 242, 0.12); }
 .who-dir-row:hover { background: rgba(255, 107, 53, 0.04); }
 .who-dir-row:last-child { border-bottom: 1.5px solid var(--ink); }
 
+@media (max-width: 480px) {
+  .who-dir-row { grid-template-columns: auto 1fr; gap: 12px; }
+  .who-dir-mark { display: none; }
+}
+
 .who-dir-num {
   font-family: 'Saira', sans-serif;
   font-size: 12px;
@@ -4304,6 +4309,15 @@ body.dark .colophon { border-color: var(--cream); }
   font-size: clamp(16px, 1.5vw, 20px);
   color: var(--ink);
 }
+
+.prose {
+  max-width: 65ch;
+  margin: 0 auto;
+  font-size: 16px;
+  line-height: 1.75;
+}
+.prose a { color: var(--accent-text); text-decoration: underline; }
+
 .colophon-anti {
   font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 12.5px;
