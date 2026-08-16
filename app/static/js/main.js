@@ -75,9 +75,6 @@
     }, { passive: true });
   }
 
-  const aura = document.querySelector('.cursor-aura');
-  if (aura) aura.remove();
-
   const savedTheme = localStorage.getItem('fs-theme');
   if (savedTheme === 'dark') document.body.classList.add('dark');
 

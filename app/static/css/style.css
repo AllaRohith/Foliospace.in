@@ -6848,7 +6848,7 @@ body.dark .signup-chip:has(input:checked) { background: var(--accent); color: va
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cover { min-height: 100vh; }
+  .cover { min-height: 100vh; min-height: 100dvh; }
 }
 
 /* dark-mode overrides for cover (preserves cream aesthetic for the hero) */
