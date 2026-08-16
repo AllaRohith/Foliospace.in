@@ -70,7 +70,7 @@ def _csp() -> str:
     return "; ".join(parts)
 
 
-def _security_headers(response: Response) -> None:
+def _security_headers(request: Request, response: Response) -> None:
     if response.headers.get("Content-Security-Policy") is None:
         response.headers["Content-Security-Policy"] = _csp()
     response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
@@ -86,12 +86,15 @@ def _security_headers(response: Response) -> None:
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
+    elif request.url.path.startswith("/static/"):
+        if response.headers.get("Cache-Control") is None:
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
-        _security_headers(response)
+        _security_headers(request, response)
         return response
 
 

@@ -8,6 +8,7 @@ from fastapi.templating import Jinja2Templates
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from app.rate_limit import limiter
+from starlette.middleware.gzip import GZipMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from starlette.middleware.sessions import SessionMiddleware
@@ -42,6 +43,8 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 install_security(app)
+
+app.add_middleware(GZipMiddleware, minimum_size=512)
 
 _session_secret = os.getenv("ADMIN_SESSION_SECRET", "").strip()
 if not _session_secret:
