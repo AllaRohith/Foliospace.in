@@ -66,8 +66,10 @@
       const y = window.scrollY;
       if (y > 200 && y > lastScroll) {
         navWrap.classList.add('is-hidden');
+        navWrap.setAttribute('inert', '');
       } else if (y < lastScroll || y < 100) {
         navWrap.classList.remove('is-hidden');
+        navWrap.removeAttribute('inert');
       }
       lastScroll = y;
     }, { passive: true });
@@ -452,17 +454,25 @@
 
   const burger = document.querySelector('.nav-burger');
   const navLinks = document.querySelector('.nav-links');
+  function setBurgerOpen(open) {
+    burger.classList.toggle('is-open', open);
+    navLinks.classList.toggle('is-open', open);
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) {
+      navLinks.removeAttribute('inert');
+    } else {
+      navLinks.setAttribute('inert', '');
+    }
+  }
   if (burger && navLinks) {
+    setBurgerOpen(false);
     burger.addEventListener('click', function () {
-      const open = burger.classList.toggle('is-open');
-      navLinks.classList.toggle('is-open', open);
-      burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      setBurgerOpen(!burger.classList.contains('is-open'));
     });
     navLinks.querySelectorAll('a').forEach(function (a) {
       a.addEventListener('click', function () {
-        burger.classList.remove('is-open');
-        navLinks.classList.remove('is-open');
-        burger.setAttribute('aria-expanded', 'false');
+        setBurgerOpen(false);
+        burger.focus();
       });
     });
   }
@@ -485,8 +495,10 @@
   const cmdInput = document.getElementById('cmd-input');
   const cmdList = document.getElementById('cmd-list');
 
+  let lastFocused = null;
   function openPalette() {
     if (!palette) return;
+    lastFocused = document.activeElement;
     palette.classList.add('is-open');
     palette.setAttribute('aria-hidden', 'false');
     if (cmdInput) { cmdInput.value = ''; renderList(''); setTimeout(function () { cmdInput.focus(); }, 50); }
@@ -495,6 +507,7 @@
     if (!palette) return;
     palette.classList.remove('is-open');
     palette.setAttribute('aria-hidden', 'true');
+    if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
   }
 
   let activeIdx = 0;
@@ -557,7 +570,7 @@
       else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(0, activeIdx - 1); }
       else if (e.key === 'Enter') { e.preventDefault(); runAction(CMD_ACTIONS.filter(function (a) { return a.label.toLowerCase().includes(cmdInput.value.toLowerCase()); })[activeIdx]); return; }
       else if (e.key === 'Escape') { closePalette(); return; }
-      items.forEach(function (li, i) { li.classList.toggle('is-active', i === activeIdx); });
+      items.forEach(function (li, i) { li.classList.toggle('is-active', i === activeIdx); if (i === activeIdx) li.scrollIntoView({ block: 'nearest' }); });
     });
   }
   (function () {
@@ -713,12 +726,28 @@
       }
     }
 
-    buttons.forEach(function (b) {
-      b.addEventListener('click', function () {
-        if (b.classList.contains('is-on')) return;
-        buttons.forEach(function (x) { x.classList.remove('is-on'); });
-        b.classList.add('is-on');
-        apply(b.dataset.cycle);
+    function selectButton(idx) {
+      const target = buttons[idx];
+      if (!target || target.classList.contains('is-on')) return;
+      buttons.forEach(function (x, i) {
+        x.classList.toggle('is-on', i === idx);
+        x.setAttribute('aria-checked', i === idx ? 'true' : 'false');
+      });
+      apply(target.dataset.cycle);
+    }
+
+    buttons.forEach(function (b, i) {
+      b.addEventListener('click', function () { selectButton(i); });
+      b.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          selectButton((i - 1 + buttons.length) % buttons.length);
+          buttons[(i - 1 + buttons.length) % buttons.length].focus();
+        } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          selectButton((i + 1) % buttons.length);
+          buttons[(i + 1) % buttons.length].focus();
+        }
       });
     });
   })();

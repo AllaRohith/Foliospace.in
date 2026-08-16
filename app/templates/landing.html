@@ -50,7 +50,7 @@
 {% block content %}
   {% include "partials/_nav.html" %}
 
-  <main>
+  <main id="main">
     <section class="cover">
       <div class="cover-grain" aria-hidden="true">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -149,7 +149,7 @@
         </div>
       </div>
 
-      <a href="#workshop" class="cover-stub" id="cover-counter" aria-label="People on the waitlist">
+      <a href="#workshop" class="cover-stub" id="cover-counter" aria-label="People on the waitlist" aria-live="polite" aria-atomic="true">
         <span class="cover-stub-stub" aria-hidden="true">
           <span class="cover-stub-num" data-count="16">0</span>
           <span class="cover-stub-cap">folios</span>
@@ -526,9 +526,9 @@
         <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page 05<span class="folio-meta-sep">/</span>The receipt</p>
         <h2 class="reveal">Pricing that doesn't make you think twice.</h2>
 
-        <div class="pricing-toggle" id="pricing-toggle">
-          <button class="is-on" data-cycle="monthly">Monthly</button>
-          <button data-cycle="yearly">Yearly <span class="pricing-save">Save 17%</span></button>
+        <div class="pricing-toggle" id="pricing-toggle" role="radiogroup" aria-label="Billing cycle">
+          <button class="is-on" data-cycle="monthly" role="radio" aria-checked="true">Monthly</button>
+          <button data-cycle="yearly" role="radio" aria-checked="false">Yearly <span class="pricing-save">Save 17%</span></button>
         </div>
 
         <div class="receipt-grid">
