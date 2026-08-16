@@ -17,3 +17,6 @@ node_modules/
 package.json
 package-lock.json
 skills-lock.json
+
+scripts/mobile_shots/
+scripts/generate_grain_overlay.py
