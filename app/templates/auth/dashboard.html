@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — FolioSpace{% endblock %}
+{% block description %}Your FolioSpace dashboard.{% endblock %}
+{% block canonical %}/dashboard{% endblock %}
+
+{% block content %}
+<main id="main" class="auth-main">
+  <section class="auth-wrap" style="max-width:560px;">
+    <div class="auth-card">
+      <div class="auth-eyebrow">→ Dashboard · v0 stub</div>
+      <h1 class="auth-title">Hello, <em>{{ user.display_name or user.email.split('@')[0] }}</em></h1>
+      <div class="auth-rule"></div>
+      <p class="auth-sub">You're signed in. The full dashboard with profile, portfolio, integrations, billing, and share is shipping in upcoming releases.</p>
+
+      <dl style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-family:'Saira',sans-serif;font-size:13.5px;color:var(--ink-2);margin:8px 0 4px;">
+        <dt style="font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);">Email</dt>
+        <dd style="margin:0;">{{ user.email }}</dd>
+        <dt style="font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);">Slug</dt>
+        <dd style="margin:0;font-family:monospace;">{{ user.slug }}</dd>
+        {% if user.role %}
+          <dt style="font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);">Role</dt>
+          <dd style="margin:0;">{{ user.role }}</dd>
+        {% endif %}
+      </dl>
+
+      <form method="post" action="/logout" style="margin-top:14px;">
+        <button type="submit" class="auth-submit" style="background:transparent;color:var(--accent-text);border:1px solid var(--accent-text);">Log out</button>
+      </form>
+
+      <p class="auth-foot"><a href="/">Back to home</a></p>
+    </div>
+  </section>
+</main>
+{% endblock %}

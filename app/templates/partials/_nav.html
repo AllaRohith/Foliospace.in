@@ -11,23 +11,46 @@
         <span class="brand-name">FolioSpace</span>
       </a>
 
+      {% set u = nav_user(request) %}
       <nav class="nav-links" id="nav-links" aria-label="Primary">
         <div class="nav-indicator" aria-hidden="true"></div>
-        <a href="{{ home }}#who" data-section="who" class="nav-link">
-          <span>Who it's for</span>
-        </a>
-        <a href="/features" class="nav-link">
-          <span>Features</span>
-        </a>
-        <a href="{{ home }}#pricing" data-section="pricing" class="nav-link">
-          <span>Pricing</span>
-        </a>
-        <a href="{{ home }}#faq" data-section="faq" class="nav-link">
-          <span>FAQ</span>
-        </a>
-        <a href="/space-community" class="nav-link nav-link--end">
-          <span>Space Community</span>
-        </a>
+        {% if u %}
+          <a href="/dashboard" class="nav-link">
+            <span>Dashboard</span>
+          </a>
+          <a href="{{ home }}#who" data-section="who" class="nav-link">
+            <span>Who it's for</span>
+          </a>
+          <a href="/features" class="nav-link">
+            <span>Features</span>
+          </a>
+          <a href="{{ home }}#pricing" data-section="pricing" class="nav-link">
+            <span>Pricing</span>
+          </a>
+          <a href="/space-community" class="nav-link nav-link--end">
+            <span>Space Community</span>
+          </a>
+          <form method="post" action="/logout" class="nav-user-form" style="display:contents;">
+            <button type="submit" class="nav-user nav-user-logout" aria-label="Log out">Log out</button>
+          </form>
+        {% else %}
+          <a href="{{ home }}#who" data-section="who" class="nav-link">
+            <span>Who it's for</span>
+          </a>
+          <a href="/features" class="nav-link">
+            <span>Features</span>
+          </a>
+          <a href="{{ home }}#pricing" data-section="pricing" class="nav-link">
+            <span>Pricing</span>
+          </a>
+          <a href="{{ home }}#faq" data-section="faq" class="nav-link">
+            <span>FAQ</span>
+          </a>
+          <a href="/space-community" class="nav-link nav-link--end">
+            <span>Space Community</span>
+          </a>
+          <a href="/login" class="nav-user">Log in</a>
+        {% endif %}
         <div class="nav-theme-mobile">
           <span>Theme</span>
           <button id="nav-theme-mobile-sun" type="button" aria-label="Light mode" aria-pressed="false">☀</button>
@@ -50,11 +73,19 @@
         </svg>
       </button>
 
-      <a href="{{ home }}#join" class="nav-cta">
-        <span class="nav-cta-text-full">Join waitlist</span>
-        <span class="nav-cta-text-short">Join</span>
-        <span class="nav-cta-arrow">→</span>
-      </a>
+      {% if u %}
+        <a href="/dashboard" class="nav-cta">
+          <span class="nav-cta-text-full">Dashboard</span>
+          <span class="nav-cta-text-short">You</span>
+          <span class="nav-cta-arrow">→</span>
+        </a>
+      {% else %}
+        <a href="{{ home }}#join" class="nav-cta">
+          <span class="nav-cta-text-full">Join waitlist</span>
+          <span class="nav-cta-text-short">Join</span>
+          <span class="nav-cta-arrow">→</span>
+        </a>
+      {% endif %}
 
       <button class="nav-burger" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
         <span></span><span></span><span></span>

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Log in — FolioSpace{% endblock %}
+{% block description %}Log in to your FolioSpace account.{% endblock %}
+{% block canonical %}/login{% endblock %}
+
+{% block content %}
+<main id="main" class="auth-main">
+  <section class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-eyebrow">→ Welcome back</div>
+      <h1 class="auth-title"><em>Log</em> in</h1>
+      <div class="auth-rule"></div>
+      <p class="auth-sub">Pick up where you left off.</p>
+
+      {% if locked %}
+        <div class="auth-err is-warn">Too many attempts from this network. Try again in a few minutes.</div>
+      {% elif err == 'invalid' %}
+        <div class="auth-err">Email or password didn't match. Try once more.</div>
+      {% elif err == 'missing' %}
+        <div class="auth-err">Both email and password are required.</div>
+      {% elif err == 'session' %}
+        <div class="auth-err">Couldn't set up your session. Try again.</div>
+      {% elif err %}
+        <div class="auth-err">Login failed. Try once more.</div>
+      {% endif %}
+
+      <form method="post" action="/login{% if next %}?next={{ next }}{% endif %}" autocomplete="on" novalidate>
+        <div class="auth-field">
+          <label for="email">Email</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            value="{{ email }}"
+            required
+            autofocus
+            autocomplete="email"
+            spellcheck="false"
+            autocapitalize="off"
+            inputmode="email"
+            maxlength="254"
+          />
+        </div>
+        <div class="auth-field">
+          <label for="password">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            autocomplete="current-password"
+            spellcheck="false"
+            autocapitalize="off"
+            maxlength="256"
+          />
+        </div>
+        <button type="submit" class="auth-submit">Log in →</button>
+      </form>
+
+      <p class="auth-foot">
+        No account yet? <a href="/signup">Sign up</a> · <a href="/">Back to home</a>
+      </p>
+    </div>
+  </section>
+</main>
+{% endblock %}

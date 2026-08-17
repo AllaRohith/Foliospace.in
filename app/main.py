@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from slowapi import _rate_limit_exceeded_handler
@@ -15,6 +15,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.middleware import install_security
 from app.routers import admin
+from app.routers import auth
 from app.routers import waitlist
 from app.routers import stats
 
@@ -52,11 +53,27 @@ if not _session_secret:
         raise RuntimeError("ADMIN_SESSION_SECRET must be set in production.")
     _session_secret = "dev-only-not-secret-change-me"
 
+_user_session_secret = os.getenv("USER_SESSION_SECRET", "").strip()
+if not _user_session_secret:
+    if ENV == "production":
+        raise RuntimeError("USER_SESSION_SECRET must be set in production.")
+    _user_session_secret = "dev-only-user-not-secret-change-me"
+
 app.add_middleware(
     SessionMiddleware,
     secret_key=_session_secret,
     session_cookie="fs_admin",
     max_age=24 * 3600,
+    same_site="lax",
+    https_only=ENV == "production",
+    path="/",
+)
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=_user_session_secret,
+    session_cookie="fs_usr",
+    max_age=30 * 24 * 3600,
     same_site="lax",
     https_only=ENV == "production",
     path="/",
@@ -69,9 +86,57 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 templates.env.globals["asset_v"] = (os.getenv("RENDER_GIT_COMMIT") or os.getenv("GIT_COMMIT") or "dev")[:8]
 
+
+def _nav_user(request: Request):
+    from app.services import user_auth
+    try:
+        user = user_auth.require_user(request)
+    except Exception:
+        return None
+    if not user:
+        return None
+    return {
+        "id": str(user["id"]),
+        "email": user["email"],
+        "slug": user["slug"],
+        "display_name": user.get("display_name") or "",
+        "role": user.get("role") or "",
+    }
+
+
+templates.env.globals["nav_user"] = _nav_user
+
 app.include_router(waitlist.router)
 app.include_router(stats.router)
+app.include_router(auth.router)
 app.include_router(admin.router)
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard(request: Request):
+    from app.services import user_auth
+    from fastapi.responses import RedirectResponse
+    user = user_auth.require_user(request)
+    if not user:
+        return RedirectResponse("/login?next=/dashboard", status_code=303)
+    response = templates.TemplateResponse(
+        request,
+        "auth/dashboard.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Dashboard — FolioSpace",
+            "description": "Your FolioSpace dashboard.",
+            "user": {
+                "id": str(user["id"]),
+                "email": user["email"],
+                "slug": user["slug"],
+                "display_name": user.get("display_name") or "",
+                "role": user.get("role") or "",
+            },
+        },
+        headers={"Cache-Control": "private, no-store"},
+    )
+    return response
 
 
 ERROR_COPY = {

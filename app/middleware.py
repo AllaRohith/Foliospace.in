@@ -108,6 +108,9 @@ class OriginCheckMiddleware(BaseHTTPMiddleware):
             "/api/waitlist/join",
             "/admin/login",
             "/admin/logout",
+            "/signup",
+            "/login",
+            "/logout",
         )
         self.protected_prefixes = (
             "/admin/signups/",
