@@ -32,6 +32,17 @@ except ValueError:
     except ValueError:
         logger.warning("default LAUNCH_DATE is unparseable: %s", _DEFAULT_LAUNCH_DATE_STR)
 
+
+def is_launched(now: datetime | None = None) -> bool:
+    if not LAUNCH_DATE:
+        return False
+    current = now or datetime.now(timezone.utc)
+    if LAUNCH_DATE.tzinfo is None:
+        launch_aware = LAUNCH_DATE.replace(tzinfo=timezone.utc)
+    else:
+        launch_aware = LAUNCH_DATE
+    return current >= launch_aware
+
 TEMPLATE_DIR = Path(__file__).resolve().parent.parent / "templates" / "emails"
 
 _jinja_env = Environment(

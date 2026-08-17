@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}?v={{ asset_v }}" />
   <script defer src="{{ request.url_for('static', path='js/curtain.js') }}?v={{ asset_v }}"></script>
 </head>
-<body>
+<body{% if launched %} data-launched="1"{% endif %}>
   <script src="{{ request.url_for('static', path='js/theme.js') }}?v={{ asset_v }}"></script>
   <a class="skip-link" href="#main">Skip to content</a>
   <svg class="bg-topo" aria-hidden="true">

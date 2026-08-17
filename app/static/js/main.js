@@ -474,6 +474,7 @@
     });
   }
 
+  const LAUNCHED = document.body.dataset.launched === '1';
   const CMD_ACTIONS = [
     { label: 'Hero — top of page', hint: 'Nav', icon: '↑', href: '#top' },
     { label: 'Who it\'s for', hint: 'Section', icon: 'W', href: '#who' },
@@ -481,8 +482,12 @@
     { label: 'Space Community', hint: 'Marketplace', icon: 'C', href: '/space-community', accent: true },
     { label: 'Pricing', hint: 'Section', icon: '₹', href: '#pricing', accent: true },
     { label: 'FAQ', hint: 'Section', icon: '?', href: '#faq' },
-    { label: 'Join the waitlist', hint: 'Action', icon: '→', href: '#join', accent: true },
-    { label: 'See the cover story', hint: 'Action', icon: '◉', href: '.cover' },
+    LAUNCHED
+      ? { label: 'Log in', hint: 'Action', icon: '→', href: '/login', accent: true }
+      : { label: 'Join the waitlist', hint: 'Action', icon: '→', href: '#join', accent: true },
+    LAUNCHED
+      ? { label: 'Create account', hint: 'Action', icon: '+', href: '/signup', accent: true }
+      : { label: 'See the cover story', hint: 'Action', icon: '◉', href: '.cover' },
     { label: 'Scroll to top', hint: 'Action', icon: '↑', action: 'scrollTop' },
     { label: 'Toggle dark mode', hint: 'Theme', icon: '◐', action: 'theme' },
   ];

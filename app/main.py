@@ -87,6 +87,30 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 templates.env.globals["asset_v"] = (os.getenv("RENDER_GIT_COMMIT") or os.getenv("GIT_COMMIT") or "dev")[:8]
 
 
+def _is_launched_now() -> bool:
+    from app.services.email_service import is_launched
+    try:
+        return bool(is_launched())
+    except Exception:
+        return False
+
+
+_orig_template_response = templates.TemplateResponse
+
+
+def _patched_template_response(*args, **kwargs):
+    if "context" in kwargs and isinstance(kwargs["context"], dict):
+        kwargs["context"].setdefault("launched", _is_launched_now())
+    elif len(args) >= 3 and isinstance(args[2], dict):
+        ctx = dict(args[2])
+        ctx.setdefault("launched", _is_launched_now())
+        args = (args[0], args[1], ctx) + args[3:]
+    return _orig_template_response(*args, **kwargs)
+
+
+templates.TemplateResponse = _patched_template_response
+
+
 def _nav_user(request: Request):
     from app.services import user_auth
     try:

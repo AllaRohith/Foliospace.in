@@ -6158,6 +6158,49 @@ body.dark .signup-chip:has(input:checked) { background: var(--accent); color: va
   text-align: center;
 }
 
+.signup-dossier-blurb {
+  margin: 14px 0 16px;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+body.dark .signup-dossier-blurb { color: var(--cream-2); }
+
+.signup-dossier-cta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+@media (min-width: 481px) {
+  .signup-dossier-cta-row {
+    flex-direction: row;
+  }
+  .signup-dossier-cta-row > .signup-dossier-cta { width: auto; flex: 1; }
+}
+
+.signup-dossier-cta--ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--line);
+}
+.signup-dossier-cta--ghost:hover {
+  background: var(--ink);
+  color: var(--cream);
+  border-color: var(--ink);
+}
+body.dark .signup-dossier-cta--ghost {
+  color: var(--cream);
+  border-color: var(--ink-2);
+}
+body.dark .signup-dossier-cta--ghost:hover {
+  background: var(--cream);
+  color: var(--ink);
+  border-color: var(--cream);
+}
+
 
 
 /* ============================================================

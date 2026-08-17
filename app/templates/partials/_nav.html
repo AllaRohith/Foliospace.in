@@ -79,6 +79,12 @@
           <span class="nav-cta-text-short">You</span>
           <span class="nav-cta-arrow">→</span>
         </a>
+      {% elif launched %}
+        <a href="/login" class="nav-cta">
+          <span class="nav-cta-text-full">Log in</span>
+          <span class="nav-cta-text-short">Log in</span>
+          <span class="nav-cta-arrow">→</span>
+        </a>
       {% else %}
         <a href="{{ home }}#join" class="nav-cta">
           <span class="nav-cta-text-full">Join waitlist</span>
