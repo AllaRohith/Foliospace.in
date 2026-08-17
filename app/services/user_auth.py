@@ -115,6 +115,15 @@ def create_user(email: str, password: str, role: str | None = None) -> dict:
                     (email_clean, pw_hash, slug, email_clean.split("@", 1)[0], role, now, now),
                 )
                 row = cur.fetchone()
+                prefill = _apply_waitlist_to_user(cur, row["id"], email_clean)
+                if prefill:
+                    row["role"] = prefill["role"] or row["role"]
+                    row["created_at"] = prefill["created_at"] or row["created_at"]
+                    row["prefilled_from_waitlist"] = True
+                    row["waitlist_created_at"] = prefill["created_at"]
+                else:
+                    row["prefilled_from_waitlist"] = False
+                    row["waitlist_created_at"] = None
             conn.commit()
     except psycopg.Error as e:
         logger.exception("create_user failed: %s", e)
@@ -170,6 +179,50 @@ def find_user_by_id(user_id: str | UUID) -> dict | None:
     except (psycopg.Error, ValueError, TypeError) as e:
         logger.exception("find_user_by_id failed: %s", e)
         return None
+
+
+def find_waitlist_row(email: str) -> dict | None:
+    email_clean = (email or "").strip().lower()[:MAX_EMAIL_LEN]
+    if not DATABASE_URL or not email_clean:
+        return None
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT role, created_at, utm_source FROM waitlist WHERE email = %s",
+                    (email_clean,),
+                )
+                row = cur.fetchone()
+            conn.commit()
+        return row
+    except psycopg.Error as e:
+        logger.exception("find_waitlist_row failed: %s", e)
+        return None
+
+
+def _apply_waitlist_to_user(cur, user_id: UUID, email: str) -> dict | None:
+    email_clean = (email or "").strip().lower()[:MAX_EMAIL_LEN]
+    if not email_clean:
+        return None
+    cur.execute(
+        "SELECT role, created_at FROM waitlist WHERE email = %s",
+        (email_clean,),
+    )
+    row = cur.fetchone()
+    if not row:
+        return None
+    role = row["role"]
+    created_at = row["created_at"]
+    cur.execute(
+        """
+        UPDATE users
+           SET role = COALESCE(%s, role),
+               created_at = COALESCE(%s, created_at)
+         WHERE id = %s
+        """,
+        (role, created_at, user_id),
+    )
+    return {"role": role, "created_at": created_at}
 
 
 def is_locked_out(ip: str) -> bool:

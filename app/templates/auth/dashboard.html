@@ -7,6 +7,15 @@
 {% block content %}
 <main id="main" class="auth-main">
   <section class="auth-wrap" style="max-width:560px;">
+    {% if flash and flash.kind == "waitlist" %}
+    <aside class="dash-flash" role="status">
+      <span class="dash-flash-eyebrow">→ Welcome back</span>
+      <p class="dash-flash-body">
+        You joined the waitlist on <strong>{{ flash.first_seen_iso[:10] }}</strong>.
+        {% if flash.role %}Your <strong>{{ flash.role }}</strong> role has been pre-filled — edit it any time from Profile.{% else %}Your profile has been pre-filled from your waitlist entry.{% endif %}
+      </p>
+    </aside>
+    {% endif %}
     <div class="auth-card">
       <div class="auth-eyebrow">→ Dashboard · v0 stub</div>
       <h1 class="auth-title">Hello, <em>{{ user.display_name or user.email.split('@')[0] }}</em></h1>

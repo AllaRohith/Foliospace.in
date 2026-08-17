@@ -97,6 +97,12 @@ async def signup_submit(
         logger.exception("post-signup session failed: %s", e)
         return RedirectResponse("/login?err=session", status_code=303)
     user_auth.audit_user(request, str(user["id"]), "signup.ok", target=ip)
+    if user.get("prefilled_from_waitlist") and user.get("waitlist_created_at"):
+        request.session["flash"] = {
+            "kind": "waitlist",
+            "first_seen_iso": user["waitlist_created_at"].isoformat(),
+            "role": user.get("role") or "",
+        }
     return RedirectResponse("/dashboard", status_code=303)
 
 

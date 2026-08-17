@@ -143,6 +143,7 @@ async def dashboard(request: Request):
     user = user_auth.require_user(request)
     if not user:
         return RedirectResponse("/login?next=/dashboard", status_code=303)
+    flash = request.session.pop("flash", None)
     response = templates.TemplateResponse(
         request,
         "auth/dashboard.html",
@@ -157,6 +158,7 @@ async def dashboard(request: Request):
                 "display_name": user.get("display_name") or "",
                 "role": user.get("role") or "",
             },
+            "flash": flash,
         },
         headers={"Cache-Control": "private, no-store"},
     )
