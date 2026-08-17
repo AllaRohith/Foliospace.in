@@ -26,5 +26,7 @@ services:
         sync: false
       - key: ADMIN_SESSION_SECRET
         sync: false
+      - key: USER_SESSION_SECRET
+        sync: false
       - key: INTERNAL_TRUST_TOKEN
         sync: false
