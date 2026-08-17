@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block description %}{{ description }}{% endblock %}
+{% block canonical %}/dashboard{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+  {% include "partials/_dash_sidebar.html" %}
+  <div class="dash-app">
+    <header class="dash-bar">
+      <button type="button" class="dash-bar-hamburger" aria-label="Toggle navigation" data-dash-burger>☰</button>
+      <span class="dash-bar-issue">→ Issue No. 04</span>
+      <div class="dash-bar-right">
+        <a class="dash-bar-link" href="/">View site →</a>
+        <a class="dash-bar-link" href="/u/{{ user.slug }}">Your folio →</a>
+      </div>
+    </header>
+    <main id="main" class="dash-main">
+      {% if flash and flash.kind == "waitlist" %}
+        {% include "partials/_dash_flash.html" %}
+      {% endif %}
+      {% block dash_body %}{% endblock %}
+    </main>
+  </div>
+</div>
+<script defer src="{{ request.url_for('static', path='js/dash.js') }}?v={{ asset_v }}"></script>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "auth/_base.html" %}
+
+{% block dash_body %}
+<h1 class="dash-page-title">Edit <em>profile.</em></h1>
+<div class="dash-page-sub">Fill what you have. You can change anything later.</div>
+
+{% if saved %}
+  <div class="profile-saved is-shown">✓ Profile saved</div>
+{% endif %}
+
+{% if err == 'display_name' %}
+  <div class="auth-err is-warn">Display name must be 2–80 characters.</div>
+{% elif err == 'bio' %}
+  <div class="auth-err is-warn">Bio must be 280 characters or fewer.</div>
+{% elif err == 'phone' %}
+  <div class="auth-err is-warn">Phone must be 6–20 characters: digits, spaces, + ( ) - only.</div>
+{% elif err == 'avatar_url' %}
+  <div class="auth-err is-warn">Avatar URL must start with http:// or https://.</div>
+{% elif err == 'role' %}
+  <div class="auth-err is-warn">Role must be 60 characters or fewer.</div>
+{% elif err == 'server' %}
+  <div class="auth-err is-warn">Couldn't save your profile right now. Try again.</div>
+{% endif %}
+
+<form class="profile-form" method="post" action="/dashboard/profile" autocomplete="on" novalidate>
+  <div class="profile-field">
+    <label for="display_name">Display name</label>
+    <div class="field-hint">Public — the name shown on your folio.</div>
+    <input id="display_name" name="display_name" type="text" maxlength="80" required value="{{ user.display_name or '' }}" autofocus />
+  </div>
+
+  <div class="profile-field">
+    <label for="role">Role</label>
+    <div class="field-hint">e.g. chef, designer, student, consultant — keep it short.</div>
+    <input id="role" name="role" type="text" maxlength="60" value="{{ user.role or '' }}" placeholder="designer" />
+  </div>
+
+  <div class="profile-field">
+    <label for="bio">Bio</label>
+    <div class="field-hint">A line or two about your work. Marked complete at 40+ characters.</div>
+    <textarea id="bio" name="bio" maxlength="280" data-profile-counter data-profile-counter-max="280">{{ user.bio or '' }}</textarea>
+    <div class="char-count" data-profile-counter-display>{{ (user.bio or '') | length }} / 280</div>
+  </div>
+
+  <div class="profile-field">
+    <label for="phone">WhatsApp number</label>
+    <div class="field-hint">Used for the WhatsApp pre-fill on your folio link.</div>
+    <input id="phone" name="phone" type="tel" maxlength="20" value="{{ user.phone or '' }}" placeholder="+91 98765 43210" />
+  </div>
+
+  <div class="profile-field">
+    <label for="avatar_url">Avatar URL</label>
+    <div class="field-hint">Paste a link to a square photo. Local uploads coming later.</div>
+    <input id="avatar_url" name="avatar_url" type="url" value="{{ user.avatar_url or '' }}" placeholder="https://…" />
+  </div>
+
+  <button type="submit" class="profile-submit">Save profile</button>
+</form>
+{% endblock %}

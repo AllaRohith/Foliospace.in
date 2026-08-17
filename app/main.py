@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from slowapi import _rate_limit_exceeded_handler
@@ -134,35 +134,6 @@ app.include_router(waitlist.router)
 app.include_router(stats.router)
 app.include_router(auth.router)
 app.include_router(admin.router)
-
-
-@app.get("/dashboard", response_class=HTMLResponse)
-async def dashboard(request: Request):
-    from app.services import user_auth
-    from fastapi.responses import RedirectResponse
-    user = user_auth.require_user(request)
-    if not user:
-        return RedirectResponse("/login?next=/dashboard", status_code=303)
-    flash = request.session.pop("flash", None)
-    response = templates.TemplateResponse(
-        request,
-        "auth/dashboard.html",
-        {
-            "site_name": "FolioSpace",
-            "page_title": "Dashboard — FolioSpace",
-            "description": "Your FolioSpace dashboard.",
-            "user": {
-                "id": str(user["id"]),
-                "email": user["email"],
-                "slug": user["slug"],
-                "display_name": user.get("display_name") or "",
-                "role": user.get("role") or "",
-            },
-            "flash": flash,
-        },
-        headers={"Cache-Control": "private, no-store"},
-    )
-    return response
 
 
 ERROR_COPY = {

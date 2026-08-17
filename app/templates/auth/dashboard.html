@@ -1,44 +1,52 @@
-{% extends "base.html" %}
+{% extends "auth/_base.html" %}
 
-{% block title %}Dashboard — FolioSpace{% endblock %}
-{% block description %}Your FolioSpace dashboard.{% endblock %}
-{% block canonical %}/dashboard{% endblock %}
-
-{% block content %}
-<main id="main" class="auth-main">
-  <section class="auth-wrap" style="max-width:560px;">
-    {% if flash and flash.kind == "waitlist" %}
-    <aside class="dash-flash" role="status">
-      <span class="dash-flash-eyebrow">→ Welcome back</span>
-      <p class="dash-flash-body">
-        You joined the waitlist on <strong>{{ flash.first_seen_iso[:10] }}</strong>.
-        {% if flash.role %}Your <strong>{{ flash.role }}</strong> role has been pre-filled — edit it any time from Profile.{% else %}Your profile has been pre-filled from your waitlist entry.{% endif %}
-      </p>
-    </aside>
+{% block dash_body %}
+<section class="meter-card">
+  <div class="meter-eyebrow">→ Folio completion</div>
+  <h1 class="meter-title">
+    {% if completion.filled == completion.total %}
+      Your folio is <em>complete.</em>
+    {% else %}
+      {{ completion.filled }} of {{ completion.total }} <em>filled.</em>
     {% endif %}
-    <div class="auth-card">
-      <div class="auth-eyebrow">→ Dashboard · v0 stub</div>
-      <h1 class="auth-title">Hello, <em>{{ user.display_name or user.email.split('@')[0] }}</em></h1>
-      <div class="auth-rule"></div>
-      <p class="auth-sub">You're signed in. The full dashboard with profile, portfolio, integrations, billing, and share is shipping in upcoming releases.</p>
+  </h1>
+  <div class="meter-bar">
+    {% for f in completion.fields %}
+      <div class="meter-seg {{ 'is-done' if f.done else '' }}" title="{{ f.label }}"></div>
+    {% endfor %}
+  </div>
+  <ul class="meter-list">
+    {% for f in completion.fields %}
+      <li class="meter-row {{ 'is-done' if f.done else '' }}">
+        <span class="meter-mark">{{ '✓' if f.done else '○' }}</span>
+        <span class="meter-label">{{ f.label }}</span>
+        <a class="meter-cta" href="/dashboard/profile">Edit →</a>
+      </li>
+    {% endfor %}
+  </ul>
+  {% if completion.filled < completion.total %}
+    <a class="meter-action" href="/dashboard/profile">→ Continue your folio</a>
+  {% endif %}
+</section>
 
-      <dl style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-family:'Saira',sans-serif;font-size:13.5px;color:var(--ink-2);margin:8px 0 4px;">
-        <dt style="font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);">Email</dt>
-        <dd style="margin:0;">{{ user.email }}</dd>
-        <dt style="font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);">Slug</dt>
-        <dd style="margin:0;font-family:monospace;">{{ user.slug }}</dd>
-        {% if user.role %}
-          <dt style="font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);">Role</dt>
-          <dd style="margin:0;">{{ user.role }}</dd>
-        {% endif %}
-      </dl>
-
-      <form method="post" action="/logout" style="margin-top:14px;">
-        <button type="submit" class="auth-submit" style="background:transparent;color:var(--accent-text);border:1px solid var(--accent-text);">Log out</button>
-      </form>
-
-      <p class="auth-foot"><a href="/">Back to home</a></p>
+<div class="dash-grid">
+  <div class="dash-card">
+    <div class="dash-card-eyebrow">→ Profile</div>
+    <h2 class="dash-card-title">Your <em>details.</em></h2>
+    <div class="dash-card-row"><span class="dash-card-key">Name</span><span class="dash-card-val">{{ user.display_name or '—' }}</span></div>
+    <div class="dash-card-row"><span class="dash-card-key">Role</span><span class="dash-card-val">{{ user.role or '—' }}</span></div>
+    <div class="dash-card-row"><span class="dash-card-key">Bio</span><span class="dash-card-val">{{ user.bio or '—' }}</span></div>
+    <div class="dash-card-row"><span class="dash-card-key">Phone</span><span class="dash-card-val">{{ user.phone or '—' }}</span></div>
+    <a class="dash-card-cta" href="/dashboard/profile">Edit profile →</a>
+  </div>
+  <div class="dash-card">
+    <div class="dash-card-eyebrow">→ Your link</div>
+    <h2 class="dash-card-title">Public <em>folio.</em></h2>
+    <p class="dash-card-sub">This is what you'll share in WhatsApp, LinkedIn, and everywhere.</p>
+    <code class="dash-link">foliospace.in/u/{{ user.slug }}</code>
+    <div class="dash-link-actions">
+      <button type="button" class="meter-cta" data-copy-link="/u/{{ user.slug }}" data-dash-copy>Copy link</button>
     </div>
-  </section>
-</main>
+  </div>
+</div>
 {% endblock %}

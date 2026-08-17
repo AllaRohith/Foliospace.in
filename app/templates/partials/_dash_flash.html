@@ -1,0 +1,7 @@
+<aside class="dash-flash" role="status">
+  <span class="dash-flash-eyebrow">→ Welcome back</span>
+  <p class="dash-flash-body">
+    You joined the waitlist on <strong>{{ flash.first_seen_iso[:10] }}</strong>.
+    {% if flash.role %}Your <strong>{{ flash.role }}</strong> role has been pre-filled — edit it any time from Profile.{% else %}Your profile has been pre-filled from your waitlist entry.{% endif %}
+  </p>
+</aside>

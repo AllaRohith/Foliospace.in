@@ -7,6 +7,9 @@ CREATE TABLE IF NOT EXISTS users (
     slug            TEXT NOT NULL UNIQUE,
     display_name    TEXT,
     role            TEXT,
+    bio             TEXT,
+    phone           TEXT,
+    avatar_url      TEXT,
     email_verified  BOOLEAN NOT NULL DEFAULT FALSE,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -14,7 +17,11 @@ CREATE TABLE IF NOT EXISTS users (
     claimed_at      TIMESTAMPTZ,
     claim_token     TEXT UNIQUE,
     claim_expires_at TIMESTAMPTZ,
-    deleted_at      TIMESTAMPTZ
+    deleted_at      TIMESTAMPTZ,
+    CONSTRAINT users_phone_format_chk
+        CHECK (phone IS NULL OR phone ~ '^[+0-9 ()\-]{6,20}$'),
+    CONSTRAINT users_avatar_url_scheme_chk
+        CHECK (avatar_url IS NULL OR avatar_url ~* '^https?://')
 );
 
 CREATE INDEX IF NOT EXISTS users_slug_lower_idx ON users (lower(slug));

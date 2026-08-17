@@ -1,0 +1,25 @@
+<aside class="dash-side" id="dash-side" aria-label="Dashboard navigation">
+  <a class="dash-side-brand" href="/dashboard">FolioSpace.in</a>
+  <nav class="dash-side-section">
+    <div class="dash-side-section-label">Your folio</div>
+    <a class="dash-side-item {% if nav_active == 'overview' %}is-active{% endif %}" href="/dashboard">Overview</a>
+    <a class="dash-side-item {% if nav_active == 'profile' %}is-active{% endif %}" href="/dashboard/profile">Profile</a>
+    <a class="dash-side-item is-stub {% if nav_active == 'portfolio' %}is-active{% endif %}" href="/dashboard/portfolio">Portfolio <span class="stub-tag">2.6</span></a>
+    <a class="dash-side-item is-stub {% if nav_active == 'integrations' %}is-active{% endif %}" href="/dashboard/integrations">Integrations <span class="stub-tag">2.4 / 2.5</span></a>
+    <a class="dash-side-item is-stub {% if nav_active == 'billing' %}is-active{% endif %}" href="/dashboard/billing">Billing <span class="stub-tag">2.6</span></a>
+    <a class="dash-side-item is-stub {% if nav_active == 'share' %}is-active{% endif %}" href="/dashboard/share">Share <span class="stub-tag">2.5</span></a>
+  </nav>
+  <div class="dash-side-section">
+    <div class="dash-side-section-label">Account</div>
+    <form method="post" action="/logout" class="dash-side-signout-form">
+      <button type="submit" class="dash-side-item dash-side-signout">Sign out</button>
+    </form>
+  </div>
+  <div class="dash-side-foot">
+    <div class="foot-avatar">{{ (user.display_name or user.email)[0] | upper }}</div>
+    <div class="foot-meta">
+      <div class="foot-name">{{ user.display_name or user.email.split('@')[0] }}</div>
+      <div class="foot-email">{{ user.email }}</div>
+    </div>
+  </div>
+</aside>

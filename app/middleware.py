@@ -111,6 +111,7 @@ class OriginCheckMiddleware(BaseHTTPMiddleware):
             "/signup",
             "/login",
             "/logout",
+            "/dashboard/profile",
         )
         self.protected_prefixes = (
             "/admin/signups/",

@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 from pathlib import Path
 
 from fastapi import APIRouter, Form, HTTPException, Request
@@ -187,5 +188,177 @@ async def me(request: Request):
             "slug": user["slug"],
             "display_name": user.get("display_name") or "",
             "role": user.get("role") or "",
+            "bio": user.get("bio") or "",
+            "phone": user.get("phone") or "",
+            "avatar_url": user.get("avatar_url") or "",
         }
     )
+
+
+def _user_to_context(user) -> dict:
+    return {
+        "id": str(user["id"]),
+        "email": user["email"],
+        "slug": user["slug"],
+        "display_name": user.get("display_name") or "",
+        "role": user.get("role") or "",
+        "bio": user.get("bio") or "",
+        "phone": user.get("phone") or "",
+        "avatar_url": user.get("avatar_url") or "",
+    }
+
+
+@router.get("/dashboard", response_class=HTMLResponse)
+async def dashboard(request: Request):
+    user = user_auth.require_user(request)
+    if not user:
+        return RedirectResponse("/login?next=/dashboard", status_code=303)
+    flash = request.session.pop("flash", None)
+    completion = user_auth.compute_completion(user)
+    return _no_cache(templates.TemplateResponse(
+        request,
+        "auth/dashboard.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Dashboard — FolioSpace",
+            "description": "Your FolioSpace dashboard.",
+            "user": _user_to_context(user),
+            "flash": flash,
+            "completion": completion,
+            "nav_active": "overview",
+        },
+    ))
+
+
+@router.get("/dashboard/profile", response_class=HTMLResponse)
+async def profile_form(request: Request):
+    user = user_auth.require_user(request)
+    if not user:
+        return RedirectResponse("/login?next=/dashboard/profile", status_code=303)
+    return _no_cache(templates.TemplateResponse(
+        request,
+        "auth/profile.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Edit profile — FolioSpace",
+            "description": "Edit your FolioSpace profile.",
+            "user": _user_to_context(user),
+            "err": _sanitize(request.query_params.get("err", ""))[:120],
+            "saved": request.query_params.get("saved") == "1",
+            "nav_active": "profile",
+        },
+    ))
+
+
+@router.post("/dashboard/profile")
+@limiter.limit("30/minute")
+async def profile_submit(
+    request: Request,
+    display_name: str = Form(""),
+    role: str = Form(""),
+    bio: str = Form(""),
+    phone: str = Form(""),
+    avatar_url: str = Form(""),
+):
+    user = user_auth.require_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+    dname = (display_name or "").strip()
+    if not (2 <= len(dname) <= 80):
+        return RedirectResponse("/dashboard/profile?err=display_name", status_code=303)
+    bio_clean = (bio or "").strip()
+    if len(bio_clean) > 280:
+        return RedirectResponse("/dashboard/profile?err=bio", status_code=303)
+    phone_clean = (phone or "").strip()
+    if phone_clean and not re.fullmatch(r"[+0-9 ()\-]{6,20}", phone_clean):
+        return RedirectResponse("/dashboard/profile?err=phone", status_code=303)
+    avatar_clean = (avatar_url or "").strip()
+    if avatar_clean and not re.fullmatch(r"https?://[^\s]+", avatar_clean):
+        return RedirectResponse("/dashboard/profile?err=avatar_url", status_code=303)
+    role_clean = (role or "").strip()
+    if len(role_clean) > 60:
+        return RedirectResponse("/dashboard/profile?err=role", status_code=303)
+    updated = user_auth.update_user_profile(
+        str(user["id"]),
+        display_name=dname,
+        role=role_clean,
+        bio=bio_clean,
+        phone=phone_clean,
+        avatar_url=avatar_clean,
+    )
+    if not updated:
+        return RedirectResponse("/dashboard/profile?err=server", status_code=303)
+    user_auth.audit_user(request, str(user["id"]), "profile.update")
+    return RedirectResponse("/dashboard/profile?saved=1", status_code=303)
+
+
+@router.get("/dashboard/portfolio", response_class=HTMLResponse)
+async def dashboard_portfolio(request: Request):
+    user = user_auth.require_user(request)
+    if not user:
+        return RedirectResponse("/login?next=/dashboard/portfolio", status_code=303)
+    return _no_cache(templates.TemplateResponse(
+        request,
+        "dashboard/portfolio.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Portfolio — FolioSpace",
+            "description": "Your FolioSpace portfolio editor.",
+            "user": _user_to_context(user),
+            "nav_active": "portfolio",
+        },
+    ))
+
+
+@router.get("/dashboard/integrations", response_class=HTMLResponse)
+async def dashboard_integrations(request: Request):
+    user = user_auth.require_user(request)
+    if not user:
+        return RedirectResponse("/login?next=/dashboard/integrations", status_code=303)
+    return _no_cache(templates.TemplateResponse(
+        request,
+        "dashboard/integrations.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Integrations — FolioSpace",
+            "description": "Connect GitHub and LinkedIn to FolioSpace.",
+            "user": _user_to_context(user),
+            "nav_active": "integrations",
+        },
+    ))
+
+
+@router.get("/dashboard/billing", response_class=HTMLResponse)
+async def dashboard_billing(request: Request):
+    user = user_auth.require_user(request)
+    if not user:
+        return RedirectResponse("/login?next=/dashboard/billing", status_code=303)
+    return _no_cache(templates.TemplateResponse(
+        request,
+        "dashboard/billing.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Billing — FolioSpace",
+            "description": "Your FolioSpace billing and subscription.",
+            "user": _user_to_context(user),
+            "nav_active": "billing",
+        },
+    ))
+
+
+@router.get("/dashboard/share", response_class=HTMLResponse)
+async def dashboard_share(request: Request):
+    user = user_auth.require_user(request)
+    if not user:
+        return RedirectResponse("/login?next=/dashboard/share", status_code=303)
+    return _no_cache(templates.TemplateResponse(
+        request,
+        "dashboard/share.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Share — FolioSpace",
+            "description": "Share your FolioSpace link.",
+            "user": _user_to_context(user),
+            "nav_active": "share",
+        },
+    ))
