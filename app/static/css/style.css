@@ -13,8 +13,8 @@
   --accent-500: #FF6B35;
   --accent-700: #E85A24;
   --accent-900: #8A3517;
-  --accent-text: #B83A0F;
-  --accent-text-soft: #C7531F;
+  --accent-text: #FF6B35;
+  --accent-text-soft: #FF6B35;
   --accent-glow-0: rgba(255, 107, 53, 0.06);
   --accent-glow-1: rgba(255, 107, 53, 0.12);
   --accent-glow-2: rgba(255, 107, 53, 0.20);
@@ -65,8 +65,8 @@ body.dark {
   --fg-2: #E8E2D6;
   --card-bg: #15191E;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.4);
-  --accent-text: #FF9A6E;
-  --accent-text-soft: #F5A98A;
+  --accent-text: #FF6B35;
+  --accent-text-soft: #FF6B35;
   color-scheme: dark;
 }
 
