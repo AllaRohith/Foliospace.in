@@ -7,6 +7,16 @@
   ₹149/mo via AutoPay — UPI or Card. Cancel anytime from this page.
 </div>
 
+{% if user.payment_failed_at %}
+  <div class="dash-card" style="border: 1px solid var(--accent); background: rgba(255,107,53,0.05);">
+    <div class="dash-card-eyebrow">⚠ Payment failed</div>
+    <div class="dash-card-title">Pro ends in <em>{{ grace_days_left }} day{{ '' if grace_days_left == 1 else 's' }}.</em></div>
+    <div class="dash-card-sub">
+      Razorpay couldn't charge your last payment. Approve the mandate again in your UPI app, or contact support if this keeps happening.
+    </div>
+  </div>
+{% endif %}
+
 {% if err %}
   <div class="dash-card meter-pro-card">
     {% if err == "config" %}
@@ -45,7 +55,9 @@
     <div class="dash-card-row">
       <span class="dash-card-key">Status</span>
       <span class="dash-card-val">
-        {% if subscription.cancel_at_period_end %}Cancelling{% else %}Active{% endif %}
+        {% if subscription.cancel_at_period_end %}Cancelling
+        {% elif user.payment_failed_at %}Payment failed — {{ grace_days_left }} day{{ '' if grace_days_left == 1 else 's' }} left
+        {% else %}Active{% endif %}
       </span>
     </div>
     <div class="dash-card-row">

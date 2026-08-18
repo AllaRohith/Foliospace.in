@@ -1,6 +1,17 @@
 {% extends "auth/_base.html" %}
 
 {% block dash_body %}
+
+{% if user.payment_failed_at %}
+<section class="meter-card" style="border: 1px solid var(--accent); background: rgba(255,107,53,0.05);">
+  <div class="meter-eyebrow">⚠ Payment failed</div>
+  <h1 class="meter-title">Pro ends in <em>{{ grace_days_left }} day{{ '' if grace_days_left == 1 else 's' }}.</em></h1>
+  <p style="font-family: 'Saira', sans-serif; font-size: 14px; color: var(--ink); margin-top: 12px;">
+    Razorpay couldn't charge your last payment. Approve the mandate again in your UPI app, or <a href="/dashboard/billing">manage billing →</a>.
+  </p>
+</section>
+{% endif %}
+
 <section class="meter-card">
   <div class="meter-eyebrow">→ Folio completion</div>
   <h1 class="meter-title">

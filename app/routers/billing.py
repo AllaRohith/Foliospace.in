@@ -44,6 +44,7 @@ def _user_to_context(user) -> dict:
         "is_public": bool(user.get("is_public")),
         "plan": user.get("plan") or "free",
         "plan_expires_at": user.get("plan_expires_at"),
+        "payment_failed_at": user.get("payment_failed_at"),
         "setup_paid_at": user.get("setup_paid_at"),
     }
 
@@ -69,6 +70,7 @@ async def dashboard_billing(request: Request):
             "razorpay_configured": configured,
             "razorpay_key_id": razorpay_svc.public_key() if configured else "",
             "setup_paid": bool(user.get("setup_paid_at")),
+            "grace_days_left": billing_svc.grace_days_left(user),
             "err": (request.query_params.get("err") or "")[:24],
             "cancelled": request.query_params.get("cancel") == "1",
             "nav_active": "billing",

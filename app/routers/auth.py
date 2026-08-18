@@ -209,6 +209,9 @@ def _user_to_context(user) -> dict:
         "phone": user.get("phone") or "",
         "avatar_url": user.get("avatar_url") or "",
         "is_public": bool(user.get("is_public")),
+        "plan": user.get("plan") or "free",
+        "plan_expires_at": user.get("plan_expires_at"),
+        "payment_failed_at": user.get("payment_failed_at"),
     }
 
 
@@ -220,7 +223,9 @@ async def dashboard(request: Request):
     flash = request.session.pop("flash", None)
     completion = user_auth.compute_completion(user)
     from app.services import folio_views as views_svc
+    from app.services import billing as billing_svc
     view_stats = views_svc.get_view_stats(user["slug"], days=30)
+    grace_days_left = billing_svc.grace_days_left(user)
     return _no_cache(templates.TemplateResponse(
         request,
         "auth/dashboard.html",
@@ -232,6 +237,7 @@ async def dashboard(request: Request):
             "flash": flash,
             "completion": completion,
             "view_stats": view_stats,
+            "grace_days_left": grace_days_left,
             "nav_active": "overview",
         },
     ))

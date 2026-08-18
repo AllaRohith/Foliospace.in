@@ -192,7 +192,8 @@ def find_user_by_id(user_id: str | UUID) -> dict | None:
                     SELECT id, email, password_hash, slug, display_name, role,
                            bio, phone, avatar_url, is_public,
                            email_verified, created_at, updated_at, last_login_at,
-                           claimed_at, claim_token, claim_expires_at, deleted_at
+                           claimed_at, claim_token, claim_expires_at, deleted_at,
+                           plan, plan_expires_at, payment_failed_at, razorpay_customer_id
                       FROM users
                      WHERE id = %s
                     """,
@@ -366,7 +367,8 @@ def require_user(request: Request) -> dict | None:
     if not user or user.get("deleted_at") or not user.get("password_hash"):
         request.session.clear()
         return None
-    return user
+    from app.services.billing import enforce_plan_grace
+    return enforce_plan_grace(str(user["id"]), user)
 
 
 def current_user_id(request: Request) -> str | None:

@@ -369,7 +369,7 @@ def _on_subscription_activated(cur, payload: dict):
     )
     if status in ("active", "authenticated", "created"):
         cur.execute(
-            "UPDATE users SET plan = 'pro', updated_at = NOW() WHERE id = %s AND plan <> 'pro'",
+            "UPDATE users SET plan = 'pro', payment_failed_at = NULL, updated_at = NOW() WHERE id = %s",
             (user_id,),
         )
 
@@ -419,7 +419,7 @@ def _on_subscription_charged(cur, payload: dict):
         _upsert_payment_from_charge(cur, user_id, sub_id, payment_entity)
     if period_end is not None:
         cur.execute(
-            "UPDATE users SET plan = 'pro', plan_expires_at = %s, updated_at = NOW() WHERE id = %s",
+            "UPDATE users SET plan = 'pro', plan_expires_at = %s, payment_failed_at = NULL, updated_at = NOW() WHERE id = %s",
             (period_end, user_id),
         )
 
@@ -480,7 +480,8 @@ def _on_subscription_halted(cur, payload: dict):
     )
     if user_id:
         cur.execute(
-            "UPDATE users SET plan = 'free', plan_expires_at = NULL, updated_at = NOW() WHERE id = %s",
+            "UPDATE users SET plan_expires_at = NOW() + INTERVAL '7 days', "
+            "payment_failed_at = NOW(), updated_at = NOW() WHERE id = %s",
             (user_id,),
         )
 
@@ -576,3 +577,41 @@ _DISPATCH = {
     "subscription.paused": _on_subscription_paused,
     "subscription.resumed": _on_subscription_resumed,
 }
+
+
+def grace_days_left(user: dict) -> int:
+    expires_at = user.get("plan_expires_at")
+    failed_at = user.get("payment_failed_at")
+    if not expires_at or not failed_at:
+        return 0
+    delta = expires_at - datetime.now(timezone.utc)
+    if delta.total_seconds() <= 0:
+        return 0
+    return int((delta.total_seconds() + 86399) // 86400)
+
+
+def enforce_plan_grace(user_id: str, user: dict) -> dict:
+    if user.get("plan") != "pro":
+        return user
+    expires_at = user.get("plan_expires_at")
+    if not expires_at:
+        return user
+    if expires_at > datetime.now(timezone.utc):
+        return user
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "UPDATE users SET plan = 'free', plan_expires_at = NULL, "
+                    "payment_failed_at = NULL, updated_at = NOW() "
+                    "WHERE id = %s AND plan = 'pro'",
+                    (user_id,),
+                )
+            conn.commit()
+    except psycopg.Error as e:
+        logger.exception("enforce_plan_grace failed for user=%s: %s", user_id, e)
+        return user
+    user["plan"] = "free"
+    user["plan_expires_at"] = None
+    user["payment_failed_at"] = None
+    return user

@@ -2,7 +2,8 @@ ALTER TABLE users
     ADD COLUMN IF NOT EXISTS plan                 TEXT NOT NULL DEFAULT 'free',
     ADD COLUMN IF NOT EXISTS plan_expires_at      TIMESTAMPTZ,
     ADD COLUMN IF NOT EXISTS setup_paid_at        TIMESTAMPTZ,
-    ADD COLUMN IF NOT EXISTS razorpay_customer_id TEXT;
+    ADD COLUMN IF NOT EXISTS razorpay_customer_id TEXT,
+    ADD COLUMN IF NOT EXISTS payment_failed_at    TIMESTAMPTZ;
 
 DO $$
 BEGIN
