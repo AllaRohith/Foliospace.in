@@ -101,6 +101,7 @@ async def public_folio(request: Request, slug: str):
     bio = (user.get("bio") or "").strip()
     description = bio if bio else f"{display_name} on FolioSpace."
     page_title = f"{display_name} — FolioSpace"
+    public_base_url = _os.getenv("PUBLIC_BASE_URL", "https://foliospace.in").rstrip("/")
     response = templates.TemplateResponse(
         request,
         "folio.html",
@@ -113,6 +114,7 @@ async def public_folio(request: Request, slug: str):
             "og_image_alt": f"{display_name} — {role or 'Folio'} on FolioSpace",
             "og_title": f"{display_name} — {role}" if role else page_title,
             "canonical": f"/{user['slug']}",
+            "public_base_url": public_base_url,
         },
     )
     return _public_cache(response)

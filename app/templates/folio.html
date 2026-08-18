@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% set folio_base = public_base_url %}
 {% block title %}{{ page_title }}{% endblock %}
 {% block description %}{{ description }}{% endblock %}
 {% block canonical %}/{{ user.slug }}{% endblock %}
@@ -17,11 +18,11 @@
   "@context": "https://schema.org",
   "@type": "Person",
   "name": {{ user.display_name | tojson }},
-  "url": "{{ request.url.scheme }}://{{ request.url.host }}/{{ user.slug }}",
+  "url": "{{ folio_base }}/{{ user.slug }}",
   {% if user.role %}"jobTitle": {{ user.role | tojson }},{% endif %}
   {% if user.bio %}"description": {{ user.bio | tojson }},{% endif %}
   {% if user.avatar_url %}"image": {{ user.avatar_url | tojson }},{% endif %}
-  "sameAs": ["{{ request.url.scheme }}://{{ request.url.host }}/{{ user.slug }}"]
+  "sameAs": ["{{ folio_base }}/{{ user.slug }}"]
 }
 </script>
 {% endblock %}
