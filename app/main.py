@@ -1,5 +1,11 @@
+import logging
 import os
 from pathlib import Path
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
 
 from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse
