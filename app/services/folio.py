@@ -32,37 +32,50 @@ def find_user_by_slug(slug: str) -> dict | None:
         return None
     if not DATABASE_URL:
         return None
+    full_sql = (
+        """
+        SELECT id, slug, display_name, role, bio, phone, avatar_url,
+               created_at, updated_at, deleted_at
+          FROM users
+         WHERE slug = %s
+            OR lower(slug) = lower(%s)
+            OR lower(trim(slug)) = lower(trim(%s))
+         LIMIT 1
+        """
+    )
+    minimal_sql = (
+        """
+        SELECT id, slug, display_name, role, created_at, updated_at, deleted_at,
+               NULL::text AS bio, NULL::text AS phone, NULL::text AS avatar_url
+          FROM users
+         WHERE slug = %s
+            OR lower(slug) = lower(%s)
+            OR lower(trim(slug)) = lower(trim(%s))
+         LIMIT 1
+        """
+    )
+    params = (s, s, s)
     try:
         with _connect() as conn:
             with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    SELECT id, slug, display_name, role, bio, phone, avatar_url,
-                           created_at, updated_at, deleted_at, length(slug) AS slug_len
-                      FROM users
-                     WHERE slug = %s
-                        OR lower(slug) = lower(%s)
-                        OR lower(trim(slug)) = lower(trim(%s))
-                     LIMIT 1
-                    """,
-                    (s, s, s),
-                )
+                cur.execute(full_sql, params)
                 row = cur.fetchone()
             conn.commit()
-        if row is None:
-            with _connect() as conn:
-                with conn.cursor() as cur:
-                    cur.execute("SELECT slug, deleted_at FROM users ORDER BY created_at DESC LIMIT 5")
-                    recent = cur.fetchall()
-                    logger.info(
-                        "find_user_by_slug: no match for %r. recent users: %s",
-                        s,
-                        [(r.get("slug"), bool(r.get("deleted_at"))) for r in recent],
-                    )
-                conn.commit()
+        return row
+    except psycopg.errors.UndefinedColumn as e:
+        logger.warning("find_user_by_slug: optional columns missing, falling back: %s", e)
+    except psycopg.Error as e:
+        logger.exception("find_user_by_slug failed (full query): %s", e)
+        return None
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(minimal_sql, params)
+                row = cur.fetchone()
+            conn.commit()
         return row
     except psycopg.Error as e:
-        logger.exception("find_user_by_slug failed: %s", e)
+        logger.exception("find_user_by_slug failed (minimal fallback): %s", e)
         return None
 
 
