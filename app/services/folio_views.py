@@ -5,6 +5,7 @@ import re
 from datetime import datetime, timedelta, timezone
 
 import psycopg
+from psycopg.rows import dict_row
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +48,7 @@ def _connect():
         return None
     return psycopg.connect(
         DATABASE_URL,
+        row_factory=dict_row,
         options="-c statement_timeout=2000",
     )
 
