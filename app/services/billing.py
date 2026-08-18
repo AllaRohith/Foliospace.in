@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import time
 from datetime import datetime, timezone
 
 import psycopg
@@ -68,13 +69,27 @@ def _get_or_create_customer_id(user: dict) -> str:
     return cust_id
 
 
+def _wait_for_customer(client, customer_id: str, max_wait_s: float = 8.0) -> bool:
+    deadline = time.monotonic() + max_wait_s
+    delay = 0.4
+    while True:
+        try:
+            client.customer.fetch(customer_id)
+            return True
+        except Exception:
+            if time.monotonic() >= deadline:
+                return False
+            time.sleep(min(delay, deadline - time.monotonic()))
+            delay = min(delay * 1.6, 1.5)
+
+
 def create_subscription(user_id: str) -> str:
     if not razorpay_svc.is_configured():
         raise HTTPException(status_code=503, detail="Razorpay not configured.")
     with _connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT id, email, slug, display_name, phone, razorpay_customer_id, deleted_at "
+                "SELECT id, email, slug, display_name, phone, razorpay_customer_id, created_at, deleted_at "
                 "FROM users WHERE id = %s LIMIT 1",
                 (user_id,),
             )
@@ -84,23 +99,12 @@ def create_subscription(user_id: str) -> str:
         raise HTTPException(status_code=404, detail="User not found.")
     customer_id = _get_or_create_customer_id(user)
     plan_id = razorpay_svc.plan_id()
-    logger.warning("create_subscription: plan_id=%r customer_id=%r user_id=%s", plan_id, customer_id, user_id)
+    logger.info("create_subscription: plan_id=%r customer_id=%r user_id=%s", plan_id, customer_id, user_id)
     client = razorpay_svc.get_client()
-    try:
-        plan = client.plan.fetch(plan_id)
-        item = plan.get("item") or {}
-        logger.warning("PREFLIGHT_PLAN_OK id=%s period=%s interval=%s item_amount=%s active=%s notes=%s",
-                       plan.get("id"), plan.get("period"), plan.get("interval"),
-                       item.get("amount"), plan.get("active"), plan.get("notes"))
-    except Exception as e:
-        logger.warning("PREFLIGHT_PLAN_FAIL: %s: %s", type(e).__name__, e)
-    try:
-        cust = client.customer.fetch(customer_id)
-        logger.warning("PREFLIGHT_CUST_OK id=%s active=%s", cust.get("id"), cust.get("active"))
-    except Exception as e:
-        logger.warning("PREFLIGHT_CUST_FAIL: %s: %s", type(e).__name__, e)
+    if not _wait_for_customer(client, customer_id):
+        raise HTTPException(status_code=503, detail="Razorpay customer propagation timeout, please retry.")
     sub = razorpay_svc.create_subscription(
-        plan_id=razorpay_svc.plan_id(),
+        plan_id=plan_id,
         customer_id=customer_id,
         total_count=SUBSCRIPTION_TOTAL_COUNT,
         notes={
