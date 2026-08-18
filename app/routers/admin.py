@@ -28,6 +28,8 @@ TEMPLATE_DIR = BASE_DIR / "templates"
 from fastapi.templating import Jinja2Templates
 
 templates = Jinja2Templates(directory=str(TEMPLATE_DIR))
+import os as _os
+templates.env.globals["asset_v"] = (_os.getenv("RENDER_GIT_COMMIT") or _os.getenv("GIT_COMMIT") or "dev")[:8]
 
 
 def _issue_label() -> str:
