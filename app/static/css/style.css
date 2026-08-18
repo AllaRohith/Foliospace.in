@@ -8236,3 +8236,66 @@ body.dark .pf-card {
   .pf-avatar-fallback { font-size: 36px; }
   .pf-foot { flex-direction: column; align-items: flex-start; gap: 12px; }
 }
+
+.profile-field-toggle {
+  padding: 18px 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--cream-2);
+}
+body.dark .profile-field-toggle { background: var(--card-bg); border-color: var(--line); }
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  cursor: pointer;
+  margin: 0;
+}
+.toggle-text { flex: 1; min-width: 0; }
+.toggle-label {
+  display: block;
+  font-family: 'Saira', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 4px;
+  letter-spacing: 0.01em;
+}
+.toggle-row input[type="checkbox"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.toggle-track {
+  position: relative;
+  flex-shrink: 0;
+  width: 48px;
+  height: 28px;
+  background: var(--line);
+  border-radius: 999px;
+  transition: background 0.18s ease;
+}
+.toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  background: var(--cream);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(15, 20, 25, 0.18);
+  transition: transform 0.18s ease;
+}
+.toggle-row input[type="checkbox"]:checked ~ .toggle-track {
+  background: var(--accent);
+}
+.toggle-row input[type="checkbox"]:checked ~ .toggle-track .toggle-thumb {
+  transform: translateX(20px);
+}
+.toggle-row input[type="checkbox"]:focus-visible ~ .toggle-track {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+body.dark .toggle-thumb { background: var(--cream); }

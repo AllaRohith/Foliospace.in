@@ -141,7 +141,7 @@ def find_user_by_email(email: str) -> dict | None:
                 cur.execute(
                     """
                     SELECT id, email, password_hash, slug, display_name, role,
-                           bio, phone, avatar_url,
+                           bio, phone, avatar_url, is_public,
                            email_verified, created_at, updated_at, last_login_at,
                            claimed_at, claim_token, claim_expires_at, deleted_at
                       FROM users
@@ -167,7 +167,7 @@ def find_user_by_id(user_id: str | UUID) -> dict | None:
                 cur.execute(
                     """
                     SELECT id, email, password_hash, slug, display_name, role,
-                           bio, phone, avatar_url,
+                           bio, phone, avatar_url, is_public,
                            email_verified, created_at, updated_at, last_login_at,
                            claimed_at, claim_token, claim_expires_at, deleted_at
                       FROM users
@@ -388,7 +388,16 @@ def _clean_url(value):
     return s[:MAX_AVATAR_URL_LEN]
 
 
-def update_user_profile(user_id, *, display_name, role, bio, phone, avatar_url) -> dict | None:
+def update_user_profile(
+    user_id,
+    *,
+    display_name,
+    role,
+    bio,
+    phone,
+    avatar_url,
+    is_public,
+) -> dict | None:
     uid = UUID(user_id) if not isinstance(user_id, UUID) else user_id
     now = datetime.now(timezone.utc)
     try:
@@ -402,12 +411,14 @@ def update_user_profile(user_id, *, display_name, role, bio, phone, avatar_url) 
                            bio          = %s,
                            phone        = %s,
                            avatar_url   = %s,
+                           is_public    = %s,
                            updated_at   = %s
                      WHERE id = %s
                        AND deleted_at IS NULL
                     RETURNING id, email, slug, display_name, role, bio, phone, avatar_url,
-                              email_verified, created_at, updated_at, last_login_at,
-                              claimed_at, claim_token, claim_expires_at, deleted_at
+                              is_public, email_verified, created_at, updated_at,
+                              last_login_at, claimed_at, claim_token, claim_expires_at,
+                              deleted_at
                     """,
                     (
                         _clean_text(display_name, MAX_DISPLAY_NAME_LEN),
@@ -415,6 +426,7 @@ def update_user_profile(user_id, *, display_name, role, bio, phone, avatar_url) 
                         _clean_text(bio, MAX_BIO_LEN),
                         _clean_text(phone, MAX_PHONE_LEN),
                         _clean_url(avatar_url),
+                        bool(is_public),
                         now, uid,
                     ),
                 )
@@ -432,17 +444,19 @@ def compute_completion(user) -> dict:
     bio = (user.get("bio") or "").strip()
     phone = (user.get("phone") or "").strip()
     avatar = (user.get("avatar_url") or "").strip()
+    public = bool(user.get("is_public"))
     fields = [
         ("display_name", "Display name", bool(dname)),
         ("role",         "Role",         bool(role)),
         ("bio",          "Bio (40+ chars)", bool(bio) and len(bio) >= BIO_COMPLETE_MIN),
         ("phone",        "WhatsApp number", bool(phone)),
         ("avatar_url",   "Avatar URL",   bool(avatar)),
+        ("is_public",    "Public folio", public),
     ]
     filled = sum(1 for _, _, done in fields if done)
     return {
         "filled": filled,
-        "total": 5,
+        "total": 6,
         "fields": [{"key": k, "label": l, "done": d} for k, l, d in fields],
     }
 

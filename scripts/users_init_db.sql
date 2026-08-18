@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS users (
     claim_token     TEXT UNIQUE,
     claim_expires_at TIMESTAMPTZ,
     deleted_at      TIMESTAMPTZ,
+    is_public       BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT users_phone_format_chk
         CHECK (phone IS NULL OR phone ~ '^[+0-9 ()\-]{6,20}$'),
     CONSTRAINT users_avatar_url_scheme_chk

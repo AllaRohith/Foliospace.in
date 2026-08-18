@@ -35,7 +35,7 @@ def find_user_by_slug(slug: str) -> dict | None:
     full_sql = (
         """
         SELECT id, slug, display_name, role, bio, phone, avatar_url,
-               created_at, updated_at, deleted_at
+               is_public, created_at, updated_at, deleted_at
           FROM users
          WHERE slug = %s
             OR lower(slug) = lower(%s)
@@ -46,7 +46,8 @@ def find_user_by_slug(slug: str) -> dict | None:
     minimal_sql = (
         """
         SELECT id, slug, display_name, role, created_at, updated_at, deleted_at,
-               NULL::text AS bio, NULL::text AS phone, NULL::text AS avatar_url
+               NULL::text AS bio, NULL::text AS phone, NULL::text AS avatar_url,
+               FALSE AS is_public
           FROM users
          WHERE slug = %s
             OR lower(slug) = lower(%s)
@@ -61,6 +62,8 @@ def find_user_by_slug(slug: str) -> dict | None:
                 cur.execute(full_sql, params)
                 row = cur.fetchone()
             conn.commit()
+        if row is not None and not row.get("is_public"):
+            return None
         return row
     except psycopg.errors.UndefinedColumn as e:
         logger.warning("find_user_by_slug: optional columns missing, falling back: %s", e)
@@ -73,6 +76,8 @@ def find_user_by_slug(slug: str) -> dict | None:
                 cur.execute(minimal_sql, params)
                 row = cur.fetchone()
             conn.commit()
+        if row is not None and not row.get("is_public"):
+            return None
         return row
     except psycopg.Error as e:
         logger.exception("find_user_by_slug failed (minimal fallback): %s", e)
@@ -90,6 +95,7 @@ def list_public_slugs() -> list[tuple[str, str]]:
                     SELECT slug, updated_at
                       FROM users
                      WHERE deleted_at IS NULL
+                       AND is_public = TRUE
                        AND display_name IS NOT NULL
                        AND length(trim(display_name)) > 0
                        AND slug IS NOT NULL
@@ -105,6 +111,33 @@ def list_public_slugs() -> list[tuple[str, str]]:
             (r["slug"], r["updated_at"].date().isoformat() if r.get("updated_at") else "")
             for r in rows
         ]
+    except psycopg.errors.UndefinedColumn:
+        try:
+            with _connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        SELECT slug, updated_at
+                          FROM users
+                         WHERE deleted_at IS NULL
+                           AND display_name IS NOT NULL
+                           AND length(trim(display_name)) > 0
+                           AND slug IS NOT NULL
+                           AND length(trim(slug)) >= %s
+                         ORDER BY created_at DESC
+                         LIMIT 5000
+                        """,
+                        (MIN_SLUG_LEN,),
+                    )
+                    rows = cur.fetchall()
+                conn.commit()
+            return [
+                (r["slug"], r["updated_at"].date().isoformat() if r.get("updated_at") else "")
+                for r in rows
+            ]
+        except psycopg.Error as e2:
+            logger.exception("list_public_slugs fallback failed: %s", e2)
+            return []
     except psycopg.Error as e:
         logger.exception("list_public_slugs failed: %s", e)
         return []

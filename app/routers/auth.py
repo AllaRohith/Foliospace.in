@@ -191,6 +191,7 @@ async def me(request: Request):
             "bio": user.get("bio") or "",
             "phone": user.get("phone") or "",
             "avatar_url": user.get("avatar_url") or "",
+            "is_public": bool(user.get("is_public")),
         }
     )
 
@@ -205,6 +206,7 @@ def _user_to_context(user) -> dict:
         "bio": user.get("bio") or "",
         "phone": user.get("phone") or "",
         "avatar_url": user.get("avatar_url") or "",
+        "is_public": bool(user.get("is_public")),
     }
 
 
@@ -259,6 +261,7 @@ async def profile_submit(
     bio: str = Form(""),
     phone: str = Form(""),
     avatar_url: str = Form(""),
+    is_public: str = Form(""),
 ):
     user = user_auth.require_user(request)
     if not user:
@@ -278,6 +281,7 @@ async def profile_submit(
     role_clean = (role or "").strip()
     if len(role_clean) > 60:
         return RedirectResponse("/dashboard/profile?err=role", status_code=303)
+    public_flag = (is_public or "").strip().lower() in ("1", "true", "on", "yes")
     updated = user_auth.update_user_profile(
         str(user["id"]),
         display_name=dname,
@@ -285,10 +289,16 @@ async def profile_submit(
         bio=bio_clean,
         phone=phone_clean,
         avatar_url=avatar_clean,
+        is_public=public_flag,
     )
     if not updated:
         return RedirectResponse("/dashboard/profile?err=server", status_code=303)
-    user_auth.audit_user(request, str(user["id"]), "profile.update")
+    user_auth.audit_user(
+        request,
+        str(user["id"]),
+        "profile.update",
+        metadata={"is_public": public_flag},
+    )
     return RedirectResponse("/dashboard/profile?saved=1", status_code=303)
 
 
