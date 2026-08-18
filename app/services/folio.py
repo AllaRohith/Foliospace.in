@@ -25,7 +25,7 @@ def _connect():
     )
 
 
-def find_user_by_slug(slug: str) -> dict | None:
+def find_user_by_slug(slug: str, *, require_public: bool = True) -> dict | None:
     from app.utils.text import strip_control
     s = strip_control((slug or "").strip())[:MAX_SLUG_LEN]
     if not s or len(s) < MIN_SLUG_LEN:
@@ -62,7 +62,7 @@ def find_user_by_slug(slug: str) -> dict | None:
                 cur.execute(full_sql, params)
                 row = cur.fetchone()
             conn.commit()
-        if row is not None and not row.get("is_public"):
+        if require_public and row is not None and not row.get("is_public"):
             return None
         return row
     except psycopg.errors.UndefinedColumn as e:
@@ -76,7 +76,7 @@ def find_user_by_slug(slug: str) -> dict | None:
                 cur.execute(minimal_sql, params)
                 row = cur.fetchone()
             conn.commit()
-        if row is not None and not row.get("is_public"):
+        if require_public and row is not None and not row.get("is_public"):
             return None
         return row
     except psycopg.Error as e:

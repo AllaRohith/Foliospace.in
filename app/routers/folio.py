@@ -103,7 +103,7 @@ async def public_folio_og(request: Request, slug: str):
 async def public_folio_qr(request: Request, slug: str):
     from app.utils.text import strip_control
     safe_slug = strip_control((slug or "").strip())[:48]
-    user = folio_svc.find_user_by_slug(safe_slug)
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
     if not user or user.get("deleted_at"):
         return RedirectResponse("/static/img/og.png", status_code=302)
     share_url = str(request.url_for("public_folio", slug=user["slug"]))
