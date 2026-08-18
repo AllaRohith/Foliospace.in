@@ -9,6 +9,7 @@ from fastapi import HTTPException
 from psycopg.rows import dict_row
 
 from app.services import razorpay as razorpay_svc
+from app.services import user_auth
 
 logger = logging.getLogger(__name__)
 
@@ -615,6 +616,18 @@ def grace_days_left(user: dict) -> int:
     return int((delta.total_seconds() + 86399) // 86400)
 
 
+def trial_days_left(user: dict) -> int:
+    if not user.get("is_trial"):
+        return 0
+    expires_at = user.get("plan_expires_at")
+    if not expires_at:
+        return 0
+    delta = expires_at - datetime.now(timezone.utc)
+    if delta.total_seconds() <= 0:
+        return 0
+    return int((delta.total_seconds() + 86399) // 86400)
+
+
 def enforce_plan_grace(user_id: str, user: dict) -> dict:
     if user.get("plan") != "pro":
         return user
@@ -628,7 +641,11 @@ def enforce_plan_grace(user_id: str, user: dict) -> dict:
             with conn.cursor() as cur:
                 cur.execute(
                     "UPDATE users SET plan = 'free', plan_expires_at = NULL, "
-                    "payment_failed_at = NULL, updated_at = NOW() "
+                    "payment_failed_at = NULL, is_trial = FALSE, "
+                    "trial_reminder_7d_sent_at = NULL, "
+                    "trial_reminder_4d_sent_at = NULL, "
+                    "trial_reminder_2d_sent_at = NULL, "
+                    "updated_at = NOW() "
                     "WHERE id = %s AND plan = 'pro'",
                     (user_id,),
                 )
@@ -639,4 +656,60 @@ def enforce_plan_grace(user_id: str, user: dict) -> dict:
     user["plan"] = "free"
     user["plan_expires_at"] = None
     user["payment_failed_at"] = None
+    user["is_trial"] = False
+    user["trial_reminder_7d_sent_at"] = None
+    user["trial_reminder_4d_sent_at"] = None
+    user["trial_reminder_2d_sent_at"] = None
     return user
+
+
+def maybe_send_trial_reminders(user_id: str, user: dict) -> bool:
+    if not user.get("is_trial"):
+        return False
+    days_left = trial_days_left(user)
+    if not (0 < days_left <= 7):
+        return False
+    sent = False
+    thresholds = [
+        (7, "trial_reminder_7d_sent_at"),
+        (4, "trial_reminder_4d_sent_at"),
+        (2, "trial_reminder_2d_sent_at"),
+    ]
+    for threshold, sent_col in thresholds:
+        if days_left > threshold:
+            continue
+        if user.get(sent_col) is not None:
+            continue
+        if _fire_trial_reminder(user_id, sent_col, days_left):
+            sent = True
+    return sent
+
+
+def _fire_trial_reminder(user_id: str, sent_col: str, days_left: int) -> bool:
+    from app.services import email_service
+    fresh = user_auth.find_user_by_id(user_id) or {}
+    if not fresh.get("email"):
+        return False
+    ok, _msg_id = email_service.send_trial_ending_email(
+        fresh["email"], days_left
+    )
+    if not ok:
+        logger.warning("trial reminder send failed for user=%s days_left=%s", user_id, days_left)
+        return False
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"UPDATE users SET {sent_col} = NOW(), updated_at = NOW() "
+                    f"WHERE id = %s AND {sent_col} IS NULL",
+                    (user_id,),
+                )
+                updated = cur.rowcount
+            conn.commit()
+    except psycopg.Error as e:
+        logger.exception("trial reminder mark-sent failed for user=%s: %s", user_id, e)
+        return False
+    if updated == 0:
+        logger.info("trial reminder race: another worker already sent %s for user=%s",
+                    sent_col, user_id)
+    return True

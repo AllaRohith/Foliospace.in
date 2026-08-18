@@ -3,7 +3,11 @@ ALTER TABLE users
     ADD COLUMN IF NOT EXISTS plan_expires_at      TIMESTAMPTZ,
     ADD COLUMN IF NOT EXISTS setup_paid_at        TIMESTAMPTZ,
     ADD COLUMN IF NOT EXISTS razorpay_customer_id TEXT,
-    ADD COLUMN IF NOT EXISTS payment_failed_at    TIMESTAMPTZ;
+    ADD COLUMN IF NOT EXISTS payment_failed_at    TIMESTAMPTZ,
+    ADD COLUMN IF NOT EXISTS is_trial                 BOOLEAN     NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS trial_reminder_7d_sent_at TIMESTAMPTZ,
+    ADD COLUMN IF NOT EXISTS trial_reminder_4d_sent_at TIMESTAMPTZ,
+    ADD COLUMN IF NOT EXISTS trial_reminder_2d_sent_at TIMESTAMPTZ;
 
 DO $$
 BEGIN
@@ -15,6 +19,27 @@ BEGIN
             CHECK (plan IN ('free', 'pro'));
     END IF;
 END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_class WHERE relname = 'users_trial_idx'
+    ) THEN
+        CREATE INDEX users_trial_idx
+            ON users(is_trial, plan_expires_at)
+            WHERE is_trial = TRUE;
+    END IF;
+END $$;
+
+UPDATE users
+   SET is_trial = TRUE,
+       plan = 'pro',
+       plan_expires_at = NOW() + INTERVAL '15 days',
+       updated_at = NOW()
+ WHERE plan = 'free'
+   AND setup_paid_at IS NULL
+   AND razorpay_customer_id IS NULL
+   AND deleted_at IS NULL;
 
 CREATE TABLE IF NOT EXISTS user_subscriptions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

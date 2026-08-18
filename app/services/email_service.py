@@ -132,6 +132,38 @@ def send_welcome_email(to_email: str) -> tuple[bool, str]:
         return False, str(e)
 
 
+def send_trial_ending_email(to_email: str, days_left: int) -> tuple[bool, str]:
+    if not API_KEY:
+        logger.info("RESEND_API_KEY not set, skipping trial-ending email to %s", to_email)
+        return False, "no_api_key"
+    try:
+        resend.api_key = API_KEY
+        days_int = int(days_left)
+        context = {
+            "public_url": PUBLIC_URL,
+            "first_name": _first_name_from_email(to_email),
+            "days_left": days_int,
+            "billing_url": f"{PUBLIC_URL}/dashboard/billing",
+        }
+        html = _render_template("trial_ending.html", **context)
+        subject = f"Your FolioSpace trial ends in {days_int} day{'' if days_int == 1 else 's'}"
+        params = {
+            "from": FROM_EMAIL,
+            "to": [to_email],
+            "reply_to": REPLY_TO,
+            "subject": subject,
+            "html": html,
+        }
+        result = resend.Emails.send(params)
+        msg_id = result.get("id", "unknown") if isinstance(result, dict) else str(result)
+        logger.info("sent trial-ending email to %s (days_left=%s, id=%s)",
+                    to_email, days_int, msg_id)
+        return True, msg_id
+    except Exception as e:
+        logger.exception("send_trial_ending_email failed for %s: %s", to_email, e)
+        return False, "send_error"
+
+
 def send_internal_notification(
     email: str,
     role: str | None,

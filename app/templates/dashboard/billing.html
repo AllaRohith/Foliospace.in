@@ -7,6 +7,16 @@
   ₹149/mo via AutoPay — UPI or Card. Cancel anytime from this page.
 </div>
 
+{% if user.is_trial and trial_days_left is defined and 0 < trial_days_left <= 7 %}
+  <div class="dash-card" style="border: 1px solid var(--accent); background: rgba(255,107,53,0.05);">
+    <div class="dash-card-eyebrow">⚡ Free trial</div>
+    <div class="dash-card-title">Trial ends in <em>{{ trial_days_left }} day{{ '' if trial_days_left == 1 else 's' }}.</em></div>
+    <div class="dash-card-sub">
+      Your Pro access continues until the end of the trial. Activate Pro below to keep your features.
+    </div>
+  </div>
+{% endif %}
+
 {% if user.payment_failed_at %}
   <div class="dash-card" style="border: 1px solid var(--accent); background: rgba(255,107,53,0.05);">
     <div class="dash-card-eyebrow">⚠ Payment failed</div>
@@ -80,6 +90,12 @@
     <div class="dash-card-sub">
       Custom sections, analytics, priority support. Cancel anytime from this page.
     </div>
+    {% if user.is_trial %}
+      <div class="dash-card-row">
+        <span class="dash-card-key">Trial</span>
+        <span class="dash-card-val">Ends in {{ trial_days_left }} day{{ '' if trial_days_left == 1 else 's' }} — {{ trial_expires_at_iso }}</span>
+      </div>
+    {% endif %}
     <div class="dash-card-row">
       <span class="dash-card-key">Billing</span>
       <span class="dash-card-val">₹149/mo via UPI or Card AutoPay</span>

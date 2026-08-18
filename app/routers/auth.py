@@ -3,7 +3,7 @@ import os
 import re
 from pathlib import Path
 
-from fastapi import APIRouter, Form, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 
@@ -212,11 +212,12 @@ def _user_to_context(user) -> dict:
         "plan": user.get("plan") or "free",
         "plan_expires_at": user.get("plan_expires_at"),
         "payment_failed_at": user.get("payment_failed_at"),
+        "is_trial": bool(user.get("is_trial")),
     }
 
 
 @router.get("/dashboard", response_class=HTMLResponse)
-async def dashboard(request: Request):
+async def dashboard(request: Request, background_tasks: BackgroundTasks):
     user = user_auth.require_user(request)
     if not user:
         return RedirectResponse("/login?next=/dashboard", status_code=303)
@@ -226,6 +227,13 @@ async def dashboard(request: Request):
     from app.services import billing as billing_svc
     view_stats = views_svc.get_view_stats(user["slug"], days=30)
     grace_days_left = billing_svc.grace_days_left(user)
+    trial_days_left = billing_svc.trial_days_left(user)
+    if user.get("is_trial"):
+        background_tasks.add_task(
+            billing_svc.maybe_send_trial_reminders,
+            str(user["id"]),
+            user,
+        )
     return _no_cache(templates.TemplateResponse(
         request,
         "auth/dashboard.html",
@@ -238,6 +246,7 @@ async def dashboard(request: Request):
             "completion": completion,
             "view_stats": view_stats,
             "grace_days_left": grace_days_left,
+            "trial_days_left": trial_days_left,
             "nav_active": "overview",
         },
     ))

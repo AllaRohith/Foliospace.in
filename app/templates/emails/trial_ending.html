@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your FolioSpace trial ends in {{ days_left }} day{{ '' if days_left == 1 else 's' }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Saira:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body style="margin:0; padding:0; background:#F4F1EA; font-family: 'Saira', system-ui, sans-serif; color:#1a1a1a;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#F4F1EA; padding: 32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="max-width:560px; width:100%;">
+          <tr>
+            <td style="background:#FFFFFF; border:1px solid #e7e3da; border-radius:12px; padding:32px 28px;">
+              <div style="font-size:11px; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; color:#FF6B35; margin-bottom:14px;">
+                → Free trial
+              </div>
+              <h1 style="font-family:'Saira', sans-serif; font-weight:800; font-size:28px; line-height:1.15; margin:0 0 16px; color:#1a1a1a;">
+                Your trial ends in <em style="font-style:italic; color:#FF6B35;">{{ days_left }} day{{ '' if days_left == 1 else 's' }}.</em>
+              </h1>
+              <p style="font-size:15px; line-height:1.55; margin:0 0 14px; color:#1a1a1a;">
+                Hi {{ first_name }} — your FolioSpace Pro trial has {{ days_left }} day{{ '' if days_left == 1 else 's' }} left. After that, your portfolio locks to the Free tier until you activate Pro.
+              </p>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f4f1ea; border:1px solid #e7e3da; border-radius:999px; height:12px; margin:18px 0 8px;" height="12">
+                <tr>
+                  <td style="background:#FF6B35; border-radius:999px; font-size:0; line-height:0; width: {{ ((7 - days_left) * 100 / 7) if days_left <= 7 else 0 }}%;" height="12">
+                    &nbsp;
+                  </td>
+                </tr>
+              </table>
+              <p style="font-size:12px; line-height:1.4; margin:0 0 16px; color:#6a6a6a;">
+                {{ days_left }} day{{ '' if days_left == 1 else 's' }} of urgency left.
+              </p>
+              <p style="font-size:15px; line-height:1.55; margin:0 0 16px; color:#1a1a1a;">
+                Pro is <strong>₹149/mo via UPI AutoPay</strong> — set a UPI mandate, cancel anytime. No card, no netbanking.
+              </p>
+              <p style="margin:24px 0 4px;">
+                <a href="{{ billing_url }}" style="display:inline-block; background:#FF6B35; color:#FFFFFF; padding:14px 22px; border-radius:999px; font-weight:700; font-size:14px; text-decoration:none; font-family:'Saira', sans-serif;">
+                  Activate Pro →
+                </a>
+              </p>
+              <p style="font-size:12px; color:#6a6a6a; margin-top:24px; line-height:1.5;">
+                Cancel anytime from your dashboard. Need help? Reply to this email.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:16px 8px 0; text-align:center; font-size:11px; color:#6a6a6a; font-family:'Saira', sans-serif;">
+              FolioSpace · One link for every Indian professional.
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

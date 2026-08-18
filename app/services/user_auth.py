@@ -128,14 +128,18 @@ def create_user(email: str, password: str, role: str | None = None) -> dict:
                     """
                     INSERT INTO users (
                         email, password_hash, slug, display_name, role,
-                        email_verified, created_at, updated_at
+                        email_verified, created_at, updated_at,
+                        plan, plan_expires_at, is_trial
                     )
-                    VALUES (%s, %s, %s, %s, %s, FALSE, %s, %s)
+                    VALUES (%s, %s, %s, %s, %s, FALSE, %s, %s,
+                            'pro', %s + INTERVAL '15 days', TRUE)
                     RETURNING id, email, slug, display_name, role, email_verified,
                               created_at, updated_at, last_login_at, claimed_at,
-                              claim_token, claim_expires_at, deleted_at
+                              claim_token, claim_expires_at, deleted_at,
+                              plan, plan_expires_at, is_trial,
+                              trial_reminder_7d_sent_at, trial_reminder_4d_sent_at, trial_reminder_2d_sent_at
                     """,
-                    (email_clean, pw_hash, slug, email_clean.split("@", 1)[0], role, now, now),
+                    (email_clean, pw_hash, slug, email_clean.split("@", 1)[0], role, now, now, now),
                 )
                 row = cur.fetchone()
                 prefill = _apply_waitlist_to_user(cur, row["id"], email_clean)
@@ -166,7 +170,9 @@ def find_user_by_email(email: str) -> dict | None:
                     SELECT id, email, password_hash, slug, display_name, role,
                            bio, phone, avatar_url, is_public,
                            email_verified, created_at, updated_at, last_login_at,
-                           claimed_at, claim_token, claim_expires_at, deleted_at
+                           claimed_at, claim_token, claim_expires_at, deleted_at,
+                           plan, plan_expires_at, payment_failed_at, razorpay_customer_id,
+                           is_trial, trial_reminder_7d_sent_at, trial_reminder_4d_sent_at, trial_reminder_2d_sent_at
                       FROM users
                      WHERE email = %s
                     """,
@@ -193,7 +199,8 @@ def find_user_by_id(user_id: str | UUID) -> dict | None:
                            bio, phone, avatar_url, is_public,
                            email_verified, created_at, updated_at, last_login_at,
                            claimed_at, claim_token, claim_expires_at, deleted_at,
-                           plan, plan_expires_at, payment_failed_at, razorpay_customer_id
+                           plan, plan_expires_at, payment_failed_at, razorpay_customer_id,
+                           is_trial, trial_reminder_7d_sent_at, trial_reminder_4d_sent_at, trial_reminder_2d_sent_at
                       FROM users
                      WHERE id = %s
                     """,

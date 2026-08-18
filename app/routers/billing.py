@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from datetime import timedelta, timezone
 from pathlib import Path
 
 from fastapi import APIRouter, Form, HTTPException, Request
@@ -46,6 +47,7 @@ def _user_to_context(user) -> dict:
         "plan_expires_at": user.get("plan_expires_at"),
         "payment_failed_at": user.get("payment_failed_at"),
         "setup_paid_at": user.get("setup_paid_at"),
+        "is_trial": bool(user.get("is_trial")),
     }
 
 
@@ -57,6 +59,11 @@ async def dashboard_billing(request: Request):
     sub = billing_svc.current_subscription(str(user["id"]))
     invoices = billing_svc.list_invoices(str(user["id"]))
     configured = razorpay_svc.is_configured()
+    trial_days_left = billing_svc.trial_days_left(user)
+    trial_expires_at_iso = ""
+    if user.get("is_trial") and user.get("plan_expires_at"):
+        ist = timezone(timedelta(hours=5, minutes=30))
+        trial_expires_at_iso = user["plan_expires_at"].astimezone(ist).strftime("%Y-%m-%d %H:%M IST")
     return _no_cache(templates.TemplateResponse(
         request,
         "dashboard/billing.html",
@@ -71,6 +78,8 @@ async def dashboard_billing(request: Request):
             "razorpay_key_id": razorpay_svc.public_key() if configured else "",
             "setup_paid": bool(user.get("setup_paid_at")),
             "grace_days_left": billing_svc.grace_days_left(user),
+            "trial_days_left": trial_days_left,
+            "trial_expires_at_iso": trial_expires_at_iso,
             "err": (request.query_params.get("err") or "")[:24],
             "cancelled": request.query_params.get("cancel") == "1",
             "nav_active": "billing",

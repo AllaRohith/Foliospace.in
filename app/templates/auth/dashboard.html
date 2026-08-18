@@ -2,6 +2,16 @@
 
 {% block dash_body %}
 
+{% if user.is_trial and trial_days_left is defined and 0 < trial_days_left <= 7 %}
+<section class="meter-card" style="border: 1px solid var(--accent); background: rgba(255,107,53,0.05);">
+  <div class="meter-eyebrow">⚡ Free trial</div>
+  <h1 class="meter-title">Your trial ends in <em>{{ trial_days_left }} day{{ '' if trial_days_left == 1 else 's' }}.</em></h1>
+  <p style="font-family: 'Saira', sans-serif; font-size: 14px; color: var(--ink); margin-top: 12px;">
+    Activate Pro to keep your portfolio live after day 15. <a href="/dashboard/billing">Activate ₹149/mo →</a>
+  </p>
+</section>
+{% endif %}
+
 {% if user.payment_failed_at %}
 <section class="meter-card" style="border: 1px solid var(--accent); background: rgba(255,107,53,0.05);">
   <div class="meter-eyebrow">⚠ Payment failed</div>
