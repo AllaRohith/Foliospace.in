@@ -38,15 +38,28 @@ def find_user_by_slug(slug: str) -> dict | None:
                 cur.execute(
                     """
                     SELECT id, slug, display_name, role, bio, phone, avatar_url,
-                           created_at, updated_at, deleted_at
+                           created_at, updated_at, deleted_at, length(slug) AS slug_len
                       FROM users
-                     WHERE lower(slug) = lower(%s)
+                     WHERE slug = %s
+                        OR lower(slug) = lower(%s)
+                        OR lower(trim(slug)) = lower(trim(%s))
                      LIMIT 1
                     """,
-                    (s,),
+                    (s, s, s),
                 )
                 row = cur.fetchone()
             conn.commit()
+        if row is None:
+            with _connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT slug, deleted_at FROM users ORDER BY created_at DESC LIMIT 5")
+                    recent = cur.fetchall()
+                    logger.info(
+                        "find_user_by_slug: no match for %r. recent users: %s",
+                        s,
+                        [(r.get("slug"), bool(r.get("deleted_at"))) for r in recent],
+                    )
+                conn.commit()
         return row
     except psycopg.Error as e:
         logger.exception("find_user_by_slug failed: %s", e)
