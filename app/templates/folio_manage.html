@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% set folio_base = "https://foliospace.in" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block description %}{{ description }}{% endblock %}
+{% block canonical %}/{{ user.slug }}/manage{% endblock %}
+{% block og_title %}Manage {{ user.display_name or user.slug }} — FolioSpace{% endblock %}
+{% block og_description %}{{ description }}{% endblock %}
+{% block og_image_alt %}Manage {{ user.display_name or user.slug }} on FolioSpace{% endblock %}
+{% block robots %}noindex,nofollow{% endblock %}
+
+{% block content %}
+<main id="main" class="fm-shell">
+  <header class="fm-top">
+    <a class="fm-brand" href="/">FolioSpace<span class="fm-brand-dot">.</span>in</a>
+    <nav class="fm-tabs" role="tablist">
+      <a class="fm-tab is-active" href="/{{ user.slug }}/manage" data-fm-tab="folio">Your folio</a>
+      <a class="fm-tab" href="/{{ user.slug }}?preview=1" data-fm-tab="preview" target="_blank" rel="noopener">Preview ↗</a>
+    </nav>
+    <div class="fm-top-right">
+      {% if user.is_internal %}
+        <a class="fm-plan-pill fm-plan-pill-internal" href="/dashboard/billing" title="Founder account — unlimited access">✓ Unlimited</a>
+      {% elif user.is_trial and trial_days_left is defined and trial_days_left > 0 %}
+        <a class="fm-plan-pill fm-plan-pill-trial" href="/dashboard/billing" title="Free trial — {{ trial_days_left }} day{{ '' if trial_days_left == 1 else 's' }} left">⚡ Trial · {{ trial_days_left }}d →</a>
+      {% elif user.payment_failed_at and grace_days_left %}
+        <a class="fm-plan-pill fm-plan-pill-grace" href="/dashboard/billing" title="Payment failed — {{ grace_days_left }} day{{ '' if grace_days_left == 1 else 's' }} grace left">⚠ Pro · {{ grace_days_left }}d →</a>
+      {% elif user.plan == 'pro' %}
+        <a class="fm-plan-pill fm-plan-pill-pro" href="/dashboard/billing" title="Pro subscription — manage">Pro · Active</a>
+      {% else %}
+        <a class="fm-plan-pill fm-plan-pill-free" href="/dashboard/billing" title="Free tier — upgrade to Pro">Free · Upgrade →</a>
+      {% endif %}
+      <button type="button" class="fm-share-btn" data-fm-share-popover aria-expanded="false">Share →</button>
+    </div>
+  </header>
+
+  <section class="fm-share-popover" data-fm-share-popover-panel hidden aria-label="Share folio">
+    <div class="fm-share-row">
+      <code class="fm-share-link" id="fm-share-link">{{ share_url }}</code>
+      <button type="button" class="fm-share-copy" data-fm-copy="{{ share_url }}">Copy</button>
+    </div>
+    <div class="fm-share-actions">
+      <a class="fm-share-action" href="https://wa.me/?text={{ wa_text | urlencode }}" target="_blank" rel="noopener">
+        <span class="fm-share-action-name">WhatsApp</span>
+        <span class="fm-share-action-sub">pre-filled</span>
+      </a>
+      <a class="fm-share-action" href="https://www.linkedin.com/sharing/share-offsite/?url={{ share_url | urlencode }}" target="_blank" rel="noopener">
+        <span class="fm-share-action-name">LinkedIn</span>
+        <span class="fm-share-action-sub">post + preview</span>
+      </a>
+      <a class="fm-share-action" href="mailto:?subject={{ mail_subject | urlencode }}&amp;body={{ wa_text | urlencode }}">
+        <span class="fm-share-action-name">Email</span>
+        <span class="fm-share-action-sub">opens mail client</span>
+      </a>
+      <a class="fm-share-action" href="{{ qr_url }}" download="foliospace-{{ user.slug }}.png">
+        <span class="fm-share-action-name">QR code</span>
+        <span class="fm-share-action-sub">PNG download</span>
+      </a>
+    </div>
+    <div class="fm-share-hint">
+      {% if is_live %}
+        ✓ Public — anyone with your link can see it.
+      {% else %}
+        Toggle <em>Make my folio public</em> below to make your link live.
+      {% endif %}
+    </div>
+  </section>
+
+  <div class="fm-grid">
+    <section class="fm-editor" aria-label="Edit your folio">
+      <div class="fm-editor-eyebrow">→ Your folio</div>
+      <h1 class="fm-editor-title">Edit <em>profile.</em></h1>
+      <p class="fm-editor-sub">Public — the way others see you on FolioSpace.</p>
+
+      {% if saved %}
+        <div class="fm-flash fm-flash-ok">✓ Saved</div>
+      {% endif %}
+      {% if err == 'display_name' %}
+        <div class="fm-flash fm-flash-warn">Display name must be 2–80 characters.</div>
+      {% elif err == 'bio' %}
+        <div class="fm-flash fm-flash-warn">Bio must be 280 characters or fewer.</div>
+      {% elif err == 'phone' %}
+        <div class="fm-flash fm-flash-warn">Phone must be 6–20 characters: digits, spaces, + ( ) - only.</div>
+      {% elif err == 'avatar_url' %}
+        <div class="fm-flash fm-flash-warn">Avatar URL must start with http:// or https://.</div>
+      {% elif err == 'role' %}
+        <div class="fm-flash fm-flash-warn">Role must be 60 characters or fewer.</div>
+      {% elif err == 'server' %}
+        <div class="fm-flash fm-flash-warn">Couldn't save right now. Try again.</div>
+      {% endif %}
+
+      <form class="fm-form" method="post" action="/{{ user.slug }}/manage" autocomplete="on" novalidate>
+        <div class="fm-field">
+          <label for="display_name">Display name</label>
+          <input id="display_name" name="display_name" type="text" maxlength="80" required value="{{ user.display_name or '' }}" autofocus />
+        </div>
+
+        <div class="fm-field">
+          <label for="role">Role</label>
+          <input id="role" name="role" type="text" maxlength="60" value="{{ user.role or '' }}" placeholder="designer" />
+        </div>
+
+        <div class="fm-field">
+          <label for="bio">Bio <span class="fm-field-hint">(40+ chars = complete)</span></label>
+          <textarea id="bio" name="bio" maxlength="280" data-fm-bio-counter>{{ user.bio or '' }}</textarea>
+          <div class="fm-counter" data-fm-bio-counter-display>{{ (user.bio or '') | length }} / 280</div>
+        </div>
+
+        <div class="fm-field">
+          <label for="phone">WhatsApp number</label>
+          <input id="phone" name="phone" type="tel" maxlength="20" value="{{ user.phone or '' }}" placeholder="+91 98765 43210" />
+        </div>
+
+        <div class="fm-field">
+          <label for="avatar_url">Avatar URL <span class="fm-field-hint">(square photo, https://)</span></label>
+          <input id="avatar_url" name="avatar_url" type="url" value="{{ user.avatar_url or '' }}" placeholder="https://…" />
+        </div>
+
+        <div class="fm-field fm-field-toggle">
+          <label class="fm-toggle-row" for="is_public">
+            <span class="fm-toggle-text">
+              <span class="fm-toggle-label">Make my folio public</span>
+              <span class="fm-field-hint">Off by default. <code>/{{ user.slug }}</code> 404s to anyone but you when off.</span>
+            </span>
+            <input id="is_public" name="is_public" type="checkbox" value="1" {% if user.is_public %}checked{% endif %} />
+            <span class="fm-toggle-track" aria-hidden="true"><span class="fm-toggle-thumb"></span></span>
+          </label>
+        </div>
+
+        <button type="submit" class="fm-save">Save folio →</button>
+      </form>
+    </section>
+
+    <aside class="fm-side" aria-label="Status">
+      <section class="fm-card fm-card-visits">
+        <div class="fm-card-eyebrow">→ Visits · last 30 days</div>
+        <div class="fm-card-numbers">
+          <div class="fm-card-stat">
+            <div class="fm-card-num">{{ view_stats.total_views }}</div>
+            <div class="fm-card-label">views</div>
+          </div>
+          <div class="fm-card-stat">
+            <div class="fm-card-num">{{ view_stats.unique_visitors }}</div>
+            <div class="fm-card-label">unique</div>
+          </div>
+        </div>
+        <div class="fm-card-spark" aria-hidden="true">
+          {% for d in view_stats.daily %}
+            <div class="fm-card-bar {{ 'is-today' if loop.last else '' }} {{ 'has-views' if d.views > 0 else '' }}"
+                 style="--bar-h: {{ ((d.views * 100) / view_stats.peak) if view_stats.peak else 0 }}%"></div>
+          {% endfor %}
+        </div>
+        <div class="fm-card-foot">Your own visits don't count. Bots filtered.</div>
+      </section>
+
+      <section class="fm-card fm-card-link">
+        <div class="fm-card-eyebrow">→ Your link</div>
+        <code class="fm-card-link-text">foliospace.in/{{ user.slug }}</code>
+        <a class="fm-card-link-cta" href="/{{ user.slug }}" target="_blank" rel="noopener">
+          {% if is_live %}View live folio ↗{% else %}Preview private folio ↗{% endif %}
+        </a>
+      </section>
+    </aside>
+  </div>
+
+  <footer class="fm-foot">
+    <a class="fm-foot-link" href="/dashboard/billing">Billing →</a>
+    <form method="post" action="/logout" class="fm-foot-form">
+      <button type="submit" class="fm-foot-link fm-foot-signout">Sign out</button>
+    </form>
+  </footer>
+</main>
+
+<script defer src="{{ request.url_for('static', path='js/folio_manage.js') }}?v={{ asset_v }}"></script>
+{% endblock %}
