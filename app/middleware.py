@@ -52,7 +52,7 @@ def _origin_key(origin: str) -> str:
 def _csp() -> str:
     parts = [
         "default-src 'self'",
-        "script-src 'self' https://checkout.razorpay.com",
+        "script-src 'self' https://checkout.razorpay.com https://cdn.razorpay.com",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com data:",
         "img-src 'self' data: blob:",

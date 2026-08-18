@@ -29,6 +29,8 @@
         var resp = await fetch('/dashboard/billing/subscribe', {
           method: 'POST',
           credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: '',
         });
         if (!resp.ok) throw new Error('checkout-create-failed');
         var data = await resp.json();
