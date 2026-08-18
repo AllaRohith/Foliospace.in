@@ -130,7 +130,7 @@
 
 {% if razorpay_configured %}
 <meta name="razorpay-key" content="{{ razorpay_key_id }}">
-<script defer src="{{ request.url_for('static', path='vendor/razorpay/checkout.js') }}?v={{ asset_v }}"></script>
+<script defer src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script defer src="{{ request.url_for('static', path='js/billing.js') }}?v={{ asset_v }}"></script>
 {% endif %}
 {% endblock %}
