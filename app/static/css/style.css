@@ -7978,6 +7978,7 @@ body.dark .dash-stats { background: var(--card-bg); border-color: var(--line); }
   margin-top: 22px;
   padding-bottom: 4px;
   border-bottom: 1px solid var(--line);
+  overflow: hidden;
 }
 .dash-stat-bar {
   flex: 1;

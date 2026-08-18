@@ -47,15 +47,10 @@
     </div>
   </div>
 
-  {% set max_views = 1 %}
-  {% for d in view_stats.daily %}
-    {% if d.views > max_views %}{% set max_views = d.views %}{% endif %}
-  {% endfor %}
-
   <div class="dash-stats-spark" role="img" aria-label="Daily visits over the last 30 days">
     {% for d in view_stats.daily %}
       <div class="dash-stat-bar {{ 'is-today' if loop.last else '' }} {{ 'has-views' if d.views > 0 else '' }}"
-           style="--bar-h: {{ ((d.views * 100) / max_views)|round|int }}%"
+           style="--bar-h: {{ ((d.views * 100) / view_stats.peak) if view_stats.peak else 0 }}%"
            title="{{ d.date }}: {{ d.views }} view{% if d.views != 1 %}s{% endif %}, {{ d.uniques }} unique"></div>
     {% endfor %}
   </div>

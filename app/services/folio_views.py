@@ -98,6 +98,7 @@ def get_view_stats(slug: str, days: int = 30) -> dict:
         "unique_visitors": 0,
         "daily": [],
         "days": days,
+        "peak": 0,
     }
     if not s:
         return empty
@@ -141,11 +142,13 @@ def get_view_stats(slug: str, days: int = 30) -> dict:
                 "views": int(r["views"]) if r else 0,
                 "uniques": int(r["uniques"]) if r else 0,
             })
+        peak = max((d["views"] for d in daily), default=0)
         return {
             "total_views": total,
             "unique_visitors": unique,
             "daily": daily,
             "days": days,
+            "peak": peak,
         }
     except psycopg.errors.UndefinedTable:
         return empty
