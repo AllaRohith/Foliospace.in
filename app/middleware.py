@@ -56,7 +56,8 @@ def _csp() -> str:
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com data:",
         "img-src 'self' data: blob:",
-        "connect-src 'self'",
+        "connect-src 'self' https://lumberjack.razorpay.com",
+        "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com",
         "frame-ancestors 'none'",
         "form-action 'self'",
         "base-uri 'self'",
@@ -108,6 +109,7 @@ class OriginCheckMiddleware(BaseHTTPMiddleware):
         self.allowed = {_origin_key(o) for o in (allowed_origins or _allowed_origins()) if o}
         self.allowed.discard("")
         self.safe_methods = {"GET", "HEAD", "OPTIONS"}
+        self.webhook_paths = ("/webhooks/",)
         self.protected_paths = (
             "/api/waitlist/join",
             "/admin/login",
@@ -116,6 +118,8 @@ class OriginCheckMiddleware(BaseHTTPMiddleware):
             "/login",
             "/logout",
             "/dashboard/profile",
+            "/dashboard/billing/subscribe",
+            "/dashboard/billing/cancel",
         )
         self.protected_prefixes = (
             "/admin/signups/",
@@ -123,6 +127,8 @@ class OriginCheckMiddleware(BaseHTTPMiddleware):
         self.trust_internal_token = (trust_internal_token or os.getenv("INTERNAL_TRUST_TOKEN") or "").strip()
 
     def _is_protected(self, path: str) -> bool:
+        if any(path.startswith(p) for p in self.webhook_paths):
+            return False
         if any(path == p or path.startswith(p + "/") for p in self.protected_paths):
             return True
         if any(path.startswith(p) for p in self.protected_prefixes):

@@ -8665,3 +8665,42 @@ body.dark .share-og-hint code { background: var(--bg-2); }
   .share-link-row { flex-direction: column; }
   .share-copy-btn { padding: 12px 18px; }
 }
+
+.meter-pro-card { padding: 28px 30px; }
+.dash-card-actions { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; }
+.dash-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Saira', sans-serif;
+  font-size: 13px;
+  margin-top: 14px;
+}
+.dash-table th, .dash-table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.dash-table th {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+body.dark .dash-table th, body.dark .dash-table td { border-color: var(--line); }
+.dash-badge {
+  display: inline-block;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  background: var(--cream-2);
+}
+.dash-badge-captured { background: rgba(255,107,53,0.12); color: var(--accent-text); border-color: var(--accent); }
+.dash-badge-failed   { background: rgba(180,40,40,0.08);  color: #b42828; border-color: #b42828; }
+.dash-badge-refunded { background: rgba(120,120,120,0.10); color: var(--muted); }
+body.dark .dash-badge { background: var(--card-bg); }

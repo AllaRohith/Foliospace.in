@@ -343,24 +343,6 @@ async def dashboard_integrations(request: Request):
     ))
 
 
-@router.get("/dashboard/billing", response_class=HTMLResponse)
-async def dashboard_billing(request: Request):
-    user = user_auth.require_user(request)
-    if not user:
-        return RedirectResponse("/login?next=/dashboard/billing", status_code=303)
-    return _no_cache(templates.TemplateResponse(
-        request,
-        "dashboard/billing.html",
-        {
-            "site_name": "FolioSpace",
-            "page_title": "Billing — FolioSpace",
-            "description": "Your FolioSpace billing and subscription.",
-            "user": _user_to_context(user),
-            "nav_active": "billing",
-        },
-    ))
-
-
 @router.get("/dashboard/share", response_class=HTMLResponse)
 async def dashboard_share(request: Request):
     user = user_auth.require_user(request)
