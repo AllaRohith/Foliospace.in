@@ -47,12 +47,17 @@ def _paise_to_rupees(paise) -> str:
 
 
 def _get_or_create_customer_id(user: dict) -> str:
-    cust = (user.get("razorpay_customer_id") or "").strip()
-    if cust:
-        return cust
     if not DATABASE_URL:
         raise HTTPException(status_code=503, detail="Database not configured.")
-    name = (user.get("display_name") or user.get("slug") or "FolioSpace user")[:80]
+    cust = (user.get("razorpay_customer_id") or "").strip()
+    if cust:
+        try:
+            razorpay_svc.get_client().customer.fetch(cust)
+            return cust
+        except Exception as e:
+            logger.warning("stale razorpay_customer_id=%s (%s), will recreate", cust, type(e).__name__)
+            cust = ""
+    name = (user.get("display_name") or user.get("slug") or "FolioSpace user")[:30]
     email = (user.get("email") or "")[:254]
     contact = (user.get("phone") or "")[:20]
     created = razorpay_svc.create_customer(name=name, email=email, contact=contact, notes={"user_id": str(user["id"])})
