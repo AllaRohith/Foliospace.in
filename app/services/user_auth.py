@@ -68,22 +68,26 @@ def verify_password(plain: str, hashed: str | None) -> bool:
         return False
 
 
-def _slug_from_email(email: str, suffix: str) -> str:
+def _slug_base_from_email(email: str) -> str:
     local = email.split("@", 1)[0].lower()
     base = SLUG_RE.sub("-", local).strip("-")[:MAX_SLUG_LEN]
     if not base:
         base = "user"
+    return base
+
+
+def _slug_from_email(email: str, suffix: str) -> str:
+    base = _slug_base_from_email(email)
     return f"{base}-{suffix[:6]}"
 
 
 def _reserve_slug(cur, email: str) -> str:
-    suffix = uuid4().hex
-    candidate = _slug_from_email(email, suffix)
-    cur.execute("SELECT 1 FROM users WHERE slug = %s", (candidate,))
+    base = _slug_base_from_email(email)
+    cur.execute("SELECT 1 FROM users WHERE slug = %s", (base,))
     if cur.fetchone() is None:
-        return candidate
-    suffix2 = uuid4().hex
-    return _slug_from_email(email, suffix2)
+        return base
+    suffix = uuid4().hex
+    return f"{base}-{suffix[:6]}"
 
 
 def create_user(email: str, password: str, role: str | None = None) -> dict:
