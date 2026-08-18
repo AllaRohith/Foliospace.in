@@ -7345,6 +7345,20 @@ body.dark .auth-rule { background: var(--cream); }
 }
 body.dark .auth-sub { color: var(--fg); }
 
+.auth-trial-note {
+  font-family: 'Saira', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  background: rgba(255,107,53,0.08);
+  border: 1px solid rgba(255,107,53,0.3);
+  padding: 8px 12px;
+  border-radius: 999px;
+  display: inline-block;
+  margin: 4px 0 18px;
+}
+.auth-trial-note strong { color: var(--accent); letter-spacing: 0.06em; }
+
 .auth-err {
   font-family: 'Saira', sans-serif;
   font-size: 13.5px;

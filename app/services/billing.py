@@ -330,7 +330,12 @@ def _on_payment_captured(cur, payload: dict):
         if period_end is None:
             period_end = datetime.now(timezone.utc)
         cur.execute(
-            "UPDATE users SET plan = 'pro', plan_expires_at = %s, updated_at = NOW() WHERE id = %s",
+            "UPDATE users SET plan = 'pro', plan_expires_at = %s, "
+            "is_trial = FALSE, "
+            "trial_reminder_7d_sent_at = NULL, "
+            "trial_reminder_4d_sent_at = NULL, "
+            "trial_reminder_2d_sent_at = NULL, "
+            "updated_at = NOW() WHERE id = %s",
             (period_end, user_id),
         )
 
@@ -395,7 +400,12 @@ def _on_subscription_activated(cur, payload: dict):
     )
     if status in ("active", "authenticated", "created"):
         cur.execute(
-            "UPDATE users SET plan = 'pro', payment_failed_at = NULL, updated_at = NOW() WHERE id = %s",
+            "UPDATE users SET plan = 'pro', payment_failed_at = NULL, "
+            "is_trial = FALSE, "
+            "trial_reminder_7d_sent_at = NULL, "
+            "trial_reminder_4d_sent_at = NULL, "
+            "trial_reminder_2d_sent_at = NULL, "
+            "updated_at = NOW() WHERE id = %s",
             (user_id,),
         )
 
@@ -445,7 +455,12 @@ def _on_subscription_charged(cur, payload: dict):
         _upsert_payment_from_charge(cur, user_id, sub_id, payment_entity)
     if period_end is not None:
         cur.execute(
-            "UPDATE users SET plan = 'pro', plan_expires_at = %s, payment_failed_at = NULL, updated_at = NOW() WHERE id = %s",
+            "UPDATE users SET plan = 'pro', plan_expires_at = %s, payment_failed_at = NULL, "
+            "is_trial = FALSE, "
+            "trial_reminder_7d_sent_at = NULL, "
+            "trial_reminder_4d_sent_at = NULL, "
+            "trial_reminder_2d_sent_at = NULL, "
+            "updated_at = NOW() WHERE id = %s",
             (period_end, user_id),
         )
 
@@ -534,12 +549,22 @@ def _on_subscription_cancelled(cur, payload: dict):
     if user_id:
         if period_end and period_end > datetime.now(timezone.utc):
             cur.execute(
-                "UPDATE users SET plan = 'pro', plan_expires_at = %s, updated_at = NOW() WHERE id = %s",
+                "UPDATE users SET plan = 'pro', plan_expires_at = %s, "
+                "is_trial = FALSE, "
+                "trial_reminder_7d_sent_at = NULL, "
+                "trial_reminder_4d_sent_at = NULL, "
+                "trial_reminder_2d_sent_at = NULL, "
+                "updated_at = NOW() WHERE id = %s",
                 (period_end, user_id),
             )
         else:
             cur.execute(
-                "UPDATE users SET plan = 'free', plan_expires_at = NULL, updated_at = NOW() WHERE id = %s",
+                "UPDATE users SET plan = 'free', plan_expires_at = NULL, "
+                "is_trial = FALSE, "
+                "trial_reminder_7d_sent_at = NULL, "
+                "trial_reminder_4d_sent_at = NULL, "
+                "trial_reminder_2d_sent_at = NULL, "
+                "updated_at = NOW() WHERE id = %s",
                 (user_id,),
             )
 
@@ -557,7 +582,12 @@ def _on_subscription_completed(cur, payload: dict):
     )
     if user_id:
         cur.execute(
-            "UPDATE users SET plan = 'free', plan_expires_at = NULL, updated_at = NOW() WHERE id = %s",
+            "UPDATE users SET plan = 'free', plan_expires_at = NULL, "
+            "is_trial = FALSE, "
+            "trial_reminder_7d_sent_at = NULL, "
+            "trial_reminder_4d_sent_at = NULL, "
+            "trial_reminder_2d_sent_at = NULL, "
+            "updated_at = NOW() WHERE id = %s",
             (user_id,),
         )
 
