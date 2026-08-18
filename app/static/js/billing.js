@@ -6,17 +6,20 @@
     return meta.getAttribute('content') || '';
   }
 
-  function showError(btn, orig, msg) {
+  function resetBtn(btn, orig) {
     btn.disabled = false;
     btn.textContent = orig;
+  }
+
+  function showAlert(msg) {
     if (typeof alert !== 'undefined') alert(msg);
   }
 
   var buttons = document.querySelectorAll('[data-billing-action]');
   buttons.forEach(function (btn) {
     btn.addEventListener('click', async function () {
-      if (typeof RazorpayCheckout === 'undefined') {
-        alert('Checkout is still loading. Refresh and try again.');
+      if (typeof Razorpay === 'undefined') {
+        showAlert('Checkout is still loading. Refresh and try again.');
         return;
       }
       var kind = btn.getAttribute('data-billing-action');
@@ -56,8 +59,7 @@
           handler: function () { window.location.reload(); },
           modal: {
             ondismiss: function () {
-              btn.disabled = false;
-              btn.textContent = orig;
+              resetBtn(btn, orig);
             },
           },
         };
@@ -68,9 +70,16 @@
         } else {
           options.subscription_id = data.subscription_id;
         }
-        RazorpayCheckout.open(options, function () {});
+        var rzp = new Razorpay(options);
+        rzp.on('payment.failed', function (resp) {
+          resetBtn(btn, orig);
+          var desc = resp && resp.error && resp.error.description;
+          showAlert('Payment failed: ' + (desc || 'unknown reason'));
+        });
+        rzp.open();
       } catch (err) {
-        showError(btn, orig, 'Could not start checkout. Refresh and try again.');
+        resetBtn(btn, orig);
+        showAlert('Could not start checkout. Refresh and try again.');
       }
     });
   });
