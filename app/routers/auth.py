@@ -363,14 +363,39 @@ async def dashboard_share(request: Request):
     user = user_auth.require_user(request)
     if not user:
         return RedirectResponse("/login?next=/dashboard/share", status_code=303)
+    base_url = os.getenv("PUBLIC_BASE_URL", "https://foliospace.in").rstrip("/")
+    slug = user["slug"]
+    share_url = f"{base_url}/u/{slug}"
+    qr_url = f"{share_url}/qr.png"
+    og_image_url = f"{share_url}/og.png"
+    display_name = (user.get("display_name") or "").strip() or "Folio"
+    role = (user.get("role") or "").strip()
+    bio = (user.get("bio") or "").strip()
+    wa_text = f"Hey — my folio is on FolioSpace: {share_url}"
+    mail_subject = f"My folio: {display_name}"
+    tweet_text = wa_text
+    og_title = f"{display_name} — FolioSpace" if not role else f"{display_name} — {role}"
+    og_desc = (bio[:140] if bio else f"{display_name} on FolioSpace.")
+    og_alt = f"{display_name} — {role or 'Folio'} on FolioSpace"
     return _no_cache(templates.TemplateResponse(
         request,
         "dashboard/share.html",
         {
             "site_name": "FolioSpace",
             "page_title": "Share — FolioSpace",
-            "description": "Share your FolioSpace link.",
+            "description": "Share your FolioSpace link via QR, WhatsApp, LinkedIn, or email.",
             "user": _user_to_context(user),
+            "share_url": share_url,
+            "qr_url": qr_url,
+            "og_image_url": og_image_url,
+            "wa_text": wa_text,
+            "mail_subject": mail_subject,
+            "tweet_text": tweet_text,
+            "is_live": bool(user.get("is_public")),
+            "og_preview_title": og_title,
+            "og_preview_desc": og_desc,
+            "og_preview_alt": og_alt,
+            "og_preview_meta_url": base_url.replace("https://", ""),
             "nav_active": "share",
         },
     ))

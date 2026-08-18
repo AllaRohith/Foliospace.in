@@ -1,9 +1,93 @@
 {% extends "auth/_base.html" %}
 
 {% block dash_body %}
-<div class="stub-card">
-  <div class="stub-eyebrow">→ Coming in Phase 2.5</div>
-  <h1 class="stub-title">Share + <em>QR.</em></h1>
-  <p class="stub-sub">Shareable images, QR codes, and the WhatsApp pre-fill button arrive with the LinkedIn integration in Phase 2.5. Your public link works today at foliospace.in/u/{{ user.slug }}.</p>
+<h1 class="dash-page-title">Share <em>everywhere.</em></h1>
+<div class="dash-page-sub">One link, four ways to share.</div>
+
+{% if not is_live %}
+  <div class="share-locked">
+    <span class="share-locked-dot" aria-hidden="true"></span>
+    <span class="share-locked-text">
+      <strong>Your folio is private.</strong>
+      Toggle <em>Make my folio public</em> on
+      <a href="/dashboard/profile">/dashboard/profile</a> before sharing —
+      otherwise links and QR codes return 404.
+    </span>
+  </div>
+{% endif %}
+
+<div class="share-grid">
+  <section class="share-card share-qr-card" aria-label="QR code">
+    <div class="share-card-eyebrow">→ QR</div>
+    <div class="share-qr-frame">
+      <img class="share-qr-img" src="{{ qr_url }}" alt="QR code for your FolioSpace link" loading="lazy" />
+    </div>
+    <a class="share-qr-download" href="{{ qr_url }}" download="foliospace-{{ user.slug }}.png">
+      Download PNG →
+    </a>
+  </section>
+
+  <section class="share-card share-link-card" aria-label="Your public link">
+    <div class="share-card-eyebrow">→ Your link</div>
+    <div class="share-link-row">
+      <code class="share-link-text" id="share-url">{{ share_url }}</code>
+      <button class="share-copy-btn" type="button" data-share-copy="{{ share_url }}" aria-label="Copy link">Copy</button>
+    </div>
+    <div class="share-status" data-share-status aria-live="polite"></div>
+    <div class="share-link-meta">
+      Works as soon as you toggle <em>public</em>.
+      Friends tap once. No app required.
+    </div>
+  </section>
+
+  <section class="share-card share-social-card" aria-label="Share on social">
+    <div class="share-card-eyebrow">→ Share on</div>
+    <a class="share-action share-action-wa"
+       href="https://wa.me/?text={{ wa_text | urlencode }}"
+       target="_blank" rel="noopener">
+      <span class="share-action-name">WhatsApp</span>
+      <span class="share-action-sub">pre-filled message</span>
+      <span class="share-action-arrow" aria-hidden="true">→</span>
+    </a>
+    <a class="share-action share-action-li"
+       href="https://www.linkedin.com/sharing/share-offsite/?url={{ share_url | urlencode }}"
+       target="_blank" rel="noopener">
+      <span class="share-action-name">LinkedIn</span>
+      <span class="share-action-sub">post + link preview</span>
+      <span class="share-action-arrow" aria-hidden="true">→</span>
+    </a>
+    <a class="share-action share-action-mail"
+       href="mailto:?subject={{ mail_subject | urlencode }}&amp;body={{ wa_text | urlencode }}">
+      <span class="share-action-name">Email</span>
+      <span class="share-action-sub">opens your mail client</span>
+      <span class="share-action-arrow" aria-hidden="true">→</span>
+    </a>
+    <a class="share-action share-action-tw"
+       href="https://twitter.com/intent/tweet?text={{ tweet_text | urlencode }}&amp;url={{ share_url | urlencode }}"
+       target="_blank" rel="noopener">
+      <span class="share-action-name">X / Twitter</span>
+      <span class="share-action-sub">compose a tweet</span>
+      <span class="share-action-arrow" aria-hidden="true">→</span>
+    </a>
+  </section>
 </div>
+
+<section class="share-og" aria-label="Link preview">
+  <div class="share-card-eyebrow">→ What people see when you paste the link</div>
+  <a class="share-og-card" href="{{ share_url }}" target="_blank" rel="noopener">
+    <div class="share-og-image">
+      <img class="share-og-img" src="{{ og_image_url }}" alt="{{ og_preview_alt }}" loading="lazy" />
+    </div>
+    <div class="share-og-meta">
+      <div class="share-og-domain">{{ og_preview_meta_url }}</div>
+      <div class="share-og-title">{{ og_preview_title }}</div>
+      <div class="share-og-desc">{{ og_preview_desc }}</div>
+      <div class="share-og-url">{{ share_url }}</div>
+    </div>
+  </a>
+  <div class="share-og-hint">
+    Preview is fetched by WhatsApp, LinkedIn, X, and email clients from
+    <code>/u/{{ user.slug }}/og.png</code>. Cached for an hour after any profile save.
+  </div>
+</section>
 {% endblock %}

@@ -204,3 +204,34 @@ def render_og_image(user: dict) -> bytes | None:
     buf = io.BytesIO()
     img.save(buf, format="PNG", optimize=True)
     return buf.getvalue()
+
+
+def render_qr_png(url: str) -> bytes | None:
+    try:
+        import qrcode
+        from qrcode.image.pil import PilImage
+    except ImportError:
+        logger.warning("qrcode[pil] not installed; QR PNG skipped")
+        return None
+    if not url:
+        return None
+    try:
+        qr = qrcode.QRCode(
+            version=None,
+            error_correction=qrcode.constants.ERROR_CORRECT_M,
+            box_size=8,
+            border=2,
+        )
+        qr.add_data(url)
+        qr.make(fit=True)
+        img = qr.make_image(
+            fill_color=(15, 20, 25),
+            back_color=(250, 247, 242),
+            image_factory=PilImage,
+        )
+        buf = io.BytesIO()
+        img.save(buf, format="PNG", optimize=True)
+        return buf.getvalue()
+    except Exception as e:
+        logger.exception("render_qr_png failed: %s", e)
+        return None

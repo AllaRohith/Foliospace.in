@@ -97,3 +97,20 @@ async def public_folio_og(request: Request, slug: str):
     response.headers["Cache-Control"] = "public, max-age=3600, immutable"
     response.headers["X-Content-Type-Options"] = "nosniff"
     return response
+
+
+@router.get("/u/{slug}/qr.png")
+async def public_folio_qr(request: Request, slug: str):
+    from app.utils.text import strip_control
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug)
+    if not user or user.get("deleted_at"):
+        return RedirectResponse("/static/img/og.png", status_code=302)
+    share_url = str(request.url_for("public_folio", slug=user["slug"]))
+    png = folio_svc.render_qr_png(share_url)
+    if png is None:
+        return RedirectResponse("/static/img/og.png", status_code=302)
+    response = Response(content=png, media_type="image/png")
+    response.headers["Cache-Control"] = "public, max-age=3600, immutable"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    return response
