@@ -81,8 +81,27 @@ def _slug_from_email(email: str, suffix: str) -> str:
     return f"{base}-{suffix[:6]}"
 
 
+RESERVED_SLUGS = frozenset({
+    "admin", "login", "signup", "logout", "logout", "me",
+    "dashboard", "api", "static", "sitemap", "robots",
+    "privacy", "terms", "features", "space-community",
+    "about", "contact", "help", "claim", "forgot", "reset",
+    "favicon", "u",
+    "blog", "pricing", "teams", "changelog", "status", "app", "www",
+    "staticfiles", "feed", "rss", "manifest", "service-worker",
+    "robots.txt", "humans.txt", "security", "support",
+})
+
+
+def _slug_is_reserved(slug: str) -> bool:
+    return (slug or "").lower() in RESERVED_SLUGS
+
+
 def _reserve_slug(cur, email: str) -> str:
     base = _slug_base_from_email(email)
+    if _slug_is_reserved(base):
+        suffix = uuid4().hex
+        return f"{base}-{suffix[:6]}"
     cur.execute("SELECT 1 FROM users WHERE slug = %s", (base,))
     if cur.fetchone() is None:
         return base

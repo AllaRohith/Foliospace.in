@@ -134,7 +134,6 @@ templates.env.globals["nav_user"] = _nav_user
 app.include_router(waitlist.router)
 app.include_router(stats.router)
 app.include_router(auth.router)
-app.include_router(folio.router)
 app.include_router(admin.router)
 
 
@@ -319,7 +318,7 @@ async def sitemap():
     for slug, lastmod in public_users:
         lm = lastmod or today
         urls.append(
-            f'  <url><loc>{base}/u/{slug}</loc><lastmod>{lm}</lastmod><changefreq>weekly</changefreq><priority>0.5</priority></url>'
+            f'  <url><loc>{base}/{slug}</loc><lastmod>{lm}</lastmod><changefreq>weekly</changefreq><priority>0.5</priority></url>'
         )
     body = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -330,6 +329,10 @@ async def sitemap():
     response = PlainTextResponse(content=body, media_type="application/xml")
     response.headers["Cache-Control"] = "public, max-age=300, must-revalidate"
     return response
+
+
+from app.routers import folio as _folio_router
+app.include_router(_folio_router.router)
 
 
 if __name__ == "__main__":

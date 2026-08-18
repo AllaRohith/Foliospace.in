@@ -365,9 +365,9 @@ async def dashboard_share(request: Request):
         return RedirectResponse("/login?next=/dashboard/share", status_code=303)
     base_url = os.getenv("PUBLIC_BASE_URL", "https://foliospace.in").rstrip("/")
     slug = user["slug"]
-    share_url = f"{base_url}/u/{slug}"
-    qr_url = f"{share_url}/qr.png"
-    og_image_url = f"{share_url}/og.png"
+    share_url = f"{base_url}/{slug}"
+    qr_url = f"{base_url}/u/{slug}/qr.png"
+    og_image_url = f"{base_url}/u/{slug}/og.png"
     display_name = (user.get("display_name") or "").strip() or "Folio"
     role = (user.get("role") or "").strip()
     bio = (user.get("bio") or "").strip()

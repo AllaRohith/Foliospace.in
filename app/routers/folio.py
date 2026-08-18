@@ -33,9 +33,43 @@ def _no_cache_html(response: Response) -> Response:
 
 
 @router.get("/u/{slug}", response_class=HTMLResponse)
-async def public_folio(request: Request, slug: str):
+async def public_folio_legacy_redirect(request: Request, slug: str):
+    from app.services.user_auth import _slug_is_reserved
     from app.utils.text import strip_control
     safe_slug = strip_control((slug or "").strip())[:48]
+    if not safe_slug or _slug_is_reserved(safe_slug):
+        return _no_cache_html(templates.TemplateResponse(
+            request,
+            "folio_404.html",
+            {
+                "site_name": "FolioSpace",
+                "page_title": "Folio not found — FolioSpace",
+                "description": "This folio isn't claimed yet on FolioSpace.",
+                "slug": safe_slug,
+            },
+            status_code=404,
+        ))
+    return RedirectResponse(f"/{safe_slug}", status_code=301)
+
+
+@router.get("/{slug}", response_class=HTMLResponse)
+async def public_folio(request: Request, slug: str):
+    from app.services.user_auth import _slug_is_reserved
+    from app.utils.text import strip_control
+    safe_slug = strip_control((slug or "").strip())[:48]
+    if not safe_slug or _slug_is_reserved(safe_slug):
+        response = templates.TemplateResponse(
+            request,
+            "folio_404.html",
+            {
+                "site_name": "FolioSpace",
+                "page_title": "Folio not found — FolioSpace",
+                "description": "This folio isn't claimed yet on FolioSpace.",
+                "slug": safe_slug,
+            },
+            status_code=404,
+        )
+        return _no_cache_html(response)
     user = folio_svc.find_user_by_slug(safe_slug)
     if not user:
         response = templates.TemplateResponse(
@@ -78,6 +112,7 @@ async def public_folio(request: Request, slug: str):
             "og_image": f"/u/{user['slug']}/og.png",
             "og_image_alt": f"{display_name} — {role or 'Folio'} on FolioSpace",
             "og_title": f"{display_name} — {role}" if role else page_title,
+            "canonical": f"/{user['slug']}",
         },
     )
     return _public_cache(response)

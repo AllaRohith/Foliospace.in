@@ -58,7 +58,7 @@
     <label class="toggle-row" for="is_public">
       <span class="toggle-text">
         <span class="toggle-label">Make my folio public</span>
-        <span class="field-hint">Off by default. When off, /u/{{ user.slug }} returns 404 to anyone but you.</span>
+        <span class="field-hint">Off by default. When off, /{{ user.slug }} returns 404 to anyone but you.</span>
       </span>
       <input id="is_public" name="is_public" type="checkbox" value="1" {% if user.is_public %}checked{% endif %} />
       <span class="toggle-track" aria-hidden="true"><span class="toggle-thumb"></span></span>
