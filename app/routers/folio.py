@@ -56,6 +56,7 @@ async def public_folio_legacy_redirect(request: Request, slug: str):
 async def public_folio(request: Request, slug: str):
     from app.services.user_auth import _slug_is_reserved
     from app.utils.text import strip_control
+    from app.services import folio_views as views_svc
     safe_slug = strip_control((slug or "").strip())[:48]
     if not safe_slug or _slug_is_reserved(safe_slug):
         response = templates.TemplateResponse(
@@ -96,6 +97,16 @@ async def public_folio(request: Request, slug: str):
             status_code=410,
         )
         return _no_cache_html(response)
+    from app.services import user_auth as user_auth_svc
+    viewer = user_auth_svc.require_user(request)
+    viewer_id = str(viewer["id"]) if viewer else None
+    owner_id = str(user.get("id") or "")
+    if viewer_id != owner_id:
+        views_svc.record_view(
+            safe_slug,
+            request.client.host if request.client else "",
+            request.headers.get("user-agent", ""),
+        )
     display_name = (user.get("display_name") or user.get("slug") or "Folio").strip()
     role = (user.get("role") or "").strip()
     bio = (user.get("bio") or "").strip()

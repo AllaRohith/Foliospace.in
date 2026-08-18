@@ -219,6 +219,8 @@ async def dashboard(request: Request):
         return RedirectResponse("/login?next=/dashboard", status_code=303)
     flash = request.session.pop("flash", None)
     completion = user_auth.compute_completion(user)
+    from app.services import folio_views as views_svc
+    view_stats = views_svc.get_view_stats(user["slug"], days=30)
     return _no_cache(templates.TemplateResponse(
         request,
         "auth/dashboard.html",
@@ -229,6 +231,7 @@ async def dashboard(request: Request):
             "user": _user_to_context(user),
             "flash": flash,
             "completion": completion,
+            "view_stats": view_stats,
             "nav_active": "overview",
         },
     ))

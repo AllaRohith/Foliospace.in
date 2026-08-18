@@ -7911,6 +7911,101 @@ body.dark .dash-link { background: var(--bg-2); border-color: var(--line); }
   gap: 8px;
 }
 
+.dash-stats {
+  background: var(--cream-2);
+  border: 1px solid var(--line);
+  padding: 22px 24px 18px;
+  border-radius: var(--radius);
+  margin-bottom: 22px;
+}
+body.dark .dash-stats { background: var(--card-bg); border-color: var(--line); }
+
+.dash-stats-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.dash-stats-eyebrow {
+  font-family: 'Saira', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.dash-stats-title {
+  font-family: 'Stalinist One', 'Saira', sans-serif;
+  font-size: 22px;
+  line-height: 1.05;
+  margin: 0;
+  color: var(--ink);
+}
+.dash-stats-title em { font-style: normal; color: var(--accent); }
+
+.dash-stats-numbers {
+  display: flex;
+  gap: 28px;
+  flex-shrink: 0;
+}
+.dash-stat-block {
+  text-align: right;
+  min-width: 64px;
+}
+.dash-stat-num {
+  font-family: 'Stalinist One', 'Saira', sans-serif;
+  font-size: 32px;
+  line-height: 1;
+  color: var(--ink);
+}
+.dash-stat-label {
+  font-family: 'Saira', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.dash-stats-spark {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 72px;
+  margin-top: 22px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--line);
+}
+.dash-stat-bar {
+  flex: 1;
+  height: var(--bar-h, 0%);
+  min-height: 2px;
+  background: var(--line);
+  border-radius: 1px 1px 0 0;
+  transition: height 0.25s ease;
+}
+.dash-stat-bar.has-views { background: var(--accent); }
+.dash-stat-bar.is-today { outline: 1px solid var(--ink); outline-offset: -1px; }
+body.dark .dash-stat-bar.is-today { outline-color: var(--cream); }
+
+.dash-stats-foot {
+  font-family: 'Saira', sans-serif;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 12px;
+  line-height: 1.5;
+}
+.dash-stats-foot strong { color: var(--accent); font-weight: 700; }
+
+@media (max-width: 560px) {
+  .dash-stats-head { flex-direction: column; }
+  .dash-stats-numbers { width: 100%; justify-content: flex-start; }
+  .dash-stat-block { text-align: left; }
+}
+
 .profile-form {
   max-width: 640px;
   display: flex;

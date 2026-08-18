@@ -29,6 +29,46 @@
   {% endif %}
 </section>
 
+<section class="dash-stats" aria-label="Visit stats, last 30 days">
+  <div class="dash-stats-head">
+    <div>
+      <div class="dash-stats-eyebrow">→ Visits · last 30 days</div>
+      <h2 class="dash-stats-title">Who's been <em>looking.</em></h2>
+    </div>
+    <div class="dash-stats-numbers">
+      <div class="dash-stat-block">
+        <div class="dash-stat-num">{{ view_stats.total_views }}</div>
+        <div class="dash-stat-label">views</div>
+      </div>
+      <div class="dash-stat-block">
+        <div class="dash-stat-num">{{ view_stats.unique_visitors }}</div>
+        <div class="dash-stat-label">unique</div>
+      </div>
+    </div>
+  </div>
+
+  {% set max_views = 1 %}
+  {% for d in view_stats.daily %}
+    {% if d.views > max_views %}{% set max_views = d.views %}{% endif %}
+  {% endfor %}
+
+  <div class="dash-stats-spark" role="img" aria-label="Daily visits over the last 30 days">
+    {% for d in view_stats.daily %}
+      <div class="dash-stat-bar {{ 'is-today' if loop.last else '' }} {{ 'has-views' if d.views > 0 else '' }}"
+           style="--bar-h: {{ ((d.views * 100) / max_views)|round|int }}%"
+           title="{{ d.date }}: {{ d.views }} view{% if d.views != 1 %}s{% endif %}, {{ d.uniques }} unique"></div>
+    {% endfor %}
+  </div>
+
+  <div class="dash-stats-foot">
+    Your own visits don't count.
+    Bots and crawlers are filtered out.
+    {% if view_stats.total_views == 0 %}
+      <strong>No visits yet — share your link to get started.</strong>
+    {% endif %}
+  </div>
+</section>
+
 <div class="dash-grid">
   <div class="dash-card">
     <div class="dash-card-eyebrow">→ Profile</div>
