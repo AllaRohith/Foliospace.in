@@ -4,7 +4,7 @@
 
 <h1 class="dash-page-title">Billing + <em>receipts.</em></h1>
 <div class="dash-page-sub">
-  One fee to start, ₹99/mo after.
+  ₹149/mo via AutoPay — UPI or Card. Cancel anytime from this page.
 </div>
 
 {% if err %}
@@ -41,7 +41,7 @@
 {% elif subscription and subscription.status in ('active', 'authenticated') %}
   <div class="dash-card meter-pro-card">
     <div class="dash-card-eyebrow">→ Your plan</div>
-    <div class="dash-card-title">Pro <em>₹99/mo.</em></div>
+    <div class="dash-card-title">Pro <em>₹149/mo.</em></div>
     <div class="dash-card-row">
       <span class="dash-card-key">Status</span>
       <span class="dash-card-val">
@@ -51,10 +51,6 @@
     <div class="dash-card-row">
       <span class="dash-card-key">{% if subscription.cancel_at_period_end %}Ends{% else %}Renews{% endif %}</span>
       <span class="dash-card-val">{{ subscription.current_period_end_iso }}</span>
-    </div>
-    <div class="dash-card-row">
-      <span class="dash-card-key">Setup</span>
-      <span class="dash-card-val">{% if setup_paid %}Paid{% else %}Due with first renewal{% endif %}</span>
     </div>
     {% if not subscription.cancel_at_period_end %}
       <form method="post" action="/dashboard/billing/cancel" class="dash-card-actions">
@@ -68,26 +64,21 @@
 {% else %}
   <div class="dash-card meter-pro-card">
     <div class="dash-card-eyebrow">→ Pro</div>
-    <div class="dash-card-title">Unlock Pro <em>₹99/mo.</em></div>
+    <div class="dash-card-title">Unlock Pro <em>₹149/mo.</em></div>
     <div class="dash-card-sub">
-      Custom sections, analytics, priority support.
+      Custom sections, analytics, priority support. Cancel anytime from this page.
     </div>
     <div class="dash-card-row">
-      <span class="dash-card-key">Setup</span>
-      <span class="dash-card-val">₹177 once</span>
+      <span class="dash-card-key">Billing</span>
+      <span class="dash-card-val">₹149/mo via UPI or Card AutoPay</span>
     </div>
     <div class="dash-card-row">
-      <span class="dash-card-key">Then</span>
-      <span class="dash-card-val">₹116.82/mo via UPI AutoPay</span>
+      <span class="dash-card-key">Cancel</span>
+      <span class="dash-card-val">Anytime — access continues to period end</span>
     </div>
     <div class="dash-card-actions">
-      <button class="meter-action" type="button"
-              data-billing-action="setup" id="billing-setup-btn">
-        Pay ₹177 via UPI →
-      </button>
-      <button class="meter-cta" type="button"
-              data-billing-action="recurring" id="billing-recurring-btn">
-        Activate ₹99/mo AutoPay →
+      <button class="meter-cta" type="button" id="billing-cta">
+        Activate ₹149/mo AutoPay →
       </button>
     </div>
   </div>

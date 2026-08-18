@@ -57,16 +57,6 @@ def verify_signature(body: bytes, signature: str) -> bool:
     return hmac.compare_digest(expected, signature)
 
 
-def create_one_time_order(amount_paise: int, notes: dict, currency: str = "INR") -> dict:
-    client = _get_client()
-    return client.order.create({
-        "amount": int(amount_paise),
-        "currency": currency,
-        "payment_capture": 1,
-        "notes": notes,
-    })
-
-
 def create_customer(name: str, email: str, contact: str = "", notes: dict | None = None) -> dict:
     client = _get_client()
     payload = {"name": name[:80], "email": email[:254]}

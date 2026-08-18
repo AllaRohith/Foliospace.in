@@ -13,8 +13,7 @@ logger = logging.getLogger(__name__)
 
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
-SETUP_AMOUNT_PAISE = 17700
-RECURRING_AMOUNT_PAISE = 11682
+RECURRING_AMOUNT_PAISE = 14900
 SUBSCRIPTION_TOTAL_COUNT = 120
 
 
@@ -67,31 +66,6 @@ def _get_or_create_customer_id(user: dict) -> str:
             )
         conn.commit()
     return cust_id
-
-
-def create_one_time_order(user_id: str) -> str:
-    if not razorpay_svc.is_configured():
-        raise HTTPException(status_code=503, detail="Razorpay not configured.")
-    with _connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT id, email, slug, display_name, phone, razorpay_customer_id, deleted_at "
-                "FROM users WHERE id = %s LIMIT 1",
-                (user_id,),
-            )
-            user = cur.fetchone()
-        conn.commit()
-    if not user or user.get("deleted_at"):
-        raise HTTPException(status_code=404, detail="User not found.")
-    order = razorpay_svc.create_one_time_order(
-        amount_paise=SETUP_AMOUNT_PAISE,
-        notes={
-            "user_id": str(user["id"]),
-            "kind": "setup",
-            "slug": (user.get("slug") or "")[:48],
-        },
-    )
-    return order.get("id") or ""
 
 
 def create_subscription(user_id: str) -> str:
@@ -291,7 +265,7 @@ def _on_payment_captured(cur, payload: dict):
     status = (payment_entity.get("status") or "captured").lower()
     method = (payment_entity.get("method") or "").lower() or None
     vpa_suffix = _vpa_suffix(payment_entity.get("vpa"))
-    description = "Pro setup fee" if kind == "setup" else "Pro subscription"
+    description = "Pro subscription"
     invoice_id = payment_entity.get("invoice_id") or None
     invoice_url = None
     if invoice_id:
@@ -319,13 +293,7 @@ def _on_payment_captured(cur, payload: dict):
             json.dumps(payload, default=str)[:64000],
         ),
     )
-    if kind == "setup":
-        cur.execute(
-            "UPDATE users SET plan = 'pro', setup_paid_at = COALESCE(setup_paid_at, NOW()), updated_at = NOW() "
-            "WHERE id = %s AND setup_paid_at IS NULL",
-            (user_id,),
-        )
-    elif kind == "recurring":
+    if kind == "recurring":
         period_end_iso = (payment_entity.get("notes") or {}).get("current_period_end")
         period_end = None
         if period_end_iso:
@@ -355,7 +323,7 @@ def _on_payment_failed(cur, payload: dict):
     currency = (payment_entity.get("currency") or "INR").upper()
     method = (payment_entity.get("method") or "").lower() or None
     vpa_suffix = _vpa_suffix(payment_entity.get("vpa"))
-    description = "Pro setup fee" if kind == "setup" else "Pro subscription"
+    description = "Pro subscription"
     order_id = (payment_entity.get("order_id") or "") or None
     cur.execute(
         """

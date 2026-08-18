@@ -78,20 +78,14 @@ async def dashboard_billing(request: Request):
 
 @router.post("/dashboard/billing/subscribe")
 @limiter.limit("30/minute")
-async def billing_subscribe(request: Request, type: str = Form("")):
+async def billing_subscribe(request: Request):
     user = user_auth.require_user(request)
     if not user:
         return RedirectResponse("/login", status_code=303)
-    kind = (type or "").strip().lower()
-    if kind not in ("setup", "recurring"):
-        return RedirectResponse("/dashboard/billing?err=type", status_code=303)
     if not razorpay_svc.is_configured():
         return RedirectResponse("/dashboard/billing?err=config", status_code=303)
     try:
-        if kind == "setup":
-            order_id = await run_in_threadpool(billing_svc.create_one_time_order, str(user["id"]))
-        else:
-            sub_id = await run_in_threadpool(billing_svc.create_subscription, str(user["id"]))
+        sub_id = await run_in_threadpool(billing_svc.create_subscription, str(user["id"]))
     except HTTPException as e:
         return RedirectResponse(f"/dashboard/billing?err={'config' if e.status_code == 503 else 'server'}", status_code=303)
     except Exception as e:
@@ -101,16 +95,9 @@ async def billing_subscribe(request: Request, type: str = Form("")):
         request,
         str(user["id"]),
         "billing.checkout.created",
-        metadata={"kind": kind},
+        metadata={"kind": "recurring"},
     )
-    payload = {"kind": kind, "key": razorpay_svc.public_key()}
-    if kind == "setup":
-        payload["order_id"] = order_id
-        payload["amount"] = 17700
-        payload["currency"] = "INR"
-    else:
-        payload["subscription_id"] = sub_id
-    return JSONResponse(payload)
+    return JSONResponse({"kind": "recurring", "subscription_id": sub_id, "key": razorpay_svc.public_key()})
 
 
 @router.post("/dashboard/billing/cancel")
