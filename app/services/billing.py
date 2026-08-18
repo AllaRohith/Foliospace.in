@@ -83,7 +83,22 @@ def create_subscription(user_id: str) -> str:
     if not user or user.get("deleted_at"):
         raise HTTPException(status_code=404, detail="User not found.")
     customer_id = _get_or_create_customer_id(user)
-    logger.info("create_subscription: plan_id=%r customer_id=%r user_id=%s", razorpay_svc.plan_id(), customer_id, user_id)
+    plan_id = razorpay_svc.plan_id()
+    logger.warning("create_subscription: plan_id=%r customer_id=%r user_id=%s", plan_id, customer_id, user_id)
+    client = razorpay_svc.get_client()
+    try:
+        plan = client.plan.fetch(plan_id)
+        item = plan.get("item") or {}
+        logger.warning("PREFLIGHT_PLAN_OK id=%s period=%s interval=%s item_amount=%s active=%s notes=%s",
+                       plan.get("id"), plan.get("period"), plan.get("interval"),
+                       item.get("amount"), plan.get("active"), plan.get("notes"))
+    except Exception as e:
+        logger.warning("PREFLIGHT_PLAN_FAIL: %s: %s", type(e).__name__, e)
+    try:
+        cust = client.customer.fetch(customer_id)
+        logger.warning("PREFLIGHT_CUST_OK id=%s active=%s", cust.get("id"), cust.get("active"))
+    except Exception as e:
+        logger.warning("PREFLIGHT_CUST_FAIL: %s: %s", type(e).__name__, e)
     sub = razorpay_svc.create_subscription(
         plan_id=razorpay_svc.plan_id(),
         customer_id=customer_id,
