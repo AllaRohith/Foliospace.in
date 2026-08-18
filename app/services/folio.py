@@ -112,32 +112,11 @@ def list_public_slugs() -> list[tuple[str, str]]:
             for r in rows
         ]
     except psycopg.errors.UndefinedColumn:
-        try:
-            with _connect() as conn:
-                with conn.cursor() as cur:
-                    cur.execute(
-                        """
-                        SELECT slug, updated_at
-                          FROM users
-                         WHERE deleted_at IS NULL
-                           AND display_name IS NOT NULL
-                           AND length(trim(display_name)) > 0
-                           AND slug IS NOT NULL
-                           AND length(trim(slug)) >= %s
-                         ORDER BY created_at DESC
-                         LIMIT 5000
-                        """,
-                        (MIN_SLUG_LEN,),
-                    )
-                    rows = cur.fetchall()
-                conn.commit()
-            return [
-                (r["slug"], r["updated_at"].date().isoformat() if r.get("updated_at") else "")
-                for r in rows
-            ]
-        except psycopg.Error as e2:
-            logger.exception("list_public_slugs fallback failed: %s", e2)
-            return []
+        logger.warning(
+            "list_public_slugs: is_public column missing; returning empty "
+            "(privacy-first until migration users_private.sql is applied)"
+        )
+        return []
     except psycopg.Error as e:
         logger.exception("list_public_slugs failed: %s", e)
         return []
