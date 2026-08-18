@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block description %}{{ description }}{% endblock %}
+{% block og_image %}{{ request.url_for('static', path='img/og.png') }}?v={{ asset_v }}{% endblock %}
+{% block robots %}noindex,nofollow{% endblock %}
+
+{% block content %}
+<main id="main" class="pf-page pf-claim">
+  <article class="pf-shell pf-claim-shell">
+    <div class="pf-eyebrow">→ Folio unavailable</div>
+    <h1 class="pf-name">This folio<br/><em>is gone.</em></h1>
+    <p class="pf-claim-sub">The owner deleted it. The slug is freed; you can claim it on signup.</p>
+    <a class="pf-cta" href="/signup">Start fresh →</a>
+  </article>
+</main>
+{% endblock %}

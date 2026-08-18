@@ -8029,3 +8029,210 @@ body.dark .profile-field textarea { background: var(--bg-2); border-color: var(-
 }
 body.dark .stub-card { border-color: var(--line); }
 body.dark .stub-card .stub-sub { color: var(--ink-2); }
+
+.pf-page {
+  background: var(--cream);
+  min-height: 100vh;
+  padding: 80px 24px 64px;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--ink);
+  position: relative;
+}
+body.dark .pf-page { background: var(--bg); }
+
+.pf-grain {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255, 107, 53, 0.04), transparent 40%),
+    radial-gradient(circle at 88% 100%, rgba(255, 107, 53, 0.03), transparent 50%);
+  pointer-events: none;
+}
+
+.pf-shell {
+  max-width: 720px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.pf-hero {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  padding-bottom: 32px;
+  border-bottom: 2px solid var(--ink);
+  margin-bottom: 32px;
+}
+body.dark .pf-hero { border-bottom-color: var(--cream); }
+
+.pf-avatar-wrap { flex-shrink: 0; }
+.pf-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--cream-2);
+  object-fit: cover;
+  display: block;
+}
+.pf-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Stalinist One', sans-serif;
+  font-size: 48px;
+  color: var(--ink);
+  background: var(--cream-2);
+  border: 1px solid var(--line);
+}
+body.dark .pf-avatar-fallback {
+  background: var(--card-bg);
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+.pf-id { min-width: 0; flex: 1; }
+.pf-eyebrow {
+  font-family: 'Saira', sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.pf-name {
+  font-family: 'Stalinist One', 'Saira', sans-serif;
+  font-size: clamp(36px, 6vw, 56px);
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  margin: 0 0 8px;
+  color: var(--ink);
+  word-break: break-word;
+}
+.pf-name em { font-style: italic; color: var(--accent); }
+.pf-role {
+  font-family: 'Saira', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pf-card {
+  background: var(--cream-2);
+  border: 1px solid var(--line);
+  padding: 24px 26px;
+  border-radius: var(--radius);
+  margin-bottom: 22px;
+}
+body.dark .pf-card {
+  background: var(--card-bg);
+  border-color: var(--line);
+}
+
+.pf-card-eyebrow {
+  font-family: 'Saira', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.pf-bio {
+  font-family: 'Saira', sans-serif;
+  font-size: 17px;
+  line-height: 1.6;
+  margin: 0;
+  color: var(--ink-2);
+  white-space: pre-wrap;
+}
+
+.pf-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 14px 22px;
+  background: var(--accent);
+  color: var(--cream);
+  font-family: 'Stalinist One', sans-serif;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  border-radius: 12px;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+.pf-cta:hover {
+  background: var(--accent-2);
+  transform: translateY(-1px);
+}
+.pf-cta:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.pf-foot {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Saira', sans-serif;
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.pf-foot-claim {
+  font-family: 'Saira', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+}
+.pf-foot-claim:hover { text-decoration: underline; }
+.pf-foot-brand em {
+  font-family: 'Stalinist One', sans-serif;
+  font-style: normal;
+  color: var(--ink);
+  letter-spacing: 0;
+  text-transform: none;
+  margin-left: 6px;
+  font-size: 13px;
+}
+
+.pf-claim-shell {
+  text-align: center;
+  padding: 56px 24px;
+  max-width: 560px;
+}
+.pf-claim-sub {
+  font-family: 'Saira', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  margin: 8px 0 28px;
+  max-width: 460px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 640px) {
+  .pf-page { padding: 56px 20px 48px; }
+  .pf-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .pf-avatar { width: 96px; height: 96px; }
+  .pf-avatar-fallback { font-size: 36px; }
+  .pf-foot { flex-direction: column; align-items: flex-start; gap: 12px; }
+}

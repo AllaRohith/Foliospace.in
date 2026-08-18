@@ -18,6 +18,7 @@ from app.routers import admin
 from app.routers import auth
 from app.routers import waitlist
 from app.routers import stats
+from app.routers import folio
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -133,6 +134,7 @@ templates.env.globals["nav_user"] = _nav_user
 app.include_router(waitlist.router)
 app.include_router(stats.router)
 app.include_router(auth.router)
+app.include_router(folio.router)
 app.include_router(admin.router)
 
 
@@ -289,6 +291,8 @@ async def robots():
         "User-agent: *\n"
         "Allow: /\n"
         "Disallow: /admin/\n"
+        "Disallow: /dashboard/\n"
+        "Disallow: /api/\n"
         f"Sitemap: {base}/sitemap.xml\n"
     )
     return PlainTextResponse(content=content, media_type="text/plain")
@@ -298,17 +302,27 @@ async def robots():
 async def sitemap():
     from datetime import datetime, timezone
     from fastapi.responses import PlainTextResponse
+    from app.services import folio as folio_svc
     base = os.getenv("PUBLIC_BASE_URL", "https://foliospace.in").rstrip("/")
     today = datetime.now(timezone.utc).date().isoformat()
     legal_lastmod = "2026-08-15"
+    public_users = folio_svc.list_public_slugs()
+    urls = [
+        f'  <url><loc>{base}/</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>',
+        f'  <url><loc>{base}/privacy</loc><lastmod>{legal_lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>',
+        f'  <url><loc>{base}/terms</loc><lastmod>{legal_lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>',
+        f'  <url><loc>{base}/features</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>',
+        f'  <url><loc>{base}/space-community</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>',
+    ]
+    for slug, lastmod in public_users:
+        lm = lastmod or today
+        urls.append(
+            f'  <url><loc>{base}/u/{slug}</loc><lastmod>{lm}</lastmod><changefreq>weekly</changefreq><priority>0.5</priority></url>'
+        )
     body = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-        f'  <url><loc>{base}/</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>\n'
-        f'  <url><loc>{base}/privacy</loc><lastmod>{legal_lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>\n'
-        f'  <url><loc>{base}/terms</loc><lastmod>{legal_lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>\n'
-        f'  <url><loc>{base}/features</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>\n'
-        f'  <url><loc>{base}/space-community</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>\n'
+        + "\n".join(urls) + "\n"
         '</urlset>\n'
     )
     return PlainTextResponse(content=body, media_type="application/xml")

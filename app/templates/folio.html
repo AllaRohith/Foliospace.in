@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block description %}{{ description }}{% endblock %}
+{% block canonical %}/u/{{ user.slug }}{% endblock %}
+{% block og_title %}{{ og_title }}{% endblock %}
+{% block og_description %}{{ description }}{% endblock %}
+{% block og_image %}/u/{{ user.slug }}/og.png{% endblock %}
+{% block og_image_alt %}{{ og_image_alt }}{% endblock %}
+{% block twitter_title %}{{ og_title }}{% endblock %}
+{% block twitter_description %}{{ description }}{% endblock %}
+{% block twitter_image %}/u/{{ user.slug }}/og.png{% endblock %}
+{% block twitter_image_alt %}{{ og_image_alt }}{% endblock %}
+
+{% block jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": {{ user.display_name | tojson }},
+  "url": "{{ request.url.scheme }}://{{ request.url.host }}/u/{{ user.slug }}",
+  {% if user.role %}"jobTitle": {{ user.role | tojson }},{% endif %}
+  {% if user.bio %}"description": {{ user.bio | tojson }},{% endif %}
+  {% if user.avatar_url %}"image": {{ user.avatar_url | tojson }},{% endif %}
+  "sameAs": ["{{ request.url.scheme }}://{{ request.url.host }}/u/{{ user.slug }}"]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<main id="main" class="pf-page">
+  <div class="pf-grain" aria-hidden="true"></div>
+  <article class="pf-shell">
+    <header class="pf-hero">
+      <div class="pf-avatar-wrap">
+        {% if user.avatar_url %}
+          <img class="pf-avatar" src="{{ user.avatar_url }}" alt="" loading="lazy" referrerpolicy="no-referrer" />
+        {% else %}
+          <div class="pf-avatar pf-avatar-fallback" aria-hidden="true">{{ (user.display_name or user.slug or '?')[0] | upper }}</div>
+        {% endif %}
+      </div>
+      <div class="pf-id">
+        <div class="pf-eyebrow">→ Folio · foliospace.in/u/{{ user.slug }}</div>
+        <h1 class="pf-name">{{ user.display_name or user.slug }}</h1>
+        {% if user.role %}
+          <div class="pf-role">{{ user.role }}</div>
+        {% endif %}
+      </div>
+    </header>
+
+    {% if user.bio %}
+      <section class="pf-card">
+        <div class="pf-card-eyebrow">→ About</div>
+        <p class="pf-bio">{{ user.bio }}</p>
+      </section>
+    {% endif %}
+
+    {% if user.phone %}
+      {% set digits = user.phone | replace(' ', '') | replace('(', '') | replace(')', '') | replace('-', '') | replace('+', '') %}
+      <section class="pf-card pf-card-actions">
+        <div class="pf-card-eyebrow">→ Reach out</div>
+        <a class="pf-cta" href="https://wa.me/{{ digits }}" target="_blank" rel="noopener">Message on WhatsApp →</a>
+      </section>
+    {% endif %}
+
+    <footer class="pf-foot">
+      <a class="pf-foot-claim" href="/signup">Claim your folio →</a>
+      <span class="pf-foot-brand">FolioSpace <em>Printed on the open web.</em></span>
+    </footer>
+  </article>
+</main>
+{% endblock %}

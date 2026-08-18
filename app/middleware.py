@@ -83,9 +83,13 @@ def _security_headers(request: Request, response: Response) -> None:
     response.headers.setdefault("X-Permitted-Cross-Domain-Policies", "none")
     ctype = (response.headers.get("content-type") or "").split(";")[0].strip().lower()
     if ctype == "text/html":
-        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-        response.headers["Pragma"] = "no-cache"
-        response.headers["Expires"] = "0"
+        if request.url.path.startswith("/u/"):
+            if response.headers.get("Cache-Control") is None:
+                response.headers["Cache-Control"] = "public, max-age=300, must-revalidate"
+        else:
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
     elif request.url.path.startswith("/static/"):
         if response.headers.get("Cache-Control") is None:
             response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
