@@ -83,6 +83,7 @@ def create_subscription(user_id: str) -> str:
     if not user or user.get("deleted_at"):
         raise HTTPException(status_code=404, detail="User not found.")
     customer_id = _get_or_create_customer_id(user)
+    logger.info("create_subscription: plan_id=%r customer_id=%r user_id=%s", razorpay_svc.plan_id(), customer_id, user_id)
     sub = razorpay_svc.create_subscription(
         plan_id=razorpay_svc.plan_id(),
         customer_id=customer_id,
