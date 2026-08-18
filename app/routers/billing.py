@@ -48,6 +48,7 @@ def _user_to_context(user) -> dict:
         "payment_failed_at": user.get("payment_failed_at"),
         "setup_paid_at": user.get("setup_paid_at"),
         "is_trial": bool(user.get("is_trial")),
+        "is_internal": bool(user.get("is_internal")),
     }
 
 

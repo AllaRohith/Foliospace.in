@@ -629,6 +629,8 @@ def trial_days_left(user: dict) -> int:
 
 
 def enforce_plan_grace(user_id: str, user: dict) -> dict:
+    if user.get("is_internal"):
+        return user
     if user.get("plan") != "pro":
         return user
     expires_at = user.get("plan_expires_at")

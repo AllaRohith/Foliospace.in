@@ -7,7 +7,8 @@ ALTER TABLE users
     ADD COLUMN IF NOT EXISTS is_trial                 BOOLEAN     NOT NULL DEFAULT FALSE,
     ADD COLUMN IF NOT EXISTS trial_reminder_7d_sent_at TIMESTAMPTZ,
     ADD COLUMN IF NOT EXISTS trial_reminder_4d_sent_at TIMESTAMPTZ,
-    ADD COLUMN IF NOT EXISTS trial_reminder_2d_sent_at TIMESTAMPTZ;
+    ADD COLUMN IF NOT EXISTS trial_reminder_2d_sent_at TIMESTAMPTZ,
+    ADD COLUMN IF NOT EXISTS is_internal              BOOLEAN     NOT NULL DEFAULT FALSE;
 
 DO $$
 BEGIN
@@ -19,6 +20,18 @@ BEGIN
             CHECK (plan IN ('free', 'pro'));
     END IF;
 END $$;
+
+UPDATE users
+   SET is_internal = TRUE,
+       plan = 'pro',
+       plan_expires_at = NULL,
+       is_trial = FALSE,
+       payment_failed_at = NULL,
+       trial_reminder_7d_sent_at = NULL,
+       trial_reminder_4d_sent_at = NULL,
+       trial_reminder_2d_sent_at = NULL,
+       updated_at = NOW()
+ WHERE email = 'allarohithnaidu@gmail.com';
 
 DO $$
 BEGIN

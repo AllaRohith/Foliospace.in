@@ -172,7 +172,8 @@ def find_user_by_email(email: str) -> dict | None:
                            email_verified, created_at, updated_at, last_login_at,
                            claimed_at, claim_token, claim_expires_at, deleted_at,
                            plan, plan_expires_at, payment_failed_at, razorpay_customer_id,
-                           is_trial, trial_reminder_7d_sent_at, trial_reminder_4d_sent_at, trial_reminder_2d_sent_at
+                           is_trial, trial_reminder_7d_sent_at, trial_reminder_4d_sent_at, trial_reminder_2d_sent_at,
+                           is_internal
                       FROM users
                      WHERE email = %s
                     """,
@@ -200,7 +201,8 @@ def find_user_by_id(user_id: str | UUID) -> dict | None:
                            email_verified, created_at, updated_at, last_login_at,
                            claimed_at, claim_token, claim_expires_at, deleted_at,
                            plan, plan_expires_at, payment_failed_at, razorpay_customer_id,
-                           is_trial, trial_reminder_7d_sent_at, trial_reminder_4d_sent_at, trial_reminder_2d_sent_at
+                           is_trial, trial_reminder_7d_sent_at, trial_reminder_4d_sent_at, trial_reminder_2d_sent_at,
+                           is_internal
                       FROM users
                      WHERE id = %s
                     """,
