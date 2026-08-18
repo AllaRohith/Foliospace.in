@@ -229,6 +229,7 @@ async def dashboard(request: Request, background_tasks: BackgroundTasks):
     view_stats = views_svc.get_view_stats(user["slug"], days=30)
     grace_days_left = billing_svc.grace_days_left(user)
     trial_days_left = billing_svc.trial_days_left(user)
+    subscription = billing_svc.current_subscription(str(user["id"]))
     if user.get("is_trial"):
         background_tasks.add_task(
             billing_svc.maybe_send_trial_reminders,
@@ -248,6 +249,7 @@ async def dashboard(request: Request, background_tasks: BackgroundTasks):
             "view_stats": view_stats,
             "grace_days_left": grace_days_left,
             "trial_days_left": trial_days_left,
+            "subscription": subscription,
             "nav_active": "overview",
         },
     ))
