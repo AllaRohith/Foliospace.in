@@ -217,6 +217,15 @@ def _user_to_context(user) -> dict:
     }
 
 
+def _plan_card_context(user) -> dict:
+    from app.services import billing as billing_svc
+    return {
+        "trial_days_left": billing_svc.trial_days_left(user),
+        "grace_days_left": billing_svc.grace_days_left(user),
+        "subscription": billing_svc.current_subscription(str(user["id"])),
+    }
+
+
 @router.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request, background_tasks: BackgroundTasks):
     user = user_auth.require_user(request)
@@ -227,15 +236,13 @@ async def dashboard(request: Request, background_tasks: BackgroundTasks):
     from app.services import folio_views as views_svc
     from app.services import billing as billing_svc
     view_stats = views_svc.get_view_stats(user["slug"], days=30)
-    grace_days_left = billing_svc.grace_days_left(user)
-    trial_days_left = billing_svc.trial_days_left(user)
-    subscription = billing_svc.current_subscription(str(user["id"]))
     if user.get("is_trial"):
         background_tasks.add_task(
             billing_svc.maybe_send_trial_reminders,
             str(user["id"]),
             user,
         )
+    ctx = _plan_card_context(user)
     return _no_cache(templates.TemplateResponse(
         request,
         "auth/dashboard.html",
@@ -247,9 +254,9 @@ async def dashboard(request: Request, background_tasks: BackgroundTasks):
             "flash": flash,
             "completion": completion,
             "view_stats": view_stats,
-            "grace_days_left": grace_days_left,
-            "trial_days_left": trial_days_left,
-            "subscription": subscription,
+            "grace_days_left": ctx["grace_days_left"],
+            "trial_days_left": ctx["trial_days_left"],
+            "subscription": ctx["subscription"],
             "nav_active": "overview",
         },
     ))
@@ -260,7 +267,7 @@ async def profile_form(request: Request):
     user = user_auth.require_user(request)
     if not user:
         return RedirectResponse("/login?next=/dashboard/profile", status_code=303)
-    from app.services import billing as billing_svc
+    ctx = _plan_card_context(user)
     return _no_cache(templates.TemplateResponse(
         request,
         "auth/profile.html",
@@ -271,8 +278,9 @@ async def profile_form(request: Request):
             "user": _user_to_context(user),
             "err": _sanitize(request.query_params.get("err", ""))[:120],
             "saved": request.query_params.get("saved") == "1",
-            "trial_days_left": billing_svc.trial_days_left(user),
-            "grace_days_left": billing_svc.grace_days_left(user),
+            "trial_days_left": ctx["trial_days_left"],
+            "grace_days_left": ctx["grace_days_left"],
+            "subscription": ctx["subscription"],
             "nav_active": "profile",
         },
     ))
@@ -333,6 +341,7 @@ async def dashboard_portfolio(request: Request):
     user = user_auth.require_user(request)
     if not user:
         return RedirectResponse("/login?next=/dashboard/portfolio", status_code=303)
+    ctx = _plan_card_context(user)
     return _no_cache(templates.TemplateResponse(
         request,
         "dashboard/portfolio.html",
@@ -341,6 +350,9 @@ async def dashboard_portfolio(request: Request):
             "page_title": "Portfolio — FolioSpace",
             "description": "Your FolioSpace portfolio editor.",
             "user": _user_to_context(user),
+            "trial_days_left": ctx["trial_days_left"],
+            "grace_days_left": ctx["grace_days_left"],
+            "subscription": ctx["subscription"],
             "nav_active": "portfolio",
         },
     ))
@@ -351,6 +363,7 @@ async def dashboard_integrations(request: Request):
     user = user_auth.require_user(request)
     if not user:
         return RedirectResponse("/login?next=/dashboard/integrations", status_code=303)
+    ctx = _plan_card_context(user)
     return _no_cache(templates.TemplateResponse(
         request,
         "dashboard/integrations.html",
@@ -359,6 +372,9 @@ async def dashboard_integrations(request: Request):
             "page_title": "Integrations — FolioSpace",
             "description": "Connect GitHub and LinkedIn to FolioSpace.",
             "user": _user_to_context(user),
+            "trial_days_left": ctx["trial_days_left"],
+            "grace_days_left": ctx["grace_days_left"],
+            "subscription": ctx["subscription"],
             "nav_active": "integrations",
         },
     ))
@@ -383,6 +399,7 @@ async def dashboard_share(request: Request):
     og_title = f"{display_name} — FolioSpace" if not role else f"{display_name} — {role}"
     og_desc = (bio[:140] if bio else f"{display_name} on FolioSpace.")
     og_alt = f"{display_name} — {role or 'Folio'} on FolioSpace"
+    ctx = _plan_card_context(user)
     return _no_cache(templates.TemplateResponse(
         request,
         "dashboard/share.html",
@@ -402,6 +419,9 @@ async def dashboard_share(request: Request):
             "og_preview_desc": og_desc,
             "og_preview_alt": og_alt,
             "og_preview_meta_url": base_url.replace("https://", ""),
+            "trial_days_left": ctx["trial_days_left"],
+            "grace_days_left": ctx["grace_days_left"],
+            "subscription": ctx["subscription"],
             "nav_active": "share",
         },
     ))
