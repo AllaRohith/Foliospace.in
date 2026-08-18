@@ -295,7 +295,9 @@ async def robots():
         "Disallow: /api/\n"
         f"Sitemap: {base}/sitemap.xml\n"
     )
-    return PlainTextResponse(content=content, media_type="text/plain")
+    response = PlainTextResponse(content=content, media_type="text/plain")
+    response.headers["Cache-Control"] = "public, max-age=3600, must-revalidate"
+    return response
 
 
 @app.get("/sitemap.xml")
@@ -325,7 +327,9 @@ async def sitemap():
         + "\n".join(urls) + "\n"
         '</urlset>\n'
     )
-    return PlainTextResponse(content=body, media_type="application/xml")
+    response = PlainTextResponse(content=body, media_type="application/xml")
+    response.headers["Cache-Control"] = "public, max-age=300, must-revalidate"
+    return response
 
 
 if __name__ == "__main__":
