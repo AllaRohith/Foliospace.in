@@ -18,6 +18,17 @@
   <div class="dash-side-foot">
     <div class="foot-avatar">{{ (user.display_name or user.email)[0] | upper }}</div>
     <div class="foot-meta">
+      {% if user.is_internal %}
+        <span class="foot-plan-pill foot-plan-pill-internal">✓ Unlimited</span>
+      {% elif user.is_trial and trial_days_left is defined and trial_days_left > 0 %}
+        <span class="foot-plan-pill foot-plan-pill-trial">⚡ Trial · {{ trial_days_left }} day{{ '' if trial_days_left == 1 else 's' }}</span>
+      {% elif user.payment_failed_at and grace_days_left %}
+        <span class="foot-plan-pill foot-plan-pill-grace">⚠ Pro · {{ grace_days_left }} day{{ '' if grace_days_left == 1 else 's' }} left</span>
+      {% elif user.plan == 'pro' %}
+        <span class="foot-plan-pill foot-plan-pill-pro">Pro · Active</span>
+      {% else %}
+        <span class="foot-plan-pill foot-plan-pill-free">Free</span>
+      {% endif %}
       <div class="foot-name">{{ user.display_name or user.email.split('@')[0] }}</div>
       <div class="foot-email">{{ user.email }}</div>
     </div>

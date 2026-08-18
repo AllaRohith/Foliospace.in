@@ -260,6 +260,7 @@ async def profile_form(request: Request):
     user = user_auth.require_user(request)
     if not user:
         return RedirectResponse("/login?next=/dashboard/profile", status_code=303)
+    from app.services import billing as billing_svc
     return _no_cache(templates.TemplateResponse(
         request,
         "auth/profile.html",
@@ -270,6 +271,8 @@ async def profile_form(request: Request):
             "user": _user_to_context(user),
             "err": _sanitize(request.query_params.get("err", ""))[:120],
             "saved": request.query_params.get("saved") == "1",
+            "trial_days_left": billing_svc.trial_days_left(user),
+            "grace_days_left": billing_svc.grace_days_left(user),
             "nav_active": "profile",
         },
     ))

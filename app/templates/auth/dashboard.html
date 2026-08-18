@@ -85,61 +85,6 @@
   </div>
 </section>
 
-<div class="dash-card meter-pro-card" {% if user.is_internal %}style="border: 1px solid #4a9d6f; background: rgba(74,157,111,0.06);"{% endif %}>
-  <div class="dash-card-eyebrow" {% if user.is_internal %}style="color: #4a9d6f;"{% endif %}>
-    {% if user.is_internal %}✓ Plan
-    {% else %}→ Plan{% endif %}
-  </div>
-  <h2 class="dash-card-title">
-    {% if user.is_internal %}Unlimited <em>access.</em>
-    {% elif user.is_trial %}Pro <em>trial.</em>
-    {% elif user.payment_failed_at %}Pro <em>paused.</em>
-    {% elif user.plan == 'pro' %}Pro <em>active.</em>
-    {% else %}You're on <em>Free.</em>{% endif %}
-  </h2>
-  <div class="dash-card-row">
-    <span class="dash-card-key">Tier</span>
-    <span class="dash-card-val">
-      {% if user.is_internal %}Internal (founder)
-      {% elif user.is_trial %}Trial
-      {% elif user.payment_failed_at %}Pro — grace
-      {% elif user.plan == 'pro' %}Pro
-      {% else %}Free{% endif %}
-    </span>
-  </div>
-  {% if user.is_trial and trial_days_left is defined and trial_days_left > 0 %}
-    <div class="dash-card-row">
-      <span class="dash-card-key">Days left</span>
-      <span class="dash-card-val">{{ trial_days_left }} day{{ '' if trial_days_left == 1 else 's' }}</span>
-    </div>
-    {% if user.plan_expires_at %}
-      <div class="dash-card-row">
-        <span class="dash-card-key">Trial ends</span>
-        <span class="dash-card-val">{{ user.plan_expires_at.strftime('%Y-%m-%d %H:%M UTC') if user.plan_expires_at else '—' }}</span>
-      </div>
-    {% endif %}
-  {% endif %}
-  {% if user.payment_failed_at and grace_days_left %}
-    <div class="dash-card-row">
-      <span class="dash-card-key">Grace left</span>
-      <span class="dash-card-val">{{ grace_days_left }} day{{ '' if grace_days_left == 1 else 's' }}</span>
-    </div>
-  {% endif %}
-  {% if user.plan == 'pro' and not user.payment_failed_at and subscription and subscription.current_period_end_iso %}
-    <div class="dash-card-row">
-      <span class="dash-card-key">{% if subscription.cancel_at_period_end %}Ends{% else %}Renews{% endif %}</span>
-      <span class="dash-card-val">{{ subscription.current_period_end_iso }}</span>
-    </div>
-  {% endif %}
-  <a class="dash-card-cta" href="/dashboard/billing">
-    {% if user.is_internal %}View billing →
-    {% elif user.is_trial %}Activate Pro →
-    {% elif user.payment_failed_at %}Update payment →
-    {% elif user.plan == 'pro' %}Manage billing →
-    {% else %}Upgrade to Pro →{% endif %}
-  </a>
-</div>
-
 <div class="dash-grid">
   <div class="dash-card">
     <div class="dash-card-eyebrow">→ Profile</div>
