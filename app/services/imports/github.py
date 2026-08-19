@@ -189,33 +189,56 @@ def sync_contributions(user_id: str) -> dict:
     username = get_username(user_id)
     if not username:
         return {"ok": False, "reason": "no-username", "count": 0}
+    token = get_token_for(user_id)
+    if not token:
+        return {"ok": False, "reason": "no-token", "count": 0}
     safe_user = urllib.parse.quote(username, safe="@-._")
-    data = _http_get_json(f"{CONTRIB_API}/{safe_user}")
-    if not isinstance(data, dict):
-        return {"ok": False, "reason": "fetch-failed", "count": 0}
-    contribs = data.get("contributions") or []
-    if not isinstance(contribs, list):
-        return {"ok": False, "reason": "bad-shape", "count": 0}
+    days_map: dict = {}
+    pages = 0
+    while pages < 5:
+        url = f"{GITHUB_API}/users/{safe_user}/events/public?per_page=100"
+        if pages > 0:
+            url += f"&page={pages + 1}"
+        data = _http_get_bearer(url, token)
+        if not isinstance(data, list):
+            logger.warning("github events: page %d non-list response", pages + 1)
+            break
+        logger.warning("github events: page %d returned %d events", pages + 1, len(data))
+        for ev in data:
+            if not isinstance(ev, dict):
+                continue
+            if ev.get("type") != "PushEvent":
+                continue
+            created = ev.get("created_at")
+            if not created:
+                continue
+            try:
+                d = datetime.fromisoformat(str(created).replace("Z", "+00:00")).date()
+            except (ValueError, TypeError):
+                continue
+            payload = ev.get("payload") or {}
+            if not isinstance(payload, dict):
+                continue
+            commits = payload.get("commits") or []
+            if not isinstance(commits, list):
+                continue
+            days_map[d] = days_map.get(d, 0) + len(commits)
+        if len(data) < 100:
+            break
+        pages += 1
     rows = []
-    for c in contribs:
-        if not isinstance(c, dict):
-            continue
-        dstr = (c.get("date") or "").strip()
-        if not dstr:
-            continue
-        try:
-            d = datetime.strptime(dstr, "%Y-%m-%d").date()
-        except ValueError:
-            continue
-        try:
-            count = int(c.get("count") or 0)
-        except (TypeError, ValueError):
-            count = 0
-        try:
-            level = int(c.get("level") or 0)
-        except (TypeError, ValueError):
+    for d, count in days_map.items():
+        if count <= 0:
             level = 0
-        rows.append((user_id, d, count, max(0, min(4, level))))
+        elif count < 4:
+            level = 1
+        elif count < 7:
+            level = 2
+        elif count < 10:
+            level = 3
+        else:
+            level = 4
+        rows.append((user_id, d, count, level))
     if not rows:
         return {"ok": True, "count": 0}
     from app.services.user_auth import _connect
