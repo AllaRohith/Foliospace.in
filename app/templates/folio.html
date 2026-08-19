@@ -156,10 +156,67 @@
           {% if li.locale %}<span class="pf-li-pill">{{ li.locale }}</span>{% endif %}
           {% if li.zoneinfo %}<span class="pf-li-pill">{{ li.zoneinfo }}</span>{% endif %}
         </div>
-        {% if li.unavailable_fields %}
-          <p class="pf-li-note">Experiences, education &amp; location need LinkedIn Marketing API access (in review).</p>
-        {% endif %}
       </section>
+    {% endif %}
+
+    {% set mk = integrations.marketing.payload if (integrations and integrations.marketing) else {} %}
+    {% if mk %}
+      {% if mk.positions %}
+        <section class="pf-card pf-card-experience" aria-label="Experience">
+          <div class="pf-card-eyebrow">→ Experience</div>
+          <ul class="pf-exp-list">
+            {% for p in mk.positions %}
+              {% set start = p.startDate %}
+              {% set end = p.endDate %}
+              {% set range = '' %}
+              {% if start %}{% set range = (start.year if start and start.year else '') %}{% endif %}
+              {% if end %}
+                {% set range = range + '–' + (end.year if end and end.year else 'Present') %}
+              {% elif start %}
+                {% set range = range + '–Present' %}
+              {% endif %}
+              <li class="pf-exp-row">
+                <div class="pf-exp-main">
+                  <div class="pf-exp-title">{{ p.title or 'Role' }}</div>
+                  <div class="pf-exp-org">{{ p.companyName or '' }}{% if p.location %}<span class="pf-exp-loc"> · {{ p.location }}</span>{% endif %}</div>
+                </div>
+                {% if range %}<div class="pf-exp-when">{{ range }}</div>{% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+
+      {% if mk.educations %}
+        <section class="pf-card pf-card-education" aria-label="Education">
+          <div class="pf-card-eyebrow">→ Education</div>
+          <ul class="pf-edu-list">
+            {% for e in mk.educations %}
+              {% set ey = e.endDate.year if e.endDate and e.endDate.year else '' %}
+              {% set sy = e.startDate.year if e.startDate and e.startDate.year else '' %}
+              {% set eyr = (sy + '–' + ey) if (sy and ey) else (sy + '–Present' if sy else '') %}
+              <li class="pf-edu-row">
+                <div class="pf-edu-main">
+                  <div class="pf-edu-school">{{ e.schoolName or 'School' }}</div>
+                  {% if e.degree or e.fieldOfStudy %}<div class="pf-edu-deg">{{ e.degree or '' }}{% if e.degree and e.fieldOfStudy %} · {% endif %}{{ e.fieldOfStudy or '' }}</div>{% endif %}
+                </div>
+                {% if eyr %}<div class="pf-edu-when">{{ eyr }}</div>{% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+
+      {% if mk.location %}
+        {% set loc = mk.location %}
+        {% set loc_text = (loc.countryCode or '') + (' · ' + loc.region if loc.region and loc.region != (loc.countryCode or '') else '') %}
+        {% if loc_text %}
+          <section class="pf-card pf-card-location" aria-label="Location">
+            <div class="pf-card-eyebrow">→ Based in</div>
+            <div class="pf-loc-text">{{ loc_text }}</div>
+          </section>
+        {% endif %}
+      {% endif %}
     {% endif %}
 
     {% if is_pro %}

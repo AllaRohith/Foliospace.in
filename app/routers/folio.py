@@ -212,6 +212,9 @@ async def owner_folio_manage(request: Request, slug: str):
     from app.services.imports import public_render as imports_svc
     imports_state = imports_svc.get_manage_state(str(viewer["id"]))
     imports_configured = imports_svc.server_configured()
+    manage_repos = imports_svc.get_manage_repos(str(viewer["id"]))
+    from app.services.imports import linkedin_marketing as li_marketing
+    marketing_status = li_marketing.get_status()
     repo_sort = (user.get("repo_sort") or "stars").lower() if isinstance(user.get("repo_sort"), str) else "stars"
     if repo_sort not in ("stars", "recent", "updated"):
         repo_sort = "stars"
@@ -253,6 +256,8 @@ async def owner_folio_manage(request: Request, slug: str):
             "imports_state": imports_state,
             "imports_configured": imports_configured,
             "repo_sort": repo_sort,
+            "manage_repos": manage_repos,
+            "marketing_status": marketing_status,
         },
     )
     return _no_cache_html(response)
@@ -512,6 +517,46 @@ async def owner_repo_sort(request: Request, slug: str, repo_sort: str = Form("")
         return RedirectResponse(f"/{safe_slug}/manage?err=repo-sort", status_code=303)
     user_auth_svc.audit_user(request, str(viewer["id"]), "import.repo_sort.update", target=(repo_sort or "").strip().lower()[:16])
     return RedirectResponse(f"/{safe_slug}/manage?saved=repo-sort", status_code=303)
+
+
+@router.post("/{slug}/manage/imports/repos/feature")
+@limiter.limit("30/minute")
+async def owner_repos_feature(request: Request, slug: str):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    from app.services.imports import public_render as imports_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return RedirectResponse("/", status_code=303)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return RedirectResponse(f"/login?next=/{safe_slug}/manage", status_code=303)
+    raw_values: list[str] = []
+    try:
+        raw = await request.body()
+        if raw:
+            from urllib.parse import parse_qs
+            parsed = parse_qs(raw.decode("utf-8"), keep_blank_values=True)
+            raw_values = parsed.get("repo_ids", []) or []
+    except Exception:
+        raw_values = []
+    featured_ids = set()
+    for val in raw_values:
+        for chunk in val.split(","):
+            chunk = chunk.strip()
+            if chunk.isdigit():
+                featured_ids.add(int(chunk))
+    result = imports_svc.set_featured_repos(str(viewer["id"]), featured_ids)
+    if not result.get("ok"):
+        return RedirectResponse(f"/{safe_slug}/manage?err=feature", status_code=303)
+    user_auth_svc.audit_user(
+        request,
+        str(viewer["id"]),
+        "import.repos.feature.update",
+        metadata={"count": len(featured_ids)},
+    )
+    return RedirectResponse(f"/{safe_slug}/manage?saved=featured&count={len(featured_ids)}", status_code=303)
 
 
 @router.get("/u/{slug}/og.png")

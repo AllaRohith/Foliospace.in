@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS imported_repos (
     stargazers_count INTEGER     NOT NULL DEFAULT 0,
     fork             BOOLEAN     NOT NULL DEFAULT FALSE,
     is_pinned        BOOLEAN     NOT NULL DEFAULT FALSE,
+    private          BOOLEAN     NOT NULL DEFAULT FALSE,
+    featured         BOOLEAN     NOT NULL DEFAULT FALSE,
     pushed_at        TIMESTAMPTZ,
     fetched_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (user_id, repo_id)
@@ -26,6 +28,9 @@ CREATE TABLE IF NOT EXISTS imported_repos (
 
 CREATE INDEX IF NOT EXISTS imported_repos_user_idx
     ON imported_repos (user_id);
+
+CREATE INDEX IF NOT EXISTS imported_repos_featured_idx
+    ON imported_repos (user_id, featured);
 
 CREATE TABLE IF NOT EXISTS imported_contributions (
     user_id    UUID    NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -36,6 +41,14 @@ CREATE TABLE IF NOT EXISTS imported_contributions (
 );
 
 CREATE TABLE IF NOT EXISTS imported_profile (
+    user_id    UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    provider   TEXT        NOT NULL,
+    payload    JSONB       NOT NULL,
+    fetched_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, provider)
+);
+
+CREATE TABLE IF NOT EXISTS imported_marketing (
     user_id    UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     provider   TEXT        NOT NULL,
     payload    JSONB       NOT NULL,

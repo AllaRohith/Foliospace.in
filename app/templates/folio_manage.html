@@ -332,7 +332,45 @@
               <div class="fm-import-err">Unknown sort.</div>
             {% endif %}
           </section>
-        </aside>
+
+          <section class="fm-card fm-card-featured" aria-label="Feature repos on your folio">
+            <div class="fm-card-eyebrow">→ Feature repos</div>
+            {% if not manage_repos %}
+              <div class="fm-featured-empty">No repos yet. Click Refresh on GitHub above.</div>
+            {% else %}
+              <div class="fm-featured-hint">Check the ones you want to pin to the top of your folio. Private repos stay hidden from visitors even if checked.</div>
+              <form method="post" action="/{{ user.slug }}/manage/imports/repos/feature" class="fm-featured-form">
+                <div class="fm-featured-list">
+                  {% for r in manage_repos %}
+                    <label class="fm-featured-row {% if r.featured %}is-featured{% endif %}">
+                      <input type="checkbox" name="repo_ids" value="{{ r.repo_id }}" class="fm-featured-check" {% if r.featured %}checked{% endif %} />
+                      <span class="fm-featured-body">
+                        <span class="fm-featured-name">{{ r.full_name }}</span>
+                        {% if r.language %}<span class="fm-featured-lang">{{ r.language }}</span>{% endif %}
+                        <span class="fm-featured-stars">★ {{ r.stargazers_count }}</span>
+                        {% if r.private %}<span class="fm-featured-private">Private</span>{% endif %}
+                      </span>
+                    </label>
+                  {% endfor %}
+                </div>
+                <button type="submit" class="fm-featured-save">Save featured</button>
+              </form>
+              {% if err == 'feature' %}
+                <div class="fm-import-err">Couldn't update featured. Try again.</div>
+              {% elif saved_kind == 'featured' %}
+                <div class="fm-import-ok">Featured updated.</div>
+              {% endif %}
+            {% endif %}
+          </section>
+
+          <section class="fm-card fm-card-marketing" aria-label="LinkedIn Marketing API">
+            <div class="fm-card-eyebrow">→ LinkedIn Marketing API</div>
+            {% if marketing_status.configured %}
+              <div class="fm-marketing-state">Configured · awaiting API access grant from LinkedIn.</div>
+            {% else %}
+              <div class="fm-marketing-state">Experiences, education & location. Currently waiting on LinkedIn Marketing API access. Set <code>LINKEDIN_MARKETING_CLIENT_ID</code> + <code>LINKEDIN_MARKETING_CLIENT_SECRET</code> on Render to enable once approved.</div>
+            {% endif %}
+          </section>
       </div>
     </main>
   </div>

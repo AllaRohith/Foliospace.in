@@ -80,8 +80,25 @@ _REPO_SORTS = {
 }
 
 
+def _repo_dict(r: dict) -> dict:
+    return {
+        "repo_id": r.get("repo_id"),
+        "name": (r.get("name") or "").strip(),
+        "full_name": (r.get("full_name") or "").strip(),
+        "html_url": (r.get("html_url") or "").strip(),
+        "description": (r.get("description") or "").strip() or None,
+        "language": (r.get("language") or "").strip() or None,
+        "stargazers_count": int(r.get("stargazers_count") or 0),
+        "fork": bool(r.get("fork")),
+        "is_pinned": bool(r.get("is_pinned")),
+        "private": bool(r.get("private")),
+        "featured": bool(r.get("featured")),
+        "pushed_at": r.get("pushed_at").isoformat() if r.get("pushed_at") else None,
+    }
+
+
 def get_public_sections(user_id: str) -> dict:
-    out = {"repos": [], "contributions": [], "contributions_total": 0, "profile": None, "month_labels": [], "day_labels": ["Mon", "Wed", "Fri"]}
+    out = {"repos": [], "contributions": [], "contributions_total": 0, "profile": None, "marketing": None, "month_labels": [], "day_labels": ["Mon", "Wed", "Fri"]}
     from app.services.user_auth import _connect
     with _connect() as conn:
         with conn.cursor() as cur:
@@ -92,27 +109,18 @@ def get_public_sections(user_id: str) -> dict:
             cur.execute(
                 f"""
                 SELECT repo_id, name, full_name, html_url, description,
-                       language, stargazers_count, fork, is_pinned,
+                       language, stargazers_count, fork, is_pinned, private, featured,
                        COALESCE(pushed_at, fetched_at) AS pushed_at
                 FROM imported_repos
-                WHERE user_id = %s
-                ORDER BY {order_clause}
+                WHERE user_id = %s AND private = FALSE
+                ORDER BY featured DESC, {order_clause}
                 LIMIT 6
                 """,
                 (user_id,),
             )
-            for r in cur.fetchall() or []:
-                out["repos"].append({
-                    "repo_id": r.get("repo_id"),
-                    "name": (r.get("name") or "").strip(),
-                    "full_name": (r.get("full_name") or "").strip(),
-                    "html_url": (r.get("html_url") or "").strip(),
-                    "description": (r.get("description") or "").strip() or None,
-                    "language": (r.get("language") or "").strip() or None,
-                    "stargazers_count": int(r.get("stargazers_count") or 0),
-                    "fork": bool(r.get("fork")),
-                    "is_pinned": bool(r.get("is_pinned")),
-                })
+            rows = cur.fetchall() or []
+            for r in rows:
+                out["repos"].append(_repo_dict(r))
             cur.execute(
                 """
                 SELECT day, count, level FROM imported_contributions
@@ -191,7 +199,68 @@ def get_public_sections(user_id: str) -> dict:
             "fetched_at": prow.get("fetched_at").isoformat() if prow.get("fetched_at") else None,
         }
         break
+    cur.execute(
+        """
+        SELECT provider, payload, fetched_at FROM imported_marketing
+        WHERE user_id = %s
+        """,
+        (user_id,),
+    )
+    marketing_rows = cur.fetchall() or []
+    for mrow in marketing_rows:
+        pid = (mrow.get("provider") or "").strip().lower()
+        payload = mrow.get("payload") or {}
+        if isinstance(payload, str):
+            try:
+                import json as _json
+                payload = _json.loads(payload)
+            except Exception:
+                payload = {}
+        out["marketing"] = {
+            "provider": pid,
+            "payload": payload,
+            "fetched_at": mrow.get("fetched_at").isoformat() if mrow.get("fetched_at") else None,
+        }
+        break
     return out
+
+
+def get_manage_repos(user_id: str) -> list[dict]:
+    from app.services.user_auth import _connect
+    with _connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT repo_sort FROM users WHERE id = %s", (user_id,))
+            sort_row = cur.fetchone()
+            sort_key = (sort_row.get("repo_sort") if sort_row else None) or "stars"
+            order_clause = _REPO_SORTS.get(sort_key, _REPO_SORTS["stars"])
+            cur.execute(
+                f"""
+                SELECT repo_id, name, full_name, html_url, description,
+                       language, stargazers_count, fork, is_pinned, private, featured,
+                       COALESCE(pushed_at, fetched_at) AS pushed_at
+                FROM imported_repos
+                WHERE user_id = %s
+                ORDER BY featured DESC, {order_clause}
+                """,
+                (user_id,),
+            )
+            rows = cur.fetchall() or []
+    return [_repo_dict(r) for r in rows]
+
+
+def set_featured_repos(user_id: str, featured_ids: set[int]) -> dict:
+    from app.services.user_auth import _connect
+    featured_ids = {int(x) for x in featured_ids if x is not None}
+    with _connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE imported_repos SET featured = FALSE WHERE user_id = %s", (user_id,))
+            if featured_ids:
+                cur.execute(
+                    "UPDATE imported_repos SET featured = TRUE WHERE user_id = %s AND repo_id = ANY(%s)",
+                    (user_id, list(featured_ids)),
+                )
+        conn.commit()
+    return {"ok": True, "count": len(featured_ids)}
 
 
 def has_token(user_id: str, provider: str) -> bool:

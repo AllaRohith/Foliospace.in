@@ -128,6 +128,7 @@ def sync_repos(user_id: str) -> dict:
             int(r.get("stargazers_count") or 0),
             bool(r.get("fork")),
             bool(r.get("pinned")),
+            bool(r.get("private")),
             pushed_at_val,
         ))
     if not rows and not seen:
@@ -145,8 +146,8 @@ def sync_repos(user_id: str) -> dict:
                 """
                 INSERT INTO imported_repos
                     (user_id, repo_id, name, full_name, html_url, description,
-                     language, stargazers_count, fork, is_pinned, pushed_at)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                     language, stargazers_count, fork, is_pinned, private, pushed_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (user_id, repo_id) DO UPDATE SET
                     name = EXCLUDED.name,
                     full_name = EXCLUDED.full_name,
@@ -156,6 +157,7 @@ def sync_repos(user_id: str) -> dict:
                     stargazers_count = EXCLUDED.stargazers_count,
                     fork = EXCLUDED.fork,
                     is_pinned = EXCLUDED.is_pinned,
+                    private = EXCLUDED.private,
                     pushed_at = EXCLUDED.pushed_at,
                     fetched_at = NOW()
                 """,
@@ -167,7 +169,10 @@ def sync_repos(user_id: str) -> dict:
                     (user_id, list(seen_ids)),
                 )
             else:
-                cur.execute("DELETE FROM imported_repos WHERE user_id = %s", (user_id,))
+                cur.execute(
+                    "DELETE FROM imported_repos WHERE user_id = %s AND featured = FALSE",
+                    (user_id,),
+                )
             cur.execute(
                 "UPDATE social_accounts SET last_synced_at = NOW() WHERE user_id = %s AND provider = 'github'",
                 (user_id,),
