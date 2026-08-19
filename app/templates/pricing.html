@@ -5,6 +5,7 @@
 {% block canonical %}/pricing{% endblock %}
 
 {% block content %}
+{% set u = nav_user(request) %}
 <main id="main" class="pricing-page">
   <div class="container">
 
@@ -16,9 +17,9 @@
       <p class="pricing-lede">Pro is <strong>₹149 every month</strong>, charged by UPI AutoPay. Fourteen days free, then the autopay kicks in. Cancel any time from your dashboard — two taps.</p>
 
       <div class="pricing-cta-row">
-        {% if nav_user %}
+        {% if u %}
           <a class="btn btn-primary btn-lg" href="/dashboard/billing">Manage billing →</a>
-          <a class="btn btn-ghost btn-lg" href="/{{ nav_user.slug }}/manage">Edit your folio →</a>
+          <a class="btn btn-ghost btn-lg" href="/{{ u.slug }}/manage">Edit your folio →</a>
         {% else %}
           <a class="btn btn-primary btn-lg" href="/signup">Start 14-day trial →</a>
           <a class="btn btn-ghost btn-lg" href="/login">I already have a folio</a>
@@ -142,7 +143,7 @@
       <h2 class="pricing-section-title">Try it for <em>fourteen days.</em></h2>
       <p class="pricing-bottom-sub">No card. No mandate. Full Pro. Cancel any time, even during the trial.</p>
       <div class="pricing-cta-row">
-        {% if nav_user %}
+        {% if u %}
           <a class="btn btn-primary btn-lg" href="/dashboard/billing">Manage billing →</a>
         {% else %}
           <a class="btn btn-primary btn-lg" href="/signup">Start 14-day trial →</a>
