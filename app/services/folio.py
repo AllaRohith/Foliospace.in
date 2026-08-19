@@ -2,6 +2,7 @@ import io
 import logging
 import os
 from datetime import datetime, timezone
+from pathlib import Path
 
 import psycopg
 from fastapi import HTTPException
@@ -14,6 +15,23 @@ DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 MIN_SLUG_LEN = 2
 MAX_SLUG_LEN = 48
 
+_FONT_DIR = Path(__file__).resolve().parent.parent / "static" / "fonts"
+
+W, H = 1200, 630
+INK = (15, 20, 25)
+CREAM = (250, 247, 242)
+CREAM_2 = (242, 237, 227)
+ACCENT = (255, 107, 53)
+ACCENT_SOFT = (255, 107, 53, 30)
+MUTED = (92, 100, 112)
+HAIRLINE = (232, 227, 217)
+
+BRAND_MARK_PATH = [
+    (8, 8), (8, 48), (16, 48), (16, 33), (30, 33),
+    (30, 26), (16, 26), (16, 15), (38, 15), (38, 8),
+]
+BRAND_MARK_ACC_X, BRAND_MARK_ACC_Y, BRAND_MARK_ACC_S = 32, 40, 10
+
 
 def _connect():
     if not DATABASE_URL:
@@ -23,6 +41,171 @@ def _connect():
         row_factory=dict_row,
         options="-c statement_timeout=3000",
     )
+
+
+def _try_font(filename: str, size: int):
+    from PIL import ImageFont
+    path = _FONT_DIR / filename
+    if path.exists():
+        try:
+            return ImageFont.truetype(str(path), size)
+        except OSError:
+            pass
+    candidates = [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    ]
+    for c in candidates:
+        if os.path.exists(c):
+            try:
+                return ImageFont.truetype(c, size)
+            except OSError:
+                continue
+    return ImageFont.load_default()
+
+
+def _fonts():
+    return {
+        "stalinist": _try_font("stalinist-one.ttf", 64),
+        "stalinist_avatar": _try_font("stalinist-one.ttf", 140),
+        "saira_400": _try_font("saira-400.ttf", 28),
+        "saira_500": _try_font("saira-500.ttf", 50),
+        "saira_600": _try_font("saira-600.ttf", 78),
+        "saira_700_15": _try_font("saira-700.ttf", 15),
+        "saira_700_18": _try_font("saira-700.ttf", 18),
+        "saira_700_22": _try_font("saira-700.ttf", 22),
+        "saira_500_25": _try_font("saira-500.ttf", 25),
+        "saira_italic": _try_font("saira-italic.ttf", 28),
+    }
+
+
+def _draw_background(draw):
+    for y in range(0, H, 4):
+        draw.line([(0, y), (W, y)], fill=HAIRLINE)
+    draw.rectangle([0, 0, W, 96], fill=CREAM_2)
+    draw.rectangle([0, H - 96, W, H], fill=CREAM_2)
+    draw.line([(0, 96), (W, 96)], fill=HAIRLINE, width=1)
+    draw.line([(0, H - 96), (W, H - 96)], fill=HAIRLINE, width=1)
+
+
+def _draw_brand(draw, x, y, size=56):
+    scale = size / 56
+    poly = [(x + int(px * scale), y + int(py * scale)) for px, py in BRAND_MARK_PATH]
+    draw.polygon(poly, fill=INK)
+    ax = x + int(BRAND_MARK_ACC_X * scale)
+    ay = y + int(BRAND_MARK_ACC_Y * scale)
+    aw = max(1, int(BRAND_MARK_ACC_S * scale))
+    draw.rectangle([ax, ay, ax + aw, ay + aw], fill=ACCENT)
+
+
+def _measure(draw, text, fnt):
+    bbox = draw.textbbox((0, 0), text, font=fnt)
+    return bbox[2] - bbox[0], bbox[3] - bbox[1], bbox
+
+
+def _wrap_text(draw, text, fnt, max_width, max_lines=3):
+    words = text.split()
+    if not words:
+        return []
+    lines = []
+    current = ""
+    for word in words:
+        candidate = (current + " " + word).strip()
+        w, _, _ = _measure(draw, candidate, fnt)
+        if w <= max_width:
+            current = candidate
+        else:
+            if current:
+                lines.append(current)
+            current = word
+            if len(lines) >= max_lines:
+                break
+    if current and len(lines) < max_lines:
+        lines.append(current)
+    if len(lines) == max_lines:
+        last = lines[-1]
+        while last and _measure(draw, last + "…", fnt)[0] > max_width:
+            last = last[:-1]
+        if last:
+            lines[-1] = last.rstrip(",.;:") + "…"
+    return lines
+
+
+def _strip_role(role: str) -> str:
+    if not role:
+        return ""
+    parts = [p.strip() for p in role.replace("·", "·").split("·") if p.strip()]
+    cleaned = []
+    for p in parts:
+        p = p.strip()
+        if not p:
+            continue
+        p = p[0].upper() + p[1:] if len(p) > 1 else p.upper()
+        cleaned.append(p)
+    return " · ".join(cleaned)[:80]
+
+
+def _initial_letter(user: dict) -> str:
+    name = (user.get("display_name") or "").strip()
+    if name:
+        for ch in name:
+            if ch.isalpha():
+                return ch.upper()
+    slug = (user.get("slug") or "").strip()
+    if slug:
+        return slug[0].upper()
+    return "·"
+
+
+def _draw_avatar_circle(draw, fonts, user, cx, cy, diameter=240):
+    radius = diameter // 2
+    draw.ellipse(
+        [cx - radius, cy - radius, cx + radius, cy + radius],
+        fill=CREAM,
+        outline=ACCENT,
+        width=4,
+    )
+    initial = _initial_letter(user)
+    bbox = draw.textbbox((0, 0), initial, font=fonts["stalinist_avatar"])
+    tw = bbox[2] - bbox[0]
+    th = bbox[3] - bbox[1]
+    tx = cx - tw / 2 - bbox[0]
+    ty = cy - th / 2 - bbox[1]
+    draw.text((tx, ty), initial, fill=INK, font=fonts["stalinist_avatar"])
+
+
+def _draw_avatar_image(draw, img, user, cx, cy, diameter=240):
+    radius = diameter // 2
+    avatar_url = (user.get("avatar_url") or "").strip()
+    if not avatar_url:
+        return False
+    try:
+        import urllib.request
+        from urllib.error import URLError
+        from socket import timeout as _socket_timeout
+        req = urllib.request.Request(
+            avatar_url,
+            headers={"User-Agent": "FolioSpace/1.0 OG-Generator"},
+        )
+        with urllib.request.urlopen(req, timeout=3) as resp:
+            avatar_data = resp.read()
+        from PIL import Image
+        avatar = Image.open(io.BytesIO(avatar_data)).convert("RGBA")
+        avatar = avatar.resize((diameter, diameter))
+        mask = Image.new("L", (diameter, diameter), 0)
+        from PIL import ImageDraw as _ID
+        _ID.Draw(mask).ellipse([0, 0, diameter, diameter], fill=255)
+        avatar.putalpha(mask)
+        box = (cx - radius, cy - radius)
+        img_rgba = img.convert("RGBA")
+        img_rgba.paste(avatar, box, avatar)
+        img.paste(img_rgba.convert("RGB"))
+        return True
+    except (URLError, _socket_timeout, TimeoutError, OSError, ValueError) as e:
+        logger.info("avatar fetch/skip: %s", e)
+        return False
 
 
 def find_user_by_slug(slug: str, *, require_public: bool = True) -> dict | None:
@@ -129,85 +312,88 @@ def list_public_slugs() -> list[tuple[str, str]]:
         return []
 
 
+def _fit_text_to_width(draw, text, font, max_width):
+    if _measure(draw, text, font)[0] <= max_width:
+        return text
+    ell = "…"
+    while text and _measure(draw, text + ell, font)[0] > max_width:
+        text = text[:-1].rstrip()
+    return (text + ell) if text else ell
+
+
+def _shrink_name_to_width(draw, text, fonts, max_width):
+    for key in ("saira_600", "saira_500"):
+        if _measure(draw, text, fonts[key])[0] <= max_width:
+            return text, fonts[key]
+    return _fit_text_to_width(draw, text, fonts["saira_500"], max_width), fonts["saira_500"]
+
+
 def render_og_image(user: dict) -> bytes | None:
     try:
-        from PIL import Image, ImageDraw, ImageFont
+        from PIL import Image, ImageDraw
     except ImportError:
         logger.warning("Pillow not installed; OG image generation skipped")
         return None
-    W, H = 1200, 630
-    img = Image.new("RGB", (W, H), (250, 247, 242))
+
+    fonts = _fonts()
+    img = Image.new("RGB", (W, H), CREAM)
     draw = ImageDraw.Draw(img)
-    accent = (255, 107, 53)
-    ink = (15, 20, 25)
-    muted = (92, 100, 112)
-    hairline = (232, 227, 217)
-    font_paths = [
-        ("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 28, "name"),
-        ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22, "role"),
-        ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 20, "bio"),
-        ("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 24, "brand"),
-    ]
-    fonts = {}
-    for path, size, key in font_paths:
-        try:
-            fonts[key] = ImageFont.truetype(path, size)
-        except OSError:
-            fonts[key] = ImageFont.load_default()
-    PAD = 64
-    draw.text((PAD, 64), "→ FOLIOSPACE.IN", fill=accent, font=fonts["brand"])
-    draw.line([(PAD, 110), (PAD + 96, 110)], fill=accent, width=4)
-    name = (user.get("display_name") or "Untitled folio").strip()[:48]
-    draw.text((PAD, 168), name, fill=ink, font=fonts["name"])
-    role = (user.get("role") or "").strip()[:60]
-    if role:
-        draw.text((PAD, 220), role.upper(), fill=muted, font=fonts["role"])
+    _draw_background(draw)
+
+    _draw_brand(draw, 80, 20, size=56)
+    word_x = 80 + 56 + 18
+    word_y = 28
+    draw.text((word_x, word_y), "FolioSpace", fill=INK, font=fonts["stalinist"])
+    brand_bbox = draw.textbbox((0, 0), "FolioSpace", font=fonts["stalinist"])
+    brand_w = brand_bbox[2] - brand_bbox[0]
+    brand_h = brand_bbox[3] - brand_bbox[1]
+    acc_size = 12
+    acc_x = word_x + brand_w + 4
+    acc_y = word_y + brand_h - acc_size - 2
+    draw.rectangle([acc_x, acc_y, acc_x + acc_size, acc_y + acc_size], fill=ACCENT)
+
+    name = (user.get("display_name") or "").strip()[:120].rstrip()
+    if not name:
+        name = "Untitled folio"
+
+    role = _strip_role(user.get("role") or "")
     bio = (user.get("bio") or "").strip()
+
+    right_center_x = W - 80 - 120
+    right_center_y = 230
+
+    left_x = 80
+    right_edge_for_text = right_center_x - 180
+    max_text_width = right_edge_for_text - left_x
+
+    if role:
+        eyebrow = f"→ {role.upper()}"
+        eyebrow = _fit_text_to_width(draw, eyebrow, fonts["saira_700_15"], max_text_width)
+        draw.text((left_x, 158), eyebrow, fill=ACCENT, font=fonts["saira_700_15"])
+
+    name, name_font = _shrink_name_to_width(draw, name, fonts, max_text_width)
+    draw.text((left_x, 200), name, fill=INK, font=name_font)
+
     if bio:
-        words = bio.split()
-        line = ""
-        lines: list[str] = []
-        for word in words:
-            test = (line + " " + word).strip()
-            if draw.textlength(test, font=fonts["bio"]) > W - 2 * PAD:
-                lines.append(line)
-                line = word
-            else:
-                line = test
-        if line:
-            lines.append(line)
-        lines = lines[:4]
+        bio_lines = _wrap_text(draw, bio, fonts["saira_400"], max_text_width, max_lines=3)
         y = 290
-        for ln in lines:
-            draw.text((PAD, y), ln, fill=ink, font=fonts["bio"])
-            y += 32
-    draw.line([(PAD, H - 96), (W - PAD, H - 96)], fill=hairline, width=2)
-    draw.text(
-        (PAD, H - 72),
-        f"foliospace.in/u/{user.get('slug', '')}",
-        fill=accent,
-        font=fonts["brand"],
-    )
-    avatar_url = (user.get("avatar_url") or "").strip()
-    if avatar_url:
-        try:
-            import urllib.request
-            from urllib.error import URLError
-            from socket import timeout as _socket_timeout
-            req = urllib.request.Request(
-                avatar_url,
-                headers={"User-Agent": "FolioSpace/1.0 OG-Generator"},
-            )
-            with urllib.request.urlopen(req, timeout=3) as resp:
-                avatar_data = resp.read()
-            avatar = Image.open(io.BytesIO(avatar_data)).convert("RGB")
-            avatar = avatar.resize((200, 200))
-            mask = Image.new("L", (200, 200), 0)
-            ImageDraw.Draw(mask).ellipse((0, 0, 200, 200), fill=255)
-            avatar.putalpha(mask)
-            img.paste(avatar, (W - PAD - 200, 168), avatar)
-        except (URLError, _socket_timeout, TimeoutError, OSError, ValueError) as e:
-            logger.info("avatar fetch/skip: %s", e)
+        for line in bio_lines:
+            draw.text((left_x, y), line, fill=INK, font=fonts["saira_400"])
+            y += 36
+
+    used_image = _draw_avatar_image(draw, img, user, right_center_x, right_center_y, diameter=240)
+    if not used_image:
+        _draw_avatar_circle(draw, fonts, user, right_center_x, right_center_y, diameter=240)
+
+    draw.line([(80, H - 96), (W - 80, H - 96)], fill=HAIRLINE, width=1)
+    footer_url = f"foliospace.in/{user.get('slug', '')}"
+    draw.text((80, H - 60), "→ ", fill=ACCENT, font=fonts["saira_700_22"])
+    arrow_w, _, _ = _measure(draw, "→ ", fonts["saira_700_22"])
+    draw.text((80 + arrow_w, H - 60), footer_url, fill=INK, font=fonts["saira_700_22"])
+
+    note = "FolioSpace · a portfolio for every Indian professional"
+    draw.text((W - 80 - _measure(draw, note, fonts["saira_700_15"])[0], H - 56), note, fill=MUTED, font=fonts["saira_700_15"])
+
     buf = io.BytesIO()
     img.save(buf, format="PNG", optimize=True)
     return buf.getvalue()

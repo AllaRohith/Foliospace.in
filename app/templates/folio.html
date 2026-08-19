@@ -5,11 +5,11 @@
 {% block canonical %}/{{ user.slug }}{% endblock %}
 {% block og_title %}{{ og_title }}{% endblock %}
 {% block og_description %}{{ description }}{% endblock %}
-{% block og_image %}/u/{{ user.slug }}/og.png{% endblock %}
+{% block og_image %}{{ folio_base }}/u/{{ user.slug }}/og.png{% endblock %}
 {% block og_image_alt %}{{ og_image_alt }}{% endblock %}
 {% block twitter_title %}{{ og_title }}{% endblock %}
 {% block twitter_description %}{{ description }}{% endblock %}
-{% block twitter_image %}/u/{{ user.slug }}/og.png{% endblock %}
+{% block twitter_image %}{{ folio_base }}/u/{{ user.slug }}/og.png{% endblock %}
 {% block twitter_image_alt %}{{ og_image_alt }}{% endblock %}
 
 {% block jsonld %}
