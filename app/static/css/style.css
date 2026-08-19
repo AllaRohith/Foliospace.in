@@ -9510,3 +9510,229 @@ body.dark .fm-preview-bio { background: var(--cream); }
   .fm-preview-avatar, .fm-preview-avatar-fallback { width: 56px; height: 56px; }
   .fm-preview-avatar-fallback { font-size: 24px; }
 }
+
+
+.pricing-page {
+  padding: 60px 0 100px;
+  font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.pricing-head {
+  margin-bottom: 56px;
+  max-width: 720px;
+}
+.pricing-eyebrow {
+  font-family: 'Saira', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+.pricing-title {
+  font-family: 'Stalinist One', 'Saira', sans-serif;
+  font-size: clamp(40px, 6vw, 76px);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  margin: 0 0 22px;
+  color: var(--ink);
+}
+.pricing-title em { font-style: italic; color: var(--accent); }
+.pricing-lede {
+  font-family: 'Saira', sans-serif;
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  margin: 0 0 28px;
+  max-width: 640px;
+}
+.pricing-lede strong { font-weight: 700; color: var(--ink); }
+
+.pricing-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.pricing-figure {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  margin-bottom: 64px;
+  overflow: hidden;
+}
+body.dark .pricing-figure { background: var(--card-bg); border-color: var(--cream); }
+.pricing-figure-main {
+  padding: 36px 30px;
+  background: var(--ink);
+  color: var(--cream);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+.pricing-figure-num {
+  font-family: 'Stalinist One', sans-serif;
+  font-size: clamp(72px, 11vw, 132px);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  color: var(--cream);
+}
+.pricing-figure-unit {
+  font-family: 'Saira', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-top: 4px;
+}
+.pricing-figure-detail {
+  padding: 30px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+.pricing-figure-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+  font-family: 'Saira', sans-serif;
+  font-size: 15px;
+  color: var(--muted);
+}
+.pricing-figure-row:last-child { border-bottom: none; }
+.pricing-figure-row strong {
+  font-family: 'Stalinist One', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: var(--ink);
+  text-align: right;
+  letter-spacing: 0.02em;
+}
+
+.pricing-section {
+  margin-bottom: 64px;
+}
+.pricing-section-eyebrow {
+  font-family: 'Saira', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+.pricing-section-title {
+  font-family: 'Stalinist One', 'Saira', sans-serif;
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0 0 28px;
+  color: var(--ink);
+}
+.pricing-section-title em { font-style: italic; color: var(--accent); }
+
+.pricing-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 36px;
+  max-width: 880px;
+}
+.pricing-list-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-family: 'Saira', sans-serif;
+  font-size: 15.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+.pricing-list-row strong { color: var(--ink); font-weight: 700; }
+.pricing-list-bullet {
+  color: var(--accent);
+  font-family: 'Saira', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.pricing-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border-top: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+}
+.pricing-step {
+  padding: 26px 22px;
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pricing-step:last-child { border-right: none; }
+.pricing-step-num {
+  font-family: 'Stalinist One', sans-serif;
+  font-size: 38px;
+  line-height: 1;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+}
+.pricing-step-title {
+  font-family: 'Stalinist One', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+}
+.pricing-step-body p {
+  font-family: 'Saira', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  margin: 0;
+}
+.pricing-step-body em { font-style: italic; color: var(--accent); }
+
+.pricing-faq .faq-list { max-width: 880px; }
+
+.pricing-bottom-cta {
+  margin-top: 64px;
+  padding: 50px 40px;
+  background: var(--cream-2);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  text-align: center;
+}
+body.dark .pricing-bottom-cta { background: var(--card-bg); }
+.pricing-bottom-sub {
+  font-family: 'Saira', sans-serif;
+  font-size: 16px;
+  color: var(--muted);
+  margin: 0 0 24px;
+}
+
+@media (max-width: 900px) {
+  .pricing-page { padding: 36px 0 64px; }
+  .pricing-figure { grid-template-columns: 1fr; }
+  .pricing-figure-main { padding: 28px 22px; }
+  .pricing-figure-detail { padding: 22px; }
+  .pricing-list { grid-template-columns: 1fr; gap: 0; }
+  .pricing-steps { grid-template-columns: 1fr 1fr; }
+  .pricing-step:nth-child(2) { border-right: none; }
+  .pricing-step:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+  .pricing-bottom-cta { padding: 36px 22px; }
+}

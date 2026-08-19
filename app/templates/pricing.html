@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Pricing — FolioSpace{% endblock %}
+{% block description %}One plan. ₹149/mo via UPI AutoPay. 14-day free trial. Cancel anytime. The single source of truth for FolioSpace pricing.{% endblock %}
+{% block canonical %}/pricing{% endblock %}
+
+{% block content %}
+<main id="main" class="pricing-page">
+  <div class="container">
+
+    <p class="folio-meta"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page 03<span class="folio-meta-sep">/</span>The receipt</p>
+
+    <header class="pricing-head">
+      <div class="pricing-eyebrow">→ The receipt</div>
+      <h1 class="pricing-title">One plan. <em>One number.</em></h1>
+      <p class="pricing-lede">Pro is <strong>₹149 every month</strong>, charged by UPI AutoPay. Fourteen days free, then the autopay kicks in. Cancel any time from your dashboard — two taps.</p>
+
+      <div class="pricing-cta-row">
+        {% if nav_user %}
+          <a class="btn btn-primary btn-lg" href="/dashboard/billing">Manage billing →</a>
+          <a class="btn btn-ghost btn-lg" href="/{{ nav_user.slug }}/manage">Edit your folio →</a>
+        {% else %}
+          <a class="btn btn-primary btn-lg" href="/signup">Start 14-day trial →</a>
+          <a class="btn btn-ghost btn-lg" href="/login">I already have a folio</a>
+        {% endif %}
+      </div>
+    </header>
+
+    <section class="pricing-figure" aria-label="Plan summary">
+      <div class="pricing-figure-main">
+        <div class="pricing-figure-num">₹149</div>
+        <div class="pricing-figure-unit">/month</div>
+      </div>
+      <div class="pricing-figure-detail">
+        <div class="pricing-figure-row"><span>First 14 days</span><strong>Free</strong></div>
+        <div class="pricing-figure-row"><span>After trial</span><strong>₹149/mo via UPI AutoPay</strong></div>
+        <div class="pricing-figure-row"><span>Setup fee</span><strong>None</strong></div>
+        <div class="pricing-figure-row"><span>Cancel</span><strong>Any time — two taps</strong></div>
+      </div>
+    </section>
+
+    <section class="pricing-section" aria-label="What's included">
+      <div class="pricing-section-eyebrow">→ What's in it</div>
+      <h2 class="pricing-section-title">Everything <em>you need.</em></h2>
+      <div class="pricing-list">
+        <div class="pricing-list-row"><span class="pricing-list-bullet">›</span><span><strong>foliospace.in/yourname</strong> — your handle, yours forever, even if you cancel.</span></div>
+        <div class="pricing-list-row"><span class="pricing-list-bullet">›</span><span><strong>Live preview editor</strong> — edit from any phone, see the change before you save.</span></div>
+        <div class="pricing-list-row"><span class="pricing-list-bullet">›</span><span><strong>Dynamic OG image</strong> — every share to WhatsApp, LinkedIn, or X gets a real preview.</span></div>
+        <div class="pricing-list-row"><span class="pricing-list-bullet">›</span><span><strong>QR + share link</strong> — copyable URL, pre-filled WhatsApp message, downloadable QR.</span></div>
+        <div class="pricing-list-row"><span class="pricing-list-bullet">›</span><span><strong>Visit analytics</strong> — 30-day rolling sparkline of views and unique visitors.</span></div>
+        <div class="pricing-list-row"><span class="pricing-list-bullet">›</span><span><strong>WhatsApp contact button</strong> — visitors message you without leaving your folio.</span></div>
+        <div class="pricing-list-row"><span class="pricing-list-bullet">›</span><span><strong>No FolioSpace badge</strong> — your folio, your name, no watermark.</span></div>
+        <div class="pricing-list-row"><span class="pricing-list-bullet">›</span><span><strong>Privacy toggle</strong> — flip public on or off, default is off. You decide who sees.</span></div>
+      </div>
+    </section>
+
+    <section class="pricing-section" aria-label="How billing works">
+      <div class="pricing-section-eyebrow">→ How billing works</div>
+      <h2 class="pricing-section-title">No card. <em>No wallet.</em></h2>
+      <div class="pricing-steps">
+        <div class="pricing-step">
+          <div class="pricing-step-num">01</div>
+          <div class="pricing-step-body">
+            <div class="pricing-step-title">Sign up</div>
+            <p>Email + password, one role field. Two minutes.</p>
+          </div>
+        </div>
+        <div class="pricing-step">
+          <div class="pricing-step-num">02</div>
+          <div class="pricing-step-body">
+            <div class="pricing-step-title">14 days free</div>
+            <p>Full Pro access. No card needed, no mandate started, nothing to forget.</p>
+          </div>
+        </div>
+        <div class="pricing-step">
+          <div class="pricing-step-num">03</div>
+          <div class="pricing-step-body">
+            <div class="pricing-step-title">Activate Pro</div>
+            <p>From your dashboard, click <em>Activate</em>. Approve the UPI AutoPay mandate in your UPI app. ₹149 a month, charged automatically.</p>
+          </div>
+        </div>
+        <div class="pricing-step">
+          <div class="pricing-step-num">04</div>
+          <div class="pricing-step-body">
+            <div class="pricing-step-title">Cancel any time</div>
+            <p>Two taps in your dashboard. Access stays until the end of the paid period. No retention call, no "are you sure" survey.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pricing-section pricing-faq" aria-label="Frequently asked questions">
+      <div class="pricing-section-eyebrow">→ Questions</div>
+      <h2 class="pricing-section-title">The <em>honest</em> answers.</h2>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary><span>Why ₹149?</span><span class="faq-icon" aria-hidden="true"></span></summary>
+          <div class="faq-body">
+            <p>It covers payment processing, hosting, the OG image renderer, the QR generator, and the analytics storage — for one folio per user. We add features, not price hikes.</p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary><span>Do I need a card or netbanking?</span><span class="faq-icon" aria-hidden="true"></span></summary>
+          <div class="faq-body">
+            <p>No. Pro is paid by <strong>UPI AutoPay</strong> only — PhonePe, Google Pay, Paytm, BHIM, any UPI app. You approve a one-tap mandate once, then it auto-charges monthly.</p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary><span>What if my payment fails?</span><span class="faq-icon" aria-hidden="true"></span></summary>
+          <div class="faq-body">
+            <p>You get <strong>7 grace days</strong> with full Pro access. We email you on day 1 and day 5. If the charge still fails after day 7, your folio flips to <strong>Free</strong> — same template, with the FolioSpace badge.</p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary><span>Is the trial actually free?</span><span class="faq-icon" aria-hidden="true"></span></summary>
+          <div class="faq-body">
+            <p>Yes. No card, no mandate, no charge on day 14. We remind you by email at day 7, 4, and 2. If you don't activate, your folio goes to Free on day 15.</p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary><span>What happens to my folio if I cancel?</span><span class="faq-icon" aria-hidden="true"></span></summary>
+          <div class="faq-body">
+            <p>Your handle (<code>foliospace.in/yourname</code>) is yours forever. If you cancel, your folio flips to Free: same content, badge visible, public toggle honored. Upgrade again any time.</p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary><span>Can I get a refund?</span><span class="faq-icon" aria-hidden="true"></span></summary>
+          <div class="faq-body">
+            <p>Cancel inside the first 7 days of any paid month and we refund the charge — email <strong>rohit@absolinsoft.com</strong> and we'll process it same-day.</p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary><span>Is my data safe?</span><span class="faq-icon" aria-hidden="true"></span></summary>
+          <div class="faq-body">
+            <p>Encrypted at rest (Neon Postgres + TLS in transit). You can delete your account any time — profile, folios, and visit history are wiped within 30 days. <a href="/privacy">Full privacy policy →</a></p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="pricing-bottom-cta">
+      <h2 class="pricing-section-title">Try it for <em>fourteen days.</em></h2>
+      <p class="pricing-bottom-sub">No card. No mandate. Full Pro. Cancel any time, even during the trial.</p>
+      <div class="pricing-cta-row">
+        {% if nav_user %}
+          <a class="btn btn-primary btn-lg" href="/dashboard/billing">Manage billing →</a>
+        {% else %}
+          <a class="btn btn-primary btn-lg" href="/signup">Start 14-day trial →</a>
+          <a class="btn btn-ghost btn-lg" href="/">See examples first</a>
+        {% endif %}
+      </div>
+    </section>
+
+  </div>
+</main>
+{% endblock %}

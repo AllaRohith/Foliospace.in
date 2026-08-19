@@ -269,6 +269,19 @@ async def features(request: Request):
     )
 
 
+@app.get("/pricing")
+async def pricing(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "pricing.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Pricing — FolioSpace",
+            "description": "One plan. ₹149/mo via UPI AutoPay. 14-day free trial. Cancel anytime. The single source of truth for FolioSpace pricing.",
+        },
+    )
+
+
 @app.get("/community")
 async def community_legacy(request: Request):
     return RedirectResponse(
