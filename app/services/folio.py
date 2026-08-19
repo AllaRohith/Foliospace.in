@@ -35,7 +35,10 @@ def find_user_by_slug(slug: str, *, require_public: bool = True) -> dict | None:
     full_sql = (
         """
         SELECT id, slug, display_name, role, bio, phone, avatar_url,
-               avatar_public_id, is_public, created_at, updated_at, deleted_at
+               avatar_public_id, is_public,
+               plan, is_internal, is_trial, payment_failed_at,
+               setup_paid_at, plan_expires_at,
+               created_at, updated_at, deleted_at
           FROM users
          WHERE slug = %s
             OR lower(slug) = lower(%s)
@@ -47,7 +50,11 @@ def find_user_by_slug(slug: str, *, require_public: bool = True) -> dict | None:
         """
         SELECT id, slug, display_name, role, created_at, updated_at, deleted_at,
                NULL::text AS bio, NULL::text AS phone, NULL::text AS avatar_url,
-               NULL::text AS avatar_public_id, FALSE AS is_public
+               NULL::text AS avatar_public_id, FALSE AS is_public,
+               'free'::text AS plan, FALSE AS is_internal, FALSE AS is_trial,
+               NULL::timestamp AS payment_failed_at,
+               NULL::timestamp AS setup_paid_at,
+               NULL::timestamp AS plan_expires_at
           FROM users
          WHERE slug = %s
             OR lower(slug) = lower(%s)
