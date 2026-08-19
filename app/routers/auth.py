@@ -3,7 +3,7 @@ import os
 import re
 from pathlib import Path
 
-from fastapi import APIRouter, BackgroundTasks, Form, HTTPException, Request
+from fastapi import APIRouter, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 
@@ -217,49 +217,12 @@ def _user_to_context(user) -> dict:
     }
 
 
-def _plan_card_context(user) -> dict:
-    from app.services import billing as billing_svc
-    return {
-        "trial_days_left": billing_svc.trial_days_left(user),
-        "grace_days_left": billing_svc.grace_days_left(user),
-        "subscription": billing_svc.current_subscription(str(user["id"])),
-    }
-
-
 @router.get("/dashboard", response_class=HTMLResponse)
-async def dashboard(request: Request, background_tasks: BackgroundTasks):
+async def dashboard(request: Request):
     user = user_auth.require_user(request)
     if not user:
         return RedirectResponse("/login?next=/dashboard", status_code=303)
-    flash = request.session.pop("flash", None)
-    completion = user_auth.compute_completion(user)
-    from app.services import folio_views as views_svc
-    from app.services import billing as billing_svc
-    view_stats = views_svc.get_view_stats(user["slug"], days=30)
-    if user.get("is_trial"):
-        background_tasks.add_task(
-            billing_svc.maybe_send_trial_reminders,
-            str(user["id"]),
-            user,
-        )
-    ctx = _plan_card_context(user)
-    return _no_cache(templates.TemplateResponse(
-        request,
-        "auth/dashboard.html",
-        {
-            "site_name": "FolioSpace",
-            "page_title": "Dashboard — FolioSpace",
-            "description": "Your FolioSpace dashboard.",
-            "user": _user_to_context(user),
-            "flash": flash,
-            "completion": completion,
-            "view_stats": view_stats,
-            "grace_days_left": ctx["grace_days_left"],
-            "trial_days_left": ctx["trial_days_left"],
-            "subscription": ctx["subscription"],
-            "nav_active": "overview",
-        },
-    ))
+    return RedirectResponse(f"/{user['slug']}/manage", status_code=303)
 
 
 @router.get("/dashboard/profile", response_class=HTMLResponse)
@@ -267,23 +230,7 @@ async def profile_form(request: Request):
     user = user_auth.require_user(request)
     if not user:
         return RedirectResponse("/login?next=/dashboard/profile", status_code=303)
-    ctx = _plan_card_context(user)
-    return _no_cache(templates.TemplateResponse(
-        request,
-        "auth/profile.html",
-        {
-            "site_name": "FolioSpace",
-            "page_title": "Edit profile — FolioSpace",
-            "description": "Edit your FolioSpace profile.",
-            "user": _user_to_context(user),
-            "err": _sanitize(request.query_params.get("err", ""))[:120],
-            "saved": request.query_params.get("saved") == "1",
-            "trial_days_left": ctx["trial_days_left"],
-            "grace_days_left": ctx["grace_days_left"],
-            "subscription": ctx["subscription"],
-            "nav_active": "profile",
-        },
-    ))
+    return RedirectResponse(f"/{user['slug']}/manage", status_code=303)
 
 
 @router.post("/dashboard/profile")
@@ -300,21 +247,22 @@ async def profile_submit(
     user = user_auth.require_user(request)
     if not user:
         return RedirectResponse("/login", status_code=303)
+    target = f"/{user['slug']}/manage"
     dname = (display_name or "").strip()
     if not (2 <= len(dname) <= 80):
-        return RedirectResponse("/dashboard/profile?err=display_name", status_code=303)
+        return RedirectResponse(f"{target}?err=display_name", status_code=303)
     bio_clean = (bio or "").strip()
     if len(bio_clean) > 280:
-        return RedirectResponse("/dashboard/profile?err=bio", status_code=303)
+        return RedirectResponse(f"{target}?err=bio", status_code=303)
     phone_clean = (phone or "").strip()
     if phone_clean and not re.fullmatch(r"[+0-9 ()\-]{6,20}", phone_clean):
-        return RedirectResponse("/dashboard/profile?err=phone", status_code=303)
+        return RedirectResponse(f"{target}?err=phone", status_code=303)
     avatar_clean = (avatar_url or "").strip()
     if avatar_clean and not re.fullmatch(r"https?://[^\s]+", avatar_clean):
-        return RedirectResponse("/dashboard/profile?err=avatar_url", status_code=303)
+        return RedirectResponse(f"{target}?err=avatar_url", status_code=303)
     role_clean = (role or "").strip()
     if len(role_clean) > 60:
-        return RedirectResponse("/dashboard/profile?err=role", status_code=303)
+        return RedirectResponse(f"{target}?err=role", status_code=303)
     public_flag = (is_public or "").strip().lower() in ("1", "true", "on", "yes")
     updated = user_auth.update_user_profile(
         str(user["id"]),
@@ -326,14 +274,14 @@ async def profile_submit(
         is_public=public_flag,
     )
     if not updated:
-        return RedirectResponse("/dashboard/profile?err=server", status_code=303)
+        return RedirectResponse(f"{target}?err=server", status_code=303)
     user_auth.audit_user(
         request,
         str(user["id"]),
         "profile.update",
         metadata={"is_public": public_flag},
     )
-    return RedirectResponse("/dashboard/profile?saved=1", status_code=303)
+    return RedirectResponse(f"{target}?saved=1", status_code=303)
 
 
 @router.get("/dashboard/portfolio", response_class=HTMLResponse)
@@ -341,21 +289,7 @@ async def dashboard_portfolio(request: Request):
     user = user_auth.require_user(request)
     if not user:
         return RedirectResponse("/login?next=/dashboard/portfolio", status_code=303)
-    ctx = _plan_card_context(user)
-    return _no_cache(templates.TemplateResponse(
-        request,
-        "dashboard/portfolio.html",
-        {
-            "site_name": "FolioSpace",
-            "page_title": "Portfolio — FolioSpace",
-            "description": "Your FolioSpace portfolio editor.",
-            "user": _user_to_context(user),
-            "trial_days_left": ctx["trial_days_left"],
-            "grace_days_left": ctx["grace_days_left"],
-            "subscription": ctx["subscription"],
-            "nav_active": "portfolio",
-        },
-    ))
+    return RedirectResponse(f"/{user['slug']}/manage", status_code=303)
 
 
 @router.get("/dashboard/integrations", response_class=HTMLResponse)
@@ -363,21 +297,7 @@ async def dashboard_integrations(request: Request):
     user = user_auth.require_user(request)
     if not user:
         return RedirectResponse("/login?next=/dashboard/integrations", status_code=303)
-    ctx = _plan_card_context(user)
-    return _no_cache(templates.TemplateResponse(
-        request,
-        "dashboard/integrations.html",
-        {
-            "site_name": "FolioSpace",
-            "page_title": "Integrations — FolioSpace",
-            "description": "Connect GitHub and LinkedIn to FolioSpace.",
-            "user": _user_to_context(user),
-            "trial_days_left": ctx["trial_days_left"],
-            "grace_days_left": ctx["grace_days_left"],
-            "subscription": ctx["subscription"],
-            "nav_active": "integrations",
-        },
-    ))
+    return RedirectResponse(f"/{user['slug']}/manage", status_code=303)
 
 
 @router.get("/dashboard/share", response_class=HTMLResponse)
@@ -385,43 +305,4 @@ async def dashboard_share(request: Request):
     user = user_auth.require_user(request)
     if not user:
         return RedirectResponse("/login?next=/dashboard/share", status_code=303)
-    base_url = os.getenv("PUBLIC_BASE_URL", "https://foliospace.in").rstrip("/")
-    slug = user["slug"]
-    share_url = f"{base_url}/{slug}"
-    qr_url = f"{base_url}/u/{slug}/qr.png"
-    og_image_url = f"{base_url}/u/{slug}/og.png"
-    display_name = (user.get("display_name") or "").strip() or "Folio"
-    role = (user.get("role") or "").strip()
-    bio = (user.get("bio") or "").strip()
-    wa_text = f"Hey — my folio is on FolioSpace: {share_url}"
-    mail_subject = f"My folio: {display_name}"
-    tweet_text = wa_text
-    og_title = f"{display_name} — FolioSpace" if not role else f"{display_name} — {role}"
-    og_desc = (bio[:140] if bio else f"{display_name} on FolioSpace.")
-    og_alt = f"{display_name} — {role or 'Folio'} on FolioSpace"
-    ctx = _plan_card_context(user)
-    return _no_cache(templates.TemplateResponse(
-        request,
-        "dashboard/share.html",
-        {
-            "site_name": "FolioSpace",
-            "page_title": "Share — FolioSpace",
-            "description": "Share your FolioSpace link via QR, WhatsApp, LinkedIn, or email.",
-            "user": _user_to_context(user),
-            "share_url": share_url,
-            "qr_url": qr_url,
-            "og_image_url": og_image_url,
-            "wa_text": wa_text,
-            "mail_subject": mail_subject,
-            "tweet_text": tweet_text,
-            "is_live": bool(user.get("is_public")),
-            "og_preview_title": og_title,
-            "og_preview_desc": og_desc,
-            "og_preview_alt": og_alt,
-            "og_preview_meta_url": base_url.replace("https://", ""),
-            "trial_days_left": ctx["trial_days_left"],
-            "grace_days_left": ctx["grace_days_left"],
-            "subscription": ctx["subscription"],
-            "nav_active": "share",
-        },
-    ))
+    return RedirectResponse(f"/{user['slug']}/manage", status_code=303)
