@@ -1,5 +1,6 @@
 import logging
 import os
+from datetime import datetime
 from pathlib import Path
 
 from fastapi import APIRouter, BackgroundTasks, Body, Form, Request
@@ -147,6 +148,7 @@ async def public_folio(request: Request, slug: str):
             "public_base_url": public_base_url,
             "view_stats": view_stats,
             "integrations": integrations,
+            "now": datetime.utcnow(),
         },
     )
     return _public_cache(response)
@@ -258,6 +260,7 @@ async def owner_folio_manage(request: Request, slug: str):
             "repo_sort": repo_sort,
             "manage_repos": manage_repos,
             "marketing_status": marketing_status,
+            "now": datetime.utcnow(),
         },
     )
     return _no_cache_html(response)

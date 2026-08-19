@@ -54,32 +54,110 @@
 
   <article class="pf-shell">
     <header class="pf-hero">
-      <div class="pf-avatar-wrap">
-        {% if user.avatar_url %}
-          <img class="pf-avatar" src="{{ user.avatar_url }}" alt="" loading="lazy" referrerpolicy="no-referrer" />
-        {% else %}
-          <div class="pf-avatar pf-avatar-fallback" aria-hidden="true">{{ initials }}</div>
-        {% endif %}
+      <div class="pf-hero-masthead">
+        <span class="pf-hero-masthead-stamp">FOLIO · {{ now.strftime('%b %Y') if now else '' }}</span>
+        <span class="pf-hero-masthead-mark">{% if is_open %}OPEN TO WORK{% else %}PRIVATE{% endif %}</span>
       </div>
-      <div class="pf-id">
-        <div class="pf-eyebrow">→ Folio · foliospace.in/{{ user.slug }}</div>
-        <h1 class="pf-name">{{ user.display_name or user.slug }}</h1>
-        {% if user.role %}
-          <div class="pf-role">{{ user.role }}</div>
-        {% endif %}
-        {% if is_open %}
-          <div class="pf-status">
-            <span class="pf-status-dot" aria-hidden="true"></span>
-            <span>Open to work</span>
+
+      <div class="pf-hero-grid">
+        <div class="pf-hero-portrait">
+          <div class="pf-avatar-wrap">
+            {% if user.avatar_url %}
+              <img class="pf-avatar" data-folio-avatar src="{{ user.avatar_url }}"
+                   alt="{{ (user.display_name or user.slug) | e }} portrait"
+                   loading="lazy" referrerpolicy="no-referrer" />
+            {% endif %}
+            <div class="pf-avatar pf-avatar-fallback" data-folio-avatar-fallback
+                 aria-hidden="true" {% if user.avatar_url %}hidden{% endif %}>{{ initials }}</div>
+            <span class="pf-avatar-bar" aria-hidden="true"></span>
           </div>
+          {% if is_open %}
+            <div class="pf-status">
+              <span class="pf-status-dot" aria-hidden="true"></span>
+              <span>Open to work</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="pf-hero-id">
+          <h1 class="pf-name">{{ user.display_name or user.slug }}</h1>
+
+          {% if user.role %}
+            <div class="pf-role">{{ user.role }}</div>
+          {% endif %}
+
+          {% if integrations and integrations.marketing and integrations.marketing.payload.location %}
+            {% set loc = integrations.marketing.payload.location %}
+            {% set loc_text = (loc.countryCode or '') + (' · ' + loc.region if loc.region and loc.region != (loc.countryCode or '') else '') %}
+            {% if loc_text %}
+              <div class="pf-loc">
+                <span class="pf-loc-mark" aria-hidden="true">◉</span>
+                <span class="pf-loc-text">{{ loc_text }}</span>
+              </div>
+            {% endif %}
+          {% endif %}
+
+          {% if user.bio %}
+            <p class="pf-bio">{{ user.bio }}</p>
+          {% endif %}
+
+          <div class="pf-cta-row">
+            {% if user.phone %}
+              <a class="pf-cta" href="https://wa.me/{{ digits }}" target="_blank" rel="noopener">
+                <span class="pf-cta-label">WhatsApp</span>
+                <span class="pf-cta-arrow" aria-hidden="true">→</span>
+              </a>
+              <a class="pf-cta pf-cta-quiet" href="mailto:foliospace.in@gmail.com?subject={{ ('Folio enquiry — ' ~ (user.display_name or user.slug)) | urlencode }}">
+                <span class="pf-cta-label">Email</span>
+                <span class="pf-cta-arrow" aria-hidden="true">→</span>
+              </a>
+            {% else %}
+              <a class="pf-cta pf-cta-quiet" href="mailto:foliospace.in@gmail.com?subject={{ ('Folio enquiry — ' ~ (user.display_name or user.slug)) | urlencode }}">
+                <span class="pf-cta-label">Get in touch</span>
+                <span class="pf-cta-arrow" aria-hidden="true">→</span>
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="pf-hero-stats">
+        {% set _repos_n = (integrations.repos|length if (integrations and integrations.repos) else 0) %}
+        <span class="pf-stat"><span class="pf-stat-num">{{ _repos_n }}</span><span class="pf-stat-lbl">repos</span></span>
+        {% if integrations and integrations.contributions_total %}
+          <span class="pf-stat-sep">·</span>
+          <span class="pf-stat"><span class="pf-stat-num">{{ integrations.contributions_total }}</span><span class="pf-stat-lbl">commits · 12mo</span></span>
+        {% endif %}
+        {% if integrations and integrations.active_days %}
+          <span class="pf-stat-sep">·</span>
+          <span class="pf-stat"><span class="pf-stat-num">{{ integrations.active_days }}</span><span class="pf-stat-lbl">active days</span></span>
+        {% endif %}
+        {% if view_stats and view_stats.total_views %}
+          <span class="pf-stat-sep">·</span>
+          <span class="pf-stat"><span class="pf-stat-num">{{ view_stats.total_views }}</span><span class="pf-stat-lbl">views · 30d</span></span>
+        {% endif %}
+        {% if view_stats and view_stats.unique_visitors %}
+          <span class="pf-stat-sep">·</span>
+          <span class="pf-stat"><span class="pf-stat-num">{{ view_stats.unique_visitors }}</span><span class="pf-stat-lbl">unique · 30d</span></span>
         {% endif %}
       </div>
     </header>
 
-    {% if user.bio %}
-      <section class="pf-card pf-card-about">
-        <div class="pf-card-eyebrow">→ About</div>
-        <p class="pf-bio">{{ user.bio }}</p>
+    {% if is_pro %}
+      <section class="pf-card pf-card-work" aria-labelledby="pf-work-heading">
+        <div class="pf-card-eyebrow">→ What I do</div>
+        <h2 class="pf-card-heading" id="pf-work-heading">How people hire me</h2>
+        <ul class="pf-work-rail">
+          {% for title, body in work_rail[matched_role] %}
+            <li class="pf-work-cell">
+              <div class="pf-work-num">{{ '%02d' % (loop.index) }}</div>
+              <div class="pf-work-body">
+                <div class="pf-work-title">{{ title }}</div>
+                <div class="pf-work-sub">{{ body }}</div>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
       </section>
     {% endif %}
 
@@ -145,17 +223,6 @@
       </section>
     {% endif %}
 
-    {% if integrations and integrations.profile and integrations.profile.provider == 'linkedin' %}
-      {% set li = integrations.profile.payload %}
-      <section class="pf-card pf-card-imports-profile" aria-label="LinkedIn profile">
-        <div class="pf-card-eyebrow">→ LinkedIn</div>
-        <div class="pf-li-meta">
-          {% if li.locale %}<span class="pf-li-pill">{{ li.locale }}</span>{% endif %}
-          {% if li.zoneinfo %}<span class="pf-li-pill">{{ li.zoneinfo }}</span>{% endif %}
-        </div>
-      </section>
-    {% endif %}
-
     {% set mk = integrations.marketing.payload if (integrations and integrations.marketing) else {} %}
     {% if mk %}
       {% if mk.positions %}
@@ -203,34 +270,16 @@
           </ul>
         </section>
       {% endif %}
-
-      {% if mk.location %}
-        {% set loc = mk.location %}
-        {% set loc_text = (loc.countryCode or '') + (' · ' + loc.region if loc.region and loc.region != (loc.countryCode or '') else '') %}
-        {% if loc_text %}
-          <section class="pf-card pf-card-location" aria-label="Location">
-            <div class="pf-card-eyebrow">→ Based in</div>
-            <div class="pf-loc-text">{{ loc_text }}</div>
-          </section>
-        {% endif %}
-      {% endif %}
     {% endif %}
 
-    {% if is_pro %}
-      <section class="pf-card pf-card-work" aria-labelledby="pf-work-heading">
-        <div class="pf-card-eyebrow">→ What I do</div>
-        <h2 class="pf-card-heading" id="pf-work-heading">How people hire me</h2>
-        <ul class="pf-work-rail">
-          {% for title, body in work_rail[matched_role] %}
-            <li class="pf-work-cell">
-              <div class="pf-work-num">{{ '%02d' % (loop.index) }}</div>
-              <div class="pf-work-body">
-                <div class="pf-work-title">{{ title }}</div>
-                <div class="pf-work-sub">{{ body }}</div>
-              </div>
-            </li>
-          {% endfor %}
-        </ul>
+    {% if integrations and integrations.profile and integrations.profile.provider == 'linkedin' %}
+      {% set li = integrations.profile.payload %}
+      <section class="pf-card pf-card-imports-profile" aria-label="LinkedIn profile">
+        <div class="pf-card-eyebrow">→ Background</div>
+        <div class="pf-li-meta">
+          {% if li.locale %}<span class="pf-li-pill">{{ li.locale }}</span>{% endif %}
+          {% if li.zoneinfo %}<span class="pf-li-pill">{{ li.zoneinfo }}</span>{% endif %}
+        </div>
       </section>
     {% endif %}
 
@@ -247,22 +296,6 @@
             <div class="pf-proof-label">unique visitors</div>
           </div>
           <div class="pf-proof-foot">Updated daily · your own visits don't count</div>
-        </div>
-      </section>
-    {% endif %}
-
-    {% if user.phone %}
-      <section class="pf-card pf-card-contact">
-        <div class="pf-card-eyebrow">→ Reach out</div>
-        <div class="pf-contact-cta">
-          <a class="pf-cta" href="https://wa.me/{{ digits }}" target="_blank" rel="noopener">
-            <span class="pf-cta-label">Message on WhatsApp</span>
-            <span class="pf-cta-arrow" aria-hidden="true">→</span>
-          </a>
-          <a class="pf-cta pf-cta-quiet" href="mailto:foliospace.in@gmail.com?subject={{ ('Folio enquiry — ' ~ (user.display_name or user.slug)) | urlencode }}">
-            <span class="pf-cta-label">Or email</span>
-            <span class="pf-cta-arrow" aria-hidden="true">→</span>
-          </a>
         </div>
       </section>
     {% endif %}

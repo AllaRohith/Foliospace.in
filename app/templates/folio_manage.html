@@ -156,18 +156,29 @@
           <section class="fm-card fm-card-preview" data-fm-preview aria-live="polite">
             <div class="fm-card-eyebrow">→ Live preview</div>
             <div class="fm-preview-hero">
-              <div class="fm-preview-avatar-wrap">
-                <img class="fm-preview-avatar" data-fm-preview-avatar alt="" referrerpolicy="no-referrer" {% if user.avatar_url %}src="{{ user.avatar_url }}"{% endif %} />
-                <div class="fm-preview-avatar-fallback" data-fm-preview-fallback {% if user.avatar_url %}hidden{% endif %}>{{ (user.display_name or user.slug or '?')[0] | upper }}</div>
+              <div class="fm-preview-masthead">
+                <span class="fm-preview-masthead-stamp">FOLIO</span>
+                <span class="fm-preview-masthead-mark">{{ user.slug|upper }}</span>
               </div>
-              <div class="fm-preview-id">
-                <div class="fm-preview-eyebrow">foliospace.in/{{ user.slug }}</div>
-                <h2 class="fm-preview-name" data-fm-preview-name>{{ user.display_name or user.slug or 'Your name' }}</h2>
-                <div class="fm-preview-role" data-fm-preview-role {% if not user.role %}hidden{% endif %}>{{ user.role or '' }}</div>
+              <div class="fm-preview-grid">
+                <div class="fm-preview-portrait">
+                  <div class="fm-preview-avatar-wrap">
+                    <img class="fm-preview-avatar" data-fm-preview-avatar alt="" referrerpolicy="no-referrer" {% if user.avatar_url %}src="{{ user.avatar_url }}"{% endif %} />
+                    <div class="fm-preview-avatar-fallback" data-fm-preview-fallback {% if user.avatar_url %}hidden{% endif %}>{{ (user.display_name or user.slug or '?')[0] | upper }}</div>
+                    <span class="fm-preview-avatar-bar" aria-hidden="true"></span>
+                  </div>
+                </div>
+                <div class="fm-preview-id">
+                  <h2 class="fm-preview-name" data-fm-preview-name>{{ user.display_name or user.slug or 'Your name' }}</h2>
+                  <div class="fm-preview-role" data-fm-preview-role {% if not user.role %}hidden{% endif %}>{{ user.role or '' }}</div>
+                </div>
+              </div>
+              <div class="fm-preview-bio" data-fm-preview-bio {% if not user.bio %}hidden{% endif %}>{{ user.bio or '' }}</div>
+              <a class="fm-preview-cta" data-fm-preview-cta href="#" target="_blank" rel="noopener" {% if not user.phone %}hidden{% endif %}>WhatsApp →</a>
+              <div class="fm-preview-stats">
+                <span class="fm-preview-stat"><span class="fm-preview-stat-num">{{ manage_repos|length if manage_repos else 0 }}</span><span class="fm-preview-stat-lbl">repos</span></span>
               </div>
             </div>
-            <div class="fm-preview-bio" data-fm-preview-bio {% if not user.bio %}hidden{% endif %}>{{ user.bio or '' }}</div>
-            <a class="fm-preview-cta" data-fm-preview-cta href="#" target="_blank" rel="noopener" {% if not user.phone %}hidden{% endif %}>WhatsApp →</a>
             <div class="fm-preview-hint">
               {% if is_live %}<span class="fm-preview-dot is-live"></span> Live — others see this now{% else %}<span class="fm-preview-dot"></span> Preview — only you see this until you toggle public{% endif %}
             </div>
