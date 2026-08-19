@@ -37,6 +37,41 @@ def install_template_globals(templates) -> None:
     templates.env.globals["compute_completion"] = compute_completion
 
     try:
+        from app.services.email_service import LAUNCH_DATE as _LD, is_launched as _is_launched
+        from datetime import timezone as _tz
+
+        def launch_iso() -> str:
+            if not _LD:
+                return ""
+            if _LD.tzinfo is None:
+                return _LD.replace(tzinfo=_tz.utc).isoformat()
+            return _LD.isoformat()
+
+        def launch_date_label() -> str:
+            if not _LD:
+                return ""
+            try:
+                from app.services.email_service import _format_day, _format_time
+                return f"{_format_day(_LD)} · {_format_time(_LD)}"
+            except Exception:
+                try:
+                    return _LD.strftime("%B %-d, %Y · %-I:%M %p IST")
+                except ValueError:
+                    return _LD.strftime("%B %d, %Y · %I:%M %p IST").replace(" 0", " ")
+
+        def launched() -> bool:
+            try:
+                return bool(_is_launched())
+            except Exception:
+                return False
+
+        templates.env.globals["launch_iso"] = launch_iso
+        templates.env.globals["launch_date_label"] = launch_date_label
+        templates.env.globals["launched"] = launched
+    except Exception:
+        pass
+
+    try:
         from app.services import user_auth as _user_auth
 
         def nav_user(request):

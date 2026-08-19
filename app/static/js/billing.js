@@ -37,7 +37,7 @@
         var options = {
           key: getKey(),
           name: 'FolioSpace',
-          description: 'Pro — ₹149/mo via UPI or Card AutoPay',
+          description: btn.getAttribute('data-billing-product') || 'Pro — ₹149/mo',
           subscription_id: data.subscription_id,
           prefill: {},
           notes: { kind: 'recurring' },

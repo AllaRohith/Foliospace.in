@@ -125,7 +125,7 @@
 
     <div class="legal-section">
       <h2>What <em>FolioSpace is.</em></h2>
-      <p>FolioSpace is a portfolio service for Indian professionals — chefs, students, consultants, developers, designers, and anyone with work to show. Right now we're in <strong>private beta</strong>: this website collects waitlist signups for the public launch on or around September 2, 2026.</p>
+      <p>FolioSpace is a portfolio service for Indian professionals — chefs, students, consultants, developers, designers, and anyone with work to show. Right now we're in <strong>private beta</strong>: this website collects waitlist signups for the public launch on or around {{ launch_date_label() | replace(' · ', ', ') }}.</p>
     </div>
 
     <div class="legal-section">
@@ -141,7 +141,7 @@
     <div class="legal-section">
       <h2>What <em>we don't promise.</em></h2>
       <ul>
-        <li>A specific launch date — we aim for Sep 2, 2026, but if the product isn't ready, we slip.</li>
+        <li>A specific launch date — we aim for {{ launch_date_label() | replace(' · ', ', ') }}, but if the product isn't ready, we slip.</li>
         <li>Specific features or pricing that aren't listed on the site.</li>
         <li>That the service will always be free or that prices won't change.</li>
       </ul>
