@@ -2,7 +2,7 @@ import logging
 import os
 from pathlib import Path
 
-from fastapi import APIRouter, BackgroundTasks, Body, Request
+from fastapi import APIRouter, BackgroundTasks, Body, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
@@ -200,6 +200,11 @@ async def owner_folio_manage(request: Request, slug: str):
     current_tid = (user.get("template_id") or "t1").strip()
     user_plan = (viewer.get("plan") or "free").lower()
     is_internal = bool(viewer.get("is_internal"))
+    from app.services import oauth as oauth_svc
+    linked_accounts = user_auth_svc.list_social_accounts(str(viewer["id"]))
+    user_has_password = user_auth_svc.has_password(str(viewer["id"]))
+    oauth_providers = oauth_svc.configured_providers()
+    saved_kind = strip_control(request.query_params.get("saved", ""))[:16]
     response = templates.TemplateResponse(
         request,
         "folio_manage.html",
@@ -221,6 +226,7 @@ async def owner_folio_manage(request: Request, slug: str):
             "view_stats": view_stats,
             "err": err,
             "saved": saved,
+            "saved_kind": saved_kind,
             "grace_days_left": ctx["grace_days_left"],
             "trial_days_left": ctx["trial_days_left"],
             "subscription": ctx["subscription"],
@@ -230,6 +236,9 @@ async def owner_folio_manage(request: Request, slug: str):
             "current_template_id": current_tid,
             "user_plan": user_plan,
             "is_internal": is_internal,
+            "linked_accounts": linked_accounts,
+            "user_has_password": user_has_password,
+            "oauth_providers": oauth_providers,
         },
     )
     return _no_cache_html(response)
@@ -401,6 +410,29 @@ async def owner_avatar_delete(request: Request, slug: str, background: Backgroun
         target=old_public_id or "-",
     )
     return JSONResponse({"ok": True})
+
+
+@router.post("/{slug}/manage/connections/unlink")
+async def owner_connections_unlink(request: Request, slug: str, provider: str = Form("")):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    from app.services import oauth as oauth_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    pid = strip_control((provider or "").strip().lower())[:16]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return RedirectResponse("/login", status_code=303)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return RedirectResponse(f"/{safe_slug}/manage?err=oauth-not-owner", status_code=303)
+    if pid not in oauth_svc.PROVIDERS:
+        return RedirectResponse(f"/{safe_slug}/manage?err=oauth-provider", status_code=303)
+    ok = user_auth_svc.unlink_social_account(str(viewer["id"]), pid)
+    if not ok:
+        user_auth_svc.audit_user(request, str(viewer["id"]), f"oauth.{pid}.unlink-blocked")
+        return RedirectResponse(f"/{safe_slug}/manage?err=oauth-last-login", status_code=303)
+    user_auth_svc.audit_user(request, str(viewer["id"]), f"oauth.{pid}.unlinked")
+    return RedirectResponse(f"/{safe_slug}/manage?saved=connections", status_code=303)
 
 
 @router.get("/u/{slug}/og.png")

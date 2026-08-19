@@ -423,15 +423,26 @@ def _user_to_context(user) -> dict:
 
 
 @router.get("/auth/oauth/{provider}")
-async def oauth_start(request: Request, provider: str):
+async def oauth_start(request: Request, provider: str, intent: str = "login"):
     pid = _sanitize(provider).strip().lower()[:16]
     if pid not in oauth_svc.PROVIDERS:
         return RedirectResponse("/login?err=oauth-provider", status_code=303)
     if not oauth_svc.is_configured(pid):
         return RedirectResponse("/login?err=oauth-not-configured", status_code=303)
+    link_mode = (intent or "").strip().lower() == "link"
+    if link_mode:
+        viewer = user_auth.require_user(request)
+        if not viewer:
+            return RedirectResponse("/login?err=oauth-link-needs-auth", status_code=303)
     state = oauth_svc.generate_state()
-    authorize_url = oauth_svc.build_authorize_url(pid, state)
+    if link_mode and viewer:
+        attach_uri = f"{os.getenv('OAUTH_REDIRECT_BASE') or os.getenv('PUBLIC_URL') or 'https://foliospace.in'}/auth/oauth/{pid}/attach"
+        authorize_url = oauth_svc.build_authorize_url(pid, state, redirect_uri=attach_uri)
+    else:
+        authorize_url = oauth_svc.build_authorize_url(pid, state)
     if not authorize_url:
+        if link_mode:
+            return RedirectResponse(f"/{viewer['slug']}/manage?err=oauth-start", status_code=303)
         return RedirectResponse("/login?err=oauth-start", status_code=303)
     response = RedirectResponse(authorize_url, status_code=303)
     response.set_cookie(
@@ -452,7 +463,19 @@ async def oauth_start(request: Request, provider: str):
         samesite="lax",
         path="/auth/oauth",
     )
-    user_auth.audit_user(request, None, f"oauth.{pid}.start")
+    if link_mode:
+        response.set_cookie(
+            "fs_oauth_intent",
+            "link",
+            max_age=600,
+            httponly=True,
+            secure=True,
+            samesite="lax",
+            path="/auth/oauth",
+        )
+        user_auth.audit_user(request, str(viewer["id"]), f"oauth.{pid}.link.start")
+    else:
+        user_auth.audit_user(request, None, f"oauth.{pid}.start")
     return response
 
 
@@ -513,6 +536,73 @@ async def oauth_callback(request: Request, provider: str):
     except Exception as e:
         logger.exception("oauth callback failed: %s", e)
         return RedirectResponse("/login?err=oauth", status_code=303)
+
+
+@router.get("/auth/oauth/{provider}/attach")
+async def oauth_attach(request: Request, provider: str):
+    ip = user_auth._client_ip(request)
+    viewer = user_auth.require_user(request)
+    pid = _sanitize(provider).strip().lower()[:16]
+    fallback_target = f"/{viewer['slug']}/manage" if viewer else "/login"
+    if not viewer:
+        response = RedirectResponse("/login?err=oauth-link-needs-auth", status_code=303)
+        response.delete_cookie("fs_oauth_state", path="/auth/oauth")
+        response.delete_cookie("fs_oauth_provider", path="/auth/oauth")
+        response.delete_cookie("fs_oauth_intent", path="/auth/oauth")
+        return response
+    if pid not in oauth_svc.PROVIDERS:
+        response = RedirectResponse(f"{fallback_target}?err=oauth-provider", status_code=303)
+        response.delete_cookie("fs_oauth_state", path="/auth/oauth")
+        response.delete_cookie("fs_oauth_provider", path="/auth/oauth")
+        response.delete_cookie("fs_oauth_intent", path="/auth/oauth")
+        return response
+    if not oauth_svc.is_configured(pid):
+        response = RedirectResponse(f"{fallback_target}?err=oauth-not-configured", status_code=303)
+        response.delete_cookie("fs_oauth_state", path="/auth/oauth")
+        response.delete_cookie("fs_oauth_provider", path="/auth/oauth")
+        response.delete_cookie("fs_oauth_intent", path="/auth/oauth")
+        return response
+    code = _sanitize(request.query_params.get("code", ""))[:512]
+    state_in = _sanitize(request.query_params.get("state", ""))[:128]
+    state_cookie = request.cookies.get("fs_oauth_state", "")
+    intent_cookie = request.cookies.get("fs_oauth_intent", "")
+    pid_cookie = request.cookies.get("fs_oauth_provider", "")
+    if pid_cookie and pid_cookie != pid:
+        user_auth.audit_user(request, str(viewer["id"]), f"oauth.{pid}.attach.provider-mismatch", target=ip)
+    response = RedirectResponse(f"{fallback_target}?err=oauth-attach", status_code=303)
+    response.delete_cookie("fs_oauth_state", path="/auth/oauth")
+    response.delete_cookie("fs_oauth_provider", path="/auth/oauth")
+    response.delete_cookie("fs_oauth_intent", path="/auth/oauth")
+    if not code or not state_in or state_in != state_cookie or intent_cookie != "link":
+        user_auth.audit_user(request, str(viewer["id"]), f"oauth.{pid}.attach.state-mismatch", target=ip)
+        return response
+    profile = oauth_svc.complete(pid, code)
+    if not profile or not profile.get("uid") or not profile.get("email"):
+        user_auth.audit_user(request, str(viewer["id"]), f"oauth.{pid}.attach.profile-failed", target=ip)
+        return response
+    existing = user_auth.find_user_by_provider_uid(pid, profile["uid"])
+    if existing and str(existing.get("id") or "") != str(viewer["id"]):
+        user_auth.audit_user(
+            request,
+            str(viewer["id"]),
+            f"oauth.{pid}.attach.already-linked",
+            target=str(existing.get("id")),
+        )
+        return RedirectResponse(f"{fallback_target}?err=oauth-already-linked", status_code=303)
+    try:
+        ok = user_auth.link_social_account(str(viewer["id"]), pid, profile["uid"], profile["email"])
+    except Exception as e:
+        logger.exception("attach link_social_account failed: %s", e)
+        ok = False
+    if not ok:
+        return response
+    user_auth.audit_user(
+        request,
+        str(viewer["id"]),
+        f"oauth.{pid}.linked",
+        target=profile["uid"][:255],
+    )
+    return RedirectResponse(f"{fallback_target}?saved=oauth", status_code=303)
 
 
 @router.get("/dashboard", response_class=HTMLResponse)

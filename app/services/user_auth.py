@@ -539,6 +539,91 @@ def create_user_from_oauth(
         return None
 
 
+def list_social_accounts(user_id: str | UUID) -> list[dict]:
+    uid = UUID(str(user_id)) if not isinstance(user_id, UUID) else user_id
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT provider, provider_uid, email, created_at
+                      FROM social_accounts
+                     WHERE user_id = %s
+                     ORDER BY created_at ASC
+                    """,
+                    (uid,),
+                )
+                rows = cur.fetchall() or []
+            conn.commit()
+        return [
+            {
+                "provider": (r.get("provider") or "").strip()[:16],
+                "provider_uid": (r.get("provider_uid") or "").strip()[:255],
+                "email": (r.get("email") or "").strip()[:254],
+                "created_at": r.get("created_at"),
+            }
+            for r in rows
+        ]
+    except (psycopg.Error, ValueError, TypeError) as e:
+        logger.exception("list_social_accounts failed: %s", e)
+        return []
+
+
+def has_password(user_id: str | UUID) -> bool:
+    uid = UUID(str(user_id)) if not isinstance(user_id, UUID) else user_id
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT password_hash IS NOT NULL AS has_pw FROM users WHERE id = %s",
+                    (uid,),
+                )
+                row = cur.fetchone()
+            conn.commit()
+        return bool(row and row.get("has_pw"))
+    except (psycopg.Error, ValueError, TypeError) as e:
+        logger.exception("has_password failed: %s", e)
+        return False
+
+
+def unlink_social_account(user_id: str | UUID, provider: str) -> bool:
+    uid = UUID(str(user_id)) if not isinstance(user_id, UUID) else user_id
+    pid = (provider or "").strip().lower()[:16]
+    if not pid:
+        return False
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT password_hash IS NOT NULL AS has_pw FROM users WHERE id = %s",
+                    (uid,),
+                )
+                user_row = cur.fetchone()
+                if not user_row:
+                    conn.commit()
+                    return False
+                cur.execute(
+                    "SELECT COUNT(*) AS n FROM social_accounts WHERE user_id = %s",
+                    (uid,),
+                )
+                count_row = cur.fetchone() or {"n": 0}
+                social_count = int(count_row.get("n") or 0)
+                has_pw = bool(user_row.get("has_pw"))
+                if not has_pw and social_count <= 1:
+                    conn.commit()
+                    return False
+                cur.execute(
+                    "DELETE FROM social_accounts WHERE user_id = %s AND provider = %s",
+                    (uid, pid),
+                )
+                deleted = cur.rowcount
+            conn.commit()
+        return deleted > 0
+    except (psycopg.Error, ValueError, TypeError) as e:
+        logger.exception("unlink_social_account failed: %s", e)
+        return False
+
+
 def destroy_user_session(request: Request) -> None:
     sid = request.session.get(SESSION_KEY)
     if sid and DATABASE_URL:

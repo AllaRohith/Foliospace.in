@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "partials/_oauth_icons.html" as oi %}
 
 {% set folio_base = "https://foliospace.in" %}
 {% block title %}{{ page_title }}{% endblock %}
@@ -199,6 +200,63 @@
             <a class="fm-card-link-cta" href="/{{ user.slug }}" target="_blank" rel="noopener">
               {% if is_live %}View live folio ↗{% else %}Preview private folio ↗{% endif %}
             </a>
+          </section>
+
+          <section class="fm-card fm-card-connections" aria-label="Connected accounts">
+            <div class="fm-card-eyebrow">→ Connected accounts</div>
+            {% if oauth_providers %}
+              {% for pid in oauth_providers %}
+                {% set linked = None %}
+                {% for la in linked_accounts %}
+                  {% if la.provider == pid %}
+                    {% set linked = la %}
+                  {% endif %}
+                {% endfor %}
+                {% set remaining_login_methods = (linked_accounts|length) + (1 if user_has_password else 0) %}
+                <div class="fm-conn-row">
+                  <span class="fm-conn-icon" aria-hidden="true">{{ oi.oauth_icon(pid) }}</span>
+                  <div class="fm-conn-meta">
+                    <div class="fm-conn-name">{{ {'google':'Google','github':'GitHub','linkedin':'LinkedIn'}[pid] }}</div>
+                    {% if linked %}
+                      <div class="fm-conn-state is-linked">Linked as {{ linked.email }}</div>
+                    {% else %}
+                      <div class="fm-conn-state">Not connected</div>
+                    {% endif %}
+                  </div>
+                  {% if linked %}
+                    <form method="post" action="/{{ user.slug }}/manage/connections/unlink" class="fm-conn-form">
+                      <input type="hidden" name="provider" value="{{ pid }}" />
+                      <button
+                        type="submit"
+                        class="fm-conn-btn fm-conn-btn-disconnect"
+                        {% if remaining_login_methods <= 1 %}
+                          disabled
+                          title="Set a password before disconnecting your only login"
+                        {% else %}
+                          data-fm-conn-confirm="Disconnect {{ {'google':'Google','github':'GitHub','linkedin':'LinkedIn'}[pid] }}?"
+                        {% endif %}
+                      >Disconnect</button>
+                    </form>
+                  {% else %}
+                    <a class="fm-conn-btn fm-conn-btn-connect" href="/auth/oauth/{{ pid }}?intent=link">Connect</a>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="fm-conn-empty">
+                Social login isn't enabled yet. Ask the admin to set the
+                <code>OAUTH_*_CLIENT_ID</code> env vars on Render.
+              </div>
+            {% endif %}
+            {% if err == 'oauth-already-linked' %}
+              <div class="fm-conn-err">That provider is already linked to a different account.</div>
+            {% elif err == 'oauth-last-login' %}
+              <div class="fm-conn-err">Set a password first — you can't disconnect your only login method.</div>
+            {% elif err == 'oauth-attach' or err == 'oauth-provider' or err == 'oauth-not-configured' or err == 'oauth-start' or err == 'oauth-not-owner' %}
+              <div class="fm-conn-err">Social link didn't complete. Please try again.</div>
+            {% elif saved_kind == 'connections' or saved_kind == 'oauth' %}
+              <div class="fm-conn-ok">Saved.</div>
+            {% endif %}
           </section>
         </aside>
       </div>

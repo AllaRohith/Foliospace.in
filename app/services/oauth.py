@@ -60,16 +60,17 @@ def _scope_for(provider: str) -> str:
     return ""
 
 
-def build_authorize_url(provider: str, state: str) -> str | None:
+def build_authorize_url(provider: str, state: str, redirect_uri: str | None = None) -> str | None:
     cfg = _provider_config(provider)
     if not cfg:
         return None
     pid = cfg["provider"]
+    target = (redirect_uri or cfg["redirect_uri"]).strip()
     scope = _scope_for(pid)
     if pid == "google":
         params = {
             "client_id": cfg["client_id"],
-            "redirect_uri": cfg["redirect_uri"],
+            "redirect_uri": target,
             "response_type": "code",
             "scope": scope,
             "state": state,
@@ -80,7 +81,7 @@ def build_authorize_url(provider: str, state: str) -> str | None:
     elif pid == "github":
         params = {
             "client_id": cfg["client_id"],
-            "redirect_uri": cfg["redirect_uri"],
+            "redirect_uri": target,
             "scope": scope,
             "state": state,
             "allow_signup": "true",
@@ -88,7 +89,7 @@ def build_authorize_url(provider: str, state: str) -> str | None:
     elif pid == "linkedin":
         params = {
             "client_id": cfg["client_id"],
-            "redirect_uri": cfg["redirect_uri"],
+            "redirect_uri": target,
             "response_type": "code",
             "scope": scope,
             "state": state,
@@ -159,7 +160,7 @@ def _exchange_code(provider: str, code: str) -> dict | None:
         "code": code,
         "client_id": cfg["client_id"],
         "client_secret": cfg["client_secret"],
-        "redirect_uri": cfg["redirect_uri"],
+        "redirect_uri": target,
         "grant_type": "authorization_code",
     }
     headers = None
