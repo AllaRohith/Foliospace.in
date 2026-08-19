@@ -8,7 +8,6 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 GITHUB_API = "https://api.github.com"
-CONTRIB_API = "https://github-contributions-api.deno.dev/user"
 
 
 def _http_get_bearer(url: str, token: str, accept: str = "application/vnd.github+json") -> dict | list | None:
@@ -27,6 +26,31 @@ def _http_get_bearer(url: str, token: str, accept: str = "application/vnd.github
             raw = resp.read().decode("utf-8", errors="replace")
     except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError) as e:
         logger.warning("github GET %s failed: %s", url, e)
+        return None
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        return None
+
+
+def _http_post_graphql(token: str, query: str, variables: dict) -> dict | None:
+    body = json.dumps({"query": query, "variables": variables}).encode("utf-8")
+    req = urllib.request.Request(
+        "https://api.github.com/graphql",
+        method="POST",
+        data=body,
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "User-Agent": "FolioSpace/1.0 (+https://foliospace.in)",
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            raw = resp.read().decode("utf-8", errors="replace")
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError) as e:
+        logger.warning("github POST graphql failed: %s", e)
         return None
     try:
         return json.loads(raw)
@@ -192,55 +216,68 @@ def sync_contributions(user_id: str) -> dict:
     token = get_token_for(user_id)
     if not token:
         return {"ok": False, "reason": "no-token", "count": 0}
-    safe_user = urllib.parse.quote(username, safe="@-._")
-    days_map: dict = {}
-    pages = 0
-    while pages < 5:
-        url = f"{GITHUB_API}/users/{safe_user}/events/public?per_page=100"
-        if pages > 0:
-            url += f"&page={pages + 1}"
-        data = _http_get_bearer(url, token)
-        if not isinstance(data, list):
-            logger.warning("github events: page %d non-list response", pages + 1)
-            break
-        logger.warning("github events: page %d returned %d events", pages + 1, len(data))
-        for ev in data:
-            if not isinstance(ev, dict):
-                continue
-            if ev.get("type") != "PushEvent":
-                continue
-            created = ev.get("created_at")
-            if not created:
+    query = """
+    query($login: String!) {
+      user(login: $login) {
+        contributionsCollection {
+          contributionCalendar {
+            totalContributions
+            weeks {
+              contributionDays {
+                contributionCount
+                date
+              }
+            }
+          }
+        }
+      }
+    }
+    """
+    payload = _http_post_graphql(token, query, {"login": username})
+    if not isinstance(payload, dict):
+        logger.warning("github graphql: no payload")
+        return {"ok": False, "reason": "graphql-failed", "count": 0}
+    if payload.get("errors"):
+        logger.warning("github graphql errors: %s", payload.get("errors"))
+    data = payload.get("data") or {}
+    user = data.get("user") or {}
+    if not user:
+        logger.warning("github graphql: user %s not found", username)
+        return {"ok": False, "reason": "user-not-found", "count": 0}
+    collection = user.get("contributionsCollection") or {}
+    calendar = collection.get("contributionCalendar") or {}
+    weeks = calendar.get("weeks") or []
+    rows = []
+    total = int(calendar.get("totalContributions") or 0)
+    for week in weeks:
+        days = week.get("contributionDays") or []
+        for day in days:
+            dstr = (day.get("date") or "").strip()
+            if not dstr:
                 continue
             try:
-                d = datetime.fromisoformat(str(created).replace("Z", "+00:00")).date()
-            except (ValueError, TypeError):
+                d = datetime.strptime(dstr, "%Y-%m-%d").date()
+            except ValueError:
                 continue
-            payload = ev.get("payload") or {}
-            if not isinstance(payload, dict):
-                continue
-            commits = payload.get("commits") or []
-            if not isinstance(commits, list):
-                continue
-            days_map[d] = days_map.get(d, 0) + len(commits)
-        if len(data) < 100:
-            break
-        pages += 1
-    rows = []
-    for d, count in days_map.items():
-        if count <= 0:
-            level = 0
-        elif count < 4:
-            level = 1
-        elif count < 7:
-            level = 2
-        elif count < 10:
-            level = 3
-        else:
-            level = 4
-        rows.append((user_id, d, count, level))
+            try:
+                count = int(day.get("contributionCount") or 0)
+            except (TypeError, ValueError):
+                count = 0
+            if count <= 0:
+                level = 0
+            elif count < 4:
+                level = 1
+            elif count < 7:
+                level = 2
+            elif count < 10:
+                level = 3
+            else:
+                level = 4
+            if count > 0:
+                rows.append((user_id, d, count, level))
+    logger.warning("github contrib: total %d, %d active days, %d rows to insert", total, len(rows), len(rows))
     if not rows:
-        return {"ok": True, "count": 0}
+        return {"ok": True, "count": 0, "total": total}
     from app.services.user_auth import _connect
     with _connect() as conn:
         with conn.cursor() as cur:
@@ -253,7 +290,7 @@ def sync_contributions(user_id: str) -> dict:
                 rows,
             )
         conn.commit()
-    return {"ok": True, "count": len(rows)}
+    return {"ok": True, "count": len(rows), "total": total}
 
 
 def sync_all(user_id: str) -> dict:
