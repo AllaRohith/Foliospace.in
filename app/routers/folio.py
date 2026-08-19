@@ -475,11 +475,22 @@ async def debug_connections(request: Request):
     viewer = user_auth_svc.require_user(request)
     if not viewer:
         return JSONResponse({"error": "not_logged_in"}, status_code=401)
+    raw_accounts = user_auth_svc.list_social_accounts(str(viewer["id"]))
+    accounts_iso = [
+        {
+            "provider": a.get("provider"),
+            "provider_uid": a.get("provider_uid"),
+            "email": a.get("email"),
+            "created_at": a["created_at"].isoformat() if a.get("created_at") else None,
+        }
+        for a in raw_accounts
+    ]
     return JSONResponse({
         "viewer_id": str(viewer["id"]),
         "viewer_slug": viewer.get("slug"),
         "viewer_email": viewer.get("email"),
         "viewer_has_password_hash": bool(viewer.get("password_hash")),
-        "linked_accounts": user_auth_svc.list_social_accounts(str(viewer["id"])),
+        "linked_accounts": accounts_iso,
+        "linked_count": len(accounts_iso),
         "oauth_providers": oauth_svc.configured_providers(),
     })

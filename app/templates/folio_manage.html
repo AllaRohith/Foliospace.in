@@ -206,12 +206,7 @@
             <div class="fm-card-eyebrow">→ Connected accounts</div>
             {% if oauth_providers %}
               {% for pid in oauth_providers %}
-                {% set linked = None %}
-                {% for la in linked_accounts %}
-                  {% if la.provider == pid %}
-                    {% set linked = la %}
-                  {% endif %}
-                {% endfor %}
+                {% set linked = linked_accounts|selectattr('provider', 'equalto', pid)|first or none %}
                 {% set remaining_login_methods = (linked_accounts|length) + (1 if user_has_password else 0) %}
                 <div class="fm-conn-row">
                   <span class="fm-conn-icon" aria-hidden="true">{{ oi.oauth_icon(pid) }}</span>
