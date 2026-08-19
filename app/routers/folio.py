@@ -216,6 +216,7 @@ async def owner_folio_manage(request: Request, slug: str):
             "grace_days_left": ctx["grace_days_left"],
             "trial_days_left": ctx["trial_days_left"],
             "subscription": ctx["subscription"],
+            "nav_active": "manage",
             "canonical": f"/{safe_slug}/manage",
         },
     )

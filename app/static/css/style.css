@@ -7842,6 +7842,7 @@ body.dark .dash-bar-hamburger { border-color: var(--line); color: var(--ink); }
   .dash-side.is-open { transform: translateX(0); }
   .dash-bar-hamburger { display: inline-flex; }
   .dash-main { padding: 24px 20px 48px; }
+  .fm-grid { grid-template-columns: 1fr; }
 }
 
 .dash-page-title {
@@ -8857,10 +8858,10 @@ body.dark .dash-badge { background: var(--card-bg); }
 }
 
 .fm-brand {
-  font-family: 'Saira', sans-serif;
-  font-weight: 800;
-  font-size: 20px;
-  letter-spacing: -0.02em;
+  font-family: 'Stalinist One', 'Saira', sans-serif;
+  font-weight: 400;
+  font-size: 22px;
+  letter-spacing: -0.01em;
   color: var(--ink);
   text-decoration: none;
   flex-shrink: 0;
