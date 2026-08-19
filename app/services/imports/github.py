@@ -92,15 +92,18 @@ def sync_repos(user_id: str) -> dict:
     seen = []
     page = 1
     while pages < 3:
-        url = f"{GITHUB_API}/user/repos?per_page=100&page={page}&sort=updated&affiliation=owner"
+        url = f"{GITHUB_API}/user/repos?per_page=100&page={page}&sort=updated&affiliation=owner,collaborator,organization_member"
         data = _http_get_bearer(url, token)
         if not isinstance(data, list):
+            logger.warning("github sync: page %d non-list response", page)
             break
+        logger.warning("github sync: page %d returned %d repos", page, len(data))
         seen.extend(data)
         if len(data) < 100:
             break
         page += 1
         pages += 1
+    logger.warning("github sync: total %d repos fetched across %d pages", len(seen), pages)
     rows = []
     seen_ids = set()
     from datetime import datetime
@@ -138,6 +141,7 @@ def sync_repos(user_id: str) -> dict:
                 cur.execute("DELETE FROM imported_repos WHERE user_id = %s", (user_id,))
             conn.commit()
         return {"ok": True, "count": 0}
+    logger.warning("github sync: parsed %d rows from %d raw", len(rows), len(seen))
     from app.services.user_auth import _connect
     with _connect() as conn:
         with conn.cursor() as cur:
