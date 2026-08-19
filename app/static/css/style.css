@@ -11147,8 +11147,8 @@ body.dark .pf-contrib-head-sub strong { color: var(--cream); }
 .pf-contrib-chart {
   display: grid;
   grid-template-columns: repeat(53, 1fr);
+  grid-template-rows: 96px;
   gap: 3px;
-  height: 96px;
   align-items: end;
   padding: 4px 0 0;
   border-bottom: 1px solid var(--line);
@@ -11158,11 +11158,13 @@ body.dark .pf-contrib-head-sub strong { color: var(--cream); }
   display: flex;
   align-items: flex-end;
   height: 100%;
+  min-height: 0;
   position: relative;
 }
 .pf-contrib-bar {
   width: 100%;
   height: var(--h, 4px);
+  min-height: 4px;
   background: var(--cream-3);
   border-radius: 2px 2px 0 0;
   transition: background 0.15s ease, transform 0.15s ease;
