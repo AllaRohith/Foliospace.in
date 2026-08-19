@@ -3,8 +3,7 @@
   <nav class="dash-side-section">
     <div class="dash-side-section-label">Your folio</div>
     <a class="dash-side-item {% if nav_active == 'manage' %}is-active{% endif %}" href="/{{ user.slug }}/manage">Edit folio →</a>
-    <a class="dash-side-item {% if nav_active == 'billing' %}is-active{% endif %}" href="/dashboard/billing">Billing</a>
-    <a class="dash-side-item" href="/pricing" target="_blank" rel="noopener">Plan details ↗</a>
+    <a class="dash-side-item {% if nav_active == 'billing' %}is-active{% endif %}" href="/dashboard/billing">Billing + plan →</a>
   </nav>
   <div class="dash-side-section">
     <div class="dash-side-section-label">Account</div>

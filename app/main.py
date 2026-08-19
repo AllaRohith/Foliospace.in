@@ -272,6 +272,12 @@ async def features(request: Request):
 @app.get("/pricing")
 async def pricing(request: Request):
     from app.services import user_auth, billing as billing_svc
+    try:
+        viewer_redirect = user_auth.require_user(request)
+        if viewer_redirect:
+            return RedirectResponse("/dashboard/billing", status_code=303)
+    except Exception:
+        pass
     ctx = {
         "site_name": "FolioSpace",
         "page_title": "Pricing — FolioSpace",
