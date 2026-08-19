@@ -101,4 +101,115 @@
     }
   }
 
+
+  var nameInput = document.querySelector('input[name="display_name"]');
+  var roleInput = document.querySelector('input[name="role"]');
+  var bioInput = document.querySelector('textarea[name="bio"]');
+  var phoneInput = document.querySelector('input[name="phone"]');
+  var avatarInput = document.querySelector('input[name="avatar_url"]');
+  var toggleInput = document.querySelector('input[name="is_public"]');
+
+  var previewName = document.querySelector('[data-fm-preview-name]');
+  var previewRole = document.querySelector('[data-fm-preview-role]');
+  var previewBio = document.querySelector('[data-fm-preview-bio]');
+  var previewCta = document.querySelector('[data-fm-preview-cta]');
+  var previewAvatar = document.querySelector('[data-fm-preview-avatar]');
+  var previewFallback = document.querySelector('[data-fm-preview-fallback]');
+  var previewHint = document.querySelector('.fm-preview-hint');
+
+  if (previewName && nameInput) {
+    var debounceTimer = null;
+
+    var setInitial = window.getComputedStyle ? window.getComputedStyle(previewName).color : null;
+
+    var sanitizeDigits = function (s) {
+      return (s || '').replace(/[^0-9+]/g, '');
+    };
+
+    var validUrl = function (s) {
+      if (!s) return false;
+      try {
+        var u = new URL(s);
+        return u.protocol === 'http:' || u.protocol === 'https:';
+      } catch (e) {
+        return false;
+      }
+    };
+
+    var initial = function (s) {
+      var trimmed = (s || '').trim();
+      return trimmed ? trimmed.charAt(0).toUpperCase() : '?';
+    };
+
+    var updatePreview = function () {
+      var name = nameInput.value.trim();
+      var role = roleInput ? roleInput.value.trim() : '';
+      var bio = bioInput ? bioInput.value : '';
+      var phone = phoneInput ? phoneInput.value.trim() : '';
+      var avatar = avatarInput ? avatarInput.value.trim() : '';
+
+      previewName.textContent = name || 'Your name';
+
+      if (role) {
+        previewRole.textContent = role;
+        previewRole.removeAttribute('hidden');
+      } else {
+        previewRole.setAttribute('hidden', '');
+      }
+
+      if (bio && bio.trim()) {
+        previewBio.textContent = bio;
+        previewBio.removeAttribute('hidden');
+      } else {
+        previewBio.setAttribute('hidden', '');
+        previewBio.textContent = '';
+      }
+
+      if (phone && sanitizeDigits(phone).length >= 6) {
+        var digits = sanitizeDigits(phone);
+        previewCta.setAttribute('href', 'https://wa.me/' + digits);
+        previewCta.textContent = 'WhatsApp →';
+        previewCta.removeAttribute('hidden');
+      } else {
+        previewCta.setAttribute('hidden', '');
+      }
+
+      if (validUrl(avatar)) {
+        previewAvatar.src = avatar;
+        previewAvatar.removeAttribute('hidden');
+        previewFallback.setAttribute('hidden', '');
+      } else {
+        previewAvatar.removeAttribute('src');
+        previewAvatar.setAttribute('hidden', '');
+        previewFallback.textContent = initial(name);
+        previewFallback.removeAttribute('hidden');
+      }
+    };
+
+    var schedule = function () {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(updatePreview, 120);
+    };
+
+    [nameInput, roleInput, bioInput, phoneInput, avatarInput].forEach(function (el) {
+      if (el) el.addEventListener('input', schedule);
+    });
+
+    if (toggleInput && previewHint) {
+      var setHint = function (isLive) {
+        while (previewHint.firstChild) previewHint.removeChild(previewHint.firstChild);
+        var dot = document.createElement('span');
+        dot.className = 'fm-preview-dot' + (isLive ? ' is-live' : '');
+        var text = document.createTextNode(isLive ? ' Live — others see this now' : ' Preview — only you see this until you toggle public');
+        previewHint.appendChild(dot);
+        previewHint.appendChild(text);
+      };
+      toggleInput.addEventListener('change', function () {
+        setHint(toggleInput.checked);
+      });
+    }
+
+    updatePreview();
+  }
+
 })();
