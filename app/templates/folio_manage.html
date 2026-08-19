@@ -266,8 +266,10 @@
                 {% if imports_state.github.linked %}
                   {% if imports_state.github.repo_count %}
                     <div class="fm-import-state">{{ imports_state.github.repo_count }} repos · synced {{ imports_state.github.last_synced_human }}</div>
+                  {% elif imports_state.github.last_synced_at %}
+                    <div class="fm-import-state">Linked · synced {{ imports_state.github.last_synced_human }}</div>
                   {% else %}
-                    <div class="fm-import-state">Linked · not yet synced</div>
+                    <div class="fm-import-state">Linked · click Refresh to import. If you linked before imports shipped, Disconnect &amp; re-Connect above once.</div>
                   {% endif %}
                 {% else %}
                   <div class="fm-import-state">Link GitHub in Connected accounts above to import.</div>
@@ -286,8 +288,10 @@
                 {% if imports_state.linkedin.linked %}
                   {% if imports_state.linkedin.has_basic_profile %}
                     <div class="fm-import-state">Profile · synced {{ imports_state.linkedin.last_synced_human }}</div>
+                  {% elif imports_state.linkedin.last_synced_at %}
+                    <div class="fm-import-state">Linked · synced {{ imports_state.linkedin.last_synced_human }}</div>
                   {% else %}
-                    <div class="fm-import-state">Linked · not yet synced</div>
+                    <div class="fm-import-state">Linked · click Refresh to import. If you linked before imports shipped, Disconnect &amp; re-Connect above once.</div>
                   {% endif %}
                 {% else %}
                   <div class="fm-import-state">Link LinkedIn in Connected accounts above to import.</div>
@@ -301,7 +305,7 @@
             </div>
 
             {% if err == 'import-not-linked' %}
-              <div class="fm-import-err">Connect that provider first (above).</div>
+              <div class="fm-import-err">Your link doesn't have import access yet. Disconnect that provider above and Connect again — it goes through a fresh OAuth round-trip that saves the access token.</div>
             {% elif err == 'import-server-config' %}
               <div class="fm-import-err">Imports disabled: admin hasn't set <code>IMPORT_TOKEN_KEY</code>.</div>
             {% elif err == 'import-provider' %}
