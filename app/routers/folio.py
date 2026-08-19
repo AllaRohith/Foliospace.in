@@ -1,4 +1,5 @@
 import logging
+import os
 from pathlib import Path
 
 from fastapi import APIRouter, BackgroundTasks, Body, Request
@@ -127,7 +128,7 @@ async def public_folio(request: Request, slug: str):
     bio = (user.get("bio") or "").strip()
     description = bio if bio else f"{display_name} on FolioSpace."
     page_title = f"{display_name} — FolioSpace"
-    public_base_url = _os.getenv("PUBLIC_BASE_URL", "https://foliospace.in").rstrip("/")
+    public_base_url = os.getenv("PUBLIC_BASE_URL", "https://foliospace.in").rstrip("/")
     response = templates.TemplateResponse(
         request,
         "folio.html",
@@ -171,7 +172,7 @@ async def owner_folio_manage(request: Request, slug: str):
             return RedirectResponse(f"/{safe_slug}", status_code=303)
         return RedirectResponse(f"/login?next=/{safe_slug}/manage", status_code=303)
     from app.services import billing as billing_svc
-    public_base_url = _os.getenv("PUBLIC_BASE_URL", "https://foliospace.in").rstrip("/")
+    public_base_url = os.getenv("PUBLIC_BASE_URL", "https://foliospace.in").rstrip("/")
     share_url = f"{public_base_url}/{safe_slug}"
     qr_url = f"{public_base_url}/u/{safe_slug}/qr.png"
     og_image_url = f"{public_base_url}/u/{safe_slug}/og.png"
