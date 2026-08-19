@@ -466,3 +466,20 @@ async def public_folio_qr(request: Request, slug: str):
     response.headers["Cache-Control"] = "public, max-age=3600, immutable"
     response.headers["X-Content-Type-Options"] = "nosniff"
     return response
+
+
+@router.get("/api/debug/connections")
+async def debug_connections(request: Request):
+    from app.services import user_auth as user_auth_svc
+    from app.services import oauth as oauth_svc
+    viewer = user_auth_svc.require_user(request)
+    if not viewer:
+        return JSONResponse({"error": "not_logged_in"}, status_code=401)
+    return JSONResponse({
+        "viewer_id": str(viewer["id"]),
+        "viewer_slug": viewer.get("slug"),
+        "viewer_email": viewer.get("email"),
+        "viewer_has_password_hash": bool(viewer.get("password_hash")),
+        "linked_accounts": user_auth_svc.list_social_accounts(str(viewer["id"])),
+        "oauth_providers": oauth_svc.configured_providers(),
+    })
