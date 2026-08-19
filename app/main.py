@@ -271,15 +271,31 @@ async def features(request: Request):
 
 @app.get("/pricing")
 async def pricing(request: Request):
-    return templates.TemplateResponse(
-        request,
-        "pricing.html",
-        {
-            "site_name": "FolioSpace",
-            "page_title": "Pricing — FolioSpace",
-            "description": "One plan. ₹149/mo via UPI AutoPay. 14-day free trial. Cancel anytime. The single source of truth for FolioSpace pricing.",
-        },
-    )
+    from app.services import user_auth, billing as billing_svc
+    ctx = {
+        "site_name": "FolioSpace",
+        "page_title": "Pricing — FolioSpace",
+        "description": "One plan. ₹149/mo via UPI AutoPay. 14-day free trial. Cancel anytime. The single source of truth for FolioSpace pricing.",
+        "viewer": None,
+        "trial_days_left": 0,
+        "grace_days_left": 0,
+    }
+    user = None
+    try:
+        user = user_auth.require_user(request)
+    except Exception:
+        user = None
+    if user:
+        ctx["viewer"] = {
+            "slug": user["slug"],
+            "is_internal": bool(user.get("is_internal")),
+            "is_trial": bool(user.get("is_trial")),
+            "payment_failed_at": user.get("payment_failed_at"),
+            "plan": user.get("plan") or "free",
+        }
+        ctx["trial_days_left"] = billing_svc.trial_days_left(user)
+        ctx["grace_days_left"] = billing_svc.grace_days_left(user)
+    return templates.TemplateResponse(request, "pricing.html", ctx)
 
 
 @app.get("/community")

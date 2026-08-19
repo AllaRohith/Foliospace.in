@@ -5,7 +5,6 @@
 {% block canonical %}/pricing{% endblock %}
 
 {% block content %}
-{% set u = nav_user(request) %}
 <main id="main" class="pricing-page">
   <div class="container">
 
@@ -16,10 +15,32 @@
       <h1 class="pricing-title">One plan. <em>One number.</em></h1>
       <p class="pricing-lede">Pro is <strong>₹149 every month</strong>, charged by UPI AutoPay. Fourteen days free, then the autopay kicks in. Cancel any time from your dashboard — two taps.</p>
 
+      {% if viewer %}
+        <div class="pricing-current" aria-label="Your current plan">
+          <div class="pricing-current-eyebrow">→ Your plan</div>
+          {% if viewer.is_internal %}
+            <div class="pricing-current-state">Founder access</div>
+            <div class="pricing-current-sub">All Pro features unlocked, no expiry.</div>
+          {% elif viewer.is_trial and trial_days_left > 0 %}
+            <div class="pricing-current-state">Free trial · {{ trial_days_left }} day{{ '' if trial_days_left == 1 else 's' }} left</div>
+            <div class="pricing-current-sub">Full Pro during trial · no card, no mandate. Activate below to keep it after.</div>
+          {% elif viewer.payment_failed_at and grace_days_left %}
+            <div class="pricing-current-state">Payment failed · {{ grace_days_left }} day{{ '' if grace_days_left == 1 else 's' }} grace</div>
+            <div class="pricing-current-sub">UPI mandate didn't approve. Update payment from /dashboard/billing to keep Pro.</div>
+          {% elif viewer.plan == 'pro' %}
+            <div class="pricing-current-state">Pro · Active</div>
+            <div class="pricing-current-sub">₹149/mo via UPI AutoPay. Manage or cancel from /dashboard/billing.</div>
+          {% else %}
+            <div class="pricing-current-state">Free</div>
+            <div class="pricing-current-sub">Pro features from ₹149/mo. Activate below to unlock all of the above.</div>
+          {% endif %}
+        </div>
+      {% endif %}
+
       <div class="pricing-cta-row">
-        {% if u %}
+        {% if viewer %}
           <a class="btn btn-primary btn-lg" href="/dashboard/billing">Manage billing →</a>
-          <a class="btn btn-ghost btn-lg" href="/{{ u.slug }}/manage">Edit your folio →</a>
+          <a class="btn btn-ghost btn-lg" href="/{{ viewer.slug }}/manage">Edit your folio →</a>
         {% else %}
           <a class="btn btn-primary btn-lg" href="/signup">Start 14-day trial →</a>
           <a class="btn btn-ghost btn-lg" href="/login">I already have a folio</a>
