@@ -210,15 +210,12 @@ def sync_repos(user_id: str) -> dict:
 
 
 def sync_contributions(user_id: str) -> dict:
-    username = get_username(user_id)
-    if not username:
-        return {"ok": False, "reason": "no-username", "count": 0}
     token = get_token_for(user_id)
     if not token:
         return {"ok": False, "reason": "no-token", "count": 0}
     query = """
-    query($login: String!) {
-      user(login: $login) {
+    {
+      viewer {
         contributionsCollection {
           contributionCalendar {
             totalContributions
@@ -233,18 +230,18 @@ def sync_contributions(user_id: str) -> dict:
       }
     }
     """
-    payload = _http_post_graphql(token, query, {"login": username})
+    payload = _http_post_graphql(token, query, {})
     if not isinstance(payload, dict):
         logger.warning("github graphql: no payload")
         return {"ok": False, "reason": "graphql-failed", "count": 0}
     if payload.get("errors"):
         logger.warning("github graphql errors: %s", payload.get("errors"))
     data = payload.get("data") or {}
-    user = data.get("user") or {}
-    if not user:
-        logger.warning("github graphql: user %s not found", username)
-        return {"ok": False, "reason": "user-not-found", "count": 0}
-    collection = user.get("contributionsCollection") or {}
+    viewer = data.get("viewer") or {}
+    if not viewer:
+        logger.warning("github graphql: viewer is null — token probably lacks read:user")
+        return {"ok": False, "reason": "no-viewer", "count": 0}
+    collection = viewer.get("contributionsCollection") or {}
     calendar = collection.get("contributionCalendar") or {}
     weeks = calendar.get("weeks") or []
     rows = []
@@ -275,7 +272,7 @@ def sync_contributions(user_id: str) -> dict:
                 level = 4
             if count > 0:
                 rows.append((user_id, d, count, level))
-    logger.warning("github contrib: total %d, %d active days, %d rows to insert", total, len(rows), len(rows))
+    logger.warning("github contrib: total %d, %d active days", total, len(rows))
     if not rows:
         return {"ok": True, "count": 0, "total": total}
     from app.services.user_auth import _connect
