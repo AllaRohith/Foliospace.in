@@ -11123,26 +11123,26 @@ body.dark .pf-repo-stars { color: #ffd66b; }
   width: 14px;
   height: 14px;
   border-radius: 3px;
-  background: var(--cream-3);
-  border: 1px solid transparent;
-  transition: transform 0.15s ease;
+  background: transparent;
+  border: 1px solid rgba(15, 23, 23, 0.10);
+  transition: transform 0.15s ease, border-color 0.15s ease;
 }
-.pf-contrib-cell:hover { transform: scale(1.18); }
-body.dark .pf-contrib-cell { background: rgba(255,255,255,0.05); }
+.pf-contrib-cell:hover { transform: scale(1.30); border-color: var(--ink); z-index: 2; position: relative; }
+body.dark .pf-contrib-cell { border-color: rgba(255,255,255,0.10); }
 .pf-contrib-future { visibility: hidden; }
-.pf-contrib-today { border-color: var(--accent); }
+.pf-contrib-today { border-color: var(--accent); border-width: 1.5px; }
 
-.pf-contrib-l0 { background: rgba(255, 107, 53, 0.08); }
-.pf-contrib-l1 { background: rgba(255, 107, 53, 0.22); }
-.pf-contrib-l2 { background: rgba(255, 107, 53, 0.45); }
-.pf-contrib-l3 { background: rgba(255, 107, 53, 0.7); }
-.pf-contrib-l4 { background: rgba(255, 107, 53, 0.95); }
+.pf-contrib-l0 { background: transparent; border-color: rgba(15, 23, 23, 0.08); }
+.pf-contrib-l1 { background: rgba(255, 107, 53, 0.28); border-color: rgba(255, 107, 53, 0.45); }
+.pf-contrib-l2 { background: rgba(255, 107, 53, 0.55); border-color: rgba(255, 107, 53, 0.65); }
+.pf-contrib-l3 { background: rgba(255, 107, 53, 0.80); border-color: rgba(255, 107, 53, 0.85); }
+.pf-contrib-l4 { background: rgba(255, 107, 53, 1.0);  border-color: rgba(200, 60, 0, 1.0); }
 
-body.dark .pf-contrib-l0 { background: rgba(255, 138, 91, 0.10); }
-body.dark .pf-contrib-l1 { background: rgba(255, 138, 91, 0.28); }
-body.dark .pf-contrib-l2 { background: rgba(255, 138, 91, 0.50); }
-body.dark .pf-contrib-l3 { background: rgba(255, 138, 91, 0.75); }
-body.dark .pf-contrib-l4 { background: rgba(255, 138, 91, 1.0); }
+body.dark .pf-contrib-l0 { background: transparent; border-color: rgba(255,255,255,0.08); }
+body.dark .pf-contrib-l1 { background: rgba(255, 138, 91, 0.32); border-color: rgba(255, 138, 91, 0.40); }
+body.dark .pf-contrib-l2 { background: rgba(255, 138, 91, 0.60); border-color: rgba(255, 138, 91, 0.70); }
+body.dark .pf-contrib-l3 { background: rgba(255, 138, 91, 0.85); border-color: rgba(255, 138, 91, 0.90); }
+body.dark .pf-contrib-l4 { background: rgba(255, 138, 91, 1.0); border-color: rgba(255, 138, 91, 1.0); }
 
 .pf-contrib-legend {
   display: flex;

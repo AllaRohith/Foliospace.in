@@ -98,7 +98,7 @@ def _repo_dict(r: dict) -> dict:
 
 
 def get_public_sections(user_id: str) -> dict:
-    out = {"repos": [], "contributions": [], "contributions_total": 0, "profile": None, "marketing": None, "month_labels": [], "day_labels": ["Mon", "Wed", "Fri"]}
+    out = {"repos": [], "contributions": [], "contributions_total": 0, "active_days": 0, "profile": None, "marketing": None, "month_labels": [], "day_labels": ["Mon", "Wed", "Fri"]}
     from app.services.user_auth import _connect
     with _connect() as conn:
         with conn.cursor() as cur:
@@ -161,6 +161,7 @@ def get_public_sections(user_id: str) -> dict:
     month_labels = []
     cursor = start_monday
     total_count = 0
+    active_days = 0
     last_month = None
     for week_idx in range(53):
         week = []
@@ -177,6 +178,7 @@ def get_public_sections(user_id: str) -> dict:
                     entry["level"] = data["level"]
                     any_active = True
                     total_count += data["count"]
+                    active_days += 1
                 if d == today:
                     entry["is_today"] = True
             week.append(entry)
@@ -192,6 +194,7 @@ def get_public_sections(user_id: str) -> dict:
     out["contributions"] = grid
     out["month_labels"] = month_labels
     out["contributions_total"] = total_count
+    out["active_days"] = active_days
     for prow in profile_rows:
         pid = (prow.get("provider") or "").strip().lower()
         payload = prow.get("payload") or {}
