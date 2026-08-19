@@ -482,36 +482,64 @@ def update_user_profile(
 ) -> dict | None:
     uid = UUID(user_id) if not isinstance(user_id, UUID) else user_id
     now = datetime.now(timezone.utc)
+    avatar_present = avatar_url is not None and avatar_url != ""
     try:
         with _connect() as conn:
             with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    UPDATE users
-                       SET display_name = %s,
-                           role         = %s,
-                           bio          = %s,
-                           phone        = %s,
-                           avatar_url   = %s,
-                           is_public    = %s,
-                           updated_at   = %s
-                     WHERE id = %s
-                       AND deleted_at IS NULL
-                    RETURNING id, email, slug, display_name, role, bio, phone, avatar_url,
-                              is_public, email_verified, created_at, updated_at,
-                              last_login_at, claimed_at, claim_token, claim_expires_at,
-                              deleted_at
-                    """,
-                    (
-                        _clean_text(display_name, MAX_DISPLAY_NAME_LEN),
-                        _clean_text(role, MAX_ROLE_LEN),
-                        _clean_text(bio, MAX_BIO_LEN),
-                        _clean_text(phone, MAX_PHONE_LEN),
-                        _clean_url(avatar_url) if avatar_url is not None else None,
-                        bool(is_public),
-                        now, uid,
-                    ),
-                )
+                if avatar_present:
+                    cur.execute(
+                        """
+                        UPDATE users
+                           SET display_name = %s,
+                               role         = %s,
+                               bio          = %s,
+                               phone        = %s,
+                               avatar_url   = %s,
+                               is_public    = %s,
+                               updated_at   = %s
+                         WHERE id = %s
+                           AND deleted_at IS NULL
+                        RETURNING id, email, slug, display_name, role, bio, phone, avatar_url,
+                                  is_public, email_verified, created_at, updated_at,
+                                  last_login_at, claimed_at, claim_token, claim_expires_at,
+                                  deleted_at
+                        """,
+                        (
+                            _clean_text(display_name, MAX_DISPLAY_NAME_LEN),
+                            _clean_text(role, MAX_ROLE_LEN),
+                            _clean_text(bio, MAX_BIO_LEN),
+                            _clean_text(phone, MAX_PHONE_LEN),
+                            _clean_url(avatar_url),
+                            bool(is_public),
+                            now, uid,
+                        ),
+                    )
+                else:
+                    cur.execute(
+                        """
+                        UPDATE users
+                           SET display_name = %s,
+                               role         = %s,
+                               bio          = %s,
+                               phone        = %s,
+                               is_public    = %s,
+                               updated_at   = %s
+                         WHERE id = %s
+                           AND deleted_at IS NULL
+                        RETURNING id, email, slug, display_name, role, bio, phone, avatar_url,
+                                  is_public, email_verified, created_at, updated_at,
+                                  last_login_at, claimed_at, claim_token, claim_expires_at,
+                                  deleted_at
+                        """,
+                        (
+                            _clean_text(display_name, MAX_DISPLAY_NAME_LEN),
+                            _clean_text(role, MAX_ROLE_LEN),
+                            _clean_text(bio, MAX_BIO_LEN),
+                            _clean_text(phone, MAX_PHONE_LEN),
+                            bool(is_public),
+                            now, uid,
+                        ),
+                    )
                 row = cur.fetchone()
             conn.commit()
     except (psycopg.Error, ValueError, TypeError) as e:
