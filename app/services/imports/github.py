@@ -103,6 +103,7 @@ def sync_repos(user_id: str) -> dict:
         pages += 1
     rows = []
     seen_ids = set()
+    from datetime import datetime
     for r in seen:
         if not isinstance(r, dict):
             continue
@@ -110,6 +111,13 @@ def sync_repos(user_id: str) -> dict:
         if not rid:
             continue
         seen_ids.add(int(rid))
+        pushed_at_val = None
+        pushed_at_raw = r.get("pushed_at")
+        if pushed_at_raw:
+            try:
+                pushed_at_val = datetime.fromisoformat(str(pushed_at_raw).replace("Z", "+00:00"))
+            except (ValueError, TypeError):
+                pushed_at_val = None
         rows.append((
             int(rid),
             (r.get("name") or "").strip()[:200] or "repo",
@@ -120,6 +128,7 @@ def sync_repos(user_id: str) -> dict:
             int(r.get("stargazers_count") or 0),
             bool(r.get("fork")),
             bool(r.get("pinned")),
+            pushed_at_val,
         ))
     if not rows and not seen:
         from app.services.user_auth import _connect
@@ -136,8 +145,8 @@ def sync_repos(user_id: str) -> dict:
                 """
                 INSERT INTO imported_repos
                     (user_id, repo_id, name, full_name, html_url, description,
-                     language, stargazers_count, fork, is_pinned)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                     language, stargazers_count, fork, is_pinned, pushed_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (user_id, repo_id) DO UPDATE SET
                     name = EXCLUDED.name,
                     full_name = EXCLUDED.full_name,
@@ -147,6 +156,7 @@ def sync_repos(user_id: str) -> dict:
                     stargazers_count = EXCLUDED.stargazers_count,
                     fork = EXCLUDED.fork,
                     is_pinned = EXCLUDED.is_pinned,
+                    pushed_at = EXCLUDED.pushed_at,
                     fetched_at = NOW()
                 """,
                 [(user_id, *row) for row in rows],

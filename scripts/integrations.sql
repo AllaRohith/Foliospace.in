@@ -5,6 +5,9 @@ ALTER TABLE social_accounts
     ADD COLUMN IF NOT EXISTS scope          TEXT,
     ADD COLUMN IF NOT EXISTS last_synced_at TIMESTAMPTZ;
 
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS repo_sort TEXT NOT NULL DEFAULT 'stars';
+
 CREATE TABLE IF NOT EXISTS imported_repos (
     user_id          UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     repo_id          BIGINT      NOT NULL,
@@ -16,6 +19,7 @@ CREATE TABLE IF NOT EXISTS imported_repos (
     stargazers_count INTEGER     NOT NULL DEFAULT 0,
     fork             BOOLEAN     NOT NULL DEFAULT FALSE,
     is_pinned        BOOLEAN     NOT NULL DEFAULT FALSE,
+    pushed_at        TIMESTAMPTZ,
     fetched_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (user_id, repo_id)
 );

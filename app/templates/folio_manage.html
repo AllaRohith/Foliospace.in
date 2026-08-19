@@ -314,6 +314,22 @@
               <div class="fm-import-ok">Syncing in background. Refresh in a moment.</div>
             {% elif saved_kind == 'imports-cleared' %}
               <div class="fm-import-ok">Imported data cleared.</div>
+            {% elif saved_kind == 'repo-sort' %}
+              <div class="fm-import-ok">Sort updated.</div>
+            {% endif %}
+
+            {% if imports_state.github.linked %}
+              <form method="post" action="/{{ user.slug }}/manage/repo-sort" class="fm-import-sort">
+                <label class="fm-import-sort-label" for="repo_sort">Sort repos by</label>
+                <select id="repo_sort" name="repo_sort" class="fm-import-sort-select" onchange="this.form.submit()">
+                  <option value="stars" {% if repo_sort == 'stars' %}selected{% endif %}>Most stars</option>
+                  <option value="recent" {% if repo_sort == 'recent' %}selected{% endif %}>Recently fetched</option>
+                  <option value="updated" {% if repo_sort == 'updated' %}selected{% endif %}>Recently pushed</option>
+                </select>
+              </form>
+            {% endif %}
+            {% if err == 'repo-sort' %}
+              <div class="fm-import-err">Unknown sort.</div>
             {% endif %}
           </section>
         </aside>

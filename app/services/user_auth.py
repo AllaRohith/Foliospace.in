@@ -814,6 +814,33 @@ def update_template(user_id, template_id: str) -> dict | None:
     return row
 
 
+def update_repo_sort(user_id, repo_sort: str) -> dict | None:
+    sort = (repo_sort or "").strip().lower()[:16]
+    if sort not in ("stars", "recent", "updated"):
+        return None
+    try:
+        uid = UUID(user_id) if not isinstance(user_id, UUID) else user_id
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE users
+                       SET repo_sort = %s,
+                           updated_at = NOW()
+                     WHERE id = %s
+                       AND deleted_at IS NULL
+                    RETURNING id, repo_sort
+                    """,
+                    (sort, uid),
+                )
+                row = cur.fetchone()
+            conn.commit()
+    except (psycopg.Error, ValueError, TypeError) as e:
+        logger.exception("update_repo_sort failed: %s", e)
+        return None
+    return row
+
+
 def compute_completion(user) -> dict:
     dname = (user.get("display_name") or "").strip()
     role = (user.get("role") or "").strip()

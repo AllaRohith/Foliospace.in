@@ -73,18 +73,30 @@ def get_manage_state(user_id: str) -> dict:
     return out
 
 
+_REPO_SORTS = {
+    "stars": "is_pinned DESC, stargazers_count DESC, fetched_at DESC",
+    "recent": "is_pinned DESC, fetched_at DESC, stargazers_count DESC",
+    "updated": "is_pinned DESC, COALESCE(pushed_at, fetched_at) DESC, stargazers_count DESC",
+}
+
+
 def get_public_sections(user_id: str) -> dict:
-    out = {"repos": [], "contributions": [], "contributions_total": 0, "profile": None}
+    out = {"repos": [], "contributions": [], "contributions_total": 0, "profile": None, "month_labels": [], "day_labels": ["Mon", "Wed", "Fri"]}
     from app.services.user_auth import _connect
     with _connect() as conn:
         with conn.cursor() as cur:
+            cur.execute("SELECT repo_sort FROM users WHERE id = %s", (user_id,))
+            sort_row = cur.fetchone()
+            sort_key = (sort_row.get("repo_sort") if sort_row else None) or "stars"
+            order_clause = _REPO_SORTS.get(sort_key, _REPO_SORTS["stars"])
             cur.execute(
-                """
+                f"""
                 SELECT repo_id, name, full_name, html_url, description,
-                       language, stargazers_count, fork, is_pinned
+                       language, stargazers_count, fork, is_pinned,
+                       COALESCE(pushed_at, fetched_at) AS pushed_at
                 FROM imported_repos
                 WHERE user_id = %s
-                ORDER BY is_pinned DESC, stargazers_count DESC, fetched_at DESC
+                ORDER BY {order_clause}
                 LIMIT 6
                 """,
                 (user_id,),
@@ -130,24 +142,39 @@ def get_public_sections(user_id: str) -> dict:
     today = date.today()
     start_monday = _monday(today - timedelta(days=52 * 7))
     grid = []
+    month_labels = []
     cursor = start_monday
     total_count = 0
-    for _ in range(53):
+    last_month = None
+    for week_idx in range(53):
         week = []
+        any_active = False
         for offset in range(7):
             d = cursor + timedelta(days=offset)
+            entry = {"date": d.isoformat(), "count": 0, "level": 0, "is_today": d == today}
             if d > today:
-                week.append({"date": d.isoformat(), "count": 0, "level": -1})
-                continue
-            data = days_map.get(d)
-            if data:
-                week.append({"date": d.isoformat(), "count": data["count"], "level": data["level"]})
-                total_count += data["count"]
+                entry["level"] = -1
             else:
-                week.append({"date": d.isoformat(), "count": 0, "level": 0})
+                data = days_map.get(d)
+                if data:
+                    entry["count"] = data["count"]
+                    entry["level"] = data["level"]
+                    any_active = True
+                    total_count += data["count"]
+                if d == today:
+                    entry["is_today"] = True
+            week.append(entry)
+        if any_active or week_idx == 0:
+            month_num = cursor.month
+            if month_num != last_month:
+                month_labels.append((week_idx, cursor.strftime("%b")))
+                last_month = month_num
+        else:
+            month_labels.append((week_idx, ""))
         grid.append(week)
         cursor = cursor + timedelta(days=7)
     out["contributions"] = grid
+    out["month_labels"] = month_labels
     out["contributions_total"] = total_count
     for prow in profile_rows:
         pid = (prow.get("provider") or "").strip().lower()

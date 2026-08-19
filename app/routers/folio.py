@@ -212,6 +212,9 @@ async def owner_folio_manage(request: Request, slug: str):
     from app.services.imports import public_render as imports_svc
     imports_state = imports_svc.get_manage_state(str(viewer["id"]))
     imports_configured = imports_svc.server_configured()
+    repo_sort = (user.get("repo_sort") or "stars").lower() if isinstance(user.get("repo_sort"), str) else "stars"
+    if repo_sort not in ("stars", "recent", "updated"):
+        repo_sort = "stars"
     response = templates.TemplateResponse(
         request,
         "folio_manage.html",
@@ -249,6 +252,7 @@ async def owner_folio_manage(request: Request, slug: str):
             "oauth_providers": oauth_providers,
             "imports_state": imports_state,
             "imports_configured": imports_configured,
+            "repo_sort": repo_sort,
         },
     )
     return _no_cache_html(response)
@@ -489,6 +493,25 @@ async def owner_imports_disconnect(request: Request, slug: str, provider: str):
     imports_svc.clear_imports(str(viewer["id"]), pid)
     user_auth_svc.audit_user(request, str(viewer["id"]), f"import.{pid}.disconnect")
     return RedirectResponse(f"/{safe_slug}/manage?saved=imports-cleared&provider={pid}", status_code=303)
+
+
+@router.post("/{slug}/manage/repo-sort")
+@limiter.limit("30/minute")
+async def owner_repo_sort(request: Request, slug: str, repo_sort: str = Form("")):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return RedirectResponse("/", status_code=303)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return RedirectResponse(f"/login?next=/{safe_slug}/manage", status_code=303)
+    updated = user_auth_svc.update_repo_sort(str(viewer["id"]), repo_sort)
+    if not updated:
+        return RedirectResponse(f"/{safe_slug}/manage?err=repo-sort", status_code=303)
+    user_auth_svc.audit_user(request, str(viewer["id"]), "import.repo_sort.update", target=(repo_sort or "").strip().lower()[:16])
+    return RedirectResponse(f"/{safe_slug}/manage?saved=repo-sort", status_code=303)
 
 
 @router.get("/u/{slug}/og.png")
