@@ -194,6 +194,11 @@ async def me(request: Request):
             "phone": user.get("phone") or "",
             "avatar_url": user.get("avatar_url") or "",
             "is_public": bool(user.get("is_public")),
+            "plan": user.get("plan") or "free",
+            "is_internal": bool(user.get("is_internal")),
+            "is_trial": bool(user.get("is_trial")),
+            "payment_failed_at": user.get("payment_failed_at").isoformat() if user.get("payment_failed_at") else None,
+            "plan_expires_at": user.get("plan_expires_at").isoformat() if user.get("plan_expires_at") else None,
         }
     )
 
