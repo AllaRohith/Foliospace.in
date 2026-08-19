@@ -63,10 +63,16 @@
           <h1 class="fm-editor-title">Edit <em>profile.</em></h1>
           <p class="fm-editor-sub">Public — the way others see you on FolioSpace.</p>
 
-          {% if saved %}
+          {% if saved == 'template' %}
+            <div class="fm-flash fm-flash-ok">✓ Template switched.</div>
+          {% elif saved %}
             <div class="fm-flash fm-flash-ok">✓ Saved</div>
           {% endif %}
-          {% if err == 'display_name' %}
+          {% if err == 'template-pro' %}
+            <div class="fm-flash fm-flash-warn">That template is Pro-only. Upgrade from /dashboard/billing to unlock.</div>
+          {% elif err == 'template-not-found' %}
+            <div class="fm-flash fm-flash-warn">That template isn't available right now.</div>
+          {% elif err == 'display_name' %}
             <div class="fm-flash fm-flash-warn">Display name must be 2–80 characters.</div>
           {% elif err == 'bio' %}
             <div class="fm-flash fm-flash-warn">Bio must be 280 characters or fewer.</div>

@@ -10458,3 +10458,85 @@ body.dark .pf-foot-meta strong { color: var(--cream); }
 .pf-foot-top:hover { background: var(--ink); color: var(--cream); border-color: var(--ink); }
 body.dark .pf-foot-top { color: var(--cream); border-color: var(--line); }
 body.dark .pf-foot-top:hover { background: var(--cream); color: var(--ink); border-color: var(--cream); }
+
+
+.dash-side-templates { margin-top: 4px; }
+.dash-side-tpl-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.dash-side-tpl-form { margin: 0; }
+.dash-side-tpl-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+.dash-side-tpl-btn:hover:not(:disabled):not([aria-disabled="true"]) {
+  background: var(--cream-2);
+  border-color: var(--ink-2);
+}
+.dash-side-tpl.is-active .dash-side-tpl-btn {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--cream);
+  cursor: default;
+}
+body.dark .dash-side-tpl.is-active .dash-side-tpl-btn {
+  background: var(--cream);
+  color: var(--ink);
+  border-color: var(--cream);
+}
+.dash-side-tpl.is-locked .dash-side-tpl-btn {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.dash-side-tpl-name { letter-spacing: -0.005em; }
+.dash-side-tpl-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.dash-side-tpl-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 3px rgba(46, 168, 105, 0.2);
+}
+.dash-side-tpl.is-active .dash-side-tpl-dot {
+  background: var(--green);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.18);
+}
+.dash-side-tpl-state { letter-spacing: 0.14em; }
+.dash-side-tpl-arrow { font-size: 14px; opacity: 0.7; }
+.dash-side-tpl-lock {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--accent-glow-1);
+  color: var(--accent);
+  border: 1px solid var(--accent-glow-2);
+}

@@ -137,7 +137,8 @@ def create_user(email: str, password: str, role: str | None = None) -> dict:
                               created_at, updated_at, last_login_at, claimed_at,
                               claim_token, claim_expires_at, deleted_at,
                               plan, plan_expires_at, is_trial,
-                              trial_reminder_7d_sent_at, trial_reminder_4d_sent_at, trial_reminder_2d_sent_at
+                              trial_reminder_7d_sent_at, trial_reminder_4d_sent_at, trial_reminder_2d_sent_at,
+                              template_id
                     """,
                     (email_clean, pw_hash, slug, email_clean.split("@", 1)[0], role, now, now, now),
                 )
@@ -173,7 +174,8 @@ def find_user_by_email(email: str) -> dict | None:
                            claimed_at, claim_token, claim_expires_at, deleted_at,
                            plan, plan_expires_at, payment_failed_at, razorpay_customer_id,
                            is_trial, trial_reminder_7d_sent_at, trial_reminder_4d_sent_at, trial_reminder_2d_sent_at,
-                           is_internal
+                           is_internal,
+                           template_id
                       FROM users
                      WHERE email = %s
                     """,
@@ -202,7 +204,8 @@ def find_user_by_id(user_id: str | UUID) -> dict | None:
                            claimed_at, claim_token, claim_expires_at, deleted_at,
                            plan, plan_expires_at, payment_failed_at, razorpay_customer_id,
                            is_trial, trial_reminder_7d_sent_at, trial_reminder_4d_sent_at, trial_reminder_2d_sent_at,
-                           is_internal
+                           is_internal,
+                           template_id
                       FROM users
                      WHERE id = %s
                     """,
@@ -544,6 +547,33 @@ def update_user_profile(
             conn.commit()
     except (psycopg.Error, ValueError, TypeError) as e:
         logger.exception("update_user_profile failed: %s", e)
+        return None
+    return row
+
+
+def update_template(user_id, template_id: str) -> dict | None:
+    tid = (template_id or "").strip()[:32]
+    if not tid:
+        return None
+    try:
+        uid = UUID(user_id) if not isinstance(user_id, UUID) else user_id
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE users
+                       SET template_id = %s,
+                           updated_at  = NOW()
+                     WHERE id = %s
+                       AND deleted_at IS NULL
+                    RETURNING id, template_id
+                    """,
+                    (tid, uid),
+                )
+                row = cur.fetchone()
+            conn.commit()
+    except (psycopg.Error, ValueError, TypeError) as e:
+        logger.exception("update_template failed: %s", e)
         return None
     return row
 

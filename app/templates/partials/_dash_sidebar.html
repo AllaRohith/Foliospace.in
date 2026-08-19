@@ -5,6 +5,45 @@
     <a class="dash-side-item {% if nav_active == 'manage' %}is-active{% endif %}" href="/{{ user.slug }}/manage">Edit folio →</a>
     <a class="dash-side-item {% if nav_active == 'billing' %}is-active{% endif %}" href="/dashboard/billing">Billing + plan →</a>
   </nav>
+
+  {% if templates_catalog is defined and templates_catalog %}
+    <div class="dash-side-section dash-side-templates">
+      <div class="dash-side-section-label">Template</div>
+      <ul class="dash-side-tpl-list">
+        {% for t in templates_catalog %}
+          {% set is_active = (t.id == current_template_id) %}
+          {% set can_pick = (not t.is_pro_only) or (user_plan == 'pro') or is_internal %}
+          <li class="dash-side-tpl {{ 'is-active' if is_active else '' }} {{ 'is-locked' if not can_pick else '' }}">
+            {% if can_pick %}
+              <form method="post" action="/{{ user.slug }}/manage/template" class="dash-side-tpl-form">
+                <input type="hidden" name="template_id" value="{{ t.id }}" />
+                <button type="submit" class="dash-side-tpl-btn"
+                        {% if is_active %}disabled aria-current="true"{% endif %}>
+                  <span class="dash-side-tpl-name">{{ t.name }}</span>
+                  <span class="dash-side-tpl-mark">
+                    {% if is_active %}
+                      <span class="dash-side-tpl-dot" aria-hidden="true"></span>
+                      <span class="dash-side-tpl-state">Active</span>
+                    {% else %}
+                      <span class="dash-side-tpl-arrow" aria-hidden="true">→</span>
+                    {% endif %}
+                  </span>
+                </button>
+              </form>
+            {% else %}
+              <div class="dash-side-tpl-btn is-locked" aria-disabled="true">
+                <span class="dash-side-tpl-name">{{ t.name }}</span>
+                <span class="dash-side-tpl-mark">
+                  <span class="dash-side-tpl-lock">Pro</span>
+                </span>
+              </div>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
   <div class="dash-side-section">
     <div class="dash-side-section-label">Account</div>
     <form method="post" action="/logout" class="dash-side-signout-form">

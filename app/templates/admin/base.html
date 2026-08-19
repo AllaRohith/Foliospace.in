@@ -25,6 +25,7 @@
     {% set _path = request.url.path %}
     {% if _path.startswith('/admin/signups') %}{% set _nav_active = 'signups' %}
     {% elif _path.startswith('/admin/audit') %}{% set _nav_active = 'audit' %}
+    {% elif _path.startswith('/admin/templates') %}{% set _nav_active = 'templates' %}
     {% elif _path.startswith('/admin/') %}{% set _nav_active = 'dashboard' %}
     {% endif %}
   {% endif %}
@@ -51,6 +52,10 @@
           <svg class="sidebar-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 2v12l5-3 5 3V2z"/></svg>
           <span class="sidebar-label">Audit</span>
           {% if _audit_badge %}<span class="sidebar-badge">{{ _audit_badge }}</span>{% endif %}
+        </a>
+        <a href="/admin/templates" class="sidebar-item {{ 'is-active' if _nav_active == 'templates' else '' }}">
+          <svg class="sidebar-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M2 6h12M6 2v12"/></svg>
+          <span class="sidebar-label">Templates</span>
         </a>
       </nav>
     </div>

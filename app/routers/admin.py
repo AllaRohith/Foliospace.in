@@ -12,6 +12,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response, Streamin
 from psycopg.rows import dict_row
 
 from app.services import admin_auth
+from app.services import templates as templates_svc
 from app.routers.waitlist import EMAIL_RE
 from app.utils.text import strip_control, strip_control as _sanitize
 from app.rate_limit import limiter
@@ -666,3 +667,56 @@ async def audit_log(request: Request):
         },
     )
     return _no_cache(response)
+
+@router.get("/templates", response_class=HTMLResponse)
+async def templates_list(request: Request):
+    guard = _gate(request)
+    if isinstance(guard, RedirectResponse):
+        return guard
+    sid = guard
+    items = templates_svc.list_catalog()
+    flash = _sanitize(request.query_params.get("msg", ""))[:80]
+    err = _sanitize(request.query_params.get("err", ""))[:80]
+    visible_count = sum(1 for t in items if t["is_visible"])
+    return templates.TemplateResponse(
+        request,
+        "admin/templates.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Templates · FolioSpace Admin",
+            "description": "Manage the public folio template catalog. Toggle visibility per template.",
+            "nav_active": "templates",
+            "items": items,
+            "visible_count": visible_count,
+            "flash": flash,
+            "err": err,
+        },
+    )
+
+
+@router.post("/templates/{template_id}/toggle")
+async def templates_toggle(template_id: str, request: Request):
+    guard = _gate(request)
+    if isinstance(guard, RedirectResponse):
+        return guard
+    sid = guard
+    tid = _sanitize(template_id)[:32]
+    if not tid:
+        return RedirectResponse("/admin/templates?err=missing-id", status_code=303)
+    current = templates_svc.get(tid)
+    if not current:
+        return RedirectResponse("/admin/templates?err=not-found", status_code=303)
+    new_state = not current["is_visible"]
+    if tid == "t1" and not new_state:
+        return RedirectResponse("/admin/templates?err=default-locked", status_code=303)
+    ok = templates_svc.set_visibility(tid, new_state, updated_by=sid or "")
+    if not ok:
+        return RedirectResponse("/admin/templates?err=save-failed", status_code=303)
+    admin_auth.audit(
+        request,
+        sid,
+        "admin.template.toggle",
+        target=tid,
+        metadata={"is_visible": new_state, "name": current["name"]},
+    )
+    return RedirectResponse(f"/admin/templates?msg={tid}", status_code=303)

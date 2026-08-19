@@ -290,6 +290,7 @@ async def pricing(request: Request):
             "payment_failed_at": user.get("payment_failed_at"),
             "plan_expires_at": user.get("plan_expires_at"),
             "plan": user.get("plan") or "free",
+            "template_id": (user.get("template_id") or "t1").strip()[:32],
         }
         ctx["trial_days_left"] = billing_svc.trial_days_left(user)
         ctx["grace_days_left"] = billing_svc.grace_days_left(user)

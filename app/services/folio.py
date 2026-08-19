@@ -221,6 +221,7 @@ def find_user_by_slug(slug: str, *, require_public: bool = True) -> dict | None:
                avatar_public_id, is_public,
                plan, is_internal, is_trial, payment_failed_at,
                setup_paid_at, plan_expires_at,
+               template_id,
                created_at, updated_at, deleted_at
           FROM users
          WHERE slug = %s
@@ -237,7 +238,8 @@ def find_user_by_slug(slug: str, *, require_public: bool = True) -> dict | None:
                'free'::text AS plan, FALSE AS is_internal, FALSE AS is_trial,
                NULL::timestamp AS payment_failed_at,
                NULL::timestamp AS setup_paid_at,
-               NULL::timestamp AS plan_expires_at
+               NULL::timestamp AS plan_expires_at,
+               't1'::text AS template_id
           FROM users
          WHERE slug = %s
             OR lower(slug) = lower(%s)
