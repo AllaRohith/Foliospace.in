@@ -206,7 +206,7 @@ async def landing(request: Request):
             "site_name": "FolioSpace",
             "tagline": "Your story. One link. Done.",
             "page_title": "FolioSpace — Your portfolio. Your link. Done.",
-            "description": "One link for every Indian pro — chefs, devs, students, consultants, shops, founders. ₹150 setup, ₹99/mo.",
+            "description": "One link for every Indian pro — chefs, devs, students, consultants, shops, founders. ₹149/mo via UPI AutoPay. 14-day free trial.",
             "launch_iso": launch_iso,
         },
     )
