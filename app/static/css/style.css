@@ -8502,15 +8502,15 @@ body.dark .pf-page { background: var(--bg); }
 }
 
 .pf-shell {
-  max-width: 720px;
+  max-width: 920px;
   margin: 0 auto;
   position: relative;
 }
 
 .pf-hero {
   position: relative;
-  padding: 28px 32px 28px;
-  margin-bottom: 32px;
+  padding: 36px 40px 32px;
+  margin-bottom: 36px;
   background: var(--cream);
   border-top: 2px solid var(--ink);
   border-bottom: 2px solid var(--ink);
@@ -8538,7 +8538,7 @@ body.dark .pf-hero-masthead-mark { color: var(--cream); }
 
 .pf-hero-grid {
   display: grid;
-  grid-template-columns: 168px minmax(0, 1fr);
+  grid-template-columns: 196px minmax(0, 1fr);
   gap: 0;
   align-items: stretch;
   position: relative;
@@ -8546,7 +8546,7 @@ body.dark .pf-hero-masthead-mark { color: var(--cream); }
 .pf-hero-grid::before {
   content: "";
   position: absolute;
-  left: 168px;
+  left: 196px;
   top: 0;
   bottom: 0;
   width: 2px;
@@ -8558,26 +8558,26 @@ body.dark .pf-hero-masthead-mark { color: var(--cream); }
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding-right: 32px;
-  padding-bottom: 24px;
+  padding-right: 36px;
+  padding-bottom: 28px;
 }
 .pf-hero-id {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding-left: 32px;
-  padding-bottom: 24px;
+  padding-left: 36px;
+  padding-bottom: 28px;
   min-width: 0;
 }
 
 .pf-avatar-wrap {
   position: relative;
-  padding-left: 6px;
+  padding-left: 7px;
   align-self: flex-start;
 }
 .pf-avatar {
-  width: 152px;
-  height: 152px;
+  width: 180px;
+  height: 180px;
   border-radius: 2px;
   background: var(--cream-2);
   object-fit: cover;
@@ -8587,9 +8587,9 @@ body.dark .pf-hero-masthead-mark { color: var(--cream); }
 .pf-avatar-bar {
   position: absolute;
   left: 0;
-  top: 6px;
-  bottom: 6px;
-  width: 4px;
+  top: 7px;
+  bottom: 7px;
+  width: 5px;
   background: var(--accent);
   border-radius: 1px;
 }
@@ -8598,7 +8598,7 @@ body.dark .pf-hero-masthead-mark { color: var(--cream); }
   align-items: center;
   justify-content: center;
   font-family: 'Stalinist One', sans-serif;
-  font-size: 60px;
+  font-size: 72px;
   color: var(--ink);
   background: var(--cream-2);
   border: 1px solid var(--line);
@@ -8642,10 +8642,10 @@ body.dark .pf-avatar-fallback {
 
 .pf-name {
   font-family: 'Stalinist One', 'Saira', sans-serif;
-  font-size: clamp(40px, 6.4vw, 68px);
-  line-height: 0.98;
-  letter-spacing: -0.015em;
-  margin: 0 0 10px;
+  font-size: clamp(44px, 5.8vw, 78px);
+  line-height: 0.96;
+  letter-spacing: -0.018em;
+  margin: 0 0 12px;
   color: var(--ink);
   word-break: break-word;
 }
@@ -8677,11 +8677,11 @@ body.dark .pf-avatar-fallback {
 .pf-loc-mark { color: var(--accent); font-size: 10px; }
 .pf-bio {
   font-family: 'Saira', sans-serif;
-  font-size: 17px;
+  font-size: 18px;
   line-height: 1.55;
-  margin: 0 0 24px;
+  margin: 0 0 26px;
   color: var(--ink-2);
-  max-width: 56ch;
+  max-width: 58ch;
   white-space: pre-wrap;
 }
 body.dark .pf-bio { color: rgba(250, 247, 242, 0.78); }
@@ -8872,14 +8872,14 @@ body.dark .pf-card {
 }
 
 @media (max-width: 900px) {
-  .pf-hero { padding: 24px 22px 24px; }
-  .pf-hero-grid { grid-template-columns: 128px minmax(0, 1fr); }
-  .pf-hero-grid::before { left: 128px; }
-  .pf-hero-portrait { padding-right: 22px; }
-  .pf-hero-id { padding-left: 22px; }
-  .pf-avatar { width: 116px; height: 116px; }
-  .pf-avatar-fallback { font-size: 46px; }
-  .pf-bio { font-size: 16px; }
+  .pf-hero { padding: 26px 26px 26px; }
+  .pf-hero-grid { grid-template-columns: 148px minmax(0, 1fr); }
+  .pf-hero-grid::before { left: 148px; }
+  .pf-hero-portrait { padding-right: 26px; }
+  .pf-hero-id { padding-left: 26px; }
+  .pf-avatar { width: 132px; height: 132px; }
+  .pf-avatar-fallback { font-size: 52px; }
+  .pf-bio { font-size: 16.5px; }
 }
 
 @media (max-width: 640px) {
