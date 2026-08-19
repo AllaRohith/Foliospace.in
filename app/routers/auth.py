@@ -282,27 +282,3 @@ async def profile_submit(
         metadata={"is_public": public_flag},
     )
     return RedirectResponse(f"{target}?saved=1", status_code=303)
-
-
-@router.get("/dashboard/portfolio", response_class=HTMLResponse)
-async def dashboard_portfolio(request: Request):
-    user = user_auth.require_user(request)
-    if not user:
-        return RedirectResponse("/login?next=/dashboard/portfolio", status_code=303)
-    return RedirectResponse(f"/{user['slug']}/manage", status_code=303)
-
-
-@router.get("/dashboard/integrations", response_class=HTMLResponse)
-async def dashboard_integrations(request: Request):
-    user = user_auth.require_user(request)
-    if not user:
-        return RedirectResponse("/login?next=/dashboard/integrations", status_code=303)
-    return RedirectResponse(f"/{user['slug']}/manage", status_code=303)
-
-
-@router.get("/dashboard/share", response_class=HTMLResponse)
-async def dashboard_share(request: Request):
-    user = user_auth.require_user(request)
-    if not user:
-        return RedirectResponse("/login?next=/dashboard/share", status_code=303)
-    return RedirectResponse(f"/{user['slug']}/manage", status_code=303)
