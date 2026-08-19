@@ -7643,7 +7643,8 @@ body.dark .dash-side-foot .foot-avatar { background: var(--ink); color: var(--bg
   padding: 14px 14px 12px;
   font-family: 'Saira', sans-serif;
   position: relative;
-  overflow: hidden;
+  box-sizing: border-box;
+  word-break: break-word;
 }
 .dash-side-plan-eyebrow {
   font-size: 10px;
@@ -7662,7 +7663,7 @@ body.dark .dash-side-foot .foot-avatar { background: var(--ink); color: var(--bg
 }
 .dash-side-plan-headline strong {
   display: inline-block;
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1;
