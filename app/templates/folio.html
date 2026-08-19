@@ -107,43 +107,40 @@
       </section>
     {% endif %}
 
-    {% if integrations and integrations.contributions and integrations.contributions|length > 0 %}
+    {% if integrations and integrations.weekly and integrations.weekly|length > 0 %}
       <section class="pf-card pf-card-imports-contributions" aria-label="GitHub contribution graph">
         <div class="pf-card-eyebrow">→ Last 12 months</div>
-        <h2 class="pf-card-heading">{{ integrations.contributions_total }} contributions</h2>
-        <div class="pf-contrib-wrap">
-          <div class="pf-contrib-daycol" aria-hidden="true">
-            <span></span><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span>
-          </div>
-          <div class="pf-contrib-rail">
-            <div class="pf-contrib-monthrow" aria-hidden="true">
-              {% for week_idx, label in integrations.month_labels %}
-                <span style="width: 18px; min-width: 18px;">{{ label }}</span>
-              {% endfor %}
-            </div>
-            <div class="pf-contrib-grid" role="img" aria-label="Activity graph">
-              {% for week in integrations.contributions %}
-                <div class="pf-contrib-col">
-                  {% for day in week %}
-                    {% if day.level == -1 %}
-                      <div class="pf-contrib-cell pf-contrib-future"></div>
-                    {% else %}
-                      <div class="pf-contrib-cell pf-contrib-l{{ day.level }}{% if day.is_today %} pf-contrib-today{% endif %}" title="{{ day.count }} {% if day.is_today %}today ·{% endif %} {{ day.date }}"></div>
-                    {% endif %}
-                  {% endfor %}
-                </div>
-              {% endfor %}
-            </div>
+        <div class="pf-contrib-head">
+          <div class="pf-contrib-head-num">{{ integrations.contributions_total }}</div>
+          <div class="pf-contrib-head-meta">
+            <div class="pf-contrib-head-label">contributions</div>
+            <div class="pf-contrib-head-sub">across <strong>{{ integrations.weekly|length }}</strong> weeks · {{ integrations.active_days }} active days</div>
           </div>
         </div>
-        <div class="pf-contrib-legend">
-          <span class="pf-contrib-legend-label">Less</span>
-          <span class="pf-contrib-cell pf-contrib-l0"></span>
-          <span class="pf-contrib-cell pf-contrib-l1"></span>
-          <span class="pf-contrib-cell pf-contrib-l2"></span>
-          <span class="pf-contrib-cell pf-contrib-l3"></span>
-          <span class="pf-contrib-cell pf-contrib-l4"></span>
-          <span class="pf-contrib-legend-label">More</span>
+        <div class="pf-contrib-monthrow" aria-hidden="true">
+          {% for week_idx, label in integrations.month_labels %}
+            {% if label %}<span class="pf-contrib-monthtick" style="grid-column-start: {{ week_idx + 1 }}">{{ label }}</span>{% endif %}
+          {% endfor %}
+        </div>
+        <div class="pf-contrib-chart" role="img" aria-label="Weekly commit histogram">
+          {% for w in integrations.weekly %}
+            <div class="pf-contrib-bar-slot">
+              <div class="pf-contrib-bar {% if w.active %}is-active{% endif %} {% if w.is_current %}is-current{% endif %}"
+                   style="--h: {{ w.pct }}%; {% if not w.active %}--h: 4px;{% endif %}"
+                   title="{{ w.total }} commits in week of {{ w.week_start }}">
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="pf-contrib-axis">
+          <span>Less</span>
+          <span class="pf-contrib-axis-bar">
+            <span class="pf-contrib-axis-tick" style="height: 25%"></span>
+            <span class="pf-contrib-axis-tick" style="height: 50%"></span>
+            <span class="pf-contrib-axis-tick" style="height: 75%"></span>
+            <span class="pf-contrib-axis-tick" style="height: 100%"></span>
+          </span>
+          <span>More</span>
         </div>
       </section>
     {% endif %}

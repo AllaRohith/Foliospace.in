@@ -195,6 +195,30 @@ def get_public_sections(user_id: str) -> dict:
     out["month_labels"] = month_labels
     out["contributions_total"] = total_count
     out["active_days"] = active_days
+
+    weekly = []
+    week_cursor = start_monday
+    for week_idx in range(53):
+        week_total = 0
+        for offset in range(7):
+            d = week_cursor + timedelta(days=offset)
+            if d > today:
+                continue
+            data = days_map.get(d)
+            if data:
+                week_total += data["count"]
+        weekly.append({
+            "week_start": week_cursor.isoformat(),
+            "total": week_total,
+            "active": week_total > 0,
+            "is_current": today >= week_cursor and today < week_cursor + timedelta(days=7),
+        })
+        week_cursor = week_cursor + timedelta(days=7)
+    max_week = max((w["total"] for w in weekly), default=0)
+    for w in weekly:
+        w["pct"] = int((w["total"] / max_week) * 100) if max_week > 0 else 0
+    out["weekly"] = weekly
+    out["weekly_max"] = max_week
     for prow in profile_rows:
         pid = (prow.get("provider") or "").strip().lower()
         payload = prow.get("payload") or {}
