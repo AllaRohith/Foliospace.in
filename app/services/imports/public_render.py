@@ -147,6 +147,14 @@ def get_public_sections(user_id: str) -> dict:
                 (user_id,),
             )
             profile_rows = cur.fetchall() or []
+            cur.execute(
+                """
+                SELECT provider, payload, fetched_at FROM imported_marketing
+                WHERE user_id = %s
+                """,
+                (user_id,),
+            )
+            marketing_rows = cur.fetchall() or []
     today = date.today()
     start_monday = _monday(today - timedelta(days=52 * 7))
     grid = []
@@ -199,14 +207,6 @@ def get_public_sections(user_id: str) -> dict:
             "fetched_at": prow.get("fetched_at").isoformat() if prow.get("fetched_at") else None,
         }
         break
-    cur.execute(
-        """
-        SELECT provider, payload, fetched_at FROM imported_marketing
-        WHERE user_id = %s
-        """,
-        (user_id,),
-    )
-    marketing_rows = cur.fetchall() or []
     for mrow in marketing_rows:
         pid = (mrow.get("provider") or "").strip().lower()
         payload = mrow.get("payload") or {}
