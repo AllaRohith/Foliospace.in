@@ -288,12 +288,6 @@ async def reset_submit(
     if not user_auth.set_password(user_id, pw):
         return RedirectResponse(f"/reset?err=server&token={token_clean}", status_code=303)
     user_auth.audit_user(request, user_id, "password.reset.done", target=ip)
-    try:
-        user = user_auth.find_user_by_id(user_id)
-        if user and not user.get("deleted_at"):
-            user_auth.create_user_session(request, user_id)
-    except Exception as e:
-        logger.exception("post-reset session failed: %s", e)
     return RedirectResponse("/login?ok=reset", status_code=303)
 
 
@@ -436,7 +430,7 @@ async def oauth_start(request: Request, provider: str, intent: str = "login"):
             return RedirectResponse("/login?err=oauth-link-needs-auth", status_code=303)
     state = oauth_svc.generate_state()
     if link_mode and viewer:
-        attach_uri = f"{os.getenv('OAUTH_REDIRECT_BASE') or os.getenv('PUBLIC_URL') or 'https://foliospace.in'}/auth/oauth/{pid}/attach"
+        attach_uri = oauth_svc.callback_uri(pid, "attach")
         authorize_url = oauth_svc.build_authorize_url(pid, state, redirect_uri=attach_uri)
     else:
         authorize_url = oauth_svc.build_authorize_url(pid, state)
@@ -576,7 +570,7 @@ async def oauth_attach(request: Request, provider: str):
     if not code or not state_in or state_in != state_cookie or intent_cookie != "link":
         user_auth.audit_user(request, str(viewer["id"]), f"oauth.{pid}.attach.state-mismatch", target=ip)
         return response
-    profile = oauth_svc.complete(pid, code)
+    profile = oauth_svc.complete(pid, code, redirect_uri=oauth_svc.callback_uri(pid, "attach"))
     if not profile or not profile.get("uid") or not profile.get("email"):
         user_auth.audit_user(request, str(viewer["id"]), f"oauth.{pid}.attach.profile-failed", target=ip)
         return response

@@ -28,6 +28,11 @@ def _redirect_base() -> str:
     return (os.getenv("OAUTH_REDIRECT_BASE") or os.getenv("PUBLIC_URL") or "https://foliospace.in").strip().rstrip("/")
 
 
+def callback_uri(provider: str, kind: str = "callback") -> str:
+    pid = provider.lower().strip()
+    return f"{_redirect_base()}/auth/oauth/{pid}/{kind}"
+
+
 def _provider_config(provider: str) -> dict | None:
     pid = provider.lower().strip()
     client_id = os.getenv(f"OAUTH_{pid.upper()}_CLIENT_ID", "").strip()
@@ -38,7 +43,7 @@ def _provider_config(provider: str) -> dict | None:
         "provider": pid,
         "client_id": client_id,
         "client_secret": client_secret,
-        "redirect_uri": f"{_redirect_base()}/auth/oauth/{pid}/callback",
+        "redirect_uri": callback_uri(pid, "callback"),
     }
 
 
@@ -151,11 +156,12 @@ def _http_get(url: str, headers: dict | None = None) -> dict | None:
         return None
 
 
-def _exchange_code(provider: str, code: str) -> dict | None:
+def _exchange_code(provider: str, code: str, redirect_uri: str | None = None) -> dict | None:
     cfg = _provider_config(provider)
     if not cfg:
         return None
     pid = cfg["provider"]
+    target = (redirect_uri or cfg["redirect_uri"]).strip()
     data = {
         "code": code,
         "client_id": cfg["client_id"],
@@ -233,11 +239,11 @@ def normalize_profile(provider: str, raw: dict) -> dict | None:
     }
 
 
-def complete(provider: str, code: str) -> dict | None:
+def complete(provider: str, code: str, redirect_uri: str | None = None) -> dict | None:
     pid = provider.lower().strip()
     if pid not in PROVIDERS:
         return None
-    token_data = _exchange_code(pid, code)
+    token_data = _exchange_code(pid, code, redirect_uri=redirect_uri)
     if not token_data:
         return None
     access_token = (token_data.get("access_token") or "").strip()
