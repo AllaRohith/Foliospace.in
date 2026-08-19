@@ -209,3 +209,63 @@ def send_internal_notification(
     except Exception as e:
         logger.exception("internal notification failed: %s", e)
         return False, str(e)
+
+
+def send_otp_email(to_email: str, code: str, ttl_minutes: int = 10) -> tuple[bool, str]:
+    if not API_KEY:
+        logger.info("RESEND_API_KEY not set, skipping OTP email to %s", to_email)
+        return False, "no_api_key"
+    try:
+        resend.api_key = API_KEY
+        context = {
+            "public_url": PUBLIC_URL,
+            "first_name": _first_name_from_email(to_email),
+            "code": code,
+            "ttl_minutes": ttl_minutes,
+        }
+        html = _render_template("otp.html", **context)
+        subject = f"Your FolioSpace code: {code}"
+        params = {
+            "from": FROM_EMAIL,
+            "to": [to_email],
+            "reply_to": REPLY_TO,
+            "subject": subject,
+            "html": html,
+        }
+        result = resend.Emails.send(params)
+        msg_id = result.get("id", "unknown") if isinstance(result, dict) else str(result)
+        logger.info("sent OTP email to %s (id=%s)", to_email, msg_id)
+        return True, msg_id
+    except Exception as e:
+        logger.exception("failed to send OTP email to %s: %s", to_email, e)
+        return False, str(e)
+
+
+def send_password_reset_email(to_email: str, reset_link: str, ttl_minutes: int = 30) -> tuple[bool, str]:
+    if not API_KEY:
+        logger.info("RESEND_API_KEY not set, skipping reset email to %s", to_email)
+        return False, "no_api_key"
+    try:
+        resend.api_key = API_KEY
+        context = {
+            "public_url": PUBLIC_URL,
+            "first_name": _first_name_from_email(to_email),
+            "reset_link": reset_link,
+            "ttl_minutes": ttl_minutes,
+        }
+        html = _render_template("password_reset.html", **context)
+        subject = "Reset your FolioSpace password"
+        params = {
+            "from": FROM_EMAIL,
+            "to": [to_email],
+            "reply_to": REPLY_TO,
+            "subject": subject,
+            "html": html,
+        }
+        result = resend.Emails.send(params)
+        msg_id = result.get("id", "unknown") if isinstance(result, dict) else str(result)
+        logger.info("sent password reset email to %s (id=%s)", to_email, msg_id)
+        return True, msg_id
+    except Exception as e:
+        logger.exception("failed to send reset email to %s: %s", to_email, e)
+        return False, str(e)

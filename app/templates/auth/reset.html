@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Reset password — FolioSpace{% endblock %}
+{% block description %}Set a new password for your FolioSpace account.{% endblock %}
+{% block canonical %}/reset{% endblock %}
+
+{% block content %}
+<main id="main" class="auth-main">
+  <section class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-eyebrow">→ New password</div>
+      <h1 class="auth-title">Set a <em>new</em> password</h1>
+      <div class="auth-rule"></div>
+      <p class="auth-sub">Pick something fresh — 8 characters or more.</p>
+
+      {% if err == 'short' %}
+        <div class="auth-err">Password must be at least 8 characters.</div>
+      {% elif err == 'match' %}
+        <div class="auth-err">The two passwords didn't match.</div>
+      {% elif err == 'not-found' or err == 'expired' or err == 'consumed' %}
+        <div class="auth-err">This reset link is no longer valid. <a href="/forgot">Request a new one.</a></div>
+      {% elif err == 'server' %}
+        <div class="auth-err">Couldn't save your new password. Try again.</div>
+      {% elif err %}
+        <div class="auth-err">Something didn't work. <a href="/forgot">Request a fresh link.</a></div>
+      {% endif %}
+
+      <form method="post" action="/reset" autocomplete="on" novalidate>
+        <input type="hidden" name="token" value="{{ token }}" />
+        <div class="auth-field">
+          <label for="password">New password <span class="auth-hint">(8+ characters)</span></label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            minlength="8"
+            autocomplete="new-password"
+            spellcheck="false"
+            autocapitalize="off"
+            maxlength="256"
+            autofocus
+          />
+        </div>
+        <div class="auth-field">
+          <label for="confirm">Confirm password</label>
+          <input
+            id="confirm"
+            name="confirm"
+            type="password"
+            required
+            minlength="8"
+            autocomplete="new-password"
+            spellcheck="false"
+            autocapitalize="off"
+            maxlength="256"
+          />
+        </div>
+        <button type="submit" class="auth-submit">Save new password →</button>
+      </form>
+
+      <p class="auth-foot">
+        <a href="/login">Back to log in</a> · <a href="/">Back to home</a>
+      </p>
+    </div>
+  </section>
+</main>
+{% endblock %}

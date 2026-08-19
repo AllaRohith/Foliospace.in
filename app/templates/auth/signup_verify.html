@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Verify your email — FolioSpace{% endblock %}
+{% block description %}Enter the 6-digit code we sent to your email to finish signing up.{% endblock %}
+{% block canonical %}/signup/verify{% endblock %}
+
+{% block content %}
+<main id="main" class="auth-main">
+  <section class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-eyebrow">→ Almost there</div>
+      <h1 class="auth-title">Verify your <em>email.</em></h1>
+      <div class="auth-rule"></div>
+      <p class="auth-sub">
+        We sent a 6-digit code to<br/>
+        <strong class="auth-email-chip">{{ email }}</strong>
+      </p>
+
+      {% if err == 'verify' %}
+        <div class="auth-err is-warn">Your email isn't verified yet. Enter the new code we sent.</div>
+      {% elif err == 'bad-code' %}
+        <div class="auth-err">That code didn't match. Try again.</div>
+      {% elif err == 'expired' %}
+        <div class="auth-err">That code expired. Resend a new one below.</div>
+      {% elif err == 'consumed' %}
+        <div class="auth-err">That code was already used. Resend a new one below.</div>
+      {% elif err == 'locked' %}
+        <div class="auth-err is-warn">Too many wrong tries. Resend a new code below.</div>
+      {% elif err == 'no-code' %}
+        <div class="auth-err">No code found. Resend one below.</div>
+      {% elif err == 'cooldown' %}
+        <div class="auth-err is-warn">Wait a few seconds before resending.</div>
+      {% elif err == 'resent' %}
+        <div class="auth-ok">New code sent. Check your inbox.</div>
+      {% elif err == 'missing' %}
+        <div class="auth-err">Enter the 6-digit code from your email.</div>
+      {% elif err == 'server' %}
+        <div class="auth-err">Something broke on our end. Try again in a minute.</div>
+      {% endif %}
+
+      <form method="post" action="/signup/verify" autocomplete="one-time-code" novalidate data-otp-form>
+        <input type="hidden" name="email" value="{{ email }}" />
+        <input
+          type="hidden"
+          name="code"
+          data-otp-hidden
+          value=""
+        />
+        <div class="auth-otp-row" data-otp-row aria-label="6-digit verification code">
+          <input class="auth-otp-cell" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-otp-cell autocomplete="one-time-code" />
+          <input class="auth-otp-cell" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-otp-cell autocomplete="one-time-code" />
+          <input class="auth-otp-cell" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-otp-cell autocomplete="one-time-code" />
+          <input class="auth-otp-cell" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-otp-cell autocomplete="one-time-code" />
+          <input class="auth-otp-cell" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-otp-cell autocomplete="one-time-code" />
+          <input class="auth-otp-cell" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" data-otp-cell autocomplete="one-time-code" />
+        </div>
+        <button type="submit" class="auth-submit" data-otp-submit disabled>Verify →</button>
+      </form>
+
+      <form method="post" action="/signup/resend" class="auth-resend-form">
+        <input type="hidden" name="email" value="{{ email }}" />
+        <button
+          type="submit"
+          class="auth-resend-btn"
+          data-resend-btn
+          {% if resend_cooldown and resend_cooldown > 0 %}disabled{% endif %}
+        >
+          {% if resend_cooldown and resend_cooldown > 0 %}
+            Resend in <span data-resend-countdown>{{ resend_cooldown }}</span>s
+          {% else %}
+            Resend code
+          {% endif %}
+        </button>
+      </form>
+
+      <p class="auth-foot">
+        Wrong email? <a href="/signup">Start over</a> · <a href="/">Back to home</a>
+      </p>
+    </div>
+  </section>
+</main>
+
+<script defer src="{{ request.url_for('static', path='js/otp.js') }}?v={{ asset_v }}"></script>
+{% endblock %}

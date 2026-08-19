@@ -7392,6 +7392,108 @@ body.dark .auth-err a, body.dark .auth-err.is-warn { color: var(--accent); }
   text-transform: uppercase;
   color: var(--muted);
 }
+.auth-field-link {
+  float: right;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+  text-decoration: underline;
+}
+body.dark .auth-field-link { color: var(--accent); }
+
+.auth-sub-tight { margin-top: -8px; margin-bottom: 18px; }
+.auth-otp-note {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--muted);
+  margin: -4px 0 16px;
+  padding: 0;
+}
+body.dark .auth-otp-note { color: rgba(255, 255, 255, 0.55); }
+
+.auth-social {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 0 18px;
+}
+.auth-social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'Saira', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+.auth-social-btn:hover {
+  background: var(--cream-2);
+  border-color: var(--ink);
+}
+.auth-social-btn:active { transform: scale(0.99); }
+.auth-social-btn:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.22);
+}
+.auth-social-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+}
+.auth-social-mark svg { display: block; }
+.auth-social-label { line-height: 1; }
+
+body.dark .auth-social-btn {
+  background: var(--ink);
+  color: var(--cream);
+  border-color: var(--line);
+}
+body.dark .auth-social-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--cream);
+}
+body.dark .auth-social-github .auth-social-mark svg,
+body.dark .auth-social-github .auth-social-label { color: var(--cream); fill: var(--cream); }
+body.dark .auth-social-github .auth-social-mark svg path { fill: var(--cream); }
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 18px;
+  color: var(--muted);
+  font-family: 'Saira', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+body.dark .auth-divider { color: rgba(255, 255, 255, 0.45); }
+body.dark .auth-divider::before,
+body.dark .auth-divider::after { background: var(--line); }
 .auth-field input {
   font-family: 'Saira', sans-serif;
   font-size: 16px;
@@ -7511,6 +7613,123 @@ body.dark .nav-user-logout:hover { border-color: var(--accent); color: var(--acc
   .auth-main { padding: 72px 16px 48px; }
   .auth-card { padding: 26px 22px; border-radius: 14px; }
   .auth-title { font-size: clamp(30px, 8vw, 40px); }
+}
+
+.auth-email-chip {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--cream-2);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  word-break: break-all;
+}
+body.dark .auth-email-chip { background: rgba(255, 255, 255, 0.08); color: var(--cream); }
+
+.auth-ok {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #1f6b3a;
+  background: rgba(31, 107, 58, 0.10);
+  border: 1px solid rgba(31, 107, 58, 0.30);
+  border-left: 3px solid #1f6b3a;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin: 0 0 16px;
+}
+body.dark .auth-ok { color: #6ddc8c; background: rgba(109, 220, 140, 0.10); border-color: rgba(109, 220, 140, 0.30); border-left-color: #6ddc8c; }
+
+.auth-otp-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 6px 0 20px;
+}
+.auth-otp-cell {
+  width: 48px;
+  height: 56px;
+  text-align: center;
+  font-family: 'Saira', Helvetica, Arial, sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ink);
+  background: var(--cream-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.auth-otp-cell::-webkit-outer-spin-button,
+.auth-otp-cell::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.auth-otp-cell:focus {
+  border-color: var(--accent);
+  background: var(--cream);
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.22);
+}
+.auth-otp-cell.is-filled {
+  border-color: var(--ink);
+  background: var(--cream);
+}
+body.dark .auth-otp-cell { background: var(--ink); color: var(--cream); border-color: var(--line); }
+body.dark .auth-otp-cell:focus { background: rgba(255, 255, 255, 0.04); border-color: var(--accent); }
+body.dark .auth-otp-cell.is-filled { border-color: var(--cream); }
+
+.auth-submit[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.auth-submit.is-ready {
+  background: var(--accent);
+  color: #fff;
+  animation: auth-otp-pulse 0.4s ease;
+}
+@keyframes auth-otp-pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+.auth-resend-form {
+  margin-top: 16px;
+  text-align: center;
+}
+.auth-resend-btn {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--accent-text);
+  background: transparent;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+.auth-resend-btn:hover:not([disabled]) {
+  background: rgba(255, 107, 53, 0.08);
+  text-decoration: underline;
+}
+.auth-resend-btn[disabled] {
+  color: var(--ink-soft);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+body.dark .auth-resend-btn { color: var(--accent); }
+body.dark .auth-resend-btn[disabled] { color: rgba(255, 255, 255, 0.5); }
+
+@media (max-width: 480px) {
+  .auth-otp-row { gap: 6px; }
+  .auth-otp-cell { width: 40px; height: 50px; font-size: 22px; }
 }
 
 .dash-shell {

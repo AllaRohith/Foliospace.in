@@ -388,6 +388,157 @@ def current_user_id(request: Request) -> str | None:
     return str(user["id"]) if user else None
 
 
+def mark_email_verified(user_id: str | UUID) -> bool:
+    uid = UUID(str(user_id)) if not isinstance(user_id, UUID) else user_id
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE users
+                       SET email_verified = TRUE,
+                           updated_at      = NOW()
+                     WHERE id = %s AND deleted_at IS NULL
+                    """,
+                    (uid,),
+                )
+                rowcount = cur.rowcount
+            conn.commit()
+        return rowcount > 0
+    except (psycopg.Error, ValueError, TypeError) as e:
+        logger.exception("mark_email_verified failed: %s", e)
+        return False
+
+
+def set_password(user_id: str | UUID, new_plain: str) -> bool:
+    uid = UUID(str(user_id)) if not isinstance(user_id, UUID) else user_id
+    new_hash = hash_password(new_plain or "")
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE users
+                       SET password_hash = %s,
+                           updated_at    = NOW()
+                     WHERE id = %s AND deleted_at IS NULL
+                    """,
+                    (new_hash, uid),
+                )
+                rowcount = cur.rowcount
+            conn.commit()
+        return rowcount > 0
+    except (psycopg.Error, ValueError, TypeError) as e:
+        logger.exception("set_password failed: %s", e)
+        return False
+
+
+def find_user_by_provider_uid(provider: str, provider_uid: str) -> dict | None:
+    if not provider or not provider_uid:
+        return None
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT u.id, u.email, u.slug, u.display_name, u.role, u.bio,
+                           u.phone, u.avatar_url, u.avatar_public_id, u.is_public,
+                           u.plan, u.plan_expires_at, u.payment_failed_at,
+                           u.is_trial, u.is_internal, u.template_id,
+                           u.email_verified, u.created_at, u.deleted_at
+                      FROM social_accounts sa
+                      JOIN users u ON u.id = sa.user_id
+                     WHERE sa.provider = %s AND sa.provider_uid = %s
+                       AND u.deleted_at IS NULL
+                     LIMIT 1
+                    """,
+                    (provider[:16], provider_uid[:255]),
+                )
+                row = cur.fetchone()
+            conn.commit()
+        return row
+    except psycopg.Error as e:
+        logger.exception("find_user_by_provider_uid failed: %s", e)
+        return None
+
+
+def link_social_account(user_id: str | UUID, provider: str, provider_uid: str, email: str | None = None) -> bool:
+    uid = UUID(str(user_id)) if not isinstance(user_id, UUID) else user_id
+    clean_email = (email or "").strip().lower()[:254] or None
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO social_accounts (provider, provider_uid, user_id, email)
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (provider, provider_uid) DO UPDATE
+                        SET email = EXCLUDED.email
+                    """,
+                    (provider[:16], provider_uid[:255], uid, clean_email),
+                )
+            conn.commit()
+        return True
+    except psycopg.Error as e:
+        logger.exception("link_social_account failed: %s", e)
+        return False
+
+
+def create_user_from_oauth(
+    email: str,
+    provider: str,
+    provider_uid: str,
+    display_name: str | None = None,
+    role: str | None = None,
+) -> dict | None:
+    email_clean = (email or "").strip().lower()[:254]
+    if not email_clean or not EMAIL_RE.match(email_clean):
+        return None
+    uid = uuid4()
+    suffix = secrets.token_hex(4)
+    slug = _slug_from_email(email_clean, suffix)
+    name = (display_name or "").strip()[:80] or None
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT id FROM users WHERE email = %s AND deleted_at IS NULL",
+                    (email_clean,),
+                )
+                existing = cur.fetchone()
+                if existing:
+                    return None
+                cur.execute(
+                    """
+                    INSERT INTO users (
+                        id, email, slug, password_hash, display_name, role,
+                        email_verified, created_at, updated_at
+                    )
+                    VALUES (%s, %s, %s, NULL, %s, %s, TRUE, NOW(), NOW())
+                    RETURNING id, email, slug, display_name, role, bio,
+                              phone, avatar_url, avatar_public_id, is_public,
+                              plan, plan_expires_at, payment_failed_at,
+                              is_trial, is_internal, template_id,
+                              email_verified, created_at
+                    """,
+                    (uid, email_clean, slug, name, (role or "")[:60] or None),
+                )
+                user = cur.fetchone()
+                if user:
+                    cur.execute(
+                        """
+                        INSERT INTO social_accounts (provider, provider_uid, user_id, email)
+                        VALUES (%s, %s, %s, %s)
+                        """,
+                        (provider[:16], provider_uid[:255], user["id"], email_clean),
+                    )
+            conn.commit()
+        return user
+    except psycopg.Error as e:
+        logger.exception("create_user_from_oauth failed: %s", e)
+        return None
+
+
 def destroy_user_session(request: Request) -> None:
     sid = request.session.get(SESSION_KEY)
     if sid and DATABASE_URL:

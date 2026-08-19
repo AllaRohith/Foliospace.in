@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Forgot password — FolioSpace{% endblock %}
+{% block description %}Get a reset link sent to your email.{% endblock %}
+{% block canonical %}/forgot{% endblock %}
+
+{% block content %}
+<main id="main" class="auth-main">
+  <section class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-eyebrow">→ Password recovery</div>
+      <h1 class="auth-title">Forgot your <em>password?</em></h1>
+      <div class="auth-rule"></div>
+
+      {% if sent %}
+        <div class="auth-ok">
+          If an account exists for that email, we've sent a reset link.
+          Check your inbox (and spam folder) for the next 30 minutes.
+        </div>
+        <p class="auth-sub auth-sub-tight">Didn't get one? Wait a moment, then try again.</p>
+      {% else %}
+        <p class="auth-sub">Enter the email on your account. We'll send you a reset link.</p>
+
+        {% if err == 'missing' %}
+          <div class="auth-err">Please enter the email you signed up with.</div>
+        {% elif err %}
+          <div class="auth-err">Something didn't work. Try again in a minute.</div>
+        {% endif %}
+
+        <form method="post" action="/forgot" autocomplete="on" novalidate>
+          <div class="auth-field">
+            <label for="email">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              value="{{ email }}"
+              required
+              autofocus
+              autocomplete="email"
+              spellcheck="false"
+              autocapitalize="off"
+              inputmode="email"
+              maxlength="254"
+            />
+          </div>
+          <button type="submit" class="auth-submit">Send reset link →</button>
+        </form>
+      {% endif %}
+
+      <p class="auth-foot">
+        Remembered it? <a href="/login">Log in</a> · <a href="/signup">Sign up</a> · <a href="/">Back to home</a>
+      </p>
+    </div>
+  </section>
+</main>
+{% endblock %}
