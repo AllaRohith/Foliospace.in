@@ -7558,6 +7558,11 @@ body.dark .dash-side-brand { color: var(--ink); border-bottom-color: var(--line)
   color: var(--muted);
   padding: 8px 24px 6px;
 }
+.dash-side-plan-label {
+  padding: 8px 8px 6px;
+  border-top: 1px solid var(--line);
+  margin-top: 4px;
+}
 
 .dash-side-item {
   display: flex;
