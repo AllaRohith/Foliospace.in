@@ -1,10 +1,12 @@
 import logging
 from pathlib import Path
 
-from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, Response, RedirectResponse
+from fastapi import APIRouter, BackgroundTasks, Body, Request
+from fastapi.responses import HTMLResponse, JSONResponse, Response, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
+from app.rate_limit import limiter
+from app.services import cloudinary_svc
 from app.services import folio as folio_svc
 
 logger = logging.getLogger(__name__)
@@ -232,7 +234,6 @@ async def owner_folio_manage_save(
     role: str = _Form_folio(""),
     bio: str = _Form_folio(""),
     phone: str = _Form_folio(""),
-    avatar_url: str = _Form_folio(""),
     is_public: str = _Form_folio(""),
 ):
     from app.utils.text import strip_control
@@ -253,9 +254,6 @@ async def owner_folio_manage_save(
     phone_clean = (phone or "").strip()
     if phone_clean and not _re_folio.fullmatch(r"[+0-9 ()\-]{6,20}", phone_clean):
         return RedirectResponse(f"/{safe_slug}/manage?err=phone", status_code=303)
-    avatar_clean = (avatar_url or "").strip()
-    if avatar_clean and not _re_folio.fullmatch(r"https?://\S+", avatar_clean):
-        return RedirectResponse(f"/{safe_slug}/manage?err=avatar_url", status_code=303)
     role_clean = (role or "").strip()
     if len(role_clean) > 60:
         return RedirectResponse(f"/{safe_slug}/manage?err=role", status_code=303)
@@ -266,7 +264,6 @@ async def owner_folio_manage_save(
         role=role_clean,
         bio=bio_clean,
         phone=phone_clean,
-        avatar_url=avatar_clean,
         is_public=public_flag,
     )
     if not updated:
@@ -274,6 +271,87 @@ async def owner_folio_manage_save(
     from app.services.user_auth import audit_user as _audit
     _audit(request, str(user["id"]), "folio.update", metadata={"is_public": public_flag})
     return RedirectResponse(f"/{safe_slug}/manage?saved=1", status_code=303)
+
+
+@router.get("/{slug}/manage/avatar/sign")
+@limiter.limit("20/minute")
+async def owner_avatar_sign(request: Request, slug: str):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return JSONResponse({"ok": False}, status_code=404)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return JSONResponse({"ok": False}, status_code=403)
+    params = cloudinary_svc.sign_upload_params(str(user["id"]))
+    if not params:
+        return JSONResponse({"ok": False, "message": "uploads-disabled"}, status_code=503)
+    return JSONResponse({"ok": True, **params})
+
+
+@router.post("/{slug}/manage/avatar")
+async def owner_avatar_save(
+    request: Request,
+    slug: str,
+    background: BackgroundTasks,
+    payload: dict = Body(...),
+):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return JSONResponse({"ok": False}, status_code=404)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return JSONResponse({"ok": False}, status_code=403)
+    url = strip_control(str(payload.get("url", "")))[:2048]
+    public_id = strip_control(str(payload.get("public_id", "")))[:512]
+    if not url or not url.startswith("https://res.cloudinary.com/"):
+        return JSONResponse({"ok": False, "message": "bad-url"}, status_code=400)
+    if not public_id:
+        return JSONResponse({"ok": False, "message": "missing-public-id"}, status_code=400)
+    old_public_id = (user.get("avatar_public_id") or "").strip()
+    updated = user_auth_svc.set_avatar(str(user["id"]), url, public_id)
+    if not updated:
+        return JSONResponse({"ok": False, "message": "save-failed"}, status_code=500)
+    if old_public_id and old_public_id != public_id:
+        background.add_task(cloudinary_svc.destroy_avatar, old_public_id)
+    user_auth_svc.audit_user(
+        request,
+        str(user["id"]),
+        "folio.avatar.uploaded" if not old_public_id or old_public_id == public_id else "folio.avatar.replaced",
+        target=public_id,
+    )
+    return JSONResponse({"ok": True, "url": url, "public_id": public_id})
+
+
+@router.delete("/{slug}/manage/avatar")
+async def owner_avatar_delete(request: Request, slug: str, background: BackgroundTasks):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return JSONResponse({"ok": False}, status_code=404)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return JSONResponse({"ok": False}, status_code=403)
+    old_public_id = (user.get("avatar_public_id") or "").strip()
+    cleared = user_auth_svc.clear_avatar(str(user["id"]))
+    if not cleared:
+        return JSONResponse({"ok": False, "message": "save-failed"}, status_code=500)
+    if old_public_id:
+        background.add_task(cloudinary_svc.destroy_avatar, old_public_id)
+    user_auth_svc.audit_user(
+        request,
+        str(user["id"]),
+        "folio.avatar.removed",
+        target=old_public_id or "-",
+    )
+    return JSONResponse({"ok": True})
 
 
 @router.get("/u/{slug}/og.png")

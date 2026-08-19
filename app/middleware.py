@@ -55,7 +55,7 @@ def _csp() -> str:
         "script-src 'self' https://checkout.razorpay.com https://cdn.razorpay.com",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com data:",
-        "img-src 'self' data: blob:",
+        "img-src 'self' data: blob: https://res.cloudinary.com",
         "connect-src 'self' https://lumberjack.razorpay.com",
         "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com",
         "frame-ancestors 'none'",

@@ -168,7 +168,7 @@ def find_user_by_email(email: str) -> dict | None:
                 cur.execute(
                     """
                     SELECT id, email, password_hash, slug, display_name, role,
-                           bio, phone, avatar_url, is_public,
+                           bio, phone, avatar_url, avatar_public_id, is_public,
                            email_verified, created_at, updated_at, last_login_at,
                            claimed_at, claim_token, claim_expires_at, deleted_at,
                            plan, plan_expires_at, payment_failed_at, razorpay_customer_id,
@@ -197,7 +197,7 @@ def find_user_by_id(user_id: str | UUID) -> dict | None:
                 cur.execute(
                     """
                     SELECT id, email, password_hash, slug, display_name, role,
-                           bio, phone, avatar_url, is_public,
+                           bio, phone, avatar_url, avatar_public_id, is_public,
                            email_verified, created_at, updated_at, last_login_at,
                            claimed_at, claim_token, claim_expires_at, deleted_at,
                            plan, plan_expires_at, payment_failed_at, razorpay_customer_id,
@@ -422,6 +422,54 @@ def _clean_url(value):
     return s[:MAX_AVATAR_URL_LEN]
 
 
+def set_avatar(user_id, url: str, public_id: str) -> dict | None:
+    uid = UUID(user_id) if not isinstance(user_id, UUID) else user_id
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE users
+                       SET avatar_url = %s,
+                           avatar_public_id = %s,
+                           updated_at = NOW()
+                     WHERE id = %s AND deleted_at IS NULL
+                    RETURNING id, slug, avatar_url, avatar_public_id
+                    """,
+                    (_clean_url(url), public_id[:512], uid),
+                )
+                row = cur.fetchone()
+            conn.commit()
+    except (psycopg.Error, ValueError, TypeError) as e:
+        logger.exception("set_avatar failed: %s", e)
+        return None
+    return row
+
+
+def clear_avatar(user_id) -> dict | None:
+    uid = UUID(user_id) if not isinstance(user_id, UUID) else user_id
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE users
+                       SET avatar_url = NULL,
+                           avatar_public_id = NULL,
+                           updated_at = NOW()
+                     WHERE id = %s AND deleted_at IS NULL
+                    RETURNING id, slug, avatar_public_id
+                    """,
+                    (uid,),
+                )
+                row = cur.fetchone()
+            conn.commit()
+    except psycopg.Error as e:
+        logger.exception("clear_avatar failed: %s", e)
+        return None
+    return row
+
+
 def update_user_profile(
     user_id,
     *,
@@ -429,7 +477,7 @@ def update_user_profile(
     role,
     bio,
     phone,
-    avatar_url,
+    avatar_url=None,
     is_public,
 ) -> dict | None:
     uid = UUID(user_id) if not isinstance(user_id, UUID) else user_id
@@ -459,7 +507,7 @@ def update_user_profile(
                         _clean_text(role, MAX_ROLE_LEN),
                         _clean_text(bio, MAX_BIO_LEN),
                         _clean_text(phone, MAX_PHONE_LEN),
-                        _clean_url(avatar_url),
+                        _clean_url(avatar_url) if avatar_url is not None else None,
                         bool(is_public),
                         now, uid,
                     ),

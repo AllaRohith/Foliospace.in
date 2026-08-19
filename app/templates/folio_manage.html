@@ -80,8 +80,6 @@
         <div class="fm-flash fm-flash-warn">Bio must be 280 characters or fewer.</div>
       {% elif err == 'phone' %}
         <div class="fm-flash fm-flash-warn">Phone must be 6–20 characters: digits, spaces, + ( ) - only.</div>
-      {% elif err == 'avatar_url' %}
-        <div class="fm-flash fm-flash-warn">Avatar URL must start with http:// or https://.</div>
       {% elif err == 'role' %}
         <div class="fm-flash fm-flash-warn">Role must be 60 characters or fewer.</div>
       {% elif err == 'server' %}
@@ -110,9 +108,34 @@
           <input id="phone" name="phone" type="tel" maxlength="20" value="{{ user.phone or '' }}" placeholder="+91 98765 43210" />
         </div>
 
-        <div class="fm-field">
-          <label for="avatar_url">Avatar URL <span class="fm-field-hint">(square photo, https://)</span></label>
-          <input id="avatar_url" name="avatar_url" type="url" value="{{ user.avatar_url or '' }}" placeholder="https://…" />
+        <div class="fm-field fm-field-avatar">
+          <label>Avatar <span class="fm-field-hint">(square photo · 2 MB max)</span></label>
+
+          {% if user.avatar_url %}
+            <div class="fm-avatar-current">
+              <img class="fm-avatar-thumb" src="{{ user.avatar_url }}" alt="" referrerpolicy="no-referrer" />
+              <div class="fm-avatar-actions">
+                <button type="button" class="fm-avatar-btn" data-fm-avatar-replace>Replace photo</button>
+                {% if user.avatar_public_id %}
+                  <button type="button" class="fm-avatar-btn fm-avatar-btn-quiet" data-fm-avatar-remove>Remove</button>
+                {% endif %}
+              </div>
+            </div>
+          {% else %}
+            <label class="fm-avatar-dropzone" data-fm-avatar-dropzone for="fm-avatar-input">
+              <div class="fm-avatar-dropzone-icon">↑</div>
+              <div class="fm-avatar-dropzone-label">Drop a photo here</div>
+              <div class="fm-avatar-dropzone-sub">or click to choose · JPG, PNG, WebP</div>
+              <input type="file" id="fm-avatar-input" accept="image/jpeg,image/png,image/webp" hidden />
+            </label>
+          {% endif %}
+
+          <div class="fm-avatar-progress" data-fm-avatar-progress hidden>
+            <div class="fm-avatar-progress-bar"><div class="fm-avatar-progress-fill" data-fm-avatar-progress-fill></div></div>
+            <div class="fm-avatar-progress-text" data-fm-avatar-progress-text>Uploading…</div>
+          </div>
+
+          <div class="fm-avatar-error" data-fm-avatar-error hidden></div>
         </div>
 
         <div class="fm-field fm-field-toggle">
@@ -191,4 +214,5 @@
 </main>
 
 <script defer src="{{ request.url_for('static', path='js/folio_manage.js') }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path='js/folio_manage_avatar.js') }}?v={{ asset_v }}"></script>
 {% endblock %}

@@ -106,7 +106,6 @@
   var roleInput = document.querySelector('input[name="role"]');
   var bioInput = document.querySelector('textarea[name="bio"]');
   var phoneInput = document.querySelector('input[name="phone"]');
-  var avatarInput = document.querySelector('input[name="avatar_url"]');
   var toggleInput = document.querySelector('input[name="is_public"]');
 
   var previewName = document.querySelector('[data-fm-preview-name]');
@@ -146,7 +145,6 @@
       var role = roleInput ? roleInput.value.trim() : '';
       var bio = bioInput ? bioInput.value : '';
       var phone = phoneInput ? phoneInput.value.trim() : '';
-      var avatar = avatarInput ? avatarInput.value.trim() : '';
 
       previewName.textContent = name || 'Your name';
 
@@ -174,16 +172,8 @@
         previewCta.setAttribute('hidden', '');
       }
 
-      if (validUrl(avatar)) {
-        previewAvatar.src = avatar;
-        previewAvatar.removeAttribute('hidden');
-        previewFallback.setAttribute('hidden', '');
-      } else {
-        previewAvatar.removeAttribute('src');
-        previewAvatar.setAttribute('hidden', '');
-        previewFallback.textContent = initial(name);
-        previewFallback.removeAttribute('hidden');
-      }
+      previewFallback.textContent = initial(name);
+      previewFallback.removeAttribute('hidden');
     };
 
     var schedule = function () {
@@ -191,7 +181,7 @@
       debounceTimer = setTimeout(updatePreview, 120);
     };
 
-    [nameInput, roleInput, bioInput, phoneInput, avatarInput].forEach(function (el) {
+    [nameInput, roleInput, bioInput, phoneInput].forEach(function (el) {
       if (el) el.addEventListener('input', schedule);
     });
 
