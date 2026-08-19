@@ -239,20 +239,20 @@ def normalize_profile(provider: str, raw: dict) -> dict | None:
     }
 
 
-def complete(provider: str, code: str, redirect_uri: str | None = None) -> dict | None:
+def complete(provider: str, code: str, redirect_uri: str | None = None) -> tuple[dict | None, dict | None]:
     pid = provider.lower().strip()
     if pid not in PROVIDERS:
-        return None
+        return None, None
     token_data = _exchange_code(pid, code, redirect_uri=redirect_uri)
     if not token_data:
-        return None
+        return None, None
     access_token = (token_data.get("access_token") or "").strip()
     if not access_token:
-        return None
+        return None, token_data
     raw_profile = _fetch_profile(pid, access_token)
     if not raw_profile:
-        return None
-    return normalize_profile(pid, raw_profile)
+        return None, token_data
+    return normalize_profile(pid, raw_profile), token_data
 
 
 def generate_state() -> str:

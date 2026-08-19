@@ -495,7 +495,7 @@ async def oauth_callback(request: Request, provider: str):
         return response
     if pid_cookie and pid_cookie != pid:
         return response
-    profile = oauth_svc.complete(pid, code)
+    profile, token_data = oauth_svc.complete(pid, code)
     if not profile or not profile.get("uid") or not profile.get("email"):
         user_auth.audit_user(request, None, f"oauth.{pid}.profile-failed", target=ip)
         return response
@@ -521,6 +521,12 @@ async def oauth_callback(request: Request, provider: str):
         else:
             user_auth.link_social_account(str(user["id"]), pid, profile["uid"], profile["email"])
             user_auth.audit_user(request, str(user["id"]), f"oauth.{pid}.login", target=ip)
+        if token_data and pid in ("github", "linkedin"):
+            try:
+                from app.services.imports import public_render
+                public_render.save_token(str(user["id"]), pid, token_data)
+            except Exception as e:
+                logger.warning("oauth token save failed: %s", e)
         try:
             user_auth.create_user_session(request, user["id"])
         except Exception as e:
@@ -570,7 +576,7 @@ async def oauth_attach(request: Request, provider: str):
     if not code or not state_in or state_in != state_cookie or intent_cookie != "link":
         user_auth.audit_user(request, str(viewer["id"]), f"oauth.{pid}.attach.state-mismatch", target=ip)
         return response
-    profile = oauth_svc.complete(pid, code, redirect_uri=oauth_svc.callback_uri(pid, "attach"))
+    profile, token_data = oauth_svc.complete(pid, code, redirect_uri=oauth_svc.callback_uri(pid, "attach"))
     if not profile or not profile.get("uid") or not profile.get("email"):
         user_auth.audit_user(request, str(viewer["id"]), f"oauth.{pid}.attach.profile-failed", target=ip)
         return response
@@ -590,6 +596,12 @@ async def oauth_attach(request: Request, provider: str):
         ok = False
     if not ok:
         return response
+    if token_data and pid in ("github", "linkedin"):
+        try:
+            from app.services.imports import public_render
+            public_render.save_token(str(viewer["id"]), pid, token_data)
+        except Exception as e:
+            logger.warning("oauth attach token save failed: %s", e)
     user_auth.audit_user(
         request,
         str(viewer["id"]),

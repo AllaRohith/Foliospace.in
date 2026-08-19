@@ -253,6 +253,65 @@
               <div class="fm-conn-ok">Saved.</div>
             {% endif %}
           </section>
+
+          <section class="fm-card fm-card-imports" aria-label="Imported data">
+            <div class="fm-card-eyebrow">→ Imported data</div>
+            {% if not imports_configured %}
+              <div class="fm-import-err">Imports are disabled. Admin must set <code>IMPORT_TOKEN_KEY</code> on Render.</div>
+            {% endif %}
+
+            <div class="fm-import-row">
+              <div class="fm-import-meta">
+                <div class="fm-import-name">GitHub</div>
+                {% if imports_state.github.linked %}
+                  {% if imports_state.github.repo_count %}
+                    <div class="fm-import-state">{{ imports_state.github.repo_count }} repos · synced {{ imports_state.github.last_synced_human }}</div>
+                  {% else %}
+                    <div class="fm-import-state">Linked · not yet synced</div>
+                  {% endif %}
+                {% else %}
+                  <div class="fm-import-state">Link GitHub in Connected accounts above to import.</div>
+                {% endif %}
+              </div>
+              {% if imports_state.github.linked %}
+                <form method="post" action="/{{ user.slug }}/manage/imports/github/refresh" class="fm-import-form">
+                  <button type="submit" class="fm-import-btn" {% if not imports_configured %}disabled{% endif %}>Refresh ↻</button>
+                </form>
+              {% endif %}
+            </div>
+
+            <div class="fm-import-row">
+              <div class="fm-import-meta">
+                <div class="fm-import-name">LinkedIn</div>
+                {% if imports_state.linkedin.linked %}
+                  {% if imports_state.linkedin.has_basic_profile %}
+                    <div class="fm-import-state">Profile · synced {{ imports_state.linkedin.last_synced_human }}</div>
+                  {% else %}
+                    <div class="fm-import-state">Linked · not yet synced</div>
+                  {% endif %}
+                {% else %}
+                  <div class="fm-import-state">Link LinkedIn in Connected accounts above to import.</div>
+                {% endif %}
+              </div>
+              {% if imports_state.linkedin.linked %}
+                <form method="post" action="/{{ user.slug }}/manage/imports/linkedin/refresh" class="fm-import-form">
+                  <button type="submit" class="fm-import-btn" {% if not imports_configured %}disabled{% endif %}>Refresh ↻</button>
+                </form>
+              {% endif %}
+            </div>
+
+            {% if err == 'import-not-linked' %}
+              <div class="fm-import-err">Connect that provider first (above).</div>
+            {% elif err == 'import-server-config' %}
+              <div class="fm-import-err">Imports disabled: admin hasn't set <code>IMPORT_TOKEN_KEY</code>.</div>
+            {% elif err == 'import-provider' %}
+              <div class="fm-import-err">Unknown provider.</div>
+            {% elif saved_kind == 'imports-queued' %}
+              <div class="fm-import-ok">Syncing in background. Refresh in a moment.</div>
+            {% elif saved_kind == 'imports-cleared' %}
+              <div class="fm-import-ok">Imported data cleared.</div>
+            {% endif %}
+          </section>
         </aside>
       </div>
     </main>

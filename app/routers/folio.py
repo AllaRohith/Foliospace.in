@@ -130,6 +130,8 @@ async def public_folio(request: Request, slug: str):
     page_title = f"{display_name} — FolioSpace"
     public_base_url = os.getenv("PUBLIC_BASE_URL", "https://foliospace.in").rstrip("/")
     view_stats = views_svc.get_view_stats(safe_slug, days=30)
+    from app.services.imports import public_render as imports_svc
+    integrations = imports_svc.get_public_sections(str(user["id"]))
     response = templates.TemplateResponse(
         request,
         "folio.html",
@@ -144,6 +146,7 @@ async def public_folio(request: Request, slug: str):
             "canonical": f"/{user['slug']}",
             "public_base_url": public_base_url,
             "view_stats": view_stats,
+            "integrations": integrations,
         },
     )
     return _public_cache(response)
@@ -204,7 +207,11 @@ async def owner_folio_manage(request: Request, slug: str):
     linked_accounts = user_auth_svc.list_social_accounts(str(viewer["id"]))
     user_has_password = user_auth_svc.has_password(str(viewer["id"]))
     oauth_providers = oauth_svc.configured_providers()
-    saved_kind = strip_control(request.query_params.get("saved", ""))[:16]
+    saved_kind = strip_control(request.query_params.get("saved", ""))[:24]
+    provider_q = strip_control(request.query_params.get("provider", ""))[:16]
+    from app.services.imports import public_render as imports_svc
+    imports_state = imports_svc.get_manage_state(str(viewer["id"]))
+    imports_configured = imports_svc.server_configured()
     response = templates.TemplateResponse(
         request,
         "folio_manage.html",
@@ -227,6 +234,7 @@ async def owner_folio_manage(request: Request, slug: str):
             "err": err,
             "saved": saved,
             "saved_kind": saved_kind,
+            "provider_q": provider_q,
             "grace_days_left": ctx["grace_days_left"],
             "trial_days_left": ctx["trial_days_left"],
             "subscription": ctx["subscription"],
@@ -239,6 +247,8 @@ async def owner_folio_manage(request: Request, slug: str):
             "linked_accounts": linked_accounts,
             "user_has_password": user_has_password,
             "oauth_providers": oauth_providers,
+            "imports_state": imports_state,
+            "imports_configured": imports_configured,
         },
     )
     return _no_cache_html(response)
@@ -433,6 +443,52 @@ async def owner_connections_unlink(request: Request, slug: str, provider: str = 
         return RedirectResponse(f"/{safe_slug}/manage?err=oauth-last-login", status_code=303)
     user_auth_svc.audit_user(request, str(viewer["id"]), f"oauth.{pid}.unlinked")
     return RedirectResponse(f"/{safe_slug}/manage?saved=connections", status_code=303)
+
+
+@router.post("/{slug}/manage/imports/{provider}/refresh")
+@limiter.limit("5/minute")
+async def owner_imports_refresh(request: Request, slug: str, provider: str, background: BackgroundTasks):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    from app.services.imports import public_render as imports_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    pid = strip_control((provider or "").strip().lower())[:16]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return RedirectResponse("/", status_code=303)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return RedirectResponse(f"/login?next=/{safe_slug}/manage", status_code=303)
+    if pid not in ("github", "linkedin"):
+        return RedirectResponse(f"/{safe_slug}/manage?err=import-provider", status_code=303)
+    if not imports_svc.server_configured():
+        user_auth_svc.audit_user(request, str(viewer["id"]), f"import.{pid}.sync.no-config")
+        return RedirectResponse(f"/{safe_slug}/manage?err=import-server-config", status_code=303)
+    if not imports_svc.has_token(str(viewer["id"]), pid):
+        return RedirectResponse(f"/{safe_slug}/manage?err=import-not-linked&provider={pid}", status_code=303)
+    user_auth_svc.audit_user(request, str(viewer["id"]), f"import.{pid}.sync.start")
+    background.add_task(imports_svc.sync_for_user, str(viewer["id"]), pid)
+    return RedirectResponse(f"/{safe_slug}/manage?saved=imports-queued&provider={pid}", status_code=303)
+
+
+@router.post("/{slug}/manage/imports/{provider}/disconnect")
+async def owner_imports_disconnect(request: Request, slug: str, provider: str):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    from app.services.imports import public_render as imports_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    pid = strip_control((provider or "").strip().lower())[:16]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return RedirectResponse("/", status_code=303)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return RedirectResponse(f"/login?next=/{safe_slug}/manage", status_code=303)
+    if pid not in ("github", "linkedin"):
+        return RedirectResponse(f"/{safe_slug}/manage?err=import-provider", status_code=303)
+    imports_svc.clear_imports(str(viewer["id"]), pid)
+    user_auth_svc.audit_user(request, str(viewer["id"]), f"import.{pid}.disconnect")
+    return RedirectResponse(f"/{safe_slug}/manage?saved=imports-cleared&provider={pid}", status_code=303)
 
 
 @router.get("/u/{slug}/og.png")

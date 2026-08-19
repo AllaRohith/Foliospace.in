@@ -83,6 +83,73 @@
       </section>
     {% endif %}
 
+    {% if integrations and integrations.repos %}
+      <section class="pf-card pf-card-imports-repos" aria-labelledby="pf-repos-heading">
+        <div class="pf-card-eyebrow">→ Open source</div>
+        <h2 class="pf-card-heading" id="pf-repos-heading">Public repositories</h2>
+        <ul class="pf-repo-list">
+          {% for r in integrations.repos %}
+            <li>
+              <a class="pf-repo-row" href="{{ r.html_url }}" target="_blank" rel="noopener noreferrer">
+                <div class="pf-repo-head">
+                  <span class="pf-repo-name">{{ r.full_name }}</span>
+                  {% if r.is_pinned %}<span class="pf-repo-pin" title="Pinned">📌</span>{% endif %}
+                </div>
+                {% if r.description %}<div class="pf-repo-desc">{{ r.description }}</div>{% endif %}
+                <div class="pf-repo-meta">
+                  {% if r.language %}<span class="pf-repo-pill pf-repo-lang">{{ r.language }}</span>{% endif %}
+                  {% if r.stargazers_count %}<span class="pf-repo-pill pf-repo-stars">★ {{ r.stargazers_count }}</span>{% endif %}
+                </div>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+
+    {% if integrations and integrations.contributions and integrations.contributions|length > 0 %}
+      <section class="pf-card pf-card-imports-contributions" aria-label="GitHub contribution graph">
+        <div class="pf-card-eyebrow">→ Last 12 months</div>
+        <h2 class="pf-card-heading">{{ integrations.contributions_total }} contributions</h2>
+        <div class="pf-contrib-grid" role="img" aria-label="Activity graph">
+          {% for week in integrations.contributions %}
+            <div class="pf-contrib-col">
+              {% for day in week %}
+                {% if day.level == -1 %}
+                  <div class="pf-contrib-cell pf-contrib-future"></div>
+                {% else %}
+                  <div class="pf-contrib-cell pf-contrib-l{{ day.level }}" title="{{ day.count }} on {{ day.date }}"></div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endfor %}
+        </div>
+        <div class="pf-contrib-legend">
+          <span class="pf-contrib-legend-label">Less</span>
+          <span class="pf-contrib-cell pf-contrib-l0"></span>
+          <span class="pf-contrib-cell pf-contrib-l1"></span>
+          <span class="pf-contrib-cell pf-contrib-l2"></span>
+          <span class="pf-contrib-cell pf-contrib-l3"></span>
+          <span class="pf-contrib-cell pf-contrib-l4"></span>
+          <span class="pf-contrib-legend-label">More</span>
+        </div>
+      </section>
+    {% endif %}
+
+    {% if integrations and integrations.profile and integrations.profile.provider == 'linkedin' %}
+      {% set li = integrations.profile.payload %}
+      <section class="pf-card pf-card-imports-profile" aria-label="LinkedIn profile">
+        <div class="pf-card-eyebrow">→ LinkedIn</div>
+        <div class="pf-li-meta">
+          {% if li.locale %}<span class="pf-li-pill">{{ li.locale }}</span>{% endif %}
+          {% if li.zoneinfo %}<span class="pf-li-pill">{{ li.zoneinfo }}</span>{% endif %}
+        </div>
+        {% if li.unavailable_fields %}
+          <p class="pf-li-note">Experiences, education &amp; location need LinkedIn Marketing API access (in review).</p>
+        {% endif %}
+      </section>
+    {% endif %}
+
     {% if is_pro %}
       <section class="pf-card pf-card-work" aria-labelledby="pf-work-heading">
         <div class="pf-card-eyebrow">→ What I do</div>
