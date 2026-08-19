@@ -16,24 +16,23 @@
       <p class="pricing-lede">Pro is <strong>₹149 every month</strong>, charged by UPI AutoPay. Fourteen days free, then the autopay kicks in. Cancel any time from your dashboard — two taps.</p>
 
       {% if viewer %}
+        {% set ps = plan_summary(viewer) %}
         <div class="pricing-current" aria-label="Your current plan">
-          <div class="pricing-current-eyebrow">→ Your plan</div>
-          {% if viewer.is_internal %}
-            <div class="pricing-current-state">Founder access</div>
-            <div class="pricing-current-sub">All Pro features unlocked, no expiry.</div>
-          {% elif viewer.is_trial and trial_days_left > 0 %}
-            <div class="pricing-current-state">Free trial · {{ trial_days_left }} day{{ '' if trial_days_left == 1 else 's' }} left</div>
-            <div class="pricing-current-sub">Full Pro during trial · no card, no mandate. Activate below to keep it after.</div>
-          {% elif viewer.payment_failed_at and grace_days_left %}
-            <div class="pricing-current-state">Payment failed · {{ grace_days_left }} day{{ '' if grace_days_left == 1 else 's' }} grace</div>
-            <div class="pricing-current-sub">UPI mandate didn't approve. Update payment from /dashboard/billing to keep Pro.</div>
-          {% elif viewer.plan == 'pro' %}
-            <div class="pricing-current-state">Pro · Active</div>
-            <div class="pricing-current-sub">₹149/mo via UPI AutoPay. Manage or cancel from /dashboard/billing.</div>
-          {% else %}
-            <div class="pricing-current-state">Free</div>
-            <div class="pricing-current-sub">Pro features from ₹149/mo. Activate below to unlock all of the above.</div>
-          {% endif %}
+          <div class="pricing-current-eyebrow">{{ ps.eyebrow }}</div>
+          <div class="pricing-current-state">
+            {% if ps.state == 'internal' %}Founder access
+            {% elif ps.state == 'trial' %}Free trial · {{ ps.trial_days_left }} day{{ '' if ps.trial_days_left == 1 else 's' }} left
+            {% elif ps.state == 'grace' %}Payment failed · {{ ps.grace_days_left }} day{{ '' if ps.grace_days_left == 1 else 's' }} grace
+            {% elif ps.state == 'pro' %}Pro · Active
+            {% else %}Free{% endif %}
+          </div>
+          <div class="pricing-current-sub">
+            {% if ps.state == 'internal' %}All Pro features unlocked, no expiry.
+            {% elif ps.state == 'trial' %}Full Pro during trial · no card, no mandate. Activate below to keep it after.
+            {% elif ps.state == 'grace' %}UPI mandate didn't approve. Update payment from /dashboard/billing to keep Pro.
+            {% elif ps.state == 'pro' %}₹149/mo via UPI AutoPay. Manage or cancel from /dashboard/billing.
+            {% else %}Pro features from ₹149/mo. Activate below to unlock all of the above.{% endif %}
+          </div>
         </div>
       {% endif %}
 

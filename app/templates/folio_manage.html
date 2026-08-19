@@ -19,17 +19,8 @@
       <div class="dash-bar-right">
         <a class="dash-bar-link" href="/{{ user.slug }}?preview=1" target="_blank" rel="noopener" data-fm-tab="preview">Preview ↗</a>
         <button type="button" class="fm-share-btn" data-fm-share-popover aria-expanded="false">Share →</button>
-        {% if user.is_internal %}
-          <a class="fm-plan-pill fm-plan-pill-internal" href="/dashboard/billing" title="Founder account — unlimited access">✓ Unlimited</a>
-        {% elif user.is_trial and trial_days_left is defined and trial_days_left > 0 %}
-          <a class="fm-plan-pill fm-plan-pill-trial" href="/dashboard/billing" title="Free trial — {{ trial_days_left }} day{{ '' if trial_days_left == 1 else 's' }} left">⚡ Trial · {{ trial_days_left }}d →</a>
-        {% elif user.payment_failed_at and grace_days_left %}
-          <a class="fm-plan-pill fm-plan-pill-grace" href="/dashboard/billing" title="Payment failed — {{ grace_days_left }} day{{ '' if grace_days_left == 1 else 's' }} grace left">⚠ Pro · {{ grace_days_left }}d →</a>
-        {% elif user.plan == 'pro' %}
-          <a class="fm-plan-pill fm-plan-pill-pro" href="/dashboard/billing" title="Pro subscription — manage">Pro · Active</a>
-        {% else %}
-          <a class="fm-plan-pill fm-plan-pill-free" href="/dashboard/billing" title="Free tier — upgrade to Pro">Free · Upgrade →</a>
-        {% endif %}
+        {% import "partials/_plan_summary.html" as ps_macro %}
+        {{ ps_macro.pill(user) }}
       </div>
     </header>
 

@@ -14,48 +14,8 @@
 
   <div class="dash-side-plan-wrap">
     <div class="dash-side-section-label dash-side-plan-label">Your plan</div>
-    {% if user.is_internal %}
-      <div class="dash-side-plan dash-side-plan-internal">
-        <div class="dash-side-plan-eyebrow">✓ Unlimited</div>
-        <div class="dash-side-plan-headline">Pro access</div>
-        <div class="dash-side-plan-sub">No expiry — founder account</div>
-      </div>
-    {% elif user.is_trial and trial_days_left is defined and trial_days_left > 0 %}
-      <div class="dash-side-plan dash-side-plan-trial">
-        <div class="dash-side-plan-eyebrow">⚡ Free trial</div>
-        <div class="dash-side-plan-headline">
-          Trial ends in<br><strong>{{ trial_days_left }}</strong> day{{ '' if trial_days_left == 1 else 's' }}
-        </div>
-        <a class="dash-side-plan-cta" href="/dashboard/billing">Activate Pro →</a>
-      </div>
-    {% elif user.payment_failed_at and grace_days_left %}
-      <div class="dash-side-plan dash-side-plan-grace">
-        <div class="dash-side-plan-eyebrow">⚠ Payment failed</div>
-        <div class="dash-side-plan-headline">
-          Pro ends in<br><strong>{{ grace_days_left }}</strong> day{{ '' if grace_days_left == 1 else 's' }}
-        </div>
-        <a class="dash-side-plan-cta" href="/dashboard/billing">Update payment →</a>
-      </div>
-    {% elif user.plan == 'pro' %}
-      <div class="dash-side-plan dash-side-plan-pro">
-        <div class="dash-side-plan-eyebrow">Pro</div>
-        <div class="dash-side-plan-headline"><strong>Active</strong></div>
-        {% if subscription is defined and subscription and subscription.current_period_end_iso %}
-          <div class="dash-side-plan-sub">Renews {{ subscription.current_period_end_iso[:10] }}</div>
-        {% else %}
-          <div class="dash-side-plan-sub">Active subscription</div>
-        {% endif %}
-        <a class="dash-side-plan-cta dash-side-plan-cta-quiet" href="/dashboard/billing">Manage →</a>
-      </div>
-    {% else %}
-      <div class="dash-side-plan dash-side-plan-free">
-        <div class="dash-side-plan-eyebrow">Free</div>
-        <div class="dash-side-plan-headline">
-          Pro features<br>from <strong>₹149/mo</strong>
-        </div>
-        <a class="dash-side-plan-cta" href="/dashboard/billing">Activate Pro →</a>
-      </div>
-    {% endif %}
+    {% import "partials/_plan_summary.html" as ps_macro %}
+    {{ ps_macro.sidebar_card(user, trial_days_left=trial_days_left|default(0), grace_days_left=grace_days_left|default(0), subscription=subscription|default(None)) }}
   </div>
 
   <div class="dash-side-foot">

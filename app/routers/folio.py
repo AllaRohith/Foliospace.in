@@ -17,8 +17,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = BASE_DIR / "templates"
 
 templates = Jinja2Templates(directory=str(TEMPLATE_DIR))
-import os as _os
-templates.env.globals["asset_v"] = (_os.getenv("RENDER_GIT_COMMIT") or _os.getenv("GIT_COMMIT") or "dev")[:8]
+from app.utils.template_globals import install_template_globals
+install_template_globals(templates)
 
 
 def _public_cache(response: Response) -> Response:

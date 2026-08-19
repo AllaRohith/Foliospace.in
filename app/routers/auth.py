@@ -19,8 +19,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = BASE_DIR / "templates"
 
 templates = Jinja2Templates(directory=str(TEMPLATE_DIR))
-import os as _os
-templates.env.globals["asset_v"] = (_os.getenv("RENDER_GIT_COMMIT") or _os.getenv("GIT_COMMIT") or "dev")[:8]
+from app.utils.template_globals import install_template_globals
+install_template_globals(templates)
 
 MAX_PASSWORD_LEN = 256
 
@@ -213,6 +213,7 @@ def _user_to_context(user) -> dict:
         "bio": user.get("bio") or "",
         "phone": user.get("phone") or "",
         "avatar_url": user.get("avatar_url") or "",
+        "avatar_public_id": user.get("avatar_public_id") or "",
         "is_public": bool(user.get("is_public")),
         "plan": user.get("plan") or "free",
         "plan_expires_at": user.get("plan_expires_at"),

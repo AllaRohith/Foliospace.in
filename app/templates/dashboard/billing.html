@@ -18,17 +18,8 @@
       <span class="dash-bar-issue">→ Issue No. 04</span>
       <div class="dash-bar-right">
         <a class="dash-bar-link" href="/{{ user.slug }}/manage" data-fm-tab="manage">Edit folio →</a>
-        {% if user.is_internal %}
-          <a class="fm-plan-pill fm-plan-pill-internal" href="/dashboard/billing" title="Founder account — unlimited access">✓ Unlimited</a>
-        {% elif user.is_trial and trial_days_left is defined and trial_days_left > 0 %}
-          <a class="fm-plan-pill fm-plan-pill-trial" href="/dashboard/billing" title="Free trial — {{ trial_days_left }} day{{ '' if trial_days_left == 1 else 's' }} left">⚡ Trial · {{ trial_days_left }}d →</a>
-        {% elif user.payment_failed_at and grace_days_left %}
-          <a class="fm-plan-pill fm-plan-pill-grace" href="/dashboard/billing" title="Payment failed — {{ grace_days_left }} day{{ '' if grace_days_left == 1 else 's' }} grace left">⚠ Pro · {{ grace_days_left }}d →</a>
-        {% elif user.plan == 'pro' %}
-          <a class="fm-plan-pill fm-plan-pill-pro" href="/dashboard/billing" title="Pro subscription — manage">Pro · Active</a>
-        {% else %}
-          <a class="fm-plan-pill fm-plan-pill-free" href="/dashboard/billing" title="Free tier — upgrade to Pro">Free · Upgrade →</a>
-        {% endif %}
+        {% import "partials/_plan_summary.html" as ps_macro %}
+        {{ ps_macro.pill(user) }}
       </div>
     </header>
 
@@ -145,14 +136,7 @@
         <aside class="fm-side" aria-label="Plan and receipts">
 
           <section class="fm-card fm-card-plan">
-            <div class="fm-card-eyebrow">
-              {% if user.is_internal %}→ Founder access
-              {% elif user.is_trial and trial_days_left > 0 %}→ Free trial · {{ trial_days_left }} day{{ '' if trial_days_left == 1 else 's' }} left
-              {% elif user.payment_failed_at and grace_days_left %}→ Payment failed · {{ grace_days_left }} day{{ '' if grace_days_left == 1 else 's' }} grace
-              {% elif user.plan == 'pro' %}→ Pro · Active
-              {% else %}→ Your plan
-              {% endif %}
-            </div>
+            <div class="fm-card-eyebrow">{{ plan_summary(user).eyebrow }}</div>
 
             <div class="fm-card-plan-hero">
               <div class="fm-card-plan-num">₹149</div>
@@ -160,33 +144,40 @@
             </div>
 
             <div class="fm-card-plan-rows">
-              {% if user.is_internal %}
-                <div class="fm-card-row"><span class="fm-card-row-key">Status</span><span class="fm-card-row-val">Active — no expiry</span></div>
-                <div class="fm-card-row"><span class="fm-card-row-key">Billing</span><span class="fm-card-row-val">Not required</span></div>
+              {% set ps = plan_summary(user) %}
+              {% if ps.state == 'internal' %}
+                <div class="fm-card-row"><span class="fm-card-row-key">{{ ps.value_key }}</span><span class="fm-card-row-val">{{ ps.value_val }}</span></div>
+                <div class="fm-card-row"><span class="fm-card-row-key">{{ ps.billing_key }}</span><span class="fm-card-row-val">{{ ps.billing_val }}</span></div>
               {% elif not razorpay_configured %}
                 <div class="fm-card-row"><span class="fm-card-row-key">Setup</span><span class="fm-card-row-val">Razorpay env vars missing</span></div>
                 <div class="fm-card-foot">Set RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET, RAZORPAY_PLAN_ID_PRO and redeploy.</div>
               {% elif subscription and subscription.status in ('active', 'authenticated') %}
                 <div class="fm-card-row"><span class="fm-card-row-key">Status</span><span class="fm-card-row-val">
                   {% if subscription.cancel_at_period_end %}Cancelling
-                  {% elif user.payment_failed_at and grace_days_left %}⚠ Failed · {{ grace_days_left }}d left
+                  {% elif ps.state == 'grace' %}⚠ Failed · {{ ps.grace_days_left }}d left
                   {% else %}Active{% endif %}
                 </span></div>
                 <div class="fm-card-row"><span class="fm-card-row-key">{% if subscription.cancel_at_period_end %}Ends{% else %}Renews{% endif %}</span><span class="fm-card-row-val">{{ subscription.current_period_end_iso }}</span></div>
                 <div class="fm-card-row"><span class="fm-card-row-key">Mandate</span><span class="fm-card-row-val">UPI AutoPay</span></div>
                 <div class="fm-card-row"><span class="fm-card-row-key">Setup fee</span><span class="fm-card-row-val">None</span></div>
+              {% elif ps.state == 'trial' %}
+                <div class="fm-card-row"><span class="fm-card-row-key">Trial</span><span class="fm-card-row-val">{{ ps.trial_days_left }} day{{ '' if ps.trial_days_left == 1 else 's' }} left{% if trial_expires_at_iso %} — {{ trial_expires_at_iso }}{% endif %}</span></div>
+                <div class="fm-card-row"><span class="fm-card-row-key">{{ ps.billing_key }}</span><span class="fm-card-row-val">₹149/mo via UPI or Card</span></div>
+                <div class="fm-card-row"><span class="fm-card-row-key">Cancel</span><span class="fm-card-row-val">Anytime — until period end</span></div>
+              {% elif ps.state == 'grace' %}
+                <div class="fm-card-row"><span class="fm-card-row-key">Status</span><span class="fm-card-row-val">⚠ Failed · {{ ps.grace_days_left }}d left</span></div>
+                <div class="fm-card-row"><span class="fm-card-row-key">Mandate</span><span class="fm-card-row-val">UPI AutoPay — re-approve</span></div>
+                <div class="fm-card-row"><span class="fm-card-row-key">Ends</span><span class="fm-card-row-val">{{ user.plan_expires_at.isoformat()[:10] if user.plan_expires_at else 'soon' }}</span></div>
               {% else %}
-                <div class="fm-card-row"><span class="fm-card-row-key">Trial</span><span class="fm-card-row-val">
-                  {% if user.is_trial and trial_days_left > 0 %}{{ trial_days_left }} day{{ '' if trial_days_left == 1 else 's' }} left{% if trial_expires_at_iso %} — {{ trial_expires_at_iso }}{% endif %}
-                  {% elif user.is_trial %}Trial expired{% else %}Not started{% endif %}
-                </span></div>
+                <div class="fm-card-row"><span class="fm-card-row-key">Trial</span><span class="fm-card-row-val">Not started</span></div>
                 <div class="fm-card-row"><span class="fm-card-row-key">Billing</span><span class="fm-card-row-val">₹149/mo via UPI or Card</span></div>
                 <div class="fm-card-row"><span class="fm-card-row-key">Cancel</span><span class="fm-card-row-val">Anytime — until period end</span></div>
               {% endif %}
             </div>
 
             <div class="fm-card-cta-row">
-              {% if user.is_internal %}
+              {% set ps = plan_summary(user) %}
+              {% if ps.state == 'internal' %}
                 <a class="fm-card-link-cta" href="/{{ user.slug }}/manage" data-fm-tab="manage">Edit folio →</a>
               {% elif not razorpay_configured %}
                 <a class="fm-card-link-cta" href="/{{ user.slug }}/manage" data-fm-tab="manage">Edit folio →</a>

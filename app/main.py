@@ -92,7 +92,8 @@ app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=_proxy_trusted)
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
-templates.env.globals["asset_v"] = (os.getenv("RENDER_GIT_COMMIT") or os.getenv("GIT_COMMIT") or "dev")[:8]
+from app.utils.template_globals import install_template_globals
+install_template_globals(templates)
 
 
 def _is_launched_now() -> bool:
@@ -118,25 +119,6 @@ def _patched_template_response(*args, **kwargs):
 
 templates.TemplateResponse = _patched_template_response
 
-
-def _nav_user(request: Request):
-    from app.services import user_auth
-    try:
-        user = user_auth.require_user(request)
-    except Exception:
-        return None
-    if not user:
-        return None
-    return {
-        "id": str(user["id"]),
-        "email": user["email"],
-        "slug": user["slug"],
-        "display_name": user.get("display_name") or "",
-        "role": user.get("role") or "",
-    }
-
-
-templates.env.globals["nav_user"] = _nav_user
 
 app.include_router(waitlist.router)
 app.include_router(stats.router)
@@ -293,10 +275,20 @@ async def pricing(request: Request):
         user = None
     if user:
         ctx["viewer"] = {
+            "id": str(user["id"]),
+            "email": user.get("email") or "",
             "slug": user["slug"],
+            "display_name": user.get("display_name") or "",
+            "role": user.get("role") or "",
+            "bio": user.get("bio") or "",
+            "phone": user.get("phone") or "",
+            "avatar_url": user.get("avatar_url") or "",
+            "avatar_public_id": user.get("avatar_public_id") or "",
+            "is_public": bool(user.get("is_public")),
             "is_internal": bool(user.get("is_internal")),
             "is_trial": bool(user.get("is_trial")),
             "payment_failed_at": user.get("payment_failed_at"),
+            "plan_expires_at": user.get("plan_expires_at"),
             "plan": user.get("plan") or "free",
         }
         ctx["trial_days_left"] = billing_svc.trial_days_left(user)

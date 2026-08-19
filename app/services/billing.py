@@ -658,6 +658,135 @@ def trial_days_left(user: dict) -> int:
     return int((delta.total_seconds() + 86399) // 86400)
 
 
+def plan_summary(user: dict) -> dict:
+    """Single source of truth for the user's plan state across every surface.
+
+    Returns a dict with one branch key (`state`) plus display strings every
+    template consumes. Any template that wants to show the plan reads from
+    this — keeps sidebar pill, manage-page pill, billing-page pill, billing
+    plan card, billing FAQ eyebrow, and pricing-page block in lockstep.
+    """
+    user = user or {}
+    is_internal = bool(user.get("is_internal"))
+    is_trial = bool(user.get("is_trial"))
+    is_pro = (user.get("plan") or "free") == "pro"
+    has_grace = bool(user.get("payment_failed_at")) and bool(grace_days_left(user))
+    grace_left = grace_days_left(user)
+    trial_left = trial_days_left(user)
+
+    if is_internal:
+        return {
+            "state": "internal",
+            "plan": "pro",
+            "is_unlimited": True,
+            "eyebrow": "→ Founder access",
+            "headline": "Unlimited access",
+            "headline_html": "Unlimited <em>access.</em>",
+            "sub": "Active — no expiry",
+            "value_key": "Status",
+            "value_val": "Active — no expiry",
+            "billing_key": "Billing",
+            "billing_val": "Not required",
+            "pill_class": "internal",
+            "pill_label": "✓ Unlimited",
+            "pill_title": "Founder account — unlimited access",
+            "pill_short": "✓ Unlimited",
+            "cta_kind": "none",
+            "cta_label": "",
+            "trial_days_left": 0,
+            "grace_days_left": 0,
+        }
+    if is_trial and trial_left > 0:
+        d = f"{trial_left} day{'s' if trial_left != 1 else ''}"
+        return {
+            "state": "trial",
+            "plan": "pro",
+            "is_unlimited": False,
+            "eyebrow": "→ Free trial",
+            "headline": f"Trial ends in {trial_left} day{'s' if trial_left != 1 else ''}",
+            "headline_html": f"Trial ends in <em>{trial_left}</em> day{'s' if trial_left != 1 else ''}",
+            "sub": "Full Pro during trial — no card, no mandate.",
+            "value_key": "Status",
+            "value_val": f"Trial · {d} left",
+            "billing_key": "Trial",
+            "billing_val": f"{d} left",
+            "pill_class": "trial",
+            "pill_label": f"⚡ Trial · {trial_left}d →",
+            "pill_title": f"Free trial — {d} left",
+            "pill_short": f"⚡ Trial · {trial_left}d",
+            "cta_kind": "activate",
+            "cta_label": f"Activate Pro → {d.replace(' day', '-day').replace(' days', '-day')}",
+            "trial_days_left": trial_left,
+            "grace_days_left": 0,
+        }
+    if has_grace:
+        d = f"{grace_left} day{'s' if grace_left != 1 else ''}"
+        return {
+            "state": "grace",
+            "plan": "pro",
+            "is_unlimited": False,
+            "eyebrow": "→ Payment failed",
+            "headline": f"Pro ends in {d}",
+            "headline_html": f"Pro ends in <em>{grace_left}</em> day{'s' if grace_left != 1 else ''}",
+            "sub": "Razorpay couldn't charge your last payment. Update payment to keep Pro.",
+            "value_key": "Status",
+            "value_val": f"⚠ Failed · {d} left",
+            "billing_key": "Mandate",
+            "billing_val": "UPI AutoPay — re-approve",
+            "pill_class": "grace",
+            "pill_label": f"⚠ Pro · {grace_left}d →",
+            "pill_title": f"Payment failed — {d} grace left",
+            "pill_short": f"⚠ Pro · {grace_left}d",
+            "cta_kind": "update-payment",
+            "cta_label": "Update payment →",
+            "trial_days_left": 0,
+            "grace_days_left": grace_left,
+        }
+    if is_pro:
+        return {
+            "state": "pro",
+            "plan": "pro",
+            "is_unlimited": False,
+            "eyebrow": "→ Pro · Active",
+            "headline": "Pro · ₹149/mo",
+            "headline_html": "Pro <em>₹149/mo.</em>",
+            "sub": "Active subscription",
+            "value_key": "Status",
+            "value_val": "Active",
+            "billing_key": "Mandate",
+            "billing_val": "UPI AutoPay",
+            "pill_class": "pro",
+            "pill_label": "Pro · Active",
+            "pill_title": "Pro subscription — manage",
+            "pill_short": "Pro · Active",
+            "cta_kind": "manage",
+            "cta_label": "Manage →",
+            "trial_days_left": 0,
+            "grace_days_left": 0,
+        }
+    return {
+        "state": "free",
+        "plan": "free",
+        "is_unlimited": False,
+        "eyebrow": "→ Your plan",
+        "headline": "Pro features from ₹149/mo",
+        "headline_html": "Pro features<br>from <strong>₹149/mo</strong>",
+        "sub": "UPI AutoPay or Card · cancel any time",
+        "value_key": "Status",
+        "value_val": "Free",
+        "billing_key": "Billing",
+        "billing_val": "₹149/mo via UPI or Card",
+        "pill_class": "free",
+        "pill_label": "Free · Upgrade →",
+        "pill_title": "Free tier — upgrade to Pro",
+        "pill_short": "Free · Upgrade →",
+        "cta_kind": "activate",
+        "cta_label": "Activate ₹149/mo AutoPay →",
+        "trial_days_left": 0,
+        "grace_days_left": 0,
+    }
+
+
 def enforce_plan_grace(user_id: str, user: dict) -> dict:
     if user.get("is_internal"):
         return user
