@@ -123,7 +123,7 @@
     var setInitial = window.getComputedStyle ? window.getComputedStyle(previewName).color : null;
 
     var sanitizeDigits = function (s) {
-      return (s || '').replace(/[^0-9+]/g, '');
+      return (s || '').replace(/[^0-9]/g, '');
     };
 
     var validUrl = function (s) {
