@@ -827,7 +827,7 @@
   });
 
   (function () {
-    document.querySelectorAll('img[data-folio-avatar], img[data-fm-preview-avatar]').forEach(function (img) {
+    document.querySelectorAll('img[data-folio-avatar]').forEach(function (img) {
       img.addEventListener('error', function () {
         img.style.display = 'none';
         var fb = img.nextElementSibling;

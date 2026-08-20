@@ -44,7 +44,7 @@ def get_manage_state(user_id: str) -> dict:
                 """
                 SELECT sa.provider,
                        sa.last_synced_at,
-                       (SELECT COUNT(*) FROM imported_repos r WHERE r.user_id = sa.user_id) AS repo_count,
+                       (SELECT COUNT(*) FROM imported_repos r WHERE r.user_id = sa.user_id AND r.private = FALSE) AS repo_count,
                        (SELECT 1 FROM imported_profile p WHERE p.user_id = sa.user_id AND p.provider = sa.provider LIMIT 1) AS has_profile
                 FROM social_accounts sa
                 WHERE sa.user_id = %s
@@ -266,7 +266,7 @@ def get_manage_repos(user_id: str) -> list[dict]:
                        language, stargazers_count, fork, is_pinned, private, featured,
                        COALESCE(pushed_at, fetched_at) AS pushed_at
                 FROM imported_repos
-                WHERE user_id = %s
+                WHERE user_id = %s AND private = FALSE
                 ORDER BY featured DESC, {order_clause}
                 """,
                 (user_id,),

@@ -116,7 +116,7 @@ def sync_repos(user_id: str) -> dict:
     seen = []
     page = 1
     while pages < 3:
-        url = f"{GITHUB_API}/user/repos?per_page=100&page={page}&sort=updated&affiliation=owner,collaborator,organization_member"
+        url = f"{GITHUB_API}/user/repos?per_page=100&page={page}&sort=updated&visibility=public&affiliation=owner,collaborator,organization_member"
         data = _http_get_bearer(url, token)
         if not isinstance(data, list):
             logger.warning("github sync: page %d non-list response", page)
@@ -133,6 +133,8 @@ def sync_repos(user_id: str) -> dict:
     from datetime import datetime
     for r in seen:
         if not isinstance(r, dict):
+            continue
+        if r.get("private"):
             continue
         rid = r.get("id")
         if not rid:
