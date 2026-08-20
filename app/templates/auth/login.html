@@ -6,44 +6,39 @@
 {% block canonical %}/login{% endblock %}
 
 {% block content %}
-<main id="main" class="auth-split">
-  <aside class="auth-split-brand" aria-label="FolioSpace brand">
-    <a class="auth-brand-logo" href="/" aria-label="FolioSpace home">
-      <img class="auth-brand-mark" src="{{ request.url_for('static', path='img/logo-full.png') }}?v={{ asset_v }}" alt="FolioSpace — Your story. One link. Done." />
+<main id="main" class="auth-full">
+  <header class="auth-full-top">
+    <a class="auth-full-logo" href="/" aria-label="FolioSpace home">
+      <img class="auth-full-mark" src="{{ request.url_for('static', path='img/logo-full.png') }}?v={{ asset_v }}" alt="FolioSpace — Your story. One link. Done." />
     </a>
+    <a class="auth-full-top-link" href="/signup">New here? Sign up →</a>
+  </header>
 
-    <div class="auth-brand-pitch">
-      <div class="auth-brand-eyebrow">→ One link for every Indian pro</div>
-      <h1 class="auth-brand-headline">
-        Your folio,<br/><em>in one link.</em>
-      </h1>
-      <p class="auth-brand-sub">Chefs, developers, students, consultants, shops, founders. The link you send when someone asks "tell me about you."</p>
-    </div>
+  <section class="auth-full-hero">
+    <div class="auth-full-eyebrow">→ One link for every Indian pro</div>
+    <h1 class="auth-full-headline">
+      Your folio,<br/><em>in one link.</em>
+    </h1>
+    <p class="auth-full-sub">Chefs, developers, students, consultants, shops, founders. The link you send when someone asks "tell me about you."</p>
 
-    <ul class="auth-brand-proof" aria-label="Why FolioSpace">
+    <ul class="auth-full-proof" aria-label="Why FolioSpace">
       <li>
-        <span class="auth-brand-proof-mark" aria-hidden="true">▰</span>
-        <span class="auth-brand-proof-text"><strong>15-day Pro trial</strong> — full kit, no card.</span>
+        <span class="auth-full-proof-mark" aria-hidden="true">▰</span>
+        <span class="auth-full-proof-text"><strong>15-day Pro trial</strong> — full kit, no card.</span>
       </li>
       <li>
-        <span class="auth-brand-proof-mark" aria-hidden="true">▰</span>
-        <span class="auth-brand-proof-text"><strong>₹149/mo</strong> after — UPI AutoPay, cancel any time.</span>
+        <span class="auth-full-proof-mark" aria-hidden="true">▰</span>
+        <span class="auth-full-proof-text"><strong>₹149/mo</strong> after — UPI AutoPay, cancel any time.</span>
       </li>
       <li>
-        <span class="auth-brand-proof-mark" aria-hidden="true">▰</span>
-        <span class="auth-brand-proof-text"><strong>Your slug, your domain</strong> — foliospace.in/your-name.</span>
+        <span class="auth-full-proof-mark" aria-hidden="true">▰</span>
+        <span class="auth-full-proof-text"><strong>Your slug, your domain</strong> — foliospace.in/your-name.</span>
       </li>
     </ul>
+  </section>
 
-    <div class="auth-brand-foot">
-      <span class="auth-brand-foot-line">Made for India</span>
-      <span class="auth-brand-foot-rule" aria-hidden="true"></span>
-      <span class="auth-brand-foot-line">2026</span>
-    </div>
-  </aside>
-
-  <section class="auth-split-form" aria-label="Log in">
-    <div class="auth-form-inner">
+  <section class="auth-full-card-wrap">
+    <div class="auth-full-card">
       <div class="auth-eyebrow">→ Welcome back</div>
       <h2 class="auth-title"><em>Log</em> in</h2>
       <div class="auth-rule"></div>
@@ -124,5 +119,11 @@
       </p>
     </div>
   </section>
+
+  <footer class="auth-full-foot">
+    <span class="auth-full-foot-line">Made for India</span>
+    <span class="auth-full-foot-rule" aria-hidden="true"></span>
+    <span class="auth-full-foot-line">2026</span>
+  </footer>
 </main>
 {% endblock %}
