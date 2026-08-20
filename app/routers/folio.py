@@ -133,6 +133,10 @@ async def public_folio(request: Request, slug: str):
     view_stats = views_svc.get_view_stats(safe_slug, days=30)
     from app.services.imports import public_render as imports_svc
     integrations = imports_svc.get_public_sections(str(user["id"]))
+    from app.services import user_fonts as user_fonts_svc
+    approved_fonts = user_fonts_svc.list_approved_for_user(str(user["id"]))
+    from app.services import user_links as user_links_svc
+    public_links = user_links_svc.list_links(str(user["id"]))
     response = templates.TemplateResponse(
         request,
         "folio.html",
@@ -148,6 +152,8 @@ async def public_folio(request: Request, slug: str):
             "public_base_url": public_base_url,
             "view_stats": view_stats,
             "integrations": integrations,
+            "approved_fonts": approved_fonts,
+            "public_links": public_links,
             "now": datetime.utcnow(),
         },
     )
@@ -220,6 +226,11 @@ async def owner_folio_manage(request: Request, slug: str):
     repo_sort = (user.get("repo_sort") or "stars").lower() if isinstance(user.get("repo_sort"), str) else "stars"
     if repo_sort not in ("stars", "recent", "updated"):
         repo_sort = "stars"
+    is_pro = (user_plan == "pro") or is_internal
+    from app.services import user_fonts as user_fonts_svc
+    user_fonts = user_fonts_svc.list_fonts(str(viewer["id"]))
+    from app.services import user_links as user_links_svc
+    user_links = user_links_svc.list_links(str(viewer["id"]))
     response = templates.TemplateResponse(
         request,
         "folio_manage.html",
@@ -260,6 +271,11 @@ async def owner_folio_manage(request: Request, slug: str):
             "repo_sort": repo_sort,
             "manage_repos": manage_repos,
             "marketing_status": marketing_status,
+            "completion": user_auth_svc.compute_completion(user),
+            "is_pro": is_pro,
+            "user_fonts": user_fonts,
+            "user_links": user_links,
+            "flash": request.session.pop("flash", None),
             "now": datetime.utcnow(),
         },
     )
@@ -316,6 +332,7 @@ async def owner_folio_manage_save(
     phone: str = _Form_folio(""),
     linkedin_url: str = _Form_folio(""),
     is_public: str = _Form_folio(""),
+    is_listed: str = _Form_folio(""),
 ):
     from app.utils.text import strip_control
     from app.services import user_auth as user_auth_svc
@@ -344,6 +361,9 @@ async def owner_folio_manage_save(
     ):
         return RedirectResponse(f"/{safe_slug}/manage?err=linkedin_url", status_code=303)
     public_flag = (is_public or "").strip().lower() in ("1", "true", "on", "yes")
+    listed_flag = (is_listed or "").strip().lower() in ("1", "true", "on", "yes")
+    if listed_flag and not public_flag:
+        listed_flag = False
     updated = user_auth_svc.update_user_profile(
         str(user["id"]),
         display_name=dname,
@@ -355,8 +375,15 @@ async def owner_folio_manage_save(
     )
     if not updated:
         return RedirectResponse(f"/{safe_slug}/manage?err=server", status_code=303)
+    if listed_flag != bool(user.get("is_listed")):
+        user_auth_svc.update_listing(str(user["id"]), listed_flag)
     from app.services.user_auth import audit_user as _audit
-    _audit(request, str(user["id"]), "folio.update", metadata={"is_public": public_flag})
+    _audit(
+        request,
+        str(user["id"]),
+        "folio.update",
+        metadata={"is_public": public_flag, "is_listed": listed_flag},
+    )
     return RedirectResponse(f"/{safe_slug}/manage?saved=1", status_code=303)
 
 
@@ -437,6 +464,415 @@ async def owner_avatar_delete(request: Request, slug: str, background: Backgroun
         str(user["id"]),
         "folio.avatar.removed",
         target=old_public_id or "-",
+    )
+    return JSONResponse({"ok": True})
+
+
+@router.get("/{slug}/manage/avatar-video/sign")
+@limiter.limit("20/minute")
+async def owner_avatar_video_sign(request: Request, slug: str):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return JSONResponse({"ok": False}, status_code=404)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return JSONResponse({"ok": False}, status_code=403)
+    params = cloudinary_svc.sign_upload_params(str(user["id"]), kind="video")
+    if not params:
+        return JSONResponse({"ok": False, "message": "uploads-disabled"}, status_code=503)
+    return JSONResponse({"ok": True, **params})
+
+
+@router.post("/{slug}/manage/avatar-video")
+async def owner_avatar_video_save(
+    request: Request,
+    slug: str,
+    background: BackgroundTasks,
+    payload: dict = Body(...),
+):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return JSONResponse({"ok": False}, status_code=404)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return JSONResponse({"ok": False}, status_code=403)
+    url = strip_control(str(payload.get("url", "")))[:2048]
+    public_id = strip_control(str(payload.get("public_id", "")))[:512]
+    kind = strip_control(str(payload.get("kind", "mp4")))[:16]
+    if not url or not url.startswith("https://res.cloudinary.com/"):
+        return JSONResponse({"ok": False, "message": "bad-url"}, status_code=400)
+    if not public_id:
+        return JSONResponse({"ok": False, "message": "missing-public-id"}, status_code=400)
+    old_public_id = (user.get("avatar_video_public_id") or "").strip()
+    updated = user_auth_svc.set_avatar_video(str(user["id"]), url, public_id, kind)
+    if not updated:
+        return JSONResponse({"ok": False, "message": "save-failed"}, status_code=500)
+    if old_public_id and old_public_id != public_id:
+        background.add_task(cloudinary_svc.destroy_avatar, old_public_id, "video")
+    user_auth_svc.audit_user(
+        request,
+        str(user["id"]),
+        "folio.avatar_video.uploaded" if not old_public_id or old_public_id == public_id else "folio.avatar_video.replaced",
+        target=public_id,
+    )
+    return JSONResponse({"ok": True, "url": url, "public_id": public_id, "kind": kind})
+
+
+@router.delete("/{slug}/manage/avatar-video")
+async def owner_avatar_video_delete(request: Request, slug: str, background: BackgroundTasks):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return JSONResponse({"ok": False}, status_code=404)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return JSONResponse({"ok": False}, status_code=403)
+    old_public_id = (user.get("avatar_video_public_id") or "").strip()
+    cleared = user_auth_svc.clear_avatar_video(str(user["id"]))
+    if not cleared:
+        return JSONResponse({"ok": False, "message": "save-failed"}, status_code=500)
+    if old_public_id:
+        background.add_task(cloudinary_svc.destroy_avatar, old_public_id, "video")
+    user_auth_svc.audit_user(
+        request,
+        str(user["id"]),
+        "folio.avatar_video.removed",
+        target=old_public_id or "-",
+    )
+    return JSONResponse({"ok": True})
+
+
+@router.post("/{slug}/manage/spotlight")
+async def owner_spotlight_save(
+    request: Request,
+    slug: str,
+    payload: dict = Body(...),
+):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return JSONResponse({"ok": False}, status_code=404)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return JSONResponse({"ok": False}, status_code=403)
+    if not (viewer.get("plan") == "pro" or viewer.get("is_internal")):
+        return JSONResponse({"ok": False, "message": "pro-only"}, status_code=402)
+    kind = strip_control(str(payload.get("kind", "url")))[:16]
+    ref_id = strip_control(str(payload.get("ref_id", "")))[:128]
+    text = strip_control(str(payload.get("text", "")))[:120]
+    url = strip_control(str(payload.get("url", "")))[:2048]
+    emoji = strip_control(str(payload.get("emoji", "")))[:16]
+    updated = user_auth_svc.set_spotlight(
+        str(user["id"]),
+        kind=kind,
+        ref_id=ref_id,
+        text=text,
+        url=url,
+        emoji=emoji,
+    )
+    if not updated:
+        return JSONResponse({"ok": False, "message": "save-failed"}, status_code=500)
+    user_auth_svc.audit_user(
+        request,
+        str(user["id"]),
+        "folio.spotlight.saved",
+        target=kind or "url",
+    )
+    return JSONResponse({"ok": True})
+
+
+@router.delete("/{slug}/manage/spotlight")
+async def owner_spotlight_delete(request: Request, slug: str):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return JSONResponse({"ok": False}, status_code=404)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return JSONResponse({"ok": False}, status_code=403)
+    cleared = user_auth_svc.clear_spotlight(str(user["id"]))
+    if not cleared:
+        return JSONResponse({"ok": False, "message": "save-failed"}, status_code=500)
+    user_auth_svc.audit_user(
+        request,
+        str(user["id"]),
+        "folio.spotlight.removed",
+    )
+    return JSONResponse({"ok": True})
+
+
+@router.post("/{slug}/manage/seo")
+async def owner_seo_save(
+    request: Request,
+    slug: str,
+    payload: dict = Body(...),
+):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return JSONResponse({"ok": False}, status_code=404)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return JSONResponse({"ok": False}, status_code=403)
+    seo_title = strip_control(str(payload.get("seo_title", "")))[:70]
+    seo_description = strip_control(str(payload.get("seo_description", "")))[:160]
+    og_image_override_url = strip_control(str(payload.get("og_image_override_url", "")))[:2048]
+    updated = user_auth_svc.update_user_seo(
+        str(user["id"]),
+        seo_title=seo_title,
+        seo_description=seo_description,
+        og_image_override_url=og_image_override_url,
+    )
+    if not updated:
+        return JSONResponse({"ok": False, "message": "save-failed"}, status_code=500)
+    user_auth_svc.audit_user(
+        request,
+        str(user["id"]),
+        "folio.seo.saved",
+    )
+    return JSONResponse({"ok": True})
+
+
+@router.get("/{slug}/manage/fonts/sign")
+@limiter.limit("20/minute")
+async def owner_fonts_sign(request: Request, slug: str):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return JSONResponse({"ok": False}, status_code=404)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return JSONResponse({"ok": False}, status_code=403)
+    if not (viewer.get("plan") == "pro" or viewer.get("is_internal")):
+        return JSONResponse({"ok": False, "message": "pro-only"}, status_code=402)
+    params = cloudinary_svc.sign_font_upload(str(user["id"]))
+    if not params:
+        return JSONResponse({"ok": False, "message": "uploads-disabled"}, status_code=503)
+    return JSONResponse({"ok": True, **params})
+
+
+@router.post("/{slug}/manage/fonts")
+async def owner_fonts_save(
+    request: Request,
+    slug: str,
+    payload: dict = Body(...),
+):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    from app.services import user_fonts as user_fonts_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return JSONResponse({"ok": False}, status_code=404)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return JSONResponse({"ok": False}, status_code=403)
+    if not (viewer.get("plan") == "pro" or viewer.get("is_internal")):
+        return JSONResponse({"ok": False, "message": "pro-only"}, status_code=402)
+    if user_fonts_svc.count_fonts(str(user["id"])) >= user_fonts_svc.MAX_FONTS_PER_USER:
+        return JSONResponse({"ok": False, "message": "limit-reached"}, status_code=403)
+    font_name = strip_control(str(payload.get("font_name", "")))[:60]
+    url = strip_control(str(payload.get("url", "")))[:2048]
+    public_id = strip_control(str(payload.get("public_id", "")))[:512]
+    if not url or not url.startswith("https://res.cloudinary.com/"):
+        return JSONResponse({"ok": False, "message": "bad-url"}, status_code=400)
+    created = user_fonts_svc.create_font(str(user["id"]), font_name, url, public_id)
+    if not created:
+        return JSONResponse({"ok": False, "message": "save-failed"}, status_code=500)
+    user_auth_svc.audit_user(
+        request,
+        str(user["id"]),
+        "folio.font.uploaded",
+        target=created.get("id"),
+    )
+    return JSONResponse({"ok": True, "font": created})
+
+
+@router.delete("/{slug}/manage/fonts/{font_id}")
+async def owner_fonts_delete(request: Request, slug: str, font_id: str, background: BackgroundTasks):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    from app.services import user_fonts as user_fonts_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return JSONResponse({"ok": False}, status_code=404)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return JSONResponse({"ok": False}, status_code=403)
+    deleted = user_fonts_svc.delete_font(str(user["id"]), font_id)
+    if not deleted:
+        return JSONResponse({"ok": False, "message": "save-failed"}, status_code=500)
+    user_auth_svc.audit_user(
+        request,
+        str(user["id"]),
+        "folio.font.removed",
+        target=font_id,
+    )
+    return JSONResponse({"ok": True})
+
+
+@router.get("/{slug}/manage/links")
+async def owner_links_list(request: Request, slug: str):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    from app.services import user_links as user_links_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return JSONResponse({"ok": False}, status_code=404)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return JSONResponse({"ok": False}, status_code=403)
+    items = user_links_svc.list_links(str(user["id"]))
+    return JSONResponse({"ok": True, "links": items})
+
+
+@router.post("/{slug}/manage/links")
+async def owner_links_create(
+    request: Request,
+    slug: str,
+    payload: dict = Body(...),
+):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    from app.services import user_links as user_links_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return JSONResponse({"ok": False}, status_code=404)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return JSONResponse({"ok": False}, status_code=403)
+    is_pro = (viewer.get("plan") == "pro") or bool(viewer.get("is_internal"))
+    label = strip_control(str(payload.get("label", "")))[:80]
+    url = strip_control(str(payload.get("url", "")))[:2048]
+    layout = strip_control(str(payload.get("layout", "stack")))[:16]
+    created = user_links_svc.create_link(
+        str(user["id"]),
+        label=label,
+        url=url,
+        layout=layout,
+        is_pro=is_pro,
+    )
+    if not created:
+        if not is_pro and user_links_svc.count_links(str(user["id"])) >= user_links_svc.FREE_TIER_MAX:
+            return JSONResponse({"ok": False, "message": "limit-reached"}, status_code=403)
+        return JSONResponse({"ok": False, "message": "bad-input"}, status_code=400)
+    user_auth_svc.audit_user(
+        request,
+        str(user["id"]),
+        "folio.link.created",
+        target=created.get("id"),
+    )
+    return JSONResponse({"ok": True, "link": created})
+
+
+@router.put("/{slug}/manage/links/{link_id}")
+async def owner_links_update(
+    request: Request,
+    slug: str,
+    link_id: str,
+    payload: dict = Body(...),
+):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    from app.services import user_links as user_links_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return JSONResponse({"ok": False}, status_code=404)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return JSONResponse({"ok": False}, status_code=403)
+    label = strip_control(str(payload.get("label", "")))[:80] if "label" in payload else None
+    url = strip_control(str(payload.get("url", "")))[:2048] if "url" in payload else None
+    layout = strip_control(str(payload.get("layout", "")))[:16] if "layout" in payload else None
+    updated = user_links_svc.update_link(
+        str(user["id"]),
+        link_id,
+        label=label,
+        url=url,
+        layout=layout,
+    )
+    if not updated:
+        return JSONResponse({"ok": False, "message": "save-failed"}, status_code=500)
+    user_auth_svc.audit_user(
+        request,
+        str(user["id"]),
+        "folio.link.updated",
+        target=link_id,
+    )
+    return JSONResponse({"ok": True, "link": updated})
+
+
+@router.delete("/{slug}/manage/links/{link_id}")
+async def owner_links_delete(request: Request, slug: str, link_id: str):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    from app.services import user_links as user_links_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return JSONResponse({"ok": False}, status_code=404)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return JSONResponse({"ok": False}, status_code=403)
+    deleted = user_links_svc.delete_link(str(user["id"]), link_id)
+    if not deleted:
+        return JSONResponse({"ok": False, "message": "save-failed"}, status_code=500)
+    user_auth_svc.audit_user(
+        request,
+        str(user["id"]),
+        "folio.link.removed",
+        target=link_id,
+    )
+    return JSONResponse({"ok": True})
+
+
+@router.put("/{slug}/manage/links/reorder")
+async def owner_links_reorder(
+    request: Request,
+    slug: str,
+    payload: dict = Body(...),
+):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    from app.services import user_links as user_links_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return JSONResponse({"ok": False}, status_code=404)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return JSONResponse({"ok": False}, status_code=403)
+    ordered = payload.get("ordered_ids") or []
+    if not isinstance(ordered, list) or not all(isinstance(x, str) for x in ordered):
+        return JSONResponse({"ok": False, "message": "bad-input"}, status_code=400)
+    ok = user_links_svc.reorder_links(str(user["id"]), ordered)
+    if not ok:
+        return JSONResponse({"ok": False, "message": "save-failed"}, status_code=500)
+    user_auth_svc.audit_user(
+        request,
+        str(user["id"]),
+        "folio.link.reordered",
+        metadata={"count": len(ordered)},
     )
     return JSONResponse({"ok": True})
 

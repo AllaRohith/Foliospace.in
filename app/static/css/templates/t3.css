@@ -1,0 +1,15 @@
+:root {
+  --paper: #FFF8F0;
+  --ink: #1A1A1A;
+  --accent: #E84B5A;
+  --serif: 'Saira', Georgia, serif;
+  --sans: 'Saira', sans-serif;
+  --display: 'Stalinist One', Georgia, serif;
+  --radius: 0;
+  --grid-gap: 24px;
+}
+body.pf-t3 { background: var(--paper); color: var(--ink); font-family: var(--serif); }
+.pf-t3 .pf-hero { padding-top: 32px; }
+.pf-t3 .pf-hero-masthead-stamp { color: var(--accent); }
+.pf-t3 .pf-card { border: 0; border-bottom: 2px solid var(--ink); padding: 24px 0; }
+.pf-t3 .pf-card-heading { font-size: 28px; }

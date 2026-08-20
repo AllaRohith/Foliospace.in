@@ -132,7 +132,7 @@ def create_user(email: str, password: str, role: str | None = None) -> dict:
                         plan, plan_expires_at, is_trial
                     )
                     VALUES (%s, %s, %s, %s, %s, FALSE, %s, %s,
-                            'pro', %s + INTERVAL '15 days', TRUE)
+                            'pro', %s + INTERVAL '14 days', TRUE)
                     RETURNING id, email, slug, display_name, role, email_verified,
                               created_at, updated_at, last_login_at, claimed_at,
                               claim_token, claim_expires_at, deleted_at,
@@ -169,13 +169,15 @@ def find_user_by_email(email: str) -> dict | None:
                 cur.execute(
                     """
                     SELECT id, email, password_hash, slug, display_name, role,
-                           bio, phone, avatar_url, avatar_public_id, is_public,
+                           bio, phone, avatar_url, avatar_public_id, avatar_video_url, avatar_video_public_id, avatar_video_kind, is_public,
                            email_verified, created_at, updated_at, last_login_at,
                            claimed_at, claim_token, claim_expires_at, deleted_at,
                            plan, plan_expires_at, payment_failed_at, razorpay_customer_id,
                            is_trial, trial_reminder_7d_sent_at, trial_reminder_4d_sent_at, trial_reminder_2d_sent_at,
                            is_internal,
-                           template_id, linkedin_url
+                           template_id, linkedin_url,
+                           spotlight_kind, spotlight_ref_id, spotlight_text, spotlight_url, spotlight_emoji,
+                           seo_title, seo_description, og_image_override_url
                       FROM users
                      WHERE email = %s
                     """,
@@ -199,13 +201,15 @@ def find_user_by_id(user_id: str | UUID) -> dict | None:
                 cur.execute(
                     """
                     SELECT id, email, password_hash, slug, display_name, role,
-                           bio, phone, avatar_url, avatar_public_id, is_public,
+                           bio, phone, avatar_url, avatar_public_id, avatar_video_url, avatar_video_public_id, avatar_video_kind, is_public,
                            email_verified, created_at, updated_at, last_login_at,
                            claimed_at, claim_token, claim_expires_at, deleted_at,
                            plan, plan_expires_at, payment_failed_at, razorpay_customer_id,
                            is_trial, trial_reminder_7d_sent_at, trial_reminder_4d_sent_at, trial_reminder_2d_sent_at,
                            is_internal,
-                           template_id, linkedin_url
+                           template_id, linkedin_url,
+                           spotlight_kind, spotlight_ref_id, spotlight_text, spotlight_url, spotlight_emoji,
+                           seo_title, seo_description, og_image_override_url
                       FROM users
                      WHERE id = %s
                     """,
@@ -506,10 +510,12 @@ def find_user_by_provider_uid(provider: str, provider_uid: str) -> dict | None:
                 cur.execute(
                     """
                     SELECT u.id, u.email, u.slug, u.display_name, u.role, u.bio,
-                           u.phone, u.avatar_url, u.avatar_public_id, u.is_public,
+                           u.phone, u.avatar_url, u.avatar_public_id, u.avatar_video_url, u.avatar_video_public_id, u.avatar_video_kind, u.is_public,
                            u.plan, u.plan_expires_at, u.payment_failed_at,
                            u.is_trial, u.is_internal, u.template_id,
-                           u.email_verified, u.created_at, u.deleted_at
+                           u.email_verified, u.created_at, u.deleted_at,
+                           u.spotlight_kind, u.spotlight_ref_id, u.spotlight_text, u.spotlight_url, u.spotlight_emoji,
+                           u.seo_title, u.seo_description, u.og_image_override_url
                       FROM social_accounts sa
                       JOIN users u ON u.id = sa.user_id
                      WHERE sa.provider = %s AND sa.provider_uid = %s
@@ -576,9 +582,11 @@ def create_user_from_oauth(
                     """
                     INSERT INTO users (
                         id, email, slug, password_hash, display_name, role,
-                        email_verified, created_at, updated_at
+                        email_verified, created_at, updated_at,
+                        plan, plan_expires_at, is_trial
                     )
-                    VALUES (%s, %s, %s, NULL, %s, %s, TRUE, NOW(), NOW())
+                    VALUES (%s, %s, %s, NULL, %s, %s, TRUE, NOW(), NOW(),
+                            'pro', NOW() + INTERVAL '14 days', TRUE)
                     RETURNING id, email, slug, display_name, role, bio,
                               phone, avatar_url, avatar_public_id, is_public,
                               plan, plan_expires_at, payment_failed_at,
@@ -773,6 +781,163 @@ def clear_avatar(user_id) -> dict | None:
     return row
 
 
+def set_avatar_video(user_id, url: str, public_id: str, kind: str = "mp4") -> dict | None:
+    uid = UUID(user_id) if not isinstance(user_id, UUID) else user_id
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE users
+                       SET avatar_video_url = %s,
+                           avatar_video_public_id = %s,
+                           avatar_video_kind = %s,
+                           updated_at = NOW()
+                     WHERE id = %s AND deleted_at IS NULL
+                    RETURNING id, slug, avatar_video_url, avatar_video_public_id, avatar_video_kind
+                    """,
+                    (_clean_url(url), public_id[:512], (kind or "mp4")[:16], uid),
+                )
+                row = cur.fetchone()
+            conn.commit()
+    except (psycopg.Error, ValueError, TypeError) as e:
+        logger.exception("set_avatar_video failed: %s", e)
+        return None
+    return row
+
+
+def clear_avatar_video(user_id) -> dict | None:
+    uid = UUID(user_id) if not isinstance(user_id, UUID) else user_id
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE users
+                       SET avatar_video_url = NULL,
+                           avatar_video_public_id = NULL,
+                           avatar_video_kind = NULL,
+                           updated_at = NOW()
+                     WHERE id = %s AND deleted_at IS NULL
+                    RETURNING id, slug, avatar_video_public_id
+                    """,
+                    (uid,),
+                )
+                row = cur.fetchone()
+            conn.commit()
+    except psycopg.Error as e:
+        logger.exception("clear_avatar_video failed: %s", e)
+        return None
+    return row
+
+
+def set_spotlight(
+    user_id,
+    kind: str | None = None,
+    ref_id: str | None = None,
+    text: str | None = None,
+    url: str | None = None,
+    emoji: str | None = None,
+) -> dict | None:
+    uid = UUID(user_id) if not isinstance(user_id, UUID) else user_id
+    allowed_kinds = {"", "repo", "url", "cta"}
+    clean_kind = (kind or "").strip().lower()
+    if clean_kind not in allowed_kinds:
+        clean_kind = "url"
+    clean_ref = (ref_id or "").strip()[:128] or None
+    clean_text = (text or "").strip()[:120] or None
+    clean_url = (url or "").strip()[:2048] or None
+    clean_emoji = (emoji or "").strip()[:16] or None
+    if clean_url and not (clean_url.startswith("http://") or clean_url.startswith("https://")):
+        clean_url = None
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE users
+                       SET spotlight_kind   = %s,
+                           spotlight_ref_id = %s,
+                           spotlight_text   = %s,
+                           spotlight_url    = %s,
+                           spotlight_emoji  = %s,
+                           updated_at = NOW()
+                     WHERE id = %s AND deleted_at IS NULL
+                    RETURNING id, slug, spotlight_kind, spotlight_ref_id, spotlight_text, spotlight_url, spotlight_emoji
+                    """,
+                    (clean_kind or None, clean_ref, clean_text, clean_url, clean_emoji, uid),
+                )
+                row = cur.fetchone()
+            conn.commit()
+    except (psycopg.Error, ValueError, TypeError) as e:
+        logger.exception("set_spotlight failed: %s", e)
+        return None
+    return row
+
+
+def clear_spotlight(user_id) -> dict | None:
+    uid = UUID(user_id) if not isinstance(user_id, UUID) else user_id
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE users
+                       SET spotlight_kind   = NULL,
+                           spotlight_ref_id = NULL,
+                           spotlight_text   = NULL,
+                           spotlight_url    = NULL,
+                           spotlight_emoji  = NULL,
+                           updated_at = NOW()
+                     WHERE id = %s AND deleted_at IS NULL
+                    RETURNING id, slug
+                    """,
+                    (uid,),
+                )
+                row = cur.fetchone()
+            conn.commit()
+    except psycopg.Error as e:
+        logger.exception("clear_spotlight failed: %s", e)
+        return None
+    return row
+
+
+def update_user_seo(user_id, seo_title: str | None = None, seo_description: str | None = None, og_image_override_url: str | None = None) -> dict | None:
+    uid = UUID(user_id) if not isinstance(user_id, UUID) else user_id
+    sets = []
+    params = []
+    if seo_title is not None:
+        sets.append("seo_title = %s")
+        params.append((seo_title or "").strip()[:70] or None)
+    if seo_description is not None:
+        sets.append("seo_description = %s")
+        params.append((seo_description or "").strip()[:160] or None)
+    if og_image_override_url is not None:
+        url_clean = (og_image_override_url or "").strip()[:2048] or None
+        if url_clean and not url_clean.startswith("https://res.cloudinary.com/"):
+            url_clean = None
+        sets.append("og_image_override_url = %s")
+        params.append(url_clean)
+    if not sets:
+        return None
+    sets.append("updated_at = NOW()")
+    params.append(uid)
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"UPDATE users SET {', '.join(sets)} WHERE id = %s AND deleted_at IS NULL "
+                    "RETURNING id, slug, seo_title, seo_description, og_image_override_url",
+                    tuple(params),
+                )
+                row = cur.fetchone()
+            conn.commit()
+    except (psycopg.Error, ValueError, TypeError) as e:
+        logger.exception("update_user_seo failed: %s", e)
+        return None
+    return row
+
+
 def update_user_profile(
     user_id,
     *,
@@ -890,6 +1055,93 @@ def update_repo_sort(user_id, repo_sort: str) -> dict | None:
         logger.exception("update_repo_sort failed: %s", e)
         return None
     return row
+
+
+VALID_CATEGORIES = {
+    "student", "developer", "designer", "chef", "artist",
+    "consultant", "writer", "researcher", "founder",
+    "employee", "shop", "business", "other",
+}
+VALID_STEPS = {"category", "connect", "first", "manage", "done"}
+
+
+def set_category(user_id, category: str) -> dict | None:
+    cat = (category or "").strip().lower()[:32]
+    if cat not in VALID_CATEGORIES:
+        return None
+    try:
+        uid = UUID(user_id) if not isinstance(user_id, UUID) else user_id
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE users
+                       SET category = %s,
+                           role = COALESCE(NULLIF(role, ''), %s),
+                           updated_at = NOW()
+                     WHERE id = %s
+                       AND deleted_at IS NULL
+                    RETURNING id, category, role
+                    """,
+                    (cat, cat, uid),
+                )
+                row = cur.fetchone()
+            conn.commit()
+        return row
+    except (psycopg.Error, ValueError, TypeError) as e:
+        logger.exception("set_category failed: %s", e)
+        return None
+
+
+def update_onboarding_step(user_id, step: str) -> dict | None:
+    s = (step or "").strip().lower()[:32]
+    if s not in VALID_STEPS:
+        return None
+    try:
+        uid = UUID(user_id) if not isinstance(user_id, UUID) else user_id
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE users
+                       SET onboarding_step = %s,
+                           updated_at = NOW()
+                     WHERE id = %s
+                       AND deleted_at IS NULL
+                    RETURNING id, onboarding_step
+                    """,
+                    (s, uid),
+                )
+                row = cur.fetchone()
+            conn.commit()
+        return row
+    except (psycopg.Error, ValueError, TypeError) as e:
+        logger.exception("update_onboarding_step failed: %s", e)
+        return None
+
+
+def update_listing(user_id, is_listed: bool) -> dict | None:
+    try:
+        uid = UUID(user_id) if not isinstance(user_id, UUID) else user_id
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE users
+                       SET is_listed = %s,
+                           updated_at = NOW()
+                     WHERE id = %s
+                       AND deleted_at IS NULL
+                    RETURNING id, is_listed
+                    """,
+                    (bool(is_listed), uid),
+                )
+                row = cur.fetchone()
+            conn.commit()
+        return row
+    except (psycopg.Error, ValueError, TypeError) as e:
+        logger.exception("update_listing failed: %s", e)
+        return None
 
 
 def compute_completion(user) -> dict:

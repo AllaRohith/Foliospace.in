@@ -307,6 +307,14 @@ async def community_legacy(request: Request):
 
 @app.get("/space-community")
 async def space_community(request: Request):
+    from app.services import directory as directory_svc
+    q = request.query_params.get("q", "")
+    category = request.query_params.get("category", "")
+    try:
+        page = max(1, int(request.query_params.get("page", "1")))
+    except ValueError:
+        page = 1
+    data = directory_svc.list_directory(q=q, category=category, page=page)
     return templates.TemplateResponse(
         request,
         "community.html",
@@ -314,6 +322,14 @@ async def space_community(request: Request):
             "site_name": "FolioSpace",
             "page_title": "Space Community — FolioSpace",
             "description": "The FolioSpace marketplace. Find a chef, developer, consultant, or shop — by name, company, category, profession, or place.",
+            "rows": data["rows"],
+            "total": data["total"],
+            "page": data["page"],
+            "total_pages": data["total_pages"],
+            "per_page": data["per_page"],
+            "q": data["q"],
+            "category": data["category"] or "all",
+            "categories": directory_svc.category_options(),
         },
     )
 
@@ -349,6 +365,7 @@ async def sitemap():
         f'  <url><loc>{base}/privacy</loc><lastmod>{legal_lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>',
         f'  <url><loc>{base}/terms</loc><lastmod>{legal_lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>',
         f'  <url><loc>{base}/features</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>',
+        f'  <url><loc>{base}/pricing</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>',
         f'  <url><loc>{base}/space-community</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>',
     ]
     for slug, lastmod in public_users:

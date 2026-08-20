@@ -720,3 +720,105 @@ async def templates_toggle(template_id: str, request: Request):
         metadata={"is_visible": new_state, "name": current["name"]},
     )
     return RedirectResponse(f"/admin/templates?msg={tid}", status_code=303)
+
+
+@router.get("/fonts", response_class=HTMLResponse)
+async def fonts_list(request: Request):
+    guard = _gate(request)
+    if isinstance(guard, RedirectResponse):
+        return guard
+    sid = guard
+    items: list[dict] = []
+    user_lookup: dict[str, dict] = {}
+    if DATABASE_URL:
+        try:
+            with _connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        SELECT id, user_id, font_name, file_url, file_public_id, status, created_at
+                          FROM user_fonts
+                         ORDER BY created_at DESC
+                        """
+                    )
+                    items = list(cur.fetchall())
+                    if items:
+                        user_ids = list({str(r["user_id"]) for r in items})
+                        cur.execute(
+                            "SELECT id, display_name, slug FROM users WHERE id = ANY(%s::uuid[])",
+                            (user_ids,),
+                        )
+                        for u in cur.fetchall() or []:
+                            user_lookup[str(u["id"])] = u
+                conn.commit()
+        except psycopg.Error as e:
+            logger.exception("fonts_list query failed: %s", e)
+            items = []
+    for it in items:
+        u = user_lookup.get(str(it["user_id"]), {})
+        it["display_name"] = u.get("display_name") or "(no name)"
+        it["slug"] = u.get("slug") or ""
+    pending = [f for f in items if f["status"] == "pending"]
+    decided = [f for f in items if f["status"] != "pending"]
+    admin_auth.audit(request, sid, "fonts.list", metadata={"pending": len(pending)})
+    response = templates.TemplateResponse(
+        request,
+        "admin/fonts.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Fonts · FolioSpace Admin",
+            "description": "Approve or reject custom font uploads from Pro users.",
+            "nav_active": "fonts",
+            "pending": pending,
+            "decided": decided,
+            "msg": request.query_params.get("msg", ""),
+            "err": request.query_params.get("err", ""),
+        },
+    )
+    return _no_cache(response)
+
+
+@router.post("/fonts/{font_id}/approve")
+async def fonts_approve(font_id: str, request: Request):
+    from app.services import user_fonts as user_fonts_svc
+    guard = _gate(request)
+    if isinstance(guard, RedirectResponse):
+        return guard
+    sid = guard
+    fid = _sanitize(font_id)[:48]
+    if not fid:
+        return RedirectResponse("/admin/fonts?err=missing-id", status_code=303)
+    updated = user_fonts_svc.set_font_status(fid, "approved")
+    if not updated:
+        return RedirectResponse("/admin/fonts?err=not-found", status_code=303)
+    admin_auth.audit(
+        request,
+        sid,
+        "fonts.approve",
+        target=fid,
+        metadata={"user_id": updated.get("user_id"), "font_name": updated.get("font_name")},
+    )
+    return RedirectResponse("/admin/fonts?msg=approved", status_code=303)
+
+
+@router.post("/fonts/{font_id}/reject")
+async def fonts_reject(font_id: str, request: Request):
+    from app.services import user_fonts as user_fonts_svc
+    guard = _gate(request)
+    if isinstance(guard, RedirectResponse):
+        return guard
+    sid = guard
+    fid = _sanitize(font_id)[:48]
+    if not fid:
+        return RedirectResponse("/admin/fonts?err=missing-id", status_code=303)
+    updated = user_fonts_svc.set_font_status(fid, "rejected")
+    if not updated:
+        return RedirectResponse("/admin/fonts?err=not-found", status_code=303)
+    admin_auth.audit(
+        request,
+        sid,
+        "fonts.reject",
+        target=fid,
+        metadata={"user_id": updated.get("user_id"), "font_name": updated.get("font_name")},
+    )
+    return RedirectResponse("/admin/fonts?msg=rejected", status_code=303)

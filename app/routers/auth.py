@@ -174,7 +174,11 @@ async def signup_verify_submit(request: Request, email: str = Form(""), code: st
         user_auth.enrich_from_gravatar(str(user["id"]), email_clean)
     except Exception as e:
         logger.info("post-verify gravatar enrich failed: %s", e)
-    return RedirectResponse("/welcome", status_code=303)
+    try:
+        user_auth.update_onboarding_step(str(user["id"]), "category")
+    except Exception as e:
+        logger.info("onboarding_step init failed: %s", e)
+    return RedirectResponse("/onboarding/category", status_code=303)
 
 
 @router.post("/signup/resend")
@@ -204,6 +208,9 @@ async def welcome(request: Request):
         return RedirectResponse("/login?next=/welcome", status_code=303)
     social_accounts = user_auth.list_social_accounts(str(user["id"]))
     connected_providers = {sa["provider"] for sa in social_accounts}
+    if request.query_params.get("skip") == "1":
+        user_auth.update_onboarding_step(str(user["id"]), "first")
+        return RedirectResponse("/onboarding/first", status_code=303)
     u = {
         "id": str(user["id"]),
         "email": user["email"],
@@ -228,6 +235,73 @@ async def welcome(request: Request):
         },
     )
     return _no_cache(response)
+
+
+@router.get("/onboarding/category", response_class=HTMLResponse)
+async def onboarding_category(request: Request):
+    user = user_auth.require_user(request)
+    if not user:
+        return RedirectResponse("/login?next=/onboarding/category", status_code=303)
+    categories = sorted(user_auth.VALID_CATEGORIES)
+    current = (user.get("category") or user.get("role") or "").strip().lower()
+    response = templates.TemplateResponse(
+        request,
+        "auth/onboarding_category.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Pick your category — FolioSpace",
+            "description": "Tell us what you do so your folio fits.",
+            "categories": categories,
+            "current": current,
+            "skip": request.query_params.get("skip") == "1",
+        },
+    )
+    return _no_cache(response)
+
+
+@router.post("/onboarding/category")
+@limiter.limit("30/minute")
+async def onboarding_category_save(request: Request):
+    user = user_auth.require_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+    form = await request.form()
+    cat = _sanitize(str(form.get("category", "")))[:32].lower()
+    if cat not in user_auth.VALID_CATEGORIES:
+        return RedirectResponse("/onboarding/category?err=bad-category", status_code=303)
+    user_auth.set_category(str(user["id"]), cat)
+    user_auth.audit_user(request, str(user["id"]), "onboarding.category", metadata={"category": cat})
+    user_auth.update_onboarding_step(str(user["id"]), "connect")
+    return RedirectResponse("/welcome", status_code=303)
+
+
+@router.get("/onboarding/first", response_class=HTMLResponse)
+async def onboarding_first(request: Request):
+    user = user_auth.require_user(request)
+    if not user:
+        return RedirectResponse("/login?next=/onboarding/first", status_code=303)
+    response = templates.TemplateResponse(
+        request,
+        "auth/onboarding_first.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Set your first surface — FolioSpace",
+            "description": "Pick a template + the first thing visitors see.",
+            "user": user,
+            "skip": request.query_params.get("skip") == "1",
+        },
+    )
+    return _no_cache(response)
+
+
+@router.post("/onboarding/first")
+@limiter.limit("30/minute")
+async def onboarding_first_save(request: Request):
+    user = user_auth.require_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+    user_auth.update_onboarding_step(str(user["id"]), "manage")
+    return RedirectResponse(f"/{user['slug']}/manage", status_code=303)
 
 
 @router.get("/forgot", response_class=HTMLResponse)

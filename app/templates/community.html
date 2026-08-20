@@ -247,6 +247,68 @@
       </div>
     </section>
 
+    <section class="community-directory" aria-label="Directory of listed folios">
+      <div class="container">
+        <div class="community-directory-head">
+          <div class="community-directory-eyebrow">→ Listed · {{ total }} pros</div>
+          <h2 class="community-directory-title">The <em>roster</em></h2>
+          <form class="community-directory-form" method="get" action="/space-community">
+            <input type="search" name="q" maxlength="64" placeholder="Search by name or handle…" value="{{ q }}" class="community-directory-search" aria-label="Search listed folios" />
+            <select name="category" class="community-directory-cat" aria-label="Filter by category">
+              {% for cat in categories %}
+                <option value="{{ cat }}" {% if cat == category %}selected{% endif %}>{{ cat|capitalize }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary">Search</button>
+          </form>
+        </div>
+
+        {% if rows|length == 0 %}
+          <div class="community-directory-empty">
+            {% if q or (category and category != 'all') %}
+              No results for that search. <a href="/space-community">Clear →</a>
+            {% else %}
+              Nobody's opted into the directory yet. You can <a href="/signup">list yours</a> from your manage page.
+            {% endif %}
+          </div>
+        {% else %}
+          <ul class="community-directory-grid" aria-label="Listed folios">
+            {% for r in rows %}
+              <li class="community-card">
+                <a href="/{{ r.slug }}" class="community-card-anchor">
+                  <div class="community-card-avatar" aria-hidden="true">
+                    {% if r.avatar_url %}
+                      <img src="{{ r.avatar_url }}" alt="" loading="lazy" />
+                    {% else %}
+                      <span class="community-card-initial">{{ ((r.display_name or r.slug or '?')[0])|upper }}</span>
+                    {% endif %}
+                  </div>
+                  <div class="community-card-body">
+                    <div class="community-card-name">{{ r.display_name or r.slug }}</div>
+                    {% if r.role %}<div class="community-card-role">{{ r.role }}</div>{% endif %}
+                    {% if r.category %}<div class="community-card-cat">{{ r.category }}</div>{% endif %}
+                    <div class="community-card-handle">foliospace.in/{{ r.slug }}</div>
+                  </div>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+
+          {% if total_pages > 1 %}
+            <nav class="community-pager" aria-label="Pagination">
+              {% if page > 1 %}
+                <a class="community-pager-link" href="/space-community?q={{ q }}&category={{ category }}&page={{ page - 1 }}">← Prev</a>
+              {% endif %}
+              <span class="community-pager-meta">Page {{ page }} of {{ total_pages }}</span>
+              {% if page < total_pages %}
+                <a class="community-pager-link" href="/space-community?q={{ q }}&category={{ category }}&page={{ page + 1 }}">Next →</a>
+              {% endif %}
+            </nav>
+          {% endif %}
+        {% endif %}
+      </div>
+    </section>
+
     <section class="community-page-cta">
       <div class="container">
         <p class="community-page-cta-line">Every folio, in one searchable place. When it ships, you'll find it here.</p>

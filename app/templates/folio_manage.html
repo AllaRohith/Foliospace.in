@@ -149,6 +149,79 @@
               <div class="fm-avatar-error" data-fm-avatar-error hidden></div>
             </div>
 
+            <div class="fm-field fm-field-avatar-video">
+              <label>Profile video <span class="fm-field-hint">(loops on your folio · MP4/WebM · ≤ 50 MB)</span></label>
+
+              {% if user.avatar_video_url %}
+                <div class="fm-avatar-current">
+                  <video class="fm-avatar-thumb" src="{{ user.avatar_video_url }}" autoplay loop muted playsinline preload="metadata"></video>
+                  <div class="fm-avatar-actions">
+                    <button type="button" class="fm-avatar-btn" data-fm-avatar-video-replace>Replace video</button>
+                    <button type="button" class="fm-avatar-btn fm-avatar-btn-quiet" data-fm-avatar-video-remove>Remove</button>
+                  </div>
+                </div>
+              {% else %}
+                <label class="fm-avatar-dropzone" data-fm-avatar-video-dropzone for="fm-avatar-video-input">
+                  <div class="fm-avatar-dropzone-icon">▶</div>
+                  <div class="fm-avatar-dropzone-label">Drop a short video here</div>
+                  <div class="fm-avatar-dropzone-sub">or click to choose · MP4, WebM · ≤ 50 MB · ≤ 10 s, square</div>
+                  <input type="file" id="fm-avatar-video-input" accept="video/mp4,video/webm" hidden />
+                </label>
+              {% endif %}
+
+              <div class="fm-avatar-progress" data-fm-avatar-video-progress hidden>
+                <div class="fm-avatar-progress-bar"><div class="fm-avatar-progress-fill" data-fm-avatar-video-progress-fill></div></div>
+                <div class="fm-avatar-progress-text" data-fm-avatar-video-progress-text>Uploading…</div>
+              </div>
+
+              <div class="fm-avatar-error" data-fm-avatar-video-error hidden></div>
+            </div>
+
+            <div class="fm-field fm-field-spotlight">
+              <label>Spotlight <span class="fm-field-hint">(Pro · one always-on-top CTA)</span></label>
+              {% if user.plan != 'pro' and not user.is_internal %}
+                <p class="fm-spotlight-locked">Spotlight is a Pro feature. <a href="/pricing">Upgrade →</a></p>
+              {% else %}
+                <div class="fm-spotlight-current">
+                  {% if user.spotlight_kind %}
+                    <div class="fm-spotlight-preview">
+                      <span class="fm-spotlight-eyebrow">→ Spotlight</span>
+                      <span class="fm-spotlight-emoji" aria-hidden="true">{{ user.spotlight_emoji or '★' }}</span>
+                      <span class="fm-spotlight-text">{{ user.spotlight_text or 'Your call-to-action' }}</span>
+                      <span class="fm-spotlight-url">{{ user.spotlight_url or '' }}</span>
+                      <button type="button" class="fm-avatar-btn fm-avatar-btn-quiet" data-fm-spotlight-remove>Remove</button>
+                    </div>
+                  {% endif %}
+                </div>
+                <form method="post" action="/{{ user.slug }}/manage/spotlight" class="fm-spotlight-form" data-fm-spotlight-form>
+                  <div class="fm-spotlight-row">
+                    <label class="fm-spotlight-kind" for="spotlight-kind">
+                      <span>Kind</span>
+                      <select id="spotlight-kind" name="kind">
+                        <option value="url" {% if user.spotlight_kind == 'url' %}selected{% endif %}>URL</option>
+                        <option value="cta" {% if user.spotlight_kind == 'cta' %}selected{% endif %}>CTA text</option>
+                        <option value="repo" {% if user.spotlight_kind == 'repo' %}selected{% endif %}>Repo</option>
+                      </select>
+                    </label>
+                    <label class="fm-spotlight-emoji-label" for="spotlight-emoji">
+                      <span>Emoji</span>
+                      <input id="spotlight-emoji" name="emoji" type="text" maxlength="4" value="{{ user.spotlight_emoji or '★' }}" placeholder="★" />
+                    </label>
+                  </div>
+                  <label class="fm-spotlight-text-label" for="spotlight-text">
+                    <span>Text (max 60 chars)</span>
+                    <input id="spotlight-text" name="text" type="text" maxlength="60" value="{{ user.spotlight_text or '' }}" placeholder="Book a 30-min intro" />
+                  </label>
+                  <label class="fm-spotlight-url-label" for="spotlight-url">
+                    <span>URL (https://…)</span>
+                    <input id="spotlight-url" name="url" type="url" maxlength="300" value="{{ user.spotlight_url or '' }}" placeholder="https://cal.com/…" />
+                  </label>
+                  <button type="submit" class="fm-avatar-btn fm-spotlight-save" data-fm-spotlight-save>Save Spotlight</button>
+                  <span class="fm-spotlight-status" data-fm-spotlight-status hidden></span>
+                </form>
+              {% endif %}
+            </div>
+
             <div class="fm-field fm-field-toggle">
               <label class="fm-toggle-row" for="is_public">
                 <span class="fm-toggle-text">
@@ -159,6 +232,147 @@
                 <span class="fm-toggle-track" aria-hidden="true"><span class="fm-toggle-thumb"></span></span>
               </label>
             </div>
+
+            <div class="fm-field fm-field-toggle fm-field-listing">
+              <label class="fm-toggle-row" for="is_listed">
+                <span class="fm-toggle-text">
+                  <span class="fm-toggle-label">List me in <a href="/space-community" target="_blank" rel="noopener">Space Community</a></span>
+                  <span class="fm-field-hint">Opt-in only. Requires public. Default off.</span>
+                </span>
+                <input id="is_listed" name="is_listed" type="checkbox" value="1"
+                       {% if user.is_listed %}checked{% endif %}
+                       {% if not user.is_public %}disabled{% endif %} />
+                <span class="fm-toggle-track" aria-hidden="true"><span class="fm-toggle-thumb"></span></span>
+              </label>
+            </div>
+
+            <details class="fm-field fm-field-seo" data-fm-seo>
+              <summary class="fm-seo-summary">
+                <span class="fm-seo-summary-label">SEO &amp; social preview</span>
+                <span class="fm-seo-summary-meta">{% if user.seo_title or user.seo_description %}Custom{% else %}Default{% endif %}</span>
+              </summary>
+              <div class="fm-seo-body">
+                <p class="fm-seo-hint">Override how your folio appears in Google, WhatsApp, LinkedIn, and Slack previews. Leave blank to use your display name + bio.</p>
+                <label class="fm-seo-field" for="seo-title">
+                  <span>Title (max 70)</span>
+                  <input id="seo-title" name="seo_title" type="text" maxlength="70" value="{{ user.seo_title or '' }}" placeholder="{{ user.display_name or user.slug }}" />
+                </label>
+                <label class="fm-seo-field" for="seo-description">
+                  <span>Description (max 160)</span>
+                  <textarea id="seo-description" name="seo_description" maxlength="160" rows="3" placeholder="{{ user.bio or 'Paste a one-liner about you.' }}">{{ user.seo_description or '' }}</textarea>
+                </label>
+                <label class="fm-seo-field" for="og-image-url">
+                  <span>OG image URL (must be https://res.cloudinary.com/…)</span>
+                  <input id="og-image-url" name="og_image_override_url" type="url" maxlength="2048" value="{{ user.og_image_override_url or '' }}" placeholder="https://res.cloudinary.com/…" />
+                </label>
+                <button type="button" class="fm-avatar-btn fm-seo-save" data-fm-seo-save>Save SEO</button>
+                <span class="fm-seo-status" data-fm-seo-status hidden></span>
+              </div>
+            </details>
+
+            <details class="fm-field fm-field-links" data-fm-links>
+              <summary class="fm-links-summary">
+                <span class="fm-links-summary-label">Custom links</span>
+                <span class="fm-links-summary-meta">
+                  {% if user_links is defined and user_links %}{{ user_links|length }}{% if not is_pro %}/10{% else %} links{% endif %}{% else %}0{% if not is_pro %}/10{% else %} links{% endif %}{% endif %}
+                </span>
+              </summary>
+              <div class="fm-links-body">
+                <p class="fm-links-hint">Pin your best links on top of your folio. Pick a layout — <strong>stack</strong> (one-per-row), <strong>grid</strong> (2×2 cards), or <strong>carousel</strong> (horizontal scroll). {% if not is_pro %}Free plan capped at 10. <a href="/pricing">Upgrade →</a>{% endif %}</p>
+                <form class="fm-links-add" data-fm-links-add>
+                  <label class="fm-links-add-row">
+                    <span>Label</span>
+                    <input type="text" name="label" maxlength="80" placeholder="e.g. Resume" data-fm-links-label />
+                  </label>
+                  <label class="fm-links-add-row">
+                    <span>URL</span>
+                    <input type="url" name="url" maxlength="2048" placeholder="https://…" required data-fm-links-url />
+                  </label>
+                  <label class="fm-links-add-row fm-links-add-layout">
+                    <span>Layout</span>
+                    <select name="layout" data-fm-links-layout>
+                      <option value="stack">Stack</option>
+                      <option value="grid">Grid</option>
+                      <option value="carousel">Carousel</option>
+                    </select>
+                  </label>
+                  <button type="submit" class="fm-avatar-btn" data-fm-links-add-btn>Add link</button>
+                </form>
+                <span class="fm-links-status" data-fm-links-status hidden></span>
+                <ul class="fm-links-list" data-fm-links-list aria-label="Your links">
+                  {% if user_links is defined %}
+                    {% for l in user_links %}
+                      <li class="fm-link-row" data-fm-link-row data-link-id="{{ l.id }}" data-layout="{{ l.layout }}">
+                        <button type="button" class="fm-link-row-handle" data-fm-link-handle aria-label="Reorder">⋮⋮</button>
+                        <div class="fm-link-row-body">
+                          <strong class="fm-link-row-label">{{ l.label }}</strong>
+                          <span class="fm-link-row-url">{{ l.url }}</span>
+                        </div>
+                        <span class="fm-link-row-icon fm-link-row-icon-{{ l.icon }}" aria-hidden="true">{{ l.icon[0]|upper }}</span>
+                        <select class="fm-link-row-layout" data-fm-link-layout aria-label="Layout">
+                          <option value="stack" {% if l.layout == 'stack' %}selected{% endif %}>Stack</option>
+                          <option value="grid" {% if l.layout == 'grid' %}selected{% endif %}>Grid</option>
+                          <option value="carousel" {% if l.layout == 'carousel' %}selected{% endif %}>Carousel</option>
+                        </select>
+                        <button type="button" class="fm-link-row-remove" data-fm-link-remove aria-label="Remove link">×</button>
+                      </li>
+                    {% endfor %}
+                  {% endif %}
+                </ul>
+              </div>
+            </details>
+
+            <details class="fm-field fm-field-fonts" data-fm-fonts>
+              <summary class="fm-fonts-summary">
+                <span class="fm-fonts-summary-label">Custom fonts <span class="fm-fonts-pro">Pro</span></span>
+                <span class="fm-fonts-summary-meta">
+                  {% if user_fonts is defined and user_fonts %}{{ user_fonts|length }}/2{% else %}0/2{% endif %}
+                </span>
+              </summary>
+              <div class="fm-fonts-body">
+                {% if not is_pro %}
+                  <p class="fm-fonts-locked">
+                    <span class="fm-fonts-lock-eyebrow">Pro only</span>
+                    Custom fonts are part of the Pro plan. <a href="/pricing">Upgrade →</a>
+                  </p>
+                {% else %}
+                  <p class="fm-fonts-hint">Upload a font file (TTF, OTF, WOFF, or WOFF2 · ≤ 1 MB). We review each upload within 24 hours — approved fonts load on your public folio via <code>@font-face</code>. Max 2 per user.</p>
+                  <label class="fm-fonts-field" for="font-name-input">
+                    <span>Font display name</span>
+                    <input id="font-name-input" type="text" maxlength="60" placeholder="e.g. Söhne Mono" />
+                  </label>
+                  <div class="fm-fonts-drop" data-fm-fonts-drop>
+                    <input id="font-file-input" type="file" accept=".ttf,.otf,.woff,.woff2" hidden />
+                    <div class="fm-fonts-drop-text">
+                      <strong>Drop a font file</strong>
+                      <span class="fm-fonts-drop-sub">or click to pick · TTF / OTF / WOFF / WOFF2 · ≤ 1 MB</span>
+                    </div>
+                  </div>
+                  <div class="fm-fonts-progress" data-fm-fonts-progress hidden>
+                    <div class="fm-fonts-progress-bar" data-fm-fonts-progress-bar></div>
+                    <span class="fm-fonts-progress-label" data-fm-fonts-progress-label>0%</span>
+                  </div>
+                  <span class="fm-fonts-status" data-fm-fonts-status hidden></span>
+
+                  <ul class="fm-fonts-list" data-fm-fonts-list aria-label="Your uploaded fonts">
+                    {% if user_fonts is defined %}
+                      {% for f in user_fonts %}
+                        <li class="fm-fonts-row" data-fm-fonts-row data-font-id="{{ f.id }}">
+                          <div class="fm-fonts-row-name">
+                            <strong>{{ f.font_name }}</strong>
+                            <span class="fm-fonts-row-status fm-fonts-row-status-{{ f.status }}">{{ f.status }}</span>
+                          </div>
+                          <div class="fm-fonts-row-meta">
+                            <code>{{ f.file_url.split('/')[-1][:60] }}</code>
+                          </div>
+                          <button type="button" class="fm-fonts-row-remove" data-fm-fonts-remove aria-label="Remove font">×</button>
+                        </li>
+                      {% endfor %}
+                    {% endif %}
+                  </ul>
+                {% endif %}
+              </div>
+            </details>
 
             <button type="submit" class="fm-save">Save folio →</button>
           </form>
@@ -179,6 +393,24 @@
         </section>
 
         <aside class="fm-side" aria-label="Preview and status">
+          {% if completion and completion.filled < completion.total %}
+            <section class="fm-card fm-card-completion" aria-label="Profile completion">
+              <div class="fm-card-eyebrow">→ Profile · {{ completion.filled }}/{{ completion.total }} complete</div>
+              <div class="fm-completion-bar" role="progressbar" aria-valuenow="{{ completion.filled }}" aria-valuemin="0" aria-valuemax="{{ completion.total }}">
+                <div class="fm-completion-bar-fill" style="width: {{ (completion.filled * 100 / completion.total)|round(0, 'floor') }}%"></div>
+              </div>
+              <ul class="fm-completion-list">
+                {% for f in completion.fields %}
+                  {% if not f.done %}
+                    <li class="fm-completion-row">
+                      <span class="fm-completion-mark" aria-hidden="true">○</span>
+                      <span class="fm-completion-label">{{ f.label }}</span>
+                    </li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            </section>
+          {% endif %}
           <section class="fm-card fm-card-visits">
             <div class="fm-card-eyebrow">→ Visits · last 30 days</div>
             <div class="fm-card-numbers">
@@ -385,5 +617,10 @@
 <script defer src="{{ request.url_for('static', path='js/dash.js') }}?v={{ asset_v }}"></script>
 <script defer src="{{ request.url_for('static', path='js/folio_manage.js') }}?v={{ asset_v }}"></script>
 <script defer src="{{ request.url_for('static', path='js/folio_manage_avatar.js') }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path='js/folio_manage_avatar_video.js') }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path='js/folio_manage_spotlight.js') }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path='js/folio_manage_seo.js') }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path='js/folio_manage_fonts.js') }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path='js/folio_manage_links.js') }}?v={{ asset_v }}"></script>
 <script src="https://www.linkedin.com/autofill/js/autofill.js" type="text/javascript" async></script>
 {% endblock %}

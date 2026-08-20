@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Pick your category — FolioSpace{% endblock %}
+{% block description %}Tell us what you do so your folio fits.{% endblock %}
+{% block canonical %}/onboarding/category{% endblock %}
+{% block og_image %}{{ request.url_for('static', path='img/og.png') }}?v={{ asset_v }}{% endblock %}
+
+{% block content %}
+<main class="onboarding-page">
+  <div class="onboarding-shell">
+    <div class="onboarding-eyebrow">→ Step 1 of 3</div>
+    <h1 class="onboarding-title">What do you <em>do?</em></h1>
+    <p class="onboarding-lede">Pick the closest match — we'll pre-load a template, default links, and copy that fits. You can change everything later.</p>
+
+    <form class="onboarding-grid" method="post" action="/onboarding/category">
+      {% for cat in categories %}
+        <button type="submit" name="category" value="{{ cat }}"
+                class="onboarding-chip {{ 'is-on' if cat == current else '' }}">
+          <span class="onboarding-chip-name">{{ cat|capitalize }}</span>
+        </button>
+      {% endfor %}
+    </form>
+
+    <div class="onboarding-foot">
+      <a class="onboarding-skip" href="/onboarding/first?skip=1">Skip →</a>
+    </div>
+  </div>
+</main>
+{% endblock %}

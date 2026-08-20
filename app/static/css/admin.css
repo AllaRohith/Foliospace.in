@@ -1620,3 +1620,46 @@ input, select, textarea, button { font-family: inherit; }
   .app-bar-btn { display: none; }
   .search { padding-left: 56px; font-size: 13.5px; }
 }
+
+.cards { display: grid; gap: 16px; margin: 24px 0 48px; }
+.card { background: #FFF; border: 1px solid var(--line); padding: 20px; box-shadow: var(--shadow); }
+.card-head { margin-bottom: 12px; }
+.card-eyebrow { font-family: var(--label); text-transform: uppercase; font-size: 11px; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 4px; }
+.card-title { font-family: var(--display); font-style: italic; font-size: 22px; color: var(--ink); margin-bottom: 6px; line-height: 1.1; }
+.card-sub { font-size: 12.5px; color: var(--muted); }
+.card-sub code { background: var(--cream-2); padding: 1px 6px; font-size: 12px; }
+.card-sub-sep { margin: 0 6px; color: var(--line-strong); }
+.card-body { font-size: 13.5px; color: var(--ink-2); margin-bottom: 12px; }
+.card-foot { border-top: 1px dashed var(--line); padding-top: 12px; }
+.card-foot-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.card-foot-note { font-size: 12px; color: var(--muted); }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border: 1px solid var(--ink); background: var(--ink); color: var(--cream); font-family: var(--label); font-size: 12.5px; letter-spacing: 0.02em; transition: background .15s ease; cursor: pointer; }
+.btn:hover { background: var(--accent); border-color: var(--accent); }
+.btn-toggle.is-on { background: var(--green); border-color: var(--green); }
+.btn-toggle.is-off { background: transparent; color: var(--ink); border-color: var(--ink); }
+
+.page-head { padding: 24px 0 16px; }
+.page-head .eyebrow { font-family: var(--label); text-transform: uppercase; font-size: 11px; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 6px; }
+.page-head h1 { font-family: var(--display); font-style: italic; font-size: 36px; color: var(--ink); line-height: 1.05; }
+.page-head .rule { margin-top: 12px; height: 1px; background: var(--line-strong); width: 64px; }
+.page-head-sub { padding: 16px 0 8px; }
+.page-head-sub h2 { font-family: var(--display); font-style: italic; font-size: 22px; }
+
+.flash { padding: 10px 14px; margin-bottom: 16px; border: 1px solid var(--line); font-size: 13.5px; }
+.flash-ok { background: rgba(46,168,105,.08); border-color: rgba(46,168,105,.35); color: #1d6e44; }
+.flash-warn { background: rgba(255,107,53,.08); border-color: rgba(255,107,53,.35); color: var(--accent-2); }
+.flash code { background: var(--cream-2); padding: 1px 6px; font-size: 12px; }
+
+.empty-state { padding: 32px; text-align: center; color: var(--muted); border: 1px dashed var(--line); font-size: 13.5px; }
+.empty-state code { background: var(--cream-2); padding: 1px 6px; font-size: 12px; }
+
+.card-font .card-body { display: grid; gap: 12px; }
+.font-preview-wrap { border: 1px solid var(--line); background: var(--cream-2); height: 120px; overflow: hidden; }
+.font-preview { width: 100%; height: 240px; border: 0; transform: scale(0.5); transform-origin: top left; background: var(--cream); }
+.font-meta { font-size: 12px; color: var(--muted); }
+.font-url { display: block; padding: 6px 10px; background: var(--cream-2); font-size: 11.5px; word-break: break-all; }
+.font-status { padding: 10px 14px; border: 1px solid var(--line); font-size: 13px; }
+.font-status-approved { background: rgba(46,168,105,.08); border-color: rgba(46,168,105,.35); color: #1d6e44; }
+.font-status-rejected { background: rgba(192,58,43,.08); border-color: rgba(192,58,43,.35); color: var(--red); }
+.card-font-decided { opacity: 0.85; }

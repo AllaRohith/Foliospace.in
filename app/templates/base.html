@@ -36,10 +36,12 @@
 
   {% block jsonld %}{% endblock %}
 
+  {% block head_extra %}{% endblock %}
+
   <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}?v={{ asset_v }}" />
   <script defer src="{{ request.url_for('static', path='js/curtain.js') }}?v={{ asset_v }}"></script>
 </head>
-<body{% if launched %} data-launched="1"{% endif %}>
+<body{% if launched %} data-launched="1"{% endif %} class="{% block body_class %}{% endblock %}">
   <script src="{{ request.url_for('static', path='js/theme.js') }}?v={{ asset_v }}"></script>
   <a class="skip-link" href="#main">Skip to content</a>
   <svg class="bg-topo" aria-hidden="true">
@@ -90,5 +92,6 @@
   {% block content %}{% endblock %}
   <script defer src="{{ request.url_for('static', path='js/utm.js') }}?v={{ asset_v }}"></script>
   <script defer src="{{ request.url_for('static', path='js/main.js') }}?v={{ asset_v }}"></script>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

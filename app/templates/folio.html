@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% block body_class %}pf-{{ user.template_id or 't1' }}{% endblock %}
 {% set folio_base = public_base_url %}
 {% set role_lower = (user.role or '')|lower %}
 {% set is_pro = user.plan == 'pro' %}
@@ -21,16 +22,16 @@
   {% if key in role_lower %}{% set matched_role = key %}{% endif %}
 {% endfor %}
 
-{% block title %}{{ page_title }}{% endblock %}
-{% block description %}{{ description }}{% endblock %}
+{% block title %}{{ user.seo_title if user.seo_title else page_title }}{% endblock %}
+{% block description %}{{ user.seo_description if user.seo_description else description }}{% endblock %}
 {% block canonical %}/{{ user.slug }}{% endblock %}
-{% block og_title %}{{ og_title }}{% endblock %}
-{% block og_description %}{{ description }}{% endblock %}
-{% block og_image %}{{ folio_base }}/u/{{ user.slug }}/og.png{% endblock %}
+{% block og_title %}{{ user.seo_title if user.seo_title else og_title }}{% endblock %}
+{% block og_description %}{{ user.seo_description if user.seo_description else description }}{% endblock %}
+{% block og_image %}{{ user.og_image_override_url if user.og_image_override_url else (folio_base ~ '/u/' ~ user.slug ~ '/og.png') }}{% endblock %}
 {% block og_image_alt %}{{ og_image_alt }}{% endblock %}
-{% block twitter_title %}{{ og_title }}{% endblock %}
-{% block twitter_description %}{{ description }}{% endblock %}
-{% block twitter_image %}{{ folio_base }}/u/{{ user.slug }}/og.png{% endblock %}
+{% block twitter_title %}{{ user.seo_title if user.seo_title else og_title }}{% endblock %}
+{% block twitter_description %}{{ user.seo_description if user.seo_description else description }}{% endblock %}
+{% block twitter_image %}{{ user.og_image_override_url if user.og_image_override_url else (folio_base ~ '/u/' ~ user.slug ~ '/og.png') }}{% endblock %}
 {% block twitter_image_alt %}{{ og_image_alt }}{% endblock %}
 
 {% block jsonld %}
@@ -48,9 +49,44 @@
 </script>
 {% endblock %}
 
+{% block head_extra %}
+  {% if approved_fonts %}
+    <style>
+      {% for f in approved_fonts %}
+        @font-face {
+          font-family: {{ ('fs-' ~ f.id) | replace('-', '_') }};
+          src: url('{{ f.file_url | replace("'", "%27") }}') format('{% if '.woff2' in f.file_url %}woff2{% elif '.woff' in f.file_url %}woff{% elif '.otf' in f.file_url %}opentype{% else %}truetype{% endif %}');
+          font-display: swap;
+        }
+      {% endfor %}
+    </style>
+  {% endif %}
+  {% set current_tid = user.template_id or 't1' %}
+  <link rel="stylesheet" href="{{ request.url_for('static', path='css/templates/' ~ current_tid ~ '.css') }}?v={{ asset_v }}" />
+{% endblock %}
+
 {% block content %}
 <main id="main" class="pf-page">
   <div class="pf-grain" aria-hidden="true"></div>
+
+  {% if user.spotlight_kind and (user.spotlight_url or user.spotlight_text) %}
+    <aside class="pf-spotlight" aria-label="Spotlight">
+      <span class="pf-spotlight-eyebrow">→ Spotlight</span>
+      <span class="pf-spotlight-emoji" aria-hidden="true">{{ user.spotlight_emoji or '★' }}</span>
+      {% if user.spotlight_text %}<span class="pf-spotlight-text">{{ user.spotlight_text }}</span>{% endif %}
+      {% if user.spotlight_url %}
+        <a class="pf-spotlight-cta" href="{{ user.spotlight_url }}" target="_blank" rel="noopener">
+          <span>Open</span>
+          <span aria-hidden="true">→</span>
+        </a>
+      {% endif %}
+    </aside>
+  {% elif is_pro %}
+    <aside class="pf-spotlight pf-spotlight-empty" aria-hidden="true">
+      <span class="pf-spotlight-eyebrow">→ Spotlight</span>
+      <span class="pf-spotlight-text">Highlight a project, link, or call-to-action at the top of your folio.</span>
+    </aside>
+  {% endif %}
 
   <header class="pf-hero">
       <div class="pf-hero-masthead">
@@ -61,13 +97,20 @@
       <div class="pf-hero-grid">
         <div class="pf-hero-portrait">
           <div class="pf-avatar-wrap">
+            {% if user.avatar_video_url %}
+              <video class="pf-avatar pf-avatar-video" data-folio-avatar-video
+                     src="{{ user.avatar_video_url }}"
+                     autoplay loop muted playsinline preload="metadata"
+                     poster="{% if user.avatar_url %}{{ user.avatar_url }}{% endif %}"
+                     aria-label="{{ (user.display_name or user.slug) | e }} portrait"></video>
+            {% endif %}
             {% if user.avatar_url %}
-              <img class="pf-avatar" data-folio-avatar src="{{ user.avatar_url }}"
+              <img class="pf-avatar {% if user.avatar_video_url %}pf-avatar-fallback-img{% endif %}" data-folio-avatar src="{{ user.avatar_url }}"
                    alt="{{ (user.display_name or user.slug) | e }} portrait"
-                   loading="lazy" referrerpolicy="no-referrer" />
+                   loading="lazy" referrerpolicy="no-referrer" {% if user.avatar_video_url %}hidden{% endif %} />
             {% endif %}
             <div class="pf-avatar pf-avatar-fallback" data-folio-avatar-fallback
-                 aria-hidden="true" {% if user.avatar_url %}hidden{% endif %}>{{ initials }}</div>
+                 aria-hidden="true" {% if user.avatar_url or user.avatar_video_url %}hidden{% endif %}>{{ initials }}</div>
             <span class="pf-avatar-bar" aria-hidden="true"></span>
           </div>
           {% if is_open %}
@@ -143,6 +186,59 @@
     </header>
 
     <article class="pf-shell">
+    {% if public_links and public_links|length > 0 %}
+      {% set stack_links = public_links|selectattr('layout', 'equalto', 'stack')|list %}
+      {% set grid_links = public_links|selectattr('layout', 'equalto', 'grid')|list %}
+      {% set carousel_links = public_links|selectattr('layout', 'equalto', 'carousel')|list %}
+      {% if stack_links|length > 0 %}
+        <section class="pf-card pf-card-links" aria-label="Custom links">
+          <div class="pf-card-eyebrow">→ Links</div>
+          <ul class="pf-link-list pf-link-stack">
+            {% for l in stack_links %}
+              <li class="pf-link-row pf-link-row-{{ l.icon }}">
+                <a class="pf-link-anchor" href="{{ l.url }}" target="_blank" rel="noopener noreferrer">
+                  <span class="pf-link-icon" aria-hidden="true">{{ (l.icon[0] if l.icon else 'L')|upper }}</span>
+                  <span class="pf-link-label">{{ l.label }}</span>
+                  <span class="pf-link-arrow" aria-hidden="true">→</span>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+      {% if grid_links|length > 0 %}
+        <section class="pf-card pf-card-links" aria-label="Custom links">
+          <div class="pf-card-eyebrow">→ Links</div>
+          <ul class="pf-link-list pf-link-grid">
+            {% for l in grid_links %}
+              <li class="pf-link-tile pf-link-tile-{{ l.icon }}">
+                <a class="pf-link-anchor" href="{{ l.url }}" target="_blank" rel="noopener noreferrer">
+                  <span class="pf-link-icon" aria-hidden="true">{{ (l.icon[0] if l.icon else 'L')|upper }}</span>
+                  <span class="pf-link-label">{{ l.label }}</span>
+                  <span class="pf-link-arrow" aria-hidden="true">→</span>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+      {% if carousel_links|length > 0 %}
+        <section class="pf-card pf-card-links" aria-label="Custom links">
+          <div class="pf-card-eyebrow">→ Links</div>
+          <ul class="pf-link-list pf-link-carousel">
+            {% for l in carousel_links %}
+              <li class="pf-link-slide pf-link-slide-{{ l.icon }}">
+                <a class="pf-link-anchor" href="{{ l.url }}" target="_blank" rel="noopener noreferrer">
+                  <span class="pf-link-icon" aria-hidden="true">{{ (l.icon[0] if l.icon else 'L')|upper }}</span>
+                  <span class="pf-link-label">{{ l.label }}</span>
+                  <span class="pf-link-arrow" aria-hidden="true">→</span>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+    {% endif %}
     {% if is_pro %}
       <section class="pf-card pf-card-work" aria-labelledby="pf-work-heading">
         <div class="pf-card-eyebrow">→ What I do</div>

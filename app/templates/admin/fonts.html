@@ -1,0 +1,125 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Fonts · FolioSpace Admin{% endblock %}
+{% block description %}Approve or reject custom font uploads from Pro users.{% endblock %}
+
+{% set nav_active = 'fonts' %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="/admin/">Admin</a>
+  <span class="sep">/</span>
+  <span class="here">Fonts</span>
+</div>
+{% endblock %}
+
+{% block body %}
+
+<div class="page-head">
+  <div class="eyebrow">Moderation</div>
+  <h1>The <em>custom font</em> desk</h1>
+  <div class="rule"></div>
+</div>
+
+{% if msg == 'approved' %}
+  <div class="flash flash-ok">✓ Font approved. It'll load on the user's public folio from now on.</div>
+{% elif msg == 'rejected' %}
+  <div class="flash flash-ok">Font rejected. The user can re-upload.</div>
+{% endif %}
+{% if err == 'not-found' %}
+  <div class="flash flash-warn">That font doesn't exist (or was already removed).</div>
+{% elif err == 'missing-id' %}
+  <div class="flash flash-warn">Missing font id.</div>
+{% endif %}
+
+<section class="stat-row stat-row-2" aria-label="Font totals">
+  <div class="stat">
+    <div class="stat-num">{{ pending|length }}</div>
+    <div class="stat-label">Pending review</div>
+    <div class="sub">Awaiting decision</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">{{ decided|length }}</div>
+    <div class="stat-label">Decided</div>
+    <div class="sub">Approved or rejected</div>
+  </div>
+</section>
+
+<section class="cards" aria-label="Pending fonts">
+  <div class="page-head page-head-sub">
+    <div class="eyebrow">Pending</div>
+    <h2>Awaiting <em>review</em></h2>
+  </div>
+  {% if pending|length == 0 %}
+    <div class="empty-state">No pending fonts. Queue is empty.</div>
+  {% endif %}
+  {% for f in pending %}
+    <article class="card card-font">
+      <div class="card-head">
+        <div class="card-eyebrow">→ Font / {{ f.created_at.strftime('%Y-%m-%d') if f.created_at else '—' }}</div>
+        <h2 class="card-title">{{ f.font_name }}</h2>
+        <div class="card-sub">
+          by <strong>{{ f.display_name }}</strong>
+          {% if f.slug %}<span class="card-sub-sep">·</span><code>/{{ f.slug }}</code>{% endif %}
+        </div>
+      </div>
+
+      <div class="card-body">
+        <div class="font-preview-wrap">
+          <iframe class="font-preview" src="/{{ f.slug or 'admin' }}/manage" sandbox="allow-same-origin" title="Font preview"></iframe>
+        </div>
+        <div class="font-meta">
+          <code class="font-url">{{ f.file_url }}</code>
+        </div>
+      </div>
+
+      <div class="card-foot">
+        <div class="card-foot-row">
+          <form method="post" action="/admin/fonts/{{ f.id }}/approve">
+            <button type="submit" class="btn btn-toggle is-on">Approve</button>
+          </form>
+          <form method="post" action="/admin/fonts/{{ f.id }}/reject">
+            <button type="submit" class="btn btn-toggle is-off">Reject</button>
+          </form>
+          <span class="card-foot-note">
+            Approval is permanent until the user deletes it.
+          </span>
+        </div>
+      </div>
+    </article>
+  {% endfor %}
+</section>
+
+{% if decided|length > 0 %}
+<section class="cards" aria-label="Decided fonts">
+  <div class="page-head page-head-sub">
+    <div class="eyebrow">History</div>
+    <h2>Already <em>decided</em></h2>
+  </div>
+  {% for f in decided %}
+    <article class="card card-font card-font-decided">
+      <div class="card-head">
+        <div class="card-eyebrow">
+          → {{ f.status|capitalize }} / {{ f.created_at.strftime('%Y-%m-%d') if f.created_at else '—' }}
+        </div>
+        <h2 class="card-title">{{ f.font_name }}</h2>
+        <div class="card-sub">
+          by <strong>{{ f.display_name }}</strong>
+          {% if f.slug %}<span class="card-sub-sep">·</span><code>/{{ f.slug }}</code>{% endif %}
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="font-status font-status-{{ f.status }}">
+          {% if f.status == 'approved' %}
+            Live on the public folio via @font-face.
+          {% else %}
+            Rejected. User can re-upload if they fix it.
+          {% endif %}
+        </div>
+      </div>
+    </article>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% endblock %}

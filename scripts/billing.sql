@@ -47,7 +47,7 @@ END $$;
 UPDATE users
    SET is_trial = TRUE,
        plan = 'pro',
-       plan_expires_at = NOW() + INTERVAL '15 days',
+       plan_expires_at = NOW() + INTERVAL '14 days',
        updated_at = NOW()
  WHERE plan = 'free'
    AND setup_paid_at IS NULL

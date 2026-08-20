@@ -27,8 +27,10 @@
       {% if cancelled %}
         <div class="fm-flash fm-flash-ok">✓ Cancelled — Pro ends on {{ subscription.current_period_end_iso if subscription and subscription.current_period_end_iso else 'next cycle' }}.</div>
       {% endif %}
-      {% if err == 'config' %}
+      {% if err == 'config' and user.is_internal %}
         <div class="fm-flash fm-flash-warn">Razorpay isn't configured yet. Set the RAZORPAY_* env vars and redeploy.</div>
+      {% elif err == 'annual-unavailable' %}
+        <div class="fm-flash fm-flash-warn">Annual plan not configured yet — try Monthly.</div>
       {% elif err == 'server' %}
         <div class="fm-flash fm-flash-warn">Couldn't open checkout. Try again in a moment.</div>
       {% elif err == 'cancel' %}
@@ -41,13 +43,21 @@
         <section class="fm-editor" aria-label="Billing and subscription">
 
           <div class="fm-bill-figure">
-            <div class="fm-bill-figure-main">
-              <div class="fm-bill-figure-num">₹149</div>
-              <div class="fm-bill-figure-unit">/month</div>
+            <div class="fm-bill-cycle" role="tablist" aria-label="Billing cycle">
+              <button type="button" class="fm-bill-cycle-btn is-active" data-cycle="monthly" role="tab" aria-selected="true" aria-controls="fm-bill-figure-main">
+                Monthly
+              </button>
+              <button type="button" class="fm-bill-cycle-btn" data-cycle="annual" role="tab" aria-selected="false" aria-controls="fm-bill-figure-main">
+                Annual <span class="fm-bill-cycle-save">Save 16%</span>
+              </button>
+            </div>
+            <div class="fm-bill-figure-main" id="fm-bill-figure-main" data-cycle-view="monthly">
+              <div class="fm-bill-figure-num" data-bill-cycle-num>₹149</div>
+              <div class="fm-bill-figure-unit" data-bill-cycle-unit>/month</div>
             </div>
             <div class="fm-bill-figure-detail">
               <div class="fm-bill-figure-row"><span>First 14 days</span><strong>Free</strong></div>
-              <div class="fm-bill-figure-row"><span>After trial</span><strong>₹149/mo via UPI AutoPay</strong></div>
+              <div class="fm-bill-figure-row"><span data-bill-cycle-row="after">After trial</span><strong data-bill-cycle-row="after-strong">₹149/mo via UPI AutoPay</strong></div>
               <div class="fm-bill-figure-row"><span>Setup fee</span><strong>None</strong></div>
               <div class="fm-bill-figure-row"><span>Cancel</span><strong>Anytime — two taps</strong></div>
             </div>
@@ -148,7 +158,7 @@
               {% if ps.state == 'internal' %}
                 <div class="fm-card-row"><span class="fm-card-row-key">{{ ps.value_key }}</span><span class="fm-card-row-val">{{ ps.value_val }}</span></div>
                 <div class="fm-card-row"><span class="fm-card-row-key">{{ ps.billing_key }}</span><span class="fm-card-row-val">{{ ps.billing_val }}</span></div>
-              {% elif not razorpay_configured %}
+              {% elif not razorpay_configured and user.is_internal %}
                 <div class="fm-card-row"><span class="fm-card-row-key">Setup</span><span class="fm-card-row-val">Razorpay env vars missing</span></div>
                 <div class="fm-card-foot">Set RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET, RAZORPAY_PLAN_ID_PRO and redeploy.</div>
               {% elif subscription and subscription.status in ('active', 'authenticated') %}
@@ -162,7 +172,7 @@
                 <div class="fm-card-row"><span class="fm-card-row-key">Setup fee</span><span class="fm-card-row-val">None</span></div>
               {% elif ps.state == 'trial' %}
                 <div class="fm-card-row"><span class="fm-card-row-key">Trial</span><span class="fm-card-row-val">{{ ps.trial_days_left }} day{{ '' if ps.trial_days_left == 1 else 's' }} left{% if trial_expires_at_iso %} — {{ trial_expires_at_iso }}{% endif %}</span></div>
-                <div class="fm-card-row"><span class="fm-card-row-key">{{ ps.billing_key }}</span><span class="fm-card-row-val">₹149/mo via UPI or Card</span></div>
+                <div class="fm-card-row"><span class="fm-card-row-key">{{ ps.billing_key }}</span><span class="fm-card-row-val">₹149/mo via UPI AutoPay</span></div>
                 <div class="fm-card-row"><span class="fm-card-row-key">Cancel</span><span class="fm-card-row-val">Anytime — until period end</span></div>
               {% elif ps.state == 'grace' %}
                 <div class="fm-card-row"><span class="fm-card-row-key">Status</span><span class="fm-card-row-val">⚠ Failed · {{ ps.grace_days_left }}d left</span></div>
@@ -170,7 +180,7 @@
                 <div class="fm-card-row"><span class="fm-card-row-key">Ends</span><span class="fm-card-row-val">{{ user.plan_expires_at.isoformat()[:10] if user.plan_expires_at else 'soon' }}</span></div>
               {% else %}
                 <div class="fm-card-row"><span class="fm-card-row-key">Trial</span><span class="fm-card-row-val">Not started</span></div>
-                <div class="fm-card-row"><span class="fm-card-row-key">Billing</span><span class="fm-card-row-val">₹149/mo via UPI or Card</span></div>
+                <div class="fm-card-row"><span class="fm-card-row-key">Billing</span><span class="fm-card-row-val">₹149/mo via UPI AutoPay</span></div>
                 <div class="fm-card-row"><span class="fm-card-row-key">Cancel</span><span class="fm-card-row-val">Anytime — until period end</span></div>
               {% endif %}
             </div>
@@ -191,7 +201,7 @@
                 {% endif %}
                 <a class="fm-card-link-cta" href="/{{ user.slug }}/manage" data-fm-tab="manage">Edit folio →</a>
               {% else %}
-                <button class="fm-card-cta" type="button" id="billing-cta" data-billing-product="Pro — ₹149/mo via UPI or Card AutoPay">Activate ₹149/mo AutoPay →</button>
+                <button class="fm-card-cta" type="button" id="billing-cta" data-billing-product="Pro — ₹149/mo via UPI AutoPay" data-billing-cycle="monthly">Activate ₹149/mo AutoPay →</button>
                 <a class="fm-card-link-cta" href="/{{ user.slug }}/manage" data-fm-tab="manage">Edit folio →</a>
               {% endif %}
             </div>

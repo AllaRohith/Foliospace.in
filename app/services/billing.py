@@ -89,9 +89,13 @@ def _wait_for_customer(client, customer_id: str, max_wait_s: float = 8.0) -> boo
             delay = min(delay * 1.6, 1.5)
 
 
-def create_subscription(user_id: str) -> str:
+def create_subscription(user_id: str, period: str = "monthly") -> str:
+    if period not in {"monthly", "annual"}:
+        raise HTTPException(status_code=400, detail="Invalid period.")
     if not razorpay_svc.is_configured():
         raise HTTPException(status_code=503, detail="Razorpay not configured.")
+    if period == "annual" and not razorpay_svc.is_annual_configured():
+        raise HTTPException(status_code=503, detail="Annual plan not configured.")
     with _connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -104,18 +108,25 @@ def create_subscription(user_id: str) -> str:
     if not user or user.get("deleted_at"):
         raise HTTPException(status_code=404, detail="User not found.")
     customer_id = _get_or_create_customer_id(user)
-    plan_id = razorpay_svc.plan_id()
-    logger.info("create_subscription: plan_id=%r customer_id=%r user_id=%s", plan_id, customer_id, user_id)
+    if period == "annual":
+        plan_id = razorpay_svc.annual_plan_id()
+        total_count = 12
+    else:
+        plan_id = razorpay_svc.plan_id()
+        total_count = SUBSCRIPTION_TOTAL_COUNT
+    logger.info("create_subscription: period=%s plan_id=%r customer_id=%r user_id=%s",
+                period, plan_id, customer_id, user_id)
     client = razorpay_svc.get_client()
     if not _wait_for_customer(client, customer_id):
         raise HTTPException(status_code=503, detail="Razorpay customer propagation timeout, please retry.")
     sub = razorpay_svc.create_subscription(
         plan_id=plan_id,
         customer_id=customer_id,
-        total_count=SUBSCRIPTION_TOTAL_COUNT,
+        total_count=total_count,
         notes={
             "user_id": str(user["id"]),
             "kind": "recurring",
+            "period": period,
             "slug": (user.get("slug") or "")[:48],
         },
     )
@@ -332,6 +343,7 @@ def _on_payment_captured(cur, payload: dict):
         cur.execute(
             "UPDATE users SET plan = 'pro', plan_expires_at = %s, "
             "is_trial = FALSE, "
+            "setup_paid_at = COALESCE(setup_paid_at, NOW()), "
             "trial_reminder_7d_sent_at = NULL, "
             "trial_reminder_4d_sent_at = NULL, "
             "trial_reminder_2d_sent_at = NULL, "
@@ -457,6 +469,7 @@ def _on_subscription_charged(cur, payload: dict):
         cur.execute(
             "UPDATE users SET plan = 'pro', plan_expires_at = %s, payment_failed_at = NULL, "
             "is_trial = FALSE, "
+            "setup_paid_at = COALESCE(setup_paid_at, NOW()), "
             "trial_reminder_7d_sent_at = NULL, "
             "trial_reminder_4d_sent_at = NULL, "
             "trial_reminder_2d_sent_at = NULL, "
@@ -775,7 +788,7 @@ def plan_summary(user: dict) -> dict:
         "value_key": "Status",
         "value_val": "Free",
         "billing_key": "Billing",
-        "billing_val": "₹149/mo via UPI or Card",
+        "billing_val": "₹149/mo via UPI AutoPay",
         "pill_class": "free",
         "pill_label": "Free · Upgrade →",
         "pill_title": "Free tier — upgrade to Pro",
@@ -796,6 +809,10 @@ def enforce_plan_grace(user_id: str, user: dict) -> dict:
     if not expires_at:
         return user
     if expires_at > datetime.now(timezone.utc):
+        try:
+            maybe_send_trial_reminders(user_id, user)
+        except Exception:
+            logger.exception("trial reminder failed for user=%s", user_id)
         return user
     try:
         with _connect() as conn:

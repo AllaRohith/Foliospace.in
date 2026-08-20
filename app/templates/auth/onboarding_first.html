@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Set your first surface — FolioSpace{% endblock %}
+{% block description %}Pick a template + the first thing visitors see.{% endblock %}
+{% block canonical %}/onboarding/first{% endblock %}
+{% block og_image %}{{ request.url_for('static', path='img/og.png') }}?v={{ asset_v }}{% endblock %}
+
+{% block content %}
+<main class="onboarding-page">
+  <div class="onboarding-shell">
+    <div class="onboarding-eyebrow">→ Step 3 of 3</div>
+    <h1 class="onboarding-title">Your <em>first surface</em></h1>
+    <p class="onboarding-lede">Pick a template to start with — change anytime. We'll send you to the editor next so you can drop in your name, role, and a one-liner bio.</p>
+
+    <form class="onboarding-surfaces" method="post" action="/onboarding/first">
+      <button type="submit" class="onboarding-chip onboarding-chip-big">
+        <span class="onboarding-chip-name">Editorial (default)</span>
+        <span class="onboarding-chip-sub">Letterhead, slow type, broadsheet rule.</span>
+      </button>
+      <button type="submit" class="onboarding-chip onboarding-chip-big">
+        <span class="onboarding-chip-name">Developer</span>
+        <span class="onboarding-chip-sub">Mono accents, repo-first.</span>
+      </button>
+      <button type="submit" class="onboarding-chip onboarding-chip-big">
+        <span class="onboarding-chip-name">Designer</span>
+        <span class="onboarding-chip-sub">Portfolio-heavy, photo-led.</span>
+      </button>
+    </form>
+
+    <div class="onboarding-foot">
+      <a class="onboarding-skip" href="/{{ user.slug }}/manage">Skip →</a>
+    </div>
+  </div>
+</main>
+{% endblock %}

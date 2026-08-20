@@ -97,8 +97,14 @@ async def billing_subscribe(request: Request):
         return RedirectResponse("/login", status_code=303)
     if not razorpay_svc.is_configured():
         return RedirectResponse("/dashboard/billing?err=config", status_code=303)
+    form = await request.form()
+    period = str(form.get("period", "monthly") or "monthly").strip().lower()
+    if period not in {"monthly", "annual"}:
+        period = "monthly"
+    if period == "annual" and not razorpay_svc.is_annual_configured():
+        return RedirectResponse("/dashboard/billing?err=annual-unavailable", status_code=303)
     try:
-        sub_id = await run_in_threadpool(billing_svc.create_subscription, str(user["id"]))
+        sub_id = await run_in_threadpool(billing_svc.create_subscription, str(user["id"]), period)
     except HTTPException as e:
         return RedirectResponse(f"/dashboard/billing?err={'config' if e.status_code == 503 else 'server'}", status_code=303)
     except Exception as e:
@@ -108,9 +114,9 @@ async def billing_subscribe(request: Request):
         request,
         str(user["id"]),
         "billing.checkout.created",
-        metadata={"kind": "recurring"},
+        metadata={"kind": "recurring", "period": period},
     )
-    return JSONResponse({"kind": "recurring", "subscription_id": sub_id, "key": razorpay_svc.public_key()})
+    return JSONResponse({"kind": "recurring", "subscription_id": sub_id, "key": razorpay_svc.public_key(), "period": period})
 
 
 @router.post("/dashboard/billing/cancel")

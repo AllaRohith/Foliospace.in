@@ -218,11 +218,14 @@ def find_user_by_slug(slug: str, *, require_public: bool = True) -> dict | None:
     full_sql = (
         """
         SELECT id, slug, display_name, role, bio, phone, avatar_url,
-               avatar_public_id, is_public,
+               avatar_public_id, avatar_video_url, avatar_video_public_id, avatar_video_kind,
+               is_public,
                plan, is_internal, is_trial, payment_failed_at,
                setup_paid_at, plan_expires_at,
                template_id,
-               created_at, updated_at, deleted_at, linkedin_url
+               created_at, updated_at, deleted_at, linkedin_url,
+               spotlight_kind, spotlight_ref_id, spotlight_text, spotlight_url, spotlight_emoji,
+               seo_title, seo_description, og_image_override_url
           FROM users
          WHERE slug = %s
             OR lower(slug) = lower(%s)
@@ -234,13 +237,20 @@ def find_user_by_slug(slug: str, *, require_public: bool = True) -> dict | None:
         """
         SELECT id, slug, display_name, role, created_at, updated_at, deleted_at,
                NULL::text AS bio, NULL::text AS phone, NULL::text AS avatar_url,
-               NULL::text AS avatar_public_id, FALSE AS is_public,
+               NULL::text AS avatar_public_id, NULL::text AS avatar_video_url,
+               NULL::text AS avatar_video_public_id, NULL::text AS avatar_video_kind,
+               FALSE AS is_public,
                'free'::text AS plan, FALSE AS is_internal, FALSE AS is_trial,
                NULL::timestamp AS payment_failed_at,
                NULL::timestamp AS setup_paid_at,
                NULL::timestamp AS plan_expires_at,
                't1'::text AS template_id,
-               NULL::text AS linkedin_url
+               NULL::text AS linkedin_url,
+               NULL::text AS spotlight_kind, NULL::text AS spotlight_ref_id,
+               NULL::text AS spotlight_text, NULL::text AS spotlight_url,
+               NULL::text AS spotlight_emoji,
+               NULL::text AS seo_title, NULL::text AS seo_description,
+               NULL::text AS og_image_override_url
           FROM users
          WHERE slug = %s
             OR lower(slug) = lower(%s)

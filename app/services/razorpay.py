@@ -12,6 +12,7 @@ _KEY_ID = os.getenv("RAZORPAY_KEY_ID", "").strip()
 _KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "").strip()
 _WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET", "").strip()
 _PLAN_ID = os.getenv("RAZORPAY_PLAN_ID_PRO", "").strip()
+_PLAN_ANNUAL_ID = os.getenv("RAZORPAY_PLAN_ID_PRO_ANNUAL", "").strip()
 
 _client: razorpay.Client | None = None
 
@@ -29,12 +30,20 @@ def is_configured() -> bool:
     return bool(_KEY_ID and _KEY_SECRET and _WEBHOOK_SECRET and _PLAN_ID)
 
 
+def is_annual_configured() -> bool:
+    return bool(is_configured() and _PLAN_ANNUAL_ID)
+
+
 def public_key() -> str:
     return _KEY_ID
 
 
 def plan_id() -> str:
     return _PLAN_ID
+
+
+def annual_plan_id() -> str:
+    return _PLAN_ANNUAL_ID
 
 
 def webhook_secret() -> str:

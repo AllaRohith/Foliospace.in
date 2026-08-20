@@ -13,7 +13,7 @@
     <header class="pricing-head">
       <div class="pricing-eyebrow">→ The receipt</div>
       <h1 class="pricing-title">One plan. <em>One number.</em></h1>
-      <p class="pricing-lede">Pro is <strong>₹149 every month</strong>, charged by UPI AutoPay. Fourteen days free, then the autopay kicks in. Cancel any time from your dashboard — two taps.</p>
+      <p class="pricing-lede">Pro is <strong>₹149 every month</strong> — or <strong>₹1,499 every year</strong> (saves 16%) — charged by UPI AutoPay. Fourteen days free, then the autopay kicks in. Cancel any time from your dashboard — two taps.</p>
 
       {% if viewer %}
         {% set ps = plan_summary(viewer) %}
@@ -48,13 +48,17 @@
     </header>
 
     <section class="pricing-figure" aria-label="Plan summary">
-      <div class="pricing-figure-main">
-        <div class="pricing-figure-num">₹149</div>
-        <div class="pricing-figure-unit">/month</div>
+      <div class="pricing-cycle" role="tablist" aria-label="Billing cycle">
+        <button type="button" class="pricing-cycle-btn is-active" data-cycle="monthly" role="tab" aria-selected="true">Monthly</button>
+        <button type="button" class="pricing-cycle-btn" data-cycle="annual" role="tab" aria-selected="false">Annual <span class="pricing-cycle-save">Save 16%</span></button>
+      </div>
+      <div class="pricing-figure-main" id="pricing-figure-main" data-cycle-view="monthly">
+        <div class="pricing-figure-num" data-pricing-cycle-num>₹149</div>
+        <div class="pricing-figure-unit" data-pricing-cycle-unit>/month</div>
       </div>
       <div class="pricing-figure-detail">
         <div class="pricing-figure-row"><span>First 14 days</span><strong>Free</strong></div>
-        <div class="pricing-figure-row"><span>After trial</span><strong>₹149/mo via UPI AutoPay</strong></div>
+        <div class="pricing-figure-row"><span>After trial</span><strong data-pricing-cycle-row="after-strong">₹149/mo via UPI AutoPay</strong></div>
         <div class="pricing-figure-row"><span>Setup fee</span><strong>None</strong></div>
         <div class="pricing-figure-row"><span>Cancel</span><strong>Any time — two taps</strong></div>
       </div>
@@ -173,4 +177,36 @@
 
   </div>
 </main>
+
+{% block scripts %}
+<script>
+(function () {
+  var buttons = document.querySelectorAll('.pricing-cycle-btn');
+  if (!buttons.length) return;
+  buttons.forEach(function (b) {
+    b.addEventListener('click', function () {
+      var cycle = b.getAttribute('data-cycle') || 'monthly';
+      buttons.forEach(function (other) {
+        var on = other === b;
+        other.classList.toggle('is-active', on);
+        other.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      var main = document.getElementById('pricing-figure-main');
+      if (main) main.setAttribute('data-cycle-view', cycle);
+      var num = document.querySelector('[data-pricing-cycle-num]');
+      var unit = document.querySelector('[data-pricing-cycle-unit]');
+      var rowStrong = document.querySelector('[data-pricing-cycle-row="after-strong"]');
+      if (cycle === 'annual') {
+        if (num) num.textContent = '₹1,499';
+        if (unit) unit.textContent = '/year';
+        if (rowStrong) rowStrong.textContent = '₹1,499/yr via UPI AutoPay';
+      } else {
+        if (num) num.textContent = '₹149';
+        if (unit) unit.textContent = '/month';
+        if (rowStrong) rowStrong.textContent = '₹149/mo via UPI AutoPay';
+      }
+    });
+  });
+})();
+</script>
 {% endblock %}
