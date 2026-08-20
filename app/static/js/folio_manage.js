@@ -92,11 +92,13 @@
     update();
   }
 
-  var savedFlash = document.querySelector('.fm-flash-ok');
-  if (savedFlash && window.history && window.history.replaceState) {
+  var flashEl = document.querySelector('.fm-flash');
+  if (flashEl && window.history && window.history.replaceState) {
     var url = new URL(window.location.href);
-    if (url.searchParams.has('saved')) {
-      url.searchParams.delete('saved');
+    var changed = false;
+    if (url.searchParams.has('saved')) { url.searchParams.delete('saved'); changed = true; }
+    if (url.searchParams.has('err')) { url.searchParams.delete('err'); changed = true; }
+    if (changed) {
       window.history.replaceState({}, '', url.pathname + (url.search ? url.search : '') + url.hash);
     }
   }
