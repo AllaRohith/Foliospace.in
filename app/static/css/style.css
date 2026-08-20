@@ -11935,6 +11935,24 @@ body.dark .pf-contrib-bar.is-active { background: var(--accent); }
 }
 
 .pf-card-imports-profile .pf-card-heading { font-size: 18px; }
+.pf-li-headline {
+  font-family: 'Saira', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink);
+  margin: 0 0 6px;
+  letter-spacing: -0.005em;
+}
+body.dark .pf-li-headline { color: var(--cream); }
+.pf-li-name {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
 .pf-li-meta {
   display: flex;
   gap: 8px;
@@ -11954,6 +11972,16 @@ body.dark .pf-contrib-bar.is-active { background: var(--accent); }
   font-family: 'JetBrains Mono', ui-monospace, monospace;
 }
 body.dark .pf-li-pill { background: rgba(255,255,255,0.06); color: var(--cream); }
+.pf-li-pill-link {
+  text-decoration: none;
+  color: var(--accent);
+  border-color: var(--accent);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.pf-li-pill-link:hover {
+  background: var(--accent);
+  color: var(--cream);
+}
 .pf-li-note {
   font-size: 12px;
   color: var(--muted);
