@@ -7341,12 +7341,173 @@ body.dark .auth-split-brand { background: var(--ink-2); }
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 44px;
+  height: 44px;
+  color: var(--cream);
+}
+.auth-brand-mark svg { width: 100%; height: 100%; display: block; }
+
+.auth-brand-stack {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1;
+}
+
+.auth-brand-wordmark {
+  font-family: 'Stalinist One', sans-serif;
+  font-size: 22px;
+  color: var(--cream);
+  letter-spacing: -0.01em;
+}
+
+.auth-brand-tagline {
+  font-family: 'Saira', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0;
+  color: rgba(250, 247, 242, 0.85);
+}
+.auth-brand-tagline em {
+  font-style: normal;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.welcome-brand {
+  position: absolute;
+  top: 28px;
+  left: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--ink);
+}
+.welcome-brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: var(--ink);
+}
+.welcome-brand-mark svg { width: 100%; height: 100%; display: block; }
+.welcome-brand-stack {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1;
+}
+.welcome-brand-wordmark {
+  font-family: 'Stalinist One', sans-serif;
+  font-size: 18px;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.welcome-brand-tagline {
+  font-family: 'Saira', sans-serif;
+  font-size: 12px;
+  color: var(--muted);
+}
+.welcome-brand-tagline em {
+  font-style: normal;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.dash-side-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--ink);
+  padding: 4px 0;
+}
+.dash-side-brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 28px;
   height: 28px;
-  background: var(--accent);
   color: var(--ink);
-  border-radius: 6px;
-  font-size: 14px;
+  flex-shrink: 0;
+}
+.dash-side-brand-mark svg { width: 100%; height: 100%; display: block; }
+.dash-side-brand-stack {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1;
+  min-width: 0;
+}
+.dash-side-brand-wordmark {
+  font-family: 'Stalinist One', sans-serif;
+  font-size: 15px;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.dash-side-brand-tagline {
+  font-family: 'Saira', sans-serif;
+  font-size: 10.5px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.dash-side-brand-tagline em {
+  font-style: normal;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.colophon-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: inherit;
+}
+.colophon-brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  color: inherit;
+  flex-shrink: 0;
+}
+.colophon-brand-mark svg { width: 100%; height: 100%; display: block; }
+.colophon-brand-stack {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 3px;
+  line-height: 1;
+}
+.colophon-mark {
+  font-family: 'Stalinist One', sans-serif;
+  font-size: 18px;
+  color: inherit;
+  letter-spacing: -0.01em;
+}
+.colophon-tag {
+  font-family: 'Saira', sans-serif;
+  font-size: 12px;
+  color: inherit;
+  opacity: 0.85;
+}
+.colophon-tag em {
+  font-style: normal;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .welcome-brand { top: 18px; left: 20px; gap: 10px; }
+  .welcome-brand-mark { width: 30px; height: 30px; }
+  .welcome-brand-wordmark { font-size: 16px; }
+  .welcome-brand-tagline { display: none; }
+  .dash-side-brand-tagline { display: none; }
+  .colophon-brand { gap: 10px; }
+  .colophon-brand-mark { width: 32px; height: 32px; }
+  .colophon-tag { display: none; }
 }
 
 .auth-brand-pitch {
