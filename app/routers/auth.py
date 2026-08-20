@@ -170,7 +170,7 @@ async def signup_verify_submit(request: Request, email: str = Form(""), code: st
     except Exception as e:
         logger.exception("post-verify session failed: %s", e)
         return RedirectResponse("/login?err=session", status_code=303)
-    return RedirectResponse(_next_url(request, "/dashboard"), status_code=303)
+    return RedirectResponse("/welcome", status_code=303)
 
 
 @router.post("/signup/resend")
@@ -193,10 +193,36 @@ async def signup_resend(request: Request, email: str = Form("")):
     return RedirectResponse(f"/signup/verify?err=resent&email={email_clean}", status_code=303)
 
 
+@router.get("/welcome", response_class=HTMLResponse)
+async def welcome(request: Request):
+    user = user_auth.require_user(request)
+    if not user:
+        return RedirectResponse("/login?next=/welcome", status_code=303)
+    u = {
+        "id": str(user["id"]),
+        "email": user["email"],
+        "slug": user["slug"],
+        "display_name": user.get("display_name") or "",
+        "is_pro": user.get("plan") == "pro",
+        "is_trial": bool(user.get("is_trial")),
+    }
+    response = templates.TemplateResponse(
+        request,
+        "auth/welcome.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Your Pro trial is live — FolioSpace",
+            "description": "Your 15-day Pro trial is active. Build the folio you've been putting off.",
+            "u": u,
+        },
+    )
+    return _no_cache(response)
+
+
 @router.get("/forgot", response_class=HTMLResponse)
 async def forgot_form(request: Request):
     if user_auth.require_user(request):
-        return RedirectResponse(_next_url(request, "/dashboard"), status_code=303)
+        return RedirectResponse(_next_url(request, "/welcome"), status_code=303)
     response = templates.TemplateResponse(
         request,
         "auth/forgot.html",
@@ -500,6 +526,7 @@ async def oauth_callback(request: Request, provider: str):
         user_auth.audit_user(request, None, f"oauth.{pid}.profile-failed", target=ip)
         return response
     try:
+        is_new_signup = False
         user = user_auth.find_user_by_provider_uid(pid, profile["uid"])
         if not user:
             existing = user_auth.find_user_by_email(profile["email"])
@@ -518,6 +545,7 @@ async def oauth_callback(request: Request, provider: str):
                 user_auth.audit_user(request, None, f"oauth.{pid}.create-failed", target=ip)
                 return response
             user_auth.audit_user(request, str(user["id"]), f"oauth.{pid}.signup", target=ip)
+            is_new_signup = True
         else:
             user_auth.link_social_account(str(user["id"]), pid, profile["uid"], profile["email"])
             user_auth.audit_user(request, str(user["id"]), f"oauth.{pid}.login", target=ip)
@@ -532,6 +560,8 @@ async def oauth_callback(request: Request, provider: str):
         except Exception as e:
             logger.exception("oauth session create failed: %s", e)
             return RedirectResponse("/login?err=session", status_code=303)
+        if is_new_signup:
+            return RedirectResponse("/welcome", status_code=303)
         return RedirectResponse(_next_url(request, "/dashboard"), status_code=303)
     except Exception as e:
         logger.exception("oauth callback failed: %s", e)

@@ -6,11 +6,47 @@
 {% block canonical %}/login{% endblock %}
 
 {% block content %}
-<main id="main" class="auth-main">
-  <section class="auth-wrap">
-    <div class="auth-card">
+<main id="main" class="auth-split">
+  <aside class="auth-split-brand" aria-label="FolioSpace brand">
+    <a class="auth-brand-logo" href="/" aria-label="FolioSpace home">
+      <span class="auth-brand-mark" aria-hidden="true">▰</span>
+      <span class="auth-brand-wordmark">FolioSpace</span>
+    </a>
+
+    <div class="auth-brand-pitch">
+      <div class="auth-brand-eyebrow">→ One link for every Indian pro</div>
+      <h1 class="auth-brand-headline">
+        Your folio,<br/><em>in one link.</em>
+      </h1>
+      <p class="auth-brand-sub">Chefs, developers, students, consultants, shops, founders. The link you send when someone asks "tell me about you."</p>
+    </div>
+
+    <ul class="auth-brand-proof" aria-label="Why FolioSpace">
+      <li>
+        <span class="auth-brand-proof-mark" aria-hidden="true">▰</span>
+        <span class="auth-brand-proof-text"><strong>15-day Pro trial</strong> — full kit, no card.</span>
+      </li>
+      <li>
+        <span class="auth-brand-proof-mark" aria-hidden="true">▰</span>
+        <span class="auth-brand-proof-text"><strong>₹149/mo</strong> after — UPI AutoPay, cancel any time.</span>
+      </li>
+      <li>
+        <span class="auth-brand-proof-mark" aria-hidden="true">▰</span>
+        <span class="auth-brand-proof-text"><strong>Your slug, your domain</strong> — foliospace.in/your-name.</span>
+      </li>
+    </ul>
+
+    <div class="auth-brand-foot">
+      <span class="auth-brand-foot-line">Made for India</span>
+      <span class="auth-brand-foot-rule" aria-hidden="true"></span>
+      <span class="auth-brand-foot-line">2026</span>
+    </div>
+  </aside>
+
+  <section class="auth-split-form" aria-label="Log in">
+    <div class="auth-form-inner">
       <div class="auth-eyebrow">→ Welcome back</div>
-      <h1 class="auth-title"><em>Log</em> in</h1>
+      <h2 class="auth-title"><em>Log</em> in</h2>
       <div class="auth-rule"></div>
       <p class="auth-sub">Pick up where you left off.</p>
 

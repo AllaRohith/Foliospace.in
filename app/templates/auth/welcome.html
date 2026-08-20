@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Your Pro trial is live — FolioSpace{% endblock %}
+{% block description %}Your 15-day Pro trial is active. Build the folio you've been putting off.{% endblock %}
+{% block canonical %}/welcome{% endblock %}
+{% block og_title %}Your Pro trial is live — FolioSpace{% endblock %}
+
+{% block content %}
+<main id="main" class="welcome-main">
+  <a class="welcome-skip" href="/{{ u.slug }}/manage">Skip to manage →</a>
+
+  <section class="welcome-wrap">
+    <div class="welcome-eyebrow">
+      <span class="welcome-eyebrow-mark" aria-hidden="true">▰</span>
+      <span>15-DAY PRO TRIAL · ACTIVE</span>
+    </div>
+
+    <h1 class="welcome-title">
+      Claim your <em>free</em><br/>Pro trial.
+    </h1>
+    <div class="welcome-rule" aria-hidden="true"></div>
+    <p class="welcome-sub">Start with the full power of FolioSpace.<br/>No card needed today — we'll ask only if you stay past day 15.</p>
+
+    <ol class="welcome-timeline" aria-label="Your trial timeline">
+      <li class="welcome-step is-now">
+        <div class="welcome-step-mark">
+          <span class="welcome-step-dot" aria-hidden="true"></span>
+          <span class="welcome-step-num">01</span>
+        </div>
+        <div class="welcome-step-body">
+          <div class="welcome-step-when">Today</div>
+          <div class="welcome-step-title">Your Pro is on the house.</div>
+          <div class="welcome-step-sub">Custom themes, GitHub imports, LinkedIn sync, the whole kit. ₹0 for 15 days.</div>
+        </div>
+      </li>
+
+      <li class="welcome-step">
+        <div class="welcome-step-mark">
+          <span class="welcome-step-dot" aria-hidden="true"></span>
+          <span class="welcome-step-num">02</span>
+        </div>
+        <div class="welcome-step-body">
+          <div class="welcome-step-when">In 8 days</div>
+          <div class="welcome-step-title">A nudge, not a nag.</div>
+          <div class="welcome-step-sub">We'll email you a single reminder that your trial is more than halfway through.</div>
+        </div>
+      </li>
+
+      <li class="welcome-step">
+        <div class="welcome-step-mark">
+          <span class="welcome-step-dot" aria-hidden="true"></span>
+          <span class="welcome-step-num">03</span>
+        </div>
+        <div class="welcome-step-body">
+          <div class="welcome-step-when">In 15 days</div>
+          <div class="welcome-step-title">Your plan starts at ₹149/mo.</div>
+          <div class="welcome-step-sub">Auto-charge via UPI. <strong>Cancel any time</strong> from settings — no email gauntlet.</div>
+        </div>
+      </li>
+    </ol>
+
+    <div class="welcome-cta-wrap">
+      <a class="welcome-cta" href="/{{ u.slug }}/manage">
+        <span class="welcome-cta-label">Build your folio</span>
+        <span class="welcome-cta-arrow" aria-hidden="true">→</span>
+      </a>
+      <div class="welcome-cta-meta">Takes about 4 minutes · undo anything</div>
+    </div>
+
+    <div class="welcome-trust">
+      <div class="welcome-trust-stars" aria-label="5 out of 5 stars">
+        <span class="welcome-star">★</span>
+        <span class="welcome-star">★</span>
+        <span class="welcome-star">★</span>
+        <span class="welcome-star">★</span>
+        <span class="welcome-star">★</span>
+      </div>
+      <div class="welcome-trust-label">Built for Indian pros who want one link, not a CMS.</div>
+    </div>
+  </section>
+</main>
+{% endblock %}
