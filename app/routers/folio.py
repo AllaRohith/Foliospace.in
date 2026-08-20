@@ -432,6 +432,11 @@ async def owner_folio_manage_save(
         linkedin_url=linkedin_clean,
     )
     if not updated:
+        import logging
+        logging.getLogger("app.routers.folio").exception(
+            "owner_folio_manage_save: update_user_profile returned None for user=%s",
+            user["id"],
+        )
         return RedirectResponse(f"/{safe_slug}/manage?err=server", status_code=303)
     if listed_flag != bool(user.get("is_listed")):
         user_auth_svc.update_listing(str(user["id"]), listed_flag)
