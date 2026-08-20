@@ -11,6 +11,25 @@ LINKEDIN_ME_URL = "https://api.linkedin.com/v2/me?projection=(id,localizedFirstN
 UNAVAILABLE_FIELDS = ["experiences", "education"]
 
 
+def _str(value) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        return value
+    if isinstance(value, (int, float, bool)):
+        return str(value)
+    if isinstance(value, dict):
+        country = value.get("country") or value.get("countryCode") or ""
+        language = value.get("language") or value.get("languageCode") or ""
+        if country and language:
+            return f"{language}_{country}"
+        for k in ("locale", "name", "value", "id"):
+            v = value.get(k)
+            if isinstance(v, str) and v:
+                return v
+    return ""
+
+
 def _http_get_bearer(url: str, token: str) -> dict | None:
     req = urllib.request.Request(
         url,
@@ -29,9 +48,12 @@ def _http_get_bearer(url: str, token: str) -> dict | None:
         logger.warning("linkedin GET %s failed: %s", url, e)
         return None
     try:
-        return json.loads(raw)
+        parsed = json.loads(raw)
     except json.JSONDecodeError:
         return None
+    if not isinstance(parsed, dict):
+        return None
+    return parsed
 
 
 def _extract_picture_url(me_data: dict) -> str:
@@ -75,25 +97,23 @@ def sync_basic_profile(user_id: str) -> dict:
     if not token:
         return {"ok": False, "reason": "no-token"}
     raw = _http_get_bearer(LINKEDIN_USERINFO_URL, token)
-    if not raw or not isinstance(raw, dict):
+    if not raw:
         return {"ok": False, "reason": "fetch-failed"}
     me_raw = _http_get_bearer(LINKEDIN_ME_URL, token) or {}
-    if me_raw and not isinstance(me_raw, dict):
-        me_raw = {}
     payload = {
-        "sub": (raw.get("sub") or "").strip()[:255],
-        "name": (raw.get("name") or "").strip()[:160],
-        "given_name": (raw.get("given_name") or "").strip()[:80],
-        "family_name": (raw.get("family_name") or "").strip()[:80],
-        "email": (raw.get("email") or "").strip().lower()[:254],
+        "sub": _str(raw.get("sub")).strip()[:255],
+        "name": _str(raw.get("name")).strip()[:160],
+        "given_name": _str(raw.get("given_name")).strip()[:80],
+        "family_name": _str(raw.get("family_name")).strip()[:80],
+        "email": _str(raw.get("email")).strip().lower()[:254],
         "email_verified": bool(raw.get("email_verified")),
-        "locale": (raw.get("locale") or "").strip()[:32],
-        "zoneinfo": (raw.get("zoneinfo") or "").strip()[:64],
-        "picture": (raw.get("picture") or "").strip()[:2048],
-        "headline": ((me_raw.get("localizedHeadline") or "").strip())[:200],
-        "first_name": ((me_raw.get("localizedFirstName") or "").strip())[:80],
-        "last_name": ((me_raw.get("localizedLastName") or "").strip())[:80],
-        "vanity_name": ((me_raw.get("vanityName") or "").strip().lower())[:80],
+        "locale": _str(raw.get("locale")).strip()[:32],
+        "zoneinfo": _str(raw.get("zoneinfo")).strip()[:64],
+        "picture": _str(raw.get("picture")).strip()[:2048],
+        "headline": _str(me_raw.get("localizedHeadline")).strip()[:200],
+        "first_name": _str(me_raw.get("localizedFirstName")).strip()[:80],
+        "last_name": _str(me_raw.get("localizedLastName")).strip()[:80],
+        "vanity_name": _str(me_raw.get("vanityName")).strip().lower()[:80],
         "profile_url": "",
         "unavailable_fields": UNAVAILABLE_FIELDS,
     }
