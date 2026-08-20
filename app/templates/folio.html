@@ -63,6 +63,11 @@
   {% endif %}
   {% set current_tid = user.template_id or 't1' %}
   <link rel="stylesheet" href="{{ request.url_for('static', path='css/templates/' ~ current_tid ~ '.css') }}?v={{ asset_v }}" />
+  {% if current_tid == 't3' %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Patrick+Hand&display=swap">
+  {% endif %}
 {% endblock %}
 
 {% block content %}
