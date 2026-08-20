@@ -414,16 +414,18 @@
     update();
   }
 
-  const shines = document.querySelectorAll('.cover-headline-line');
-  if (shines.length && !reduceMotion) {
-    let shineTicking = false;
-    function updateShine() {
-      const h = document.documentElement;
-      const max = h.scrollHeight - h.clientHeight;
-      const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
-      shines.forEach(function (el) { el.style.setProperty('--shine-x', pct + '%'); });
-      shineTicking = false;
-    }
+  let shineTicking = false;
+  function updateShine() {
+    if (reduceMotion) return;
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+    document.querySelectorAll('.cover-headline-line').forEach(function (el) {
+      el.style.setProperty('--shine-x', pct + '%');
+    });
+    shineTicking = false;
+  }
+  if (!reduceMotion) {
     window.addEventListener('scroll', function () {
       if (!shineTicking) { requestAnimationFrame(updateShine); shineTicking = true; }
     }, { passive: true });
