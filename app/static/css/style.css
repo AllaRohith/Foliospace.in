@@ -6357,14 +6357,14 @@ body.dark .signup-dossier-cta--ghost:hover {
   animation: coverHeadlineUp 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
   color: var(--cream);
   -webkit-text-fill-color: var(--cream);
-  -webkit-text-stroke: 4px transparent;
+  -webkit-text-stroke: 8px transparent;
   paint-order: stroke fill;
   background-image: linear-gradient(
     100deg,
     var(--ink) 0%,
-    var(--ink) 25%,
+    var(--ink) 30%,
     var(--accent) 50%,
-    var(--ink) 75%,
+    var(--ink) 70%,
     var(--ink) 100%
   );
   background-size: 220% 100%;
