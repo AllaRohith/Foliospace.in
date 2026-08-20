@@ -414,14 +414,14 @@
     update();
   }
 
-  const shine = document.querySelector('.cover-vertical-text');
-  if (shine && !reduceMotion) {
+  const shines = document.querySelectorAll('.cover-headline-line');
+  if (shines.length && !reduceMotion) {
     let shineTicking = false;
     function updateShine() {
       const h = document.documentElement;
       const max = h.scrollHeight - h.clientHeight;
       const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
-      shine.style.setProperty('--shine-x', pct + '%');
+      shines.forEach(function (el) { el.style.setProperty('--shine-x', pct + '%'); });
       shineTicking = false;
     }
     window.addEventListener('scroll', function () {
