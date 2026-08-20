@@ -314,6 +314,7 @@ async def owner_folio_manage_save(
     role: str = _Form_folio(""),
     bio: str = _Form_folio(""),
     phone: str = _Form_folio(""),
+    linkedin_url: str = _Form_folio(""),
     is_public: str = _Form_folio(""),
 ):
     from app.utils.text import strip_control
@@ -337,6 +338,11 @@ async def owner_folio_manage_save(
     role_clean = (role or "").strip()
     if len(role_clean) > 60:
         return RedirectResponse(f"/{safe_slug}/manage?err=role", status_code=303)
+    linkedin_clean = (linkedin_url or "").strip()
+    if linkedin_clean and not _re_folio.fullmatch(
+        r"https?://(www\.)?linkedin\.com/in/[A-Za-z0-9_\-]+/?", linkedin_clean
+    ):
+        return RedirectResponse(f"/{safe_slug}/manage?err=linkedin_url", status_code=303)
     public_flag = (is_public or "").strip().lower() in ("1", "true", "on", "yes")
     updated = user_auth_svc.update_user_profile(
         str(user["id"]),
@@ -345,6 +351,7 @@ async def owner_folio_manage_save(
         bio=bio_clean,
         phone=phone_clean,
         is_public=public_flag,
+        linkedin_url=linkedin_clean,
     )
     if not updated:
         return RedirectResponse(f"/{safe_slug}/manage?err=server", status_code=303)

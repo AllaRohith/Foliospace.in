@@ -107,4 +107,127 @@
   var bioInput = document.querySelector('textarea[name="bio"]');
   var phoneInput = document.querySelector('input[name="phone"]');
 
+  var liMirror = document.querySelector('[data-fm-li-mirror]');
+  var autofillPanel = document.querySelector('[data-fm-autofill]');
+  if (liMirror && autofillPanel) {
+    var suggestion = { role: '', bio: '', phone: '' };
+    var suggestionActive = false;
+
+    var mirrorTitle = liMirror.querySelector('[data-fm-li-mirror-title]');
+    var mirrorSummary = liMirror.querySelector('[data-fm-li-mirror-summary]');
+    var mirrorPhone = liMirror.querySelector('[data-fm-li-mirror-phone]');
+    var mirrorEmail = liMirror.querySelector('[data-fm-li-mirror-email]');
+    var mirrorName = liMirror.querySelector('[data-fm-li-mirror-name]');
+
+    var fillFromMirror = function () {
+      var t = (mirrorTitle && mirrorTitle.value || '').trim();
+      var s = (mirrorSummary && mirrorSummary.value || '').trim();
+      var p = (mirrorPhone && mirrorPhone.value || '').trim();
+      var e = (mirrorEmail && mirrorEmail.value || '').trim();
+      var n = (mirrorName && mirrorName.value || '').trim();
+
+      if (!t && !s && !p && !e && !n) return;
+
+      var parts = [];
+      if (t) parts.push({ kind: 'role', val: t.slice(0, 60) });
+      if (s) parts.push({ kind: 'bio', val: s.slice(0, 280) });
+      if (p) parts.push({ kind: 'phone', val: p });
+
+      if (!parts.length) return;
+
+      var currentEmpty = function () {
+        return !roleInput.value.trim() && !bioInput.value.trim() && !phoneInput.value.trim();
+      };
+
+      if (parts.length < 1 || !currentEmpty()) {
+        autofillPanel.removeAttribute('hidden');
+        return;
+      }
+
+      for (var i = 0; i < parts.length; i++) {
+        var part = parts[i];
+        if (part.kind === 'role') suggestion.role = part.val;
+        if (part.kind === 'bio') suggestion.bio = part.val;
+        if (part.kind === 'phone') suggestion.phone = part.val;
+      }
+      suggestionActive = true;
+      autofillPanel.removeAttribute('hidden');
+    };
+
+    var inputs = [mirrorTitle, mirrorSummary, mirrorPhone, mirrorEmail, mirrorName].filter(Boolean);
+    inputs.forEach(function (inp) {
+      inp.addEventListener('input', fillFromMirror);
+      inp.addEventListener('change', fillFromMirror);
+    });
+
+    if (window.MutationObserver) {
+      var mo = new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+          var t = (muts[i].target).value;
+          if (t) { fillFromMirror(); break; }
+        }
+      });
+      inputs.forEach(function (inp) {
+        if (inp) mo.observe(inp, { attributes: true, attributeFilter: ['value'] });
+      });
+    }
+
+    var tryAttr = function () {
+      if (window.getAttrVal) {
+        var t = (window.getAttrVal(mirrorTitle) || '').trim();
+        var s = (window.getAttrVal(mirrorSummary) || '').trim();
+        var p = (window.getAttrVal(mirrorPhone) || '').trim();
+        if (t || s || p) fillFromMirror();
+      }
+    };
+    setTimeout(tryAttr, 800);
+    setTimeout(tryAttr, 2500);
+
+    var pollCount = 0;
+    var pollTimer = setInterval(function () {
+      pollCount++;
+      var t = (mirrorTitle && mirrorTitle.value || '').trim();
+      var s = (mirrorSummary && mirrorSummary.value || '').trim();
+      var p = (mirrorPhone && mirrorPhone.value || '').trim();
+      var e = (mirrorEmail && mirrorEmail.value || '').trim();
+      var n = (mirrorName && mirrorName.value || '').trim();
+      if (t || s || p || e || n) {
+        fillFromMirror();
+        clearInterval(pollTimer);
+      } else if (pollCount > 12) {
+        clearInterval(pollTimer);
+      }
+    }, 600);
+
+    var applyBtn = autofillPanel.querySelector('[data-fm-autofill-apply]');
+    var dismissBtn = autofillPanel.querySelector('[data-fm-autofill-dismiss]');
+    if (applyBtn) {
+      applyBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (!suggestionActive) {
+          var t2 = (mirrorTitle && mirrorTitle.value || '').trim();
+          var s2 = (mirrorSummary && mirrorSummary.value || '').trim();
+          var p2 = (mirrorPhone && mirrorPhone.value || '').trim();
+          if (t2) suggestion.role = t2.slice(0, 60);
+          if (s2) suggestion.bio = s2.slice(0, 280);
+          if (p2) suggestion.phone = p2;
+        }
+        if (suggestion.role && (!roleInput.value.trim())) roleInput.value = suggestion.role;
+        if (suggestion.bio && (!bioInput.value.trim())) bioInput.value = suggestion.bio;
+        if (suggestion.phone && (!phoneInput.value.trim())) phoneInput.value = suggestion.phone;
+        autofillPanel.setAttribute('hidden', '');
+        roleInput.dispatchEvent(new Event('input', { bubbles: true }));
+        bioInput.dispatchEvent(new Event('input', { bubbles: true }));
+        phoneInput.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+    }
+    if (dismissBtn) {
+      dismissBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        autofillPanel.setAttribute('hidden', '');
+        suggestionActive = false;
+      });
+    }
+  }
+
 })();

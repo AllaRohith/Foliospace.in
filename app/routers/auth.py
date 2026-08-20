@@ -170,6 +170,10 @@ async def signup_verify_submit(request: Request, email: str = Form(""), code: st
     except Exception as e:
         logger.exception("post-verify session failed: %s", e)
         return RedirectResponse("/login?err=session", status_code=303)
+    try:
+        user_auth.enrich_from_gravatar(str(user["id"]), email_clean)
+    except Exception as e:
+        logger.info("post-verify gravatar enrich failed: %s", e)
     return RedirectResponse("/welcome", status_code=303)
 
 
@@ -570,6 +574,11 @@ async def oauth_callback(request: Request, provider: str):
         else:
             user_auth.link_social_account(str(user["id"]), pid, profile["uid"], profile["email"])
             user_auth.audit_user(request, str(user["id"]), f"oauth.{pid}.login", target=ip)
+        if is_new_signup:
+            try:
+                user_auth.enrich_from_gravatar(str(user["id"]), profile["email"])
+            except Exception as e:
+                logger.info("oauth gravatar enrich failed: %s", e)
         if token_data and pid in ("github", "linkedin"):
             try:
                 from app.services.imports import public_render

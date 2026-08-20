@@ -272,27 +272,26 @@
       {% endif %}
     {% endif %}
 
-    {% if integrations and integrations.profile and integrations.profile.provider == 'linkedin' %}
-      {% set li = integrations.profile.payload %}
-      {% set has_li_data = li.headline or li.name or li.locale or li.zoneinfo or li.picture %}
-      {% if has_li_data %}
-        <section class="pf-card pf-card-imports-profile" aria-label="LinkedIn profile">
-          <div class="pf-card-eyebrow">→ LinkedIn</div>
-          {% if li.headline %}
-            <div class="pf-li-headline">{{ li.headline }}</div>
+    {% set li = (integrations.profile.payload if (integrations and integrations.profile and integrations.profile.provider == 'linkedin') else {}) %}
+    {% set li_url = user.linkedin_url or li.profile_url %}
+    {% set has_li_data = li.headline or li.name or li.locale or li.zoneinfo or li.picture or li_url %}
+    {% if has_li_data %}
+      <section class="pf-card pf-card-imports-profile" aria-label="LinkedIn profile">
+        <div class="pf-card-eyebrow">→ LinkedIn</div>
+        {% if li.headline %}
+          <div class="pf-li-headline">{{ li.headline }}</div>
+        {% endif %}
+        {% if li.name and (li.name|lower) != ((user.display_name or '')|lower) %}
+          <div class="pf-li-name">{{ li.name }}</div>
+        {% endif %}
+        <div class="pf-li-meta">
+          {% if li.locale %}<span class="pf-li-pill">{{ li.locale }}</span>{% endif %}
+          {% if li.zoneinfo %}<span class="pf-li-pill">{{ li.zoneinfo }}</span>{% endif %}
+          {% if li_url %}
+            <a class="pf-li-pill pf-li-pill-link" href="{{ li_url }}" target="_blank" rel="noopener">View on LinkedIn ↗</a>
           {% endif %}
-          {% if li.name and (li.name|lower) != ((user.display_name or '')|lower) %}
-            <div class="pf-li-name">{{ li.name }}</div>
-          {% endif %}
-          <div class="pf-li-meta">
-            {% if li.locale %}<span class="pf-li-pill">{{ li.locale }}</span>{% endif %}
-            {% if li.zoneinfo %}<span class="pf-li-pill">{{ li.zoneinfo }}</span>{% endif %}
-            {% if li.profile_url %}
-              <a class="pf-li-pill pf-li-pill-link" href="{{ li.profile_url }}" target="_blank" rel="noopener">View on LinkedIn ↗</a>
-            {% endif %}
-          </div>
-        </section>
-      {% endif %}
+        </div>
+      </section>
     {% endif %}
 
     {% if view_stats and view_stats.total_views and view_stats.total_views > 0 %}

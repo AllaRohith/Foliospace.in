@@ -81,6 +81,8 @@
             <div class="fm-flash fm-flash-warn">Phone must be 6–20 characters: digits, spaces, + ( ) - only.</div>
           {% elif err == 'role' %}
             <div class="fm-flash fm-flash-warn">Role must be 60 characters or fewer.</div>
+          {% elif err == 'linkedin_url' %}
+            <div class="fm-flash fm-flash-warn">LinkedIn URL must look like https://linkedin.com/in/your-handle</div>
           {% elif err == 'server' %}
             <div class="fm-flash fm-flash-warn">Couldn't save right now. Try again.</div>
           {% endif %}
@@ -93,18 +95,28 @@
 
             <div class="fm-field">
               <label for="role">Role</label>
-              <input id="role" name="role" type="text" maxlength="60" value="{{ user.role or '' }}" placeholder="designer" />
+              <input id="role" name="role" type="text" maxlength="60" value="{{ user.role or '' }}" placeholder="designer" data-li-autofill-name="title" />
             </div>
 
             <div class="fm-field">
               <label for="bio">Bio <span class="fm-field-hint">(40+ chars = complete)</span></label>
-              <textarea id="bio" name="bio" maxlength="280" data-fm-bio-counter>{{ user.bio or '' }}</textarea>
+              <textarea id="bio" name="bio" maxlength="280" data-fm-bio-counter data-li-autofill-name="position-summary">{{ user.bio or '' }}</textarea>
               <div class="fm-counter" data-fm-bio-counter-display>{{ (user.bio or '') | length }} / 280</div>
             </div>
 
             <div class="fm-field">
               <label for="phone">WhatsApp number</label>
-              <input id="phone" name="phone" type="tel" maxlength="20" value="{{ user.phone or '' }}" placeholder="+91 98765 43210" />
+              <input id="phone" name="phone" type="tel" maxlength="20" value="{{ user.phone or '' }}" placeholder="+91 98765 43210" data-li-autofill-name="phone-number" />
+            </div>
+
+            <div class="fm-field">
+              <label for="linkedin_url">LinkedIn URL <span class="fm-field-hint">your profile link (optional)</span></label>
+              <input id="linkedin_url" name="linkedin_url" type="url" inputmode="url" maxlength="2048" value="{{ user.linkedin_url or '' }}" placeholder="https://www.linkedin.com/in/your-handle" />
+            </div>
+
+            <div class="fm-autofill" data-fm-autofill hidden aria-live="polite">
+              <span class="fm-autofill-mark" aria-hidden="true">→</span>
+              <span class="fm-autofill-text">LinkedIn found values for your role or bio. <button type="button" class="fm-autofill-btn" data-fm-autofill-apply>Apply suggestions</button> or <button type="button" class="fm-autofill-btn" data-fm-autofill-dismiss>dismiss</button>.</span>
             </div>
 
             <div class="fm-field fm-field-avatar">
@@ -149,6 +161,20 @@
             </div>
 
             <button type="submit" class="fm-save">Save folio →</button>
+          </form>
+
+          <form class="fm-li-mirror" aria-hidden="true" data-fm-li-mirror>
+            <input type="text" name="name" value="" tabindex="-1" data-fm-li-mirror-name />
+            <input type="text" name="first-name" value="" tabindex="-1" data-fm-li-mirror-first />
+            <input type="text" name="last-name" value="" tabindex="-1" data-fm-li-mirror-last />
+            <input type="email" name="email-address" value="" tabindex="-1" data-fm-li-mirror-email />
+            <input type="tel" name="phone-number" value="" tabindex="-1" data-fm-li-mirror-phone />
+            <input type="text" name="company-name" value="" tabindex="-1" data-fm-li-mirror-company />
+            <input type="text" name="title" value="" tabindex="-1" data-fm-li-mirror-title />
+            <input type="text" name="position-summary" value="" tabindex="-1" data-fm-li-mirror-summary />
+            <input type="text" name="city" value="" tabindex="-1" data-fm-li-mirror-city />
+            <input type="text" name="country" value="" tabindex="-1" data-fm-li-mirror-country />
+            <script type="IN/Form2" data-fm-li-mirror-trigger></script>
           </form>
         </section>
 
@@ -359,4 +385,5 @@
 <script defer src="{{ request.url_for('static', path='js/dash.js') }}?v={{ asset_v }}"></script>
 <script defer src="{{ request.url_for('static', path='js/folio_manage.js') }}?v={{ asset_v }}"></script>
 <script defer src="{{ request.url_for('static', path='js/folio_manage_avatar.js') }}?v={{ asset_v }}"></script>
+<script src="https://www.linkedin.com/autofill/js/autofill.js" type="text/javascript" async></script>
 {% endblock %}

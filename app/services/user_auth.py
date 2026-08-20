@@ -175,7 +175,7 @@ def find_user_by_email(email: str) -> dict | None:
                            plan, plan_expires_at, payment_failed_at, razorpay_customer_id,
                            is_trial, trial_reminder_7d_sent_at, trial_reminder_4d_sent_at, trial_reminder_2d_sent_at,
                            is_internal,
-                           template_id
+                           template_id, linkedin_url
                       FROM users
                      WHERE email = %s
                     """,
@@ -205,7 +205,7 @@ def find_user_by_id(user_id: str | UUID) -> dict | None:
                            plan, plan_expires_at, payment_failed_at, razorpay_customer_id,
                            is_trial, trial_reminder_7d_sent_at, trial_reminder_4d_sent_at, trial_reminder_2d_sent_at,
                            is_internal,
-                           template_id
+                           template_id, linkedin_url
                       FROM users
                      WHERE id = %s
                     """,
@@ -235,6 +235,70 @@ def find_waitlist_row(email: str) -> dict | None:
         return row
     except psycopg.Error as e:
         logger.exception("find_waitlist_row failed: %s", e)
+        return None
+
+
+def _enrich_audit(user_id: str, fields: list[str]) -> None:
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                import json as _json
+                cur.execute(
+                    """
+                    INSERT INTO user_audit_log (user_id, action, target, metadata, created_at)
+                    VALUES (%s, %s, %s, %s::jsonb, NOW())
+                    """,
+                    (user_id, "enrich.gravatar.applied", None, _json.dumps({"fields": fields})),
+                )
+            conn.commit()
+    except Exception:
+        pass
+
+
+def enrich_from_gravatar(user_id, email: str) -> dict | None:
+    try:
+        from app.services.imports import gravatar
+    except Exception as e:
+        logger.info("gravatar import failed: %s", e)
+        return None
+    try:
+        data = gravatar.lookup(email or "")
+    except Exception as e:
+        logger.info("gravatar lookup failed: %s", e)
+        return None
+    if not data:
+        return None
+    try:
+        uid = UUID(user_id) if not isinstance(user_id, UUID) else user_id
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT role, bio, linkedin_url FROM users WHERE id = %s AND deleted_at IS NULL",
+                    (uid,),
+                )
+                row = cur.fetchone()
+                if not row:
+                    return None
+                new_role = (row.get("role") or "").strip() or (data.get("job_title") or "").strip()[:60] or None
+                new_bio = (row.get("bio") or "").strip() or (data.get("description") or "").strip()[:280] or None
+                new_linkedin = (row.get("linkedin_url") or "").strip() or (data.get("linkedin_url") or "").strip()[:2048] or None
+                cur.execute(
+                    """
+                    UPDATE users
+                       SET role = COALESCE(%s, role),
+                           bio = COALESCE(%s, bio),
+                           linkedin_url = COALESCE(%s, linkedin_url),
+                           updated_at = NOW()
+                     WHERE id = %s
+                       AND deleted_at IS NULL
+                    """,
+                    (new_role, new_bio, new_linkedin, uid),
+                )
+            conn.commit()
+        _enrich_audit(str(uid), [k for k in ("job_title", "company", "location", "description", "linkedin_url", "github_url") if data.get(k)])
+        return data
+    except Exception as e:
+        logger.info("gravatar enrich failed for %s: %s", user_id, e)
         return None
 
 
@@ -519,7 +583,7 @@ def create_user_from_oauth(
                               phone, avatar_url, avatar_public_id, is_public,
                               plan, plan_expires_at, payment_failed_at,
                               is_trial, is_internal, template_id,
-                              email_verified, created_at
+                              email_verified, created_at, linkedin_url
                     """,
                     (uid, email_clean, slug, name, (role or "")[:60] or None),
                 )
@@ -718,67 +782,54 @@ def update_user_profile(
     phone,
     avatar_url=None,
     is_public,
+    linkedin_url=None,
 ) -> dict | None:
     uid = UUID(user_id) if not isinstance(user_id, UUID) else user_id
     now = datetime.now(timezone.utc)
     avatar_present = avatar_url is not None and avatar_url != ""
+    linkedin_present = linkedin_url is not None
+    linkedin_value = _clean_text(linkedin_url, 2048) if linkedin_present else None
+    if linkedin_present and linkedin_value and not re.fullmatch(
+        r"https?://(www\.)?linkedin\.com/in/[A-Za-z0-9_\-]+/?", linkedin_value
+    ):
+        return None
     try:
         with _connect() as conn:
             with conn.cursor() as cur:
+                set_clauses = [
+                    "display_name = %s",
+                    "role         = %s",
+                    "bio          = %s",
+                    "phone        = %s",
+                    "is_public    = %s",
+                    "updated_at   = %s",
+                ]
+                params = [
+                    _clean_text(display_name, MAX_DISPLAY_NAME_LEN),
+                    _clean_text(role, MAX_ROLE_LEN),
+                    _clean_text(bio, MAX_BIO_LEN),
+                    _clean_text(phone, MAX_PHONE_LEN),
+                    bool(is_public),
+                    now,
+                ]
                 if avatar_present:
-                    cur.execute(
-                        """
-                        UPDATE users
-                           SET display_name = %s,
-                               role         = %s,
-                               bio          = %s,
-                               phone        = %s,
-                               avatar_url   = %s,
-                               is_public    = %s,
-                               updated_at   = %s
-                         WHERE id = %s
-                           AND deleted_at IS NULL
-                        RETURNING id, email, slug, display_name, role, bio, phone, avatar_url,
-                                  is_public, email_verified, created_at, updated_at,
-                                  last_login_at, claimed_at, claim_token, claim_expires_at,
-                                  deleted_at
-                        """,
-                        (
-                            _clean_text(display_name, MAX_DISPLAY_NAME_LEN),
-                            _clean_text(role, MAX_ROLE_LEN),
-                            _clean_text(bio, MAX_BIO_LEN),
-                            _clean_text(phone, MAX_PHONE_LEN),
-                            _clean_url(avatar_url),
-                            bool(is_public),
-                            now, uid,
-                        ),
-                    )
-                else:
-                    cur.execute(
-                        """
-                        UPDATE users
-                           SET display_name = %s,
-                               role         = %s,
-                               bio          = %s,
-                               phone        = %s,
-                               is_public    = %s,
-                               updated_at   = %s
-                         WHERE id = %s
-                           AND deleted_at IS NULL
-                        RETURNING id, email, slug, display_name, role, bio, phone, avatar_url,
-                                  is_public, email_verified, created_at, updated_at,
-                                  last_login_at, claimed_at, claim_token, claim_expires_at,
-                                  deleted_at
-                        """,
-                        (
-                            _clean_text(display_name, MAX_DISPLAY_NAME_LEN),
-                            _clean_text(role, MAX_ROLE_LEN),
-                            _clean_text(bio, MAX_BIO_LEN),
-                            _clean_text(phone, MAX_PHONE_LEN),
-                            bool(is_public),
-                            now, uid,
-                        ),
-                    )
+                    set_clauses.append("avatar_url = %s")
+                    params.append(_clean_url(avatar_url))
+                if linkedin_present:
+                    set_clauses.append("linkedin_url = %s")
+                    params.append(linkedin_value)
+                params.append(uid)
+                sql = f"""
+                    UPDATE users
+                       SET {", ".join(set_clauses)}
+                     WHERE id = %s
+                       AND deleted_at IS NULL
+                    RETURNING id, email, slug, display_name, role, bio, phone, avatar_url,
+                              is_public, email_verified, created_at, updated_at,
+                              last_login_at, claimed_at, claim_token, claim_expires_at,
+                              deleted_at, linkedin_url
+                """
+                cur.execute(sql, params)
                 row = cur.fetchone()
             conn.commit()
     except (psycopg.Error, ValueError, TypeError) as e:
