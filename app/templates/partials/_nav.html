@@ -2,13 +2,7 @@
 <header class="nav-wrap" id="nav-wrap">
     <div class="nav" data-state="top">
       <a href="/" class="brand">
-        <span class="brand-mark">
-          <svg viewBox="0 0 56 56" aria-hidden="true">
-            <path fill="currentColor" d="M 6 6 L 40 6 L 32 16 L 14 16 L 14 22 L 32 22 L 24 32 L 14 32 L 14 50 L 6 50 Z"/>
-            <path fill="currentColor" d="M 22 22 L 50 22 L 50 32 L 32 32 L 32 38 L 50 38 L 42 50 L 22 50 Z"/>
-            <rect x="42" y="44" width="8" height="8" fill="#FF6B35"/>
-          </svg>
-        </span>
+        <img class="brand-mark brand-mark-img" src="{{ request.url_for('static', path='img/logo-mark.png') }}?v={{ asset_v }}" alt="FolioSpace" />
         <span class="brand-name">FolioSpace</span>
       </a>
 
