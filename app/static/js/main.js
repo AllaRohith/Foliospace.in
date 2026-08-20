@@ -414,24 +414,6 @@
     update();
   }
 
-  let shineTicking = false;
-  function updateShine() {
-    if (reduceMotion) return;
-    const h = document.documentElement;
-    const max = h.scrollHeight - h.clientHeight;
-    const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
-    document.querySelectorAll('.cover-headline-line').forEach(function (el) {
-      el.style.setProperty('--shine-x', pct + '%');
-    });
-    shineTicking = false;
-  }
-  if (!reduceMotion) {
-    window.addEventListener('scroll', function () {
-      if (!shineTicking) { requestAnimationFrame(updateShine); shineTicking = true; }
-    }, { passive: true });
-    updateShine();
-  }
-
   document.querySelectorAll('.magnetic').forEach(function (btn) {
     btn.addEventListener('mousemove', function (e) {
       const r = btn.getBoundingClientRect();
@@ -727,48 +709,6 @@
     });
     hero.addEventListener('mouseleave', function () {
       hero.classList.remove('is-cursor-on');
-    });
-  })();
-
-  (function () {
-    const toggle = document.getElementById('pricing-toggle');
-    if (!toggle) return;
-    const buttons = toggle.querySelectorAll('button');
-    const monthlyEls = document.querySelectorAll('.receipt-price-monthly, .receipt-unit-monthly, .receipt-sub-monthly');
-    const yearlyEls = document.querySelectorAll('.receipt-price-yearly, .receipt-unit-yearly, .receipt-sub-yearly');
-    const saveStamp = document.querySelector('.receipt-save-stamp');
-
-    function apply(cycle) {
-      monthlyEls.forEach(function (el) { el.classList.toggle('is-hidden', cycle !== 'monthly'); });
-      yearlyEls.forEach(function (el) { el.classList.toggle('is-hidden', cycle !== 'yearly'); });
-      if (saveStamp) {
-        saveStamp.classList.toggle('is-on', cycle === 'yearly');
-      }
-    }
-
-    function selectButton(idx) {
-      const target = buttons[idx];
-      if (!target || target.classList.contains('is-on')) return;
-      buttons.forEach(function (x, i) {
-        x.classList.toggle('is-on', i === idx);
-        x.setAttribute('aria-checked', i === idx ? 'true' : 'false');
-      });
-      apply(target.dataset.cycle);
-    }
-
-    buttons.forEach(function (b, i) {
-      b.addEventListener('click', function () { selectButton(i); });
-      b.addEventListener('keydown', function (e) {
-        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-          e.preventDefault();
-          selectButton((i - 1 + buttons.length) % buttons.length);
-          buttons[(i - 1 + buttons.length) % buttons.length].focus();
-        } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-          e.preventDefault();
-          selectButton((i + 1) % buttons.length);
-          buttons[(i + 1) % buttons.length].focus();
-        }
-      });
     });
   })();
 
