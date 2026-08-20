@@ -52,8 +52,7 @@
 <main id="main" class="pf-page">
   <div class="pf-grain" aria-hidden="true"></div>
 
-  <article class="pf-shell">
-    <header class="pf-hero">
+  <header class="pf-hero">
       <div class="pf-hero-masthead">
         <span class="pf-hero-masthead-stamp">FOLIO · {{ now.strftime('%b %Y') if now else '' }}</span>
         <span class="pf-hero-masthead-mark">{% if is_open %}OPEN TO WORK{% else %}PRIVATE{% endif %}</span>
@@ -143,6 +142,7 @@
       </div>
     </header>
 
+    <article class="pf-shell">
     {% if is_pro %}
       <section class="pf-card pf-card-work" aria-labelledby="pf-work-heading">
         <div class="pf-card-eyebrow">→ What I do</div>
