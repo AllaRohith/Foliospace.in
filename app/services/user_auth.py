@@ -982,7 +982,7 @@ def update_user_profile(
                     params.append(_clean_url(avatar_url))
                 if linkedin_present:
                     set_clauses.append("linkedin_url = %s")
-                    params.append(linkedin_value)
+                    params.append(linkedin_value or None)
                 params.append(uid)
                 sql = f"""
                     UPDATE users
