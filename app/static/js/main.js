@@ -414,6 +414,22 @@
     update();
   }
 
+  const shine = document.querySelector('.cover-vertical-text');
+  if (shine && !reduceMotion) {
+    let shineTicking = false;
+    function updateShine() {
+      const h = document.documentElement;
+      const max = h.scrollHeight - h.clientHeight;
+      const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+      shine.style.setProperty('--shine-x', pct + '%');
+      shineTicking = false;
+    }
+    window.addEventListener('scroll', function () {
+      if (!shineTicking) { requestAnimationFrame(updateShine); shineTicking = true; }
+    }, { passive: true });
+    updateShine();
+  }
+
   document.querySelectorAll('.magnetic').forEach(function (btn) {
     btn.addEventListener('mousemove', function (e) {
       const r = btn.getBoundingClientRect();
