@@ -1,9 +1,9 @@
 {% extends "base.html" %}
+{% import "partials/_oauth_icons.html" as oi %}
 
-{% block title %}Your Pro trial is live — FolioSpace{% endblock %}
-{% block description %}Your 15-day Pro trial is active. Build the folio you've been putting off.{% endblock %}
+{% block title %}Connect your accounts — FolioSpace{% endblock %}
+{% block description %}Pull your GitHub repos and LinkedIn work history into your folio in one tap. Skip anytime.{% endblock %}
 {% block canonical %}/welcome{% endblock %}
-{% block og_title %}Your Pro trial is live — FolioSpace{% endblock %}
 
 {% block content %}
 <main id="main" class="welcome-main">
@@ -20,66 +20,105 @@
     </div>
 
     <h1 class="welcome-title">
-      Claim your <em>free</em><br/>Pro trial.
+      Welcome{% if u.display_name %}, <em>{{ u.display_name }}</em>{% endif %}.<br/>
+      Fill your folio in <em>two taps</em>.
     </h1>
     <div class="welcome-rule" aria-hidden="true"></div>
-    <p class="welcome-sub">Start with the full power of FolioSpace.<br/>No card needed today — we'll ask only if you stay past day 15.</p>
+    <p class="welcome-sub">
+      Connect GitHub + LinkedIn to pull your repos, contribution graph and work history in.
+      Or skip — you can wire them later from your dashboard.
+    </p>
 
-    <ol class="welcome-timeline" aria-label="Your trial timeline">
-      <li class="welcome-step is-now">
-        <div class="welcome-step-mark">
-          <span class="welcome-step-dot" aria-hidden="true"></span>
-          <span class="welcome-step-num">01</span>
-        </div>
-        <div class="welcome-step-body">
-          <div class="welcome-step-when">Today</div>
-          <div class="welcome-step-title">Your Pro is on the house.</div>
-          <div class="welcome-step-sub">Custom themes, GitHub imports, LinkedIn sync, the whole kit. ₹0 for 15 days.</div>
-        </div>
-      </li>
+    {% if saved == 'oauth' and saved_provider %}
+      <div class="welcome-flash is-ok">
+        <span class="welcome-flash-mark" aria-hidden="true">✓</span>
+        {{ saved_provider|capitalize }} connected. Refresh from your folio to import data.
+      </div>
+    {% elif err %}
+      <div class="welcome-flash is-warn">
+        <span class="welcome-flash-mark" aria-hidden="true">!</span>
+        {{ {'oauth-already-linked':'That provider is already linked to another account.','oauth-attach':'Social link didn’t complete. Please try again.','oauth-start':'Couldn’t start that sign-in. Please try again.','oauth-provider':'That sign-in method isn’t available.','oauth-not-configured':'That sign-in method isn’t set up yet.'}.get(err, 'Something didn’t go through. Please try again.') }}
+      </div>
+    {% endif %}
 
-      <li class="welcome-step">
-        <div class="welcome-step-mark">
-          <span class="welcome-step-dot" aria-hidden="true"></span>
-          <span class="welcome-step-num">02</span>
-        </div>
-        <div class="welcome-step-body">
-          <div class="welcome-step-when">In 8 days</div>
-          <div class="welcome-step-title">A nudge, not a nag.</div>
-          <div class="welcome-step-sub">We'll email you a single reminder that your trial is more than halfway through.</div>
-        </div>
-      </li>
+    <div class="welcome-cards">
+      <article class="welcome-card {% if 'github' in connected_providers %}is-connected{% endif %}" aria-label="Connect GitHub">
+        <header class="welcome-card-head">
+          <span class="welcome-card-mark welcome-card-mark-github" aria-hidden="true">{{ oi.oauth_icon('github') }}</span>
+          <span class="welcome-card-name">GitHub</span>
+          {% if 'github' in connected_providers %}
+            <span class="welcome-card-state welcome-card-state-ok">Connected</span>
+          {% else %}
+            <span class="welcome-card-state">Not connected</span>
+          {% endif %}
+        </header>
+        <div class="welcome-card-rule" aria-hidden="true"></div>
+        <p class="welcome-card-body">
+          Pull your public repos, languages and the last 12 months of contributions straight into your folio.
+        </p>
+        <footer class="welcome-card-foot">
+          {% if 'github' in connected_providers %}
+            <span class="welcome-card-tick" aria-hidden="true">✓</span>
+            <span class="welcome-card-tick-text">Linked. Visit your folio and hit Refresh to import.</span>
+          {% elif 'github' in oauth_providers %}
+            <a class="welcome-card-btn welcome-card-btn-github"
+               href="/auth/oauth/github?intent=link&amp;next=/welcome">
+              <span class="welcome-card-btn-label">Connect GitHub</span>
+              <span class="welcome-card-btn-arrow" aria-hidden="true">→</span>
+            </a>
+          {% else %}
+            <span class="welcome-card-off">GitHub sign-in isn’t set up on this server yet.</span>
+          {% endif %}
+        </footer>
+      </article>
 
-      <li class="welcome-step">
-        <div class="welcome-step-mark">
-          <span class="welcome-step-dot" aria-hidden="true"></span>
-          <span class="welcome-step-num">03</span>
-        </div>
-        <div class="welcome-step-body">
-          <div class="welcome-step-when">In 15 days</div>
-          <div class="welcome-step-title">Your plan starts at ₹149/mo.</div>
-          <div class="welcome-step-sub">Auto-charge via UPI. <strong>Cancel any time</strong> from settings — no email gauntlet.</div>
-        </div>
-      </li>
-    </ol>
+      <article class="welcome-card {% if 'linkedin' in connected_providers %}is-connected{% endif %}" aria-label="Connect LinkedIn">
+        <header class="welcome-card-head">
+          <span class="welcome-card-mark welcome-card-mark-linkedin" aria-hidden="true">{{ oi.oauth_icon('linkedin') }}</span>
+          <span class="welcome-card-name">LinkedIn</span>
+          {% if 'linkedin' in connected_providers %}
+            <span class="welcome-card-state welcome-card-state-ok">Connected</span>
+          {% else %}
+            <span class="welcome-card-state">Not connected</span>
+          {% endif %}
+        </header>
+        <div class="welcome-card-rule" aria-hidden="true"></div>
+        <p class="welcome-card-body">
+          Pull your headline, current role, experience and education — no retyping, no mistakes.
+        </p>
+        <footer class="welcome-card-foot">
+          {% if 'linkedin' in connected_providers %}
+            <span class="welcome-card-tick" aria-hidden="true">✓</span>
+            <span class="welcome-card-tick-text">Linked. Visit your folio and hit Refresh to import.</span>
+          {% elif 'linkedin' in oauth_providers %}
+            <a class="welcome-card-btn welcome-card-btn-linkedin"
+               href="/auth/oauth/linkedin?intent=link&amp;next=/welcome">
+              <span class="welcome-card-btn-label">Connect LinkedIn</span>
+              <span class="welcome-card-btn-arrow" aria-hidden="true">→</span>
+            </a>
+          {% else %}
+            <span class="welcome-card-off">LinkedIn sign-in isn’t set up on this server yet.</span>
+          {% endif %}
+        </footer>
+      </article>
+    </div>
 
     <div class="welcome-cta-wrap">
       <a class="welcome-cta" href="/{{ u.slug }}/manage">
-        <span class="welcome-cta-label">Build your folio</span>
+        <span class="welcome-cta-label">{% if connected_providers %}Continue to your folio{% else %}Build your folio{% endif %}</span>
         <span class="welcome-cta-arrow" aria-hidden="true">→</span>
       </a>
-      <div class="welcome-cta-meta">Takes about 4 minutes · undo anything</div>
+      <div class="welcome-cta-meta">
+        {% if connected_providers %}
+          Connected: {{ connected_providers|join(' · ') }} · Connect more later from your folio
+        {% else %}
+          You can connect both accounts later from <code>/{{ u.slug }}/manage</code>
+        {% endif %}
+      </div>
     </div>
 
     <div class="welcome-trust">
-      <div class="welcome-trust-stars" aria-label="5 out of 5 stars">
-        <span class="welcome-star">★</span>
-        <span class="welcome-star">★</span>
-        <span class="welcome-star">★</span>
-        <span class="welcome-star">★</span>
-        <span class="welcome-star">★</span>
-      </div>
-      <div class="welcome-trust-label">Built for Indian pros who want one link, not a CMS.</div>
+      <div class="welcome-trust-label">No card today · 15 days free · Cancel any time</div>
     </div>
   </section>
 </main>

@@ -376,7 +376,7 @@ def require_user(request: Request) -> dict | None:
         request.session.clear()
         return None
     user = find_user_by_id(user_id)
-    if not user or user.get("deleted_at") or not user.get("password_hash"):
+    if not user or user.get("deleted_at"):
         request.session.clear()
         return None
     from app.services.billing import enforce_plan_grace

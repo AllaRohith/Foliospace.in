@@ -198,6 +198,8 @@ async def welcome(request: Request):
     user = user_auth.require_user(request)
     if not user:
         return RedirectResponse("/login?next=/welcome", status_code=303)
+    social_accounts = user_auth.list_social_accounts(str(user["id"]))
+    connected_providers = {sa["provider"] for sa in social_accounts}
     u = {
         "id": str(user["id"]),
         "email": user["email"],
@@ -211,9 +213,14 @@ async def welcome(request: Request):
         "auth/welcome.html",
         {
             "site_name": "FolioSpace",
-            "page_title": "Your Pro trial is live — FolioSpace",
-            "description": "Your 15-day Pro trial is active. Build the folio you've been putting off.",
+            "page_title": "Connect your accounts — FolioSpace",
+            "description": "Pull your repos, contribution graph and work history into your folio in one tap.",
             "u": u,
+            "connected_providers": connected_providers,
+            "saved_provider": _sanitize(request.query_params.get("provider", ""))[:16],
+            "saved": _sanitize(request.query_params.get("saved", ""))[:16],
+            "err": _sanitize(request.query_params.get("err", ""))[:64],
+            "oauth_providers": oauth_svc.configured_providers(),
         },
     )
     return _no_cache(response)
@@ -493,8 +500,22 @@ async def oauth_start(request: Request, provider: str, intent: str = "login"):
             samesite="lax",
             path="/auth/oauth",
         )
+        next_after = _sanitize(request.query_params.get("next", ""))[:512]
+        if next_after.startswith("/") and not next_after.startswith("//"):
+            response.set_cookie(
+                "fs_oauth_fallback",
+                next_after,
+                max_age=600,
+                httponly=True,
+                secure=True,
+                samesite="lax",
+                path="/auth/oauth",
+            )
+        else:
+            response.delete_cookie("fs_oauth_fallback", path="/auth/oauth")
         user_auth.audit_user(request, str(viewer["id"]), f"oauth.{pid}.link.start")
     else:
+        response.delete_cookie("fs_oauth_fallback", path="/auth/oauth")
         user_auth.audit_user(request, None, f"oauth.{pid}.start")
     return response
 
@@ -573,24 +594,32 @@ async def oauth_attach(request: Request, provider: str):
     ip = user_auth._client_ip(request)
     viewer = user_auth.require_user(request)
     pid = _sanitize(provider).strip().lower()[:16]
-    fallback_target = f"/{viewer['slug']}/manage" if viewer else "/login"
+    raw_fallback = _sanitize(request.cookies.get("fs_oauth_fallback", ""))[:512]
+    if raw_fallback.startswith("/") and not raw_fallback.startswith("//"):
+        link_fallback = raw_fallback
+    else:
+        link_fallback = f"/{viewer['slug']}/manage" if viewer else "/login"
+    fallback_target = link_fallback
     if not viewer:
         response = RedirectResponse("/login?err=oauth-link-needs-auth", status_code=303)
         response.delete_cookie("fs_oauth_state", path="/auth/oauth")
         response.delete_cookie("fs_oauth_provider", path="/auth/oauth")
         response.delete_cookie("fs_oauth_intent", path="/auth/oauth")
+        response.delete_cookie("fs_oauth_fallback", path="/auth/oauth")
         return response
     if pid not in oauth_svc.PROVIDERS:
         response = RedirectResponse(f"{fallback_target}?err=oauth-provider", status_code=303)
         response.delete_cookie("fs_oauth_state", path="/auth/oauth")
         response.delete_cookie("fs_oauth_provider", path="/auth/oauth")
         response.delete_cookie("fs_oauth_intent", path="/auth/oauth")
+        response.delete_cookie("fs_oauth_fallback", path="/auth/oauth")
         return response
     if not oauth_svc.is_configured(pid):
         response = RedirectResponse(f"{fallback_target}?err=oauth-not-configured", status_code=303)
         response.delete_cookie("fs_oauth_state", path="/auth/oauth")
         response.delete_cookie("fs_oauth_provider", path="/auth/oauth")
         response.delete_cookie("fs_oauth_intent", path="/auth/oauth")
+        response.delete_cookie("fs_oauth_fallback", path="/auth/oauth")
         return response
     code = _sanitize(request.query_params.get("code", ""))[:512]
     state_in = _sanitize(request.query_params.get("state", ""))[:128]
@@ -603,6 +632,7 @@ async def oauth_attach(request: Request, provider: str):
     response.delete_cookie("fs_oauth_state", path="/auth/oauth")
     response.delete_cookie("fs_oauth_provider", path="/auth/oauth")
     response.delete_cookie("fs_oauth_intent", path="/auth/oauth")
+    response.delete_cookie("fs_oauth_fallback", path="/auth/oauth")
     if not code or not state_in or state_in != state_cookie or intent_cookie != "link":
         user_auth.audit_user(request, str(viewer["id"]), f"oauth.{pid}.attach.state-mismatch", target=ip)
         return response
@@ -638,7 +668,12 @@ async def oauth_attach(request: Request, provider: str):
         f"oauth.{pid}.linked",
         target=profile["uid"][:255],
     )
-    return RedirectResponse(f"{fallback_target}?saved=oauth", status_code=303)
+    success_response = RedirectResponse(f"{fallback_target}?saved=oauth&provider={pid}", status_code=303)
+    success_response.delete_cookie("fs_oauth_state", path="/auth/oauth")
+    success_response.delete_cookie("fs_oauth_provider", path="/auth/oauth")
+    success_response.delete_cookie("fs_oauth_intent", path="/auth/oauth")
+    success_response.delete_cookie("fs_oauth_fallback", path="/auth/oauth")
+    return success_response
 
 
 @router.get("/dashboard", response_class=HTMLResponse)
