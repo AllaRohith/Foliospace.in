@@ -193,7 +193,7 @@
                     </div>
                   {% endif %}
                 </div>
-                <form method="post" action="/{{ user.slug }}/manage/spotlight" class="fm-spotlight-form" data-fm-spotlight-form>
+                <form id="fm-spotlight" method="post" action="/{{ user.slug }}/manage/spotlight" class="fm-spotlight-form" data-fm-spotlight-form>
                   <div class="fm-spotlight-row">
                     <label class="fm-spotlight-kind" for="spotlight-kind">
                       <span>Kind</span>
@@ -216,7 +216,7 @@
                     <span>URL (https://…)</span>
                     <input id="spotlight-url" name="url" type="url" maxlength="300" value="{{ user.spotlight_url or '' }}" placeholder="https://cal.com/…" />
                   </label>
-                  <button type="submit" class="fm-avatar-btn fm-spotlight-save" data-fm-spotlight-save>Save Spotlight</button>
+                  <button type="submit" form="fm-spotlight" class="fm-avatar-btn fm-spotlight-save" data-fm-spotlight-save>Save Spotlight</button>
                   <span class="fm-spotlight-status" data-fm-spotlight-status hidden></span>
                 </form>
               {% endif %}
@@ -279,7 +279,7 @@
               </summary>
               <div class="fm-links-body">
                 <p class="fm-links-hint">Pin your best links on top of your folio. Pick a layout — <strong>stack</strong> (one-per-row), <strong>grid</strong> (2×2 cards), or <strong>carousel</strong> (horizontal scroll). {% if not is_pro %}Free plan capped at 10. <a href="/pricing">Upgrade →</a>{% endif %}</p>
-                <form class="fm-links-add" data-fm-links-add>
+                <form id="fm-links-add" class="fm-links-add" data-fm-links-add>
                   <label class="fm-links-add-row">
                     <span>Label</span>
                     <input type="text" name="label" maxlength="80" placeholder="e.g. Resume" data-fm-links-label />
@@ -296,7 +296,7 @@
                       <option value="carousel">Carousel</option>
                     </select>
                   </label>
-                  <button type="submit" class="fm-avatar-btn" data-fm-links-add-btn>Add link</button>
+                  <button type="submit" form="fm-links-add" class="fm-avatar-btn" data-fm-links-add-btn>Add link</button>
                 </form>
                 <span class="fm-links-status" data-fm-links-status hidden></span>
                 <ul class="fm-links-list" data-fm-links-list aria-label="Your links">

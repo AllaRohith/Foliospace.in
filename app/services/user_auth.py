@@ -969,11 +969,13 @@ def update_user_profile(
                     "is_public    = %s",
                     "updated_at   = %s",
                 ]
+                clean_phone = _clean_text(phone, MAX_PHONE_LEN)
+                clean_phone = clean_phone if clean_phone else None
                 params = [
-                    _clean_text(display_name, MAX_DISPLAY_NAME_LEN),
-                    _clean_text(role, MAX_ROLE_LEN),
-                    _clean_text(bio, MAX_BIO_LEN),
-                    _clean_text(phone, MAX_PHONE_LEN),
+                    _clean_text(display_name, MAX_DISPLAY_NAME_LEN) or None,
+                    _clean_text(role, MAX_ROLE_LEN) or None,
+                    _clean_text(bio, MAX_BIO_LEN) or None,
+                    clean_phone,
                     bool(is_public),
                     now,
                 ]
