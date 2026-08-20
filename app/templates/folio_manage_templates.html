@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Templates — FolioSpace{% endblock %}
+{% block description %}Pick the template for your folio. Editorial is the safe base — Pro templates unlock with an active plan.{% endblock %}
+{% block canonical %}/{{ user.slug }}/manage/templates{% endblock %}
+{% block og_title %}Templates — FolioSpace{% endblock %}
+{% block og_description %}Pick the template for your folio.{% endblock %}
+{% block og_image_alt %}Choose a template for your folio{% endblock %}
+{% block robots %}noindex,nofollow{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+  {% include "partials/_dash_sidebar.html" %}
+  <div class="dash-app">
+    <header class="dash-bar">
+      <button type="button" class="dash-bar-hamburger" aria-label="Toggle navigation" data-dash-burger>☰</button>
+      <span class="dash-bar-issue">→ Issue No. 04</span>
+      <div class="dash-bar-right">
+        <a class="dash-bar-link" href="/{{ user.slug }}/manage">← Edit folio</a>
+        <a class="dash-bar-link" href="/{{ user.slug }}?preview=1" target="_blank" rel="noopener">Preview ↗</a>
+        <button type="button" class="fm-share-btn" data-fm-share-popover aria-expanded="false">Share →</button>
+        {% import "partials/_plan_summary.html" as ps_macro %}
+        {{ ps_macro.pill(user) }}
+      </div>
+    </header>
+
+    <main id="main" class="dash-main">
+      <section class="tpl-screen" aria-label="Choose a template">
+        <header class="tpl-screen-head">
+          <div class="tpl-screen-eyebrow">→ Templates</div>
+          <h1 class="tpl-screen-title">Pick a <em>look.</em></h1>
+          <p class="tpl-screen-sub">Each template is one cohesive layout. <strong>Editorial</strong> is your safe base — others swap in around it. Pro templates unlock with an active plan.</p>
+        </header>
+
+        {% if saved_kind == 'template' or saved == 'template' %}
+          <div class="fm-flash fm-flash-ok">✓ Template switched.</div>
+        {% endif %}
+        {% if err == 'template-pro' %}
+          <div class="fm-flash fm-flash-warn">That template is Pro-only. Upgrade from <a href="/dashboard/billing">/dashboard/billing</a> to unlock.</div>
+        {% elif err == 'template-not-found' %}
+          <div class="fm-flash fm-flash-warn">That template isn't available right now.</div>
+        {% elif err == 'server' %}
+          <div class="fm-flash fm-flash-warn">Couldn't save right now. Try again.</div>
+        {% endif %}
+
+        <ul class="tpl-gallery" aria-label="Template gallery">
+          {% for t in templates_catalog %}
+            {% set is_active = (t.id == current_template_id) %}
+            {% set can_pick = (not t.is_pro_only) or (user_plan == 'pro') or is_internal %}
+            <li class="tpl-card {{ 'is-active' if is_active else '' }} {{ 'is-locked' if not can_pick else '' }} {{ 'is-default' if t.is_default else '' }}"
+                data-template-id="{{ t.id }}">
+              <div class="tpl-card-head">
+                <span class="tpl-card-eyebrow">→ Template · {{ '%02d'|format(t.sort) }}</span>
+                <h2 class="tpl-card-name">{{ t.name }}</h2>
+                <p class="tpl-card-desc">{{ t.description }}</p>
+              </div>
+              <div class="tpl-card-thumb" aria-hidden="true">
+                <span class="tpl-card-thumb-letter">{{ t.name[0] }}</span>
+                <span class="tpl-card-thumb-id">{{ t.id }}</span>
+              </div>
+              <div class="tpl-card-badges">
+                {% if t.is_default %}<span class="tpl-badge tpl-badge-base">Base</span>{% endif %}
+                {% if t.is_pro_only %}<span class="tpl-badge tpl-badge-pro">Pro</span>{% endif %}
+                {% if is_active %}<span class="tpl-badge tpl-badge-active">Active</span>{% endif %}
+              </div>
+              <div class="tpl-card-foot">
+                {% if can_pick %}
+                  <form method="post" action="/{{ user.slug }}/manage/template" class="tpl-card-form">
+                    <input type="hidden" name="template_id" value="{{ t.id }}" />
+                    {% if is_active %}
+                      <button type="button" class="tpl-btn tpl-btn-active" disabled aria-current="true">Currently active ✓</button>
+                    {% else %}
+                      <button type="submit" class="tpl-btn tpl-btn-activate">Activate {{ t.name }} →</button>
+                    {% endif %}
+                  </form>
+                {% else %}
+                  <a class="tpl-btn tpl-btn-locked" href="/dashboard/billing" aria-disabled="true">
+                    <span class="tpl-btn-lock" aria-hidden="true">◇</span> Upgrade to unlock
+                  </a>
+                {% endif %}
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+
+        <footer class="tpl-screen-foot">
+          <a class="tpl-foot-link" href="/{{ user.slug }}/manage">← Back to edit folio</a>
+        </footer>
+      </section>
+    </main>
+  </div>
+</div>
+{% endblock %}

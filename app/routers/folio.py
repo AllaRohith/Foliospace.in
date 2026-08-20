@@ -307,15 +307,73 @@ async def owner_folio_template_switch(request: Request, slug: str):
     target = strip_control(str(body.get("template_id", "")))[:32] or "t1"
     if not templates_svc.can_user_pick(viewer, target):
         if (viewer.get("plan") or "free").lower() != "pro" and not viewer.get("is_internal"):
-            return RedirectResponse(f"/{safe_slug}/manage?err=template-pro", status_code=303)
-        return RedirectResponse(f"/{safe_slug}/manage?err=template-not-found", status_code=303)
+            return RedirectResponse(f"/{safe_slug}/manage/templates?err=template-pro", status_code=303)
+        return RedirectResponse(f"/{safe_slug}/manage/templates?err=template-not-found", status_code=303)
     updated = user_auth_svc.update_template(str(user["id"]), target)
     if not updated:
-        return RedirectResponse(f"/{safe_slug}/manage?err=server", status_code=303)
+        return RedirectResponse(f"/{safe_slug}/manage/templates?err=server", status_code=303)
     user_auth_svc.audit_user(
         request, str(user["id"]), "folio.template.switch", target=target,
     )
-    return RedirectResponse(f"/{safe_slug}/manage?saved=template", status_code=303)
+    return RedirectResponse(f"/{safe_slug}/manage/templates?saved=template", status_code=303)
+
+
+@router.get("/{slug}/manage/templates", response_class=HTMLResponse)
+async def owner_folio_templates(request: Request, slug: str):
+    from app.utils.text import strip_control
+    from app.services.user_auth import _slug_is_reserved
+    from app.services import user_auth as user_auth_svc
+    from app.services import templates as templates_svc
+
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at") or _slug_is_reserved(safe_slug):
+        return _no_cache_html(templates.TemplateResponse(
+            request,
+            "folio_404.html",
+            {
+                "site_name": "FolioSpace",
+                "page_title": "Folio not found — FolioSpace",
+                "description": "This folio isn't claimed yet on FolioSpace.",
+                "slug": safe_slug,
+            },
+            status_code=404,
+        ))
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return RedirectResponse(f"/login?next=/{safe_slug}/manage/templates", status_code=303)
+
+    err = strip_control(request.query_params.get("err", ""))[:24]
+    saved = request.query_params.get("saved") == "1"
+    saved_kind = strip_control(request.query_params.get("saved", ""))[:24]
+    user_plan = (viewer.get("plan") or "free").lower()
+    is_internal = bool(viewer.get("is_internal"))
+    is_pro = (user_plan == "pro") or is_internal
+    current_tid = (user.get("template_id") or "t1").strip()
+    visible_templates = templates_svc.visible_catalog()
+
+    response = templates.TemplateResponse(
+        request,
+        "folio_manage_templates.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Templates — FolioSpace",
+            "description": "Pick the template for your folio.",
+            "user": user,
+            "templates_catalog": visible_templates,
+            "current_template_id": current_tid,
+            "user_plan": user_plan,
+            "is_internal": is_internal,
+            "is_pro": is_pro,
+            "err": err,
+            "saved": saved,
+            "saved_kind": saved_kind,
+            "nav_active": "templates",
+            "canonical": f"/{safe_slug}/manage/templates",
+            "now": datetime.utcnow(),
+        },
+    )
+    return _no_cache_html(response)
 
 
 import re as _re_folio
