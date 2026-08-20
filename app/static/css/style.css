@@ -7521,17 +7521,27 @@ body.dark .colophon-brand-mark img { filter: invert(1) hue-rotate(180deg); }
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(48px, 6vw, 80px) clamp(24px, 4vw, 64px);
+  padding: clamp(32px, 5vw, 64px) clamp(20px, 3vw, 48px);
   background: var(--cream);
 }
 body.dark .auth-split-form { background: var(--ink); }
 
 .auth-form-inner {
   width: 100%;
-  max-width: 440px;
+  max-width: 460px;
   display: flex;
   flex-direction: column;
   gap: 14px;
+  padding: 36px 32px 32px;
+  background: var(--cream-2);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 24px 48px -24px rgba(15, 20, 25, 0.18);
+}
+body.dark .auth-form-inner {
+  background: var(--ink-2);
+  border-color: var(--line);
+  box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.5);
 }
 
 @media (max-width: 900px) {
