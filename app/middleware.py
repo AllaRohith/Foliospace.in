@@ -52,17 +52,17 @@ def _origin_key(origin: str) -> str:
 def _csp() -> str:
     parts = [
         "default-src 'self'",
-        "script-src 'self' https://checkout.razorpay.com https://cdn.razorpay.com https://platform.linkedin.com",
+        "script-src 'self' https://checkout.razorpay.com https://cdn.razorpay.com https://platform.linkedin.com https://www.linkedin.com",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com data:",
         "img-src 'self' data: blob: https://res.cloudinary.com https://platform.linkedin.com https://www.linkedin.com",
         "connect-src 'self' https://lumberjack.razorpay.com https://api.cloudinary.com https://api.gravatar.com",
-        "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://platform.linkedin.com",
+        "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://platform.linkedin.com https://www.linkedin.com",
         "frame-ancestors 'none'",
         "form-action 'self'",
         "base-uri 'self'",
         "object-src 'none'",
-        "media-src 'self'",
+        "media-src 'self' https://res.cloudinary.com",
         "manifest-src 'self'",
         "worker-src 'self' blob:",
     ]
