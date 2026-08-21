@@ -6,16 +6,7 @@
   <nav class="dash-side-section">
     <div class="dash-side-section-label">Your folio</div>
     <a class="dash-side-item {% if nav_active == 'manage' %}is-active{% endif %}" href="/{{ user.slug }}/manage">Edit folio →</a>
-    <a class="dash-side-item {% if nav_active == 'templates' %}is-active{% endif %}" href="/{{ user.slug }}/manage/templates">
-      Templates
-      <span class="dash-side-item-meta">
-        {% if current_template_id and templates_catalog is defined %}
-          {% for t in templates_catalog %}
-            {% if t.id == current_template_id %}{{ t.name }}{% endif %}
-          {% endfor %}
-        {% else %}Folio{% endif %} →
-      </span>
-    </a>
+    <a class="dash-side-item {% if nav_active == 'templates' %}is-active{% endif %}" href="/{{ user.slug }}/manage/templates">Templates →</a>
     <a class="dash-side-item {% if nav_active == 'billing' %}is-active{% endif %}" href="/dashboard/billing">Billing + plan →</a>
   </nav>
 

@@ -421,6 +421,19 @@
         </section>
 
         <aside class="fm-side" aria-label="Preview and status">
+          {% set _tpl_match = (templates_catalog | selectattr('id', 'equalto', current_template_id) | list) if (templates_catalog is defined and current_template_id) else [] %}
+          <section class="fm-card fm-card-template" aria-label="Active template">
+            <div class="fm-card-eyebrow">→ Active template</div>
+            <div class="fm-template-row">
+              <div class="fm-template-mark" aria-hidden="true">{{ _tpl_match[0].name[0] if _tpl_match else '·' }}</div>
+              <div class="fm-template-meta">
+                <div class="fm-template-name">{{ _tpl_match[0].name if _tpl_match else 'Other Base' }}</div>
+                <div class="fm-template-sub">Auto-set from your role</div>
+              </div>
+            </div>
+            <a class="fm-template-cta" href="/{{ user.slug }}/manage/templates">View templates →</a>
+          </section>
+
           {% if completion and completion.filled < completion.total %}
             <section class="fm-card fm-card-completion" aria-label="Profile completion">
               <div class="fm-card-eyebrow">→ Profile · {{ completion.filled }}/{{ completion.total }} complete</div>
