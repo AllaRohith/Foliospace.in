@@ -49,7 +49,6 @@ body.pf-t3 {
   --display: 'Syne', -apple-system, BlinkMacSystemFont, sans-serif;
   --body: 'Space Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-  --hero-name: 'Archivo Black', 'Syne', sans-serif;
   --hand: 'Caveat', 'Patrick Hand', cursive;
   --marker: 'Permanent Marker', cursive;
 
@@ -149,62 +148,6 @@ body.pf-t3 .pf-link-label {
   width: 100%;
   margin-left: 0;
   margin-right: 0;
-}
-
-/* Outlined hero watermark — name broken into parts (Rohith / Naidu / Alla).
-   Stacked 3 lines, each ~22vw, outlined with subtle stroke + top/bottom mask
-   so only the middle band shows. Mirrors the source's "ROHITH NAIDU ALLA"
-   ghosted backdrop behind the portrait. */
-.pf-t3 .pf-hero-name-bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(0.4rem, 1.5vw, 1.25rem);
-  pointer-events: none;
-  user-select: none;
-  overflow: hidden;
-  padding: 0 1rem;
-}
-
-.pf-t3 .pf-hero-name-bg-line {
-  font-family: var(--hero-name), var(--display), sans-serif;
-  font-weight: 900;
-  font-size: clamp(3rem, 18vw, 13rem);
-  line-height: 0.85;
-  letter-spacing: -0.04em;
-  text-transform: uppercase;
-  color: transparent;
-  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.08);
-  text-stroke: 1.5px rgba(255, 255, 255, 0.08);
-  white-space: nowrap;
-  will-change: transform;
-  mask-image: linear-gradient(to bottom,
-    transparent 0%,
-    rgba(0,0,0,0.15) 18%,
-    #000 32%,
-    #000 78%,
-    transparent 95%);
-  -webkit-mask-image: linear-gradient(to bottom,
-    transparent 0%,
-    rgba(0,0,0,0.15) 18%,
-    #000 32%,
-    #000 78%,
-    transparent 95%);
-}
-@media (prefers-reduced-motion: no-preference) {
-  .pf-t3 .pf-hero-name-bg-line {
-    animation: t3-heroNameFloat 9s ease-in-out infinite;
-  }
-  .pf-t3 .pf-hero-name-bg-line:nth-child(2) { animation-delay: -3s; }
-  .pf-t3 .pf-hero-name-bg-line:nth-child(3) { animation-delay: -6s; }
-}
-@keyframes t3-heroNameFloat {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-6px); }
 }
 
 /* Doodle / graffiti layer — corner brackets + scattered glyphs */
@@ -923,9 +866,52 @@ body.pf-t3 .pf-link-label {
    ======================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
-  .pf-t3 .pf-hero-name-bg-line,
   .pf-t3 .pf-hero-glyph,
   .pf-t3 .pf-hero-masthead-mark::before {
     animation: none !important;
   }
+}
+
+/* ========================================================================
+   Dark-surface overrides — these elements get a cream/white bg from
+   style.css (`.pf-work-cell`, `.pf-repo-row`, `.pf-repo-pill`, `.pf-li-pill`,
+   `.pf-contrib-bar`). style.css also sets a "dark" variant that flips them
+   to `var(--cream-2)` (cream-dark) — neither is what we want. Override both
+   with `body.pf-t3` scope so we win on specificity (0,1,1) and keep them
+   on the same dark palette as the rest of the page.
+   ======================================================================== */
+
+.pf-t3 .pf-work-cell,
+.pf-t3 .pf-repo-row,
+.pf-t3 .pf-repo-pill,
+.pf-t3 .pf-li-pill,
+.pf-t3 .pf-li-cta {
+  background-color: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+.pf-t3 .pf-work-cell:hover,
+.pf-t3 .pf-repo-row:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: var(--line-strong);
+}
+.pf-t3 .pf-work-cell .pf-work-title,
+.pf-t3 .pf-repo-row .pf-repo-name {
+  color: var(--text);
+}
+.pf-t3 .pf-work-cell .pf-work-sub,
+.pf-t3 .pf-repo-row .pf-repo-desc {
+  color: var(--text-muted);
+}
+.pf-t3 .pf-contrib-bar {
+  background-color: rgba(255, 255, 255, 0.10);
+}
+.pf-t3 .pf-contrib-bar.is-active {
+  background-color: var(--coral);
+}
+body.dark.pf-t3 .pf-work-cell,
+body.dark.pf-t3 .pf-repo-row,
+body.dark.pf-t3 .pf-repo-pill,
+body.dark.pf-t3 .pf-li-pill {
+  background-color: rgba(255, 255, 255, 0.03);
 }

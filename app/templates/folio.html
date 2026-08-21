@@ -94,12 +94,6 @@
   {% endif %}
 
   <header class="pf-hero">
-      {% set _ghost_name = (user.display_name or user.slug) | e %}
-      {% set _ghost_parts = _ghost_name.split() %}
-      <div class="pf-hero-name-bg" aria-hidden="true">
-        {% for part in _ghost_parts %}<span class="pf-hero-name-bg-line">{{ part }}</span>{% endfor %}
-      </div>
-
       <div class="pf-hero-doodles" aria-hidden="true">
         <svg class="pf-hero-glyph pf-hero-glyph-bracket-tl" viewBox="0 0 40 40"><path d="M 4 16 L 4 4 L 16 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
         <svg class="pf-hero-glyph pf-hero-glyph-bracket-tr" viewBox="0 0 40 40"><path d="M 24 4 L 36 4 L 36 16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
