@@ -69,6 +69,10 @@ body.pf-t3 {
 body.pf-t3 .pf-grain { display: none; }
 body.pf-t3 .pf-page { background-color: #0a0a0b; }
 body.pf-t3 .bg-topo { display: none; }
+/* Belt-and-braces: override style.css's body.dark .pf-hero and body.dark .pf-page
+   so even if dark mode is on while viewing t3, the surface stays dark not cream. */
+body.dark.pf-t3 .pf-hero { background-color: #0a0a0b; border-color: var(--line); }
+body.dark.pf-t3 .pf-page { background-color: #0a0a0b; }
 
 /* html fallback — guarantees dark ground even before body rules apply */
 html body.pf-t3,
