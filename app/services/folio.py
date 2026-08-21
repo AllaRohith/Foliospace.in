@@ -217,7 +217,7 @@ def find_user_by_slug(slug: str, *, require_public: bool = True) -> dict | None:
         return None
     full_sql = (
         """
-        SELECT id, slug, display_name, role, bio, phone, avatar_url,
+        SELECT id, slug, display_name, role, category, bio, phone, avatar_url,
                avatar_public_id, avatar_video_url, avatar_video_public_id, avatar_video_kind,
                is_public,
                plan, is_internal, is_trial, payment_failed_at,
@@ -236,7 +236,7 @@ def find_user_by_slug(slug: str, *, require_public: bool = True) -> dict | None:
     )
     minimal_sql = (
         """
-        SELECT id, slug, display_name, role, created_at, updated_at, deleted_at,
+        SELECT id, slug, display_name, role, category, created_at, updated_at, deleted_at,
                NULL::text AS bio, NULL::text AS phone, NULL::text AS avatar_url,
                NULL::text AS avatar_public_id, NULL::text AS avatar_video_url,
                NULL::text AS avatar_video_public_id, NULL::text AS avatar_video_kind,
