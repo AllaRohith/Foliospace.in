@@ -432,6 +432,10 @@ body.pf-t3 .pf-link-label {
   display: inline-flex;
   align-items: baseline;
   gap: 8px;
+  background-color: transparent;
+  border: 0;
+  padding: 0;
+  border-radius: 0;
 }
 .pf-t3 .pf-stat-num {
   font-size: 28px;
@@ -449,27 +453,6 @@ body.pf-t3 .pf-link-label {
   font-weight: 500;
 }
 .pf-t3 .pf-stat-sep { color: var(--text-soft); font-size: 18px; }
-
-/* ========================================================================
-   Marquee divider (between hero and first section)
-   ======================================================================== */
-
-.pf-t3 .pf-hero + .pf-shell::before,
-.pf-t3 .pf-hero + .pf-card-work::before {
-  content: "";
-  display: block;
-  width: 100%;
-  overflow: hidden;
-  padding: 1.25rem 0;
-  background: var(--bg-2);
-  border-top: 1px solid var(--bg-3);
-  border-bottom: 1px solid var(--bg-3);
-  position: relative;
-  z-index: 2;
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
-          mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
-  margin: 24px 0;
-}
 
 /* ========================================================================
    Cards (sections)
@@ -562,7 +545,7 @@ body.pf-t3 .pf-link-label {
   display: flex;
   flex-direction: column;
   gap: 22px;
-  margin-top: 22px;
+  margin-top: 0;
 }
 
 /* ========================================================================
