@@ -212,8 +212,6 @@ body.pf-t3 .pf-card-heading {
 .pf-t3 .pf-hero {
   padding: 14px 0 22px;
   position: relative;
-  max-width: 880px;
-  margin: 0 auto;
 }
 .pf-t3 .pf-hero::after {
   content: "";
@@ -241,7 +239,6 @@ body.pf-t3 .pf-card-heading {
   letter-spacing: 0.22em;
   color: var(--ink-soft);
   margin-bottom: 22px;
-  max-width: 540px;
 }
 .pf-t3 .pf-hero-masthead-stamp {
   transform: rotate(var(--tilt-left));
@@ -355,7 +352,13 @@ body.pf-t3 .pf-card-heading {
   50% { box-shadow: 0 0 0 6px rgba(255, 77, 77, 0.05); }
 }
 
-.pf-t3 .pf-hero-id { display: flex; flex-direction: column; gap: 12px; }
+.pf-t3 .pf-hero-id {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-left: 0;
+  padding: 0;
+}
 
 .pf-t3 .pf-name {
   font-size: 52px;
