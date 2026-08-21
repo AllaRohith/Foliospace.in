@@ -10168,6 +10168,40 @@ body.dark .dash-badge { background: var(--card-bg); }
 .fm-flash-ok   { background: rgba(74,157,111,0.12); color: #2e6e4a; border: 1px solid #4a9d6f; }
 .fm-flash-warn { background: rgba(180,40,40,0.08);  color: #b42828; border: 1px solid #b42828; }
 
+.fm-base-pill {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  border: 1px solid var(--line, rgba(0,0,0,0.10));
+  border-radius: 10px;
+  background: var(--bg-soft, rgba(0,0,0,0.02));
+  font-family: 'Saira', sans-serif;
+}
+.fm-base-pill-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim, #707070);
+}
+.fm-base-pill-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text, #1a1a1a);
+}
+.fm-base-pill-sub {
+  font-size: 12px;
+  color: var(--text-dim, #707070);
+}
+.fm-base-pill-sub a {
+  color: var(--accent, #c14b2a);
+  text-decoration: none;
+  font-weight: 600;
+}
+.fm-base-pill-sub a:hover { text-decoration: underline; }
+
 .fm-li-mirror {
   position: absolute;
   left: -9999px;

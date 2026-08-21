@@ -523,7 +523,7 @@ def _user_to_context(user) -> dict:
         "payment_failed_at": user.get("payment_failed_at"),
         "is_trial": bool(user.get("is_trial")),
         "is_internal": bool(user.get("is_internal")),
-        "template_id": (user.get("template_id") or "t3").strip()[:32],
+        "template_id": (user.get("template_id") or "other-base").strip()[:32],
     }
 
 

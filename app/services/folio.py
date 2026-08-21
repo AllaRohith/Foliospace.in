@@ -245,7 +245,7 @@ def find_user_by_slug(slug: str, *, require_public: bool = True) -> dict | None:
                NULL::timestamp AS payment_failed_at,
                NULL::timestamp AS setup_paid_at,
                NULL::timestamp AS plan_expires_at,
-               't3'::text AS template_id,
+               'other-base'::text AS template_id,
                NULL::text AS linkedin_url,
                NULL::text AS spotlight_kind, NULL::text AS spotlight_ref_id,
                NULL::text AS spotlight_text, NULL::text AS spotlight_url,

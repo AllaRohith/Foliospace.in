@@ -5,97 +5,43 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_TEMPLATE_ID = "t3"
+VALID_ROLES = {
+    "student", "developer", "designer", "chef", "artist", "consultant",
+    "writer", "researcher", "founder", "employee", "shop", "business", "other",
+}
+
+ROLE_DEFAULT_TEMPLATE = {
+    "student":    "student-base",
+    "developer":  "developer-base",
+    "designer":   "designer-base",
+    "chef":       "chef-base",
+    "artist":     "artist-base",
+    "consultant": "consultant-base",
+    "writer":     "writer-base",
+    "researcher": "researcher-base",
+    "founder":    "founder-base",
+    "employee":   "employee-base",
+    "shop":       "shop-base",
+    "business":   "business-base",
+    "other":      "other-base",
+}
+
+DEFAULT_TEMPLATE_ID = "other-base"
 
 DEFAULT_CATALOG = [
-    {
-        "id": "t1",
-        "name": "Editorial",
-        "description": "Coming soon",
-        "is_visible": True,
-        "is_default": False,
-        "is_pro_only": False,
-        "is_selectable": False,
-        "thumb": "t1.svg",
-        "sort": 1,
-    },
-    {
-        "id": "t2",
-        "name": "Developer",
-        "description": "Coming soon",
-        "is_visible": True,
-        "is_default": False,
-        "is_pro_only": False,
-        "is_selectable": False,
-        "thumb": "t2.svg",
-        "sort": 2,
-    },
-    {
-        "id": "t3",
-        "name": "Folio",
-        "description": "Dark editorial canvas, big portrait, outlined type. The FolioSpace default.",
-        "is_visible": True,
-        "is_default": True,
-        "is_pro_only": False,
-        "is_selectable": True,
-        "thumb": "t3.svg",
-        "sort": 3,
-    },
-    {
-        "id": "t4",
-        "name": "Chef",
-        "description": "Coming soon",
-        "is_visible": True,
-        "is_default": False,
-        "is_pro_only": True,
-        "is_selectable": False,
-        "thumb": "t4.svg",
-        "sort": 4,
-    },
-    {
-        "id": "t5",
-        "name": "Consultant",
-        "description": "Coming soon",
-        "is_visible": True,
-        "is_default": False,
-        "is_pro_only": True,
-        "is_selectable": False,
-        "thumb": "t5.svg",
-        "sort": 5,
-    },
-    {
-        "id": "t6",
-        "name": "Shop",
-        "description": "Coming soon",
-        "is_visible": True,
-        "is_default": False,
-        "is_pro_only": True,
-        "is_selectable": False,
-        "thumb": "t6.svg",
-        "sort": 6,
-    },
-    {
-        "id": "t7",
-        "name": "Founder",
-        "description": "Coming soon",
-        "is_visible": True,
-        "is_default": False,
-        "is_pro_only": True,
-        "is_selectable": False,
-        "thumb": "t7.svg",
-        "sort": 7,
-    },
-    {
-        "id": "t8",
-        "name": "Student",
-        "description": "Coming soon",
-        "is_visible": True,
-        "is_default": False,
-        "is_pro_only": False,
-        "is_selectable": False,
-        "thumb": "t8.svg",
-        "sort": 8,
-    },
+    {"id": "chef-base",       "name": "Chef Base",       "role": "chef",       "description": "Showcase dishes, experience, and a direct message CTA.", "is_visible": True, "is_default": False, "is_pro_only": False, "is_selectable": True, "thumb": "chef.svg",       "sort": 1},
+    {"id": "developer-base",  "name": "Developer Base",  "role": "developer",  "description": "Repos, contribution graph, tech stack, project history.", "is_visible": True, "is_default": False, "is_pro_only": False, "is_selectable": True, "thumb": "developer.svg",  "sort": 2},
+    {"id": "designer-base",   "name": "Designer Base",   "role": "designer",   "description": "Cover-led case studies, process, tools, experience.", "is_visible": True, "is_default": False, "is_pro_only": False, "is_selectable": True, "thumb": "designer.svg",   "sort": 3},
+    {"id": "consultant-base", "name": "Consultant Base", "role": "consultant", "description": "Engagements with outcomes, niche, industries.", "is_visible": True, "is_default": False, "is_pro_only": False, "is_selectable": True, "thumb": "consultant.svg", "sort": 4},
+    {"id": "founder-base",    "name": "Founder Base",    "role": "founder",    "description": "Companies, traction, team, vision, hiring CTA.", "is_visible": True, "is_default": False, "is_pro_only": False, "is_selectable": True, "thumb": "founder.svg",    "sort": 5},
+    {"id": "student-base",    "name": "Student Base",    "role": "student",    "description": "Education, internships, side projects, first-role CTA.", "is_visible": True, "is_default": False, "is_pro_only": False, "is_selectable": True, "thumb": "student.svg",    "sort": 6},
+    {"id": "shop-base",       "name": "Shop Base",       "role": "shop",       "description": "Made-to-order gallery, walk-in hours, location.", "is_visible": True, "is_default": False, "is_pro_only": False, "is_selectable": True, "thumb": "shop.svg",       "sort": 7},
+    {"id": "artist-base",     "name": "Artist Base",     "role": "artist",     "description": "Curated work, exhibitions, galleries, commission CTA.", "is_visible": True, "is_default": False, "is_pro_only": False, "is_selectable": True, "thumb": "artist.svg",     "sort": 8},
+    {"id": "writer-base",     "name": "Writer Base",     "role": "writer",     "description": "Best clips with publication logos, topics covered.", "is_visible": True, "is_default": False, "is_pro_only": False, "is_selectable": True, "thumb": "writer.svg",     "sort": 9},
+    {"id": "researcher-base", "name": "Researcher Base", "role": "researcher", "description": "Publications, affiliations, current focus, collab CTA.", "is_visible": True, "is_default": False, "is_pro_only": False, "is_selectable": True, "thumb": "researcher.svg", "sort": 10},
+    {"id": "employee-base",   "name": "Employee Base",   "role": "employee",   "description": "Internal mobility, side projects, skills matrix.", "is_visible": True, "is_default": False, "is_pro_only": False, "is_selectable": True, "thumb": "employee.svg",   "sort": 11},
+    {"id": "business-base",   "name": "Business Base",   "role": "business",   "description": "Company tagline, services, team, metrics, quote CTA.", "is_visible": True, "is_default": False, "is_pro_only": False, "is_selectable": True, "thumb": "business.svg",   "sort": 12},
+    {"id": "other-base",      "name": "Other Base",      "role": "other",      "description": "Generic-but-distinctive storytelling folio.", "is_visible": True, "is_default": False, "is_pro_only": False, "is_selectable": True, "thumb": "other.svg",      "sort": 13},
 ]
 
 
@@ -107,6 +53,21 @@ def _conn():
         raise RuntimeError("DATABASE_URL not set")
     conn = psycopg.connect(dsn, row_factory=dict_row)
     return conn
+
+
+def _normalize(t: dict) -> dict:
+    return {
+        "id": str(t.get("id") or ""),
+        "name": str(t.get("name") or t.get("id") or ""),
+        "role": str(t.get("role") or ""),
+        "description": str(t.get("description") or ""),
+        "is_visible": bool(t.get("is_visible", False)),
+        "is_default": bool(t.get("is_default", False)),
+        "is_pro_only": bool(t.get("is_pro_only", False)),
+        "is_selectable": bool(t.get("is_selectable", False)),
+        "thumb": str(t.get("thumb") or ""),
+        "sort": int(t.get("sort") or 0),
+    }
 
 
 def list_catalog() -> list[dict]:
@@ -126,19 +87,7 @@ def list_catalog() -> list[dict]:
         for t in data:
             if not isinstance(t, dict) or not t.get("id"):
                 continue
-            out.append(
-                {
-                    "id": str(t["id"]),
-                    "name": str(t.get("name") or t["id"]),
-                    "description": str(t.get("description") or ""),
-                    "is_visible": bool(t.get("is_visible", False)),
-                    "is_default": bool(t.get("is_default", False)),
-                    "is_pro_only": bool(t.get("is_pro_only", False)),
-                    "is_selectable": bool(t.get("is_selectable", False)),
-                    "thumb": str(t.get("thumb") or ""),
-                    "sort": int(t.get("sort") or 0),
-                }
-            )
+            out.append(_normalize(t))
         out.sort(key=lambda x: (x["sort"], x["id"]))
         return out
     except Exception as e:
@@ -151,19 +100,7 @@ def save_catalog(items: list[dict], updated_by: str = "") -> bool:
     for t in items:
         if not isinstance(t, dict) or not t.get("id"):
             continue
-        payload.append(
-            {
-                "id": str(t["id"]),
-                "name": str(t.get("name") or t["id"]),
-                "description": str(t.get("description") or ""),
-                "is_visible": bool(t.get("is_visible", False)),
-                "is_default": bool(t.get("is_default", False)),
-                "is_pro_only": bool(t.get("is_pro_only", False)),
-                "is_selectable": bool(t.get("is_selectable", False)),
-                "thumb": str(t.get("thumb") or ""),
-                "sort": int(t.get("sort") or 0),
-            }
-        )
+        payload.append(_normalize(t))
     try:
         with _conn() as conn:
             with conn.cursor() as cur:
@@ -202,6 +139,13 @@ def visible_catalog() -> list[dict]:
     return [t for t in list_catalog() if t["is_visible"]]
 
 
+def catalog_for_role(role: str) -> list[dict]:
+    r = (role or "other").strip().lower()
+    if r not in VALID_ROLES:
+        r = "other"
+    return [t for t in visible_catalog() if t.get("role") == r]
+
+
 def get(template_id: Optional[str]) -> Optional[dict]:
     if not template_id:
         return None
@@ -215,11 +159,16 @@ def can_user_pick(user: dict, template_id: str) -> bool:
     t = get(template_id)
     if not t or not t["is_visible"]:
         return False
-    return bool(t.get("is_selectable", False))
+    if not t.get("is_selectable", False):
+        return False
+    user_role = (user.get("category") or "other").strip().lower()
+    if user_role not in VALID_ROLES:
+        user_role = "other"
+    return t.get("role") == user_role
 
 
 def safe_default(user: dict) -> str:
-    current = (user.get("template_id") or "").strip()
-    if current and get(current) and get(current)["is_visible"] and can_user_pick(user, current):
-        return current
-    return DEFAULT_TEMPLATE_ID
+    role = (user.get("category") or "other").strip().lower()
+    if role not in VALID_ROLES:
+        role = "other"
+    return ROLE_DEFAULT_TEMPLATE[role]

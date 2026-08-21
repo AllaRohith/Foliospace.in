@@ -707,8 +707,6 @@ async def templates_toggle(template_id: str, request: Request):
     if not current:
         return RedirectResponse("/admin/templates?err=not-found", status_code=303)
     new_state = not current["is_visible"]
-    if tid == "t1" and not new_state:
-        return RedirectResponse("/admin/templates?err=default-locked", status_code=303)
     ok = templates_svc.set_visibility(tid, new_state, updated_by=sid or "")
     if not ok:
         return RedirectResponse("/admin/templates?err=save-failed", status_code=303)

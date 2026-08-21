@@ -207,8 +207,8 @@ async def owner_folio_manage(request: Request, slug: str):
     view_stats = views_svc.get_view_stats(safe_slug, days=30)
     err = strip_control(request.query_params.get("err", ""))[:24]
     saved = request.query_params.get("saved") == "1"
-    visible_templates = templates_svc.visible_catalog()
-    current_tid = (user.get("template_id") or "t1").strip()
+    visible_templates = templates_svc.catalog_for_role(user.get("category") or "other")
+    current_tid = (user.get("template_id") or "other-base").strip()
     user_plan = (viewer.get("plan") or "free").lower()
     is_internal = bool(viewer.get("is_internal"))
     from app.services import oauth as oauth_svc
@@ -314,7 +314,7 @@ async def owner_folio_template_switch(request: Request, slug: str):
                 body[k] = v[0] if v else ""
     except Exception:
         body = {}
-    target = strip_control(str(body.get("template_id", "")))[:32] or "t1"
+    target = strip_control(str(body.get("template_id", "")))[:32] or "other-base"
     if not templates_svc.can_user_pick(viewer, target):
         if (viewer.get("plan") or "free").lower() != "pro" and not viewer.get("is_internal"):
             return RedirectResponse(f"/{safe_slug}/manage/templates?err=template-pro", status_code=303)
@@ -359,8 +359,8 @@ async def owner_folio_templates(request: Request, slug: str):
     user_plan = (viewer.get("plan") or "free").lower()
     is_internal = bool(viewer.get("is_internal"))
     is_pro = (user_plan == "pro") or is_internal
-    current_tid = (user.get("template_id") or "t1").strip()
-    visible_templates = templates_svc.visible_catalog()
+    current_tid = (user.get("template_id") or "other-base").strip()
+    visible_templates = templates_svc.catalog_for_role(user.get("category") or "other")
 
     response = templates.TemplateResponse(
         request,

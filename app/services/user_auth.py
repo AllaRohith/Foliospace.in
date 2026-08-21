@@ -1108,11 +1108,28 @@ VALID_CATEGORIES = {
 }
 VALID_STEPS = {"category", "connect", "first", "manage", "done"}
 
+_ROLE_BASE_FOR_CATEGORY = {
+    "student":    "student-base",
+    "developer":  "developer-base",
+    "designer":   "designer-base",
+    "chef":       "chef-base",
+    "artist":     "artist-base",
+    "consultant": "consultant-base",
+    "writer":     "writer-base",
+    "researcher": "researcher-base",
+    "founder":    "founder-base",
+    "employee":   "employee-base",
+    "shop":       "shop-base",
+    "business":   "business-base",
+    "other":      "other-base",
+}
+
 
 def set_category(user_id, category: str) -> dict | None:
     cat = (category or "").strip().lower()[:32]
     if cat not in VALID_CATEGORIES:
         return None
+    template_id = _ROLE_BASE_FOR_CATEGORY.get(cat, "other-base")
     try:
         uid = UUID(user_id) if not isinstance(user_id, UUID) else user_id
         with _connect() as conn:
@@ -1122,12 +1139,13 @@ def set_category(user_id, category: str) -> dict | None:
                     UPDATE users
                        SET category = %s,
                            role = COALESCE(NULLIF(role, ''), %s),
+                           template_id = %s,
                            updated_at = NOW()
                      WHERE id = %s
                        AND deleted_at IS NULL
-                    RETURNING id, category, role
+                    RETURNING id, category, role, template_id
                     """,
-                    (cat, cat, uid),
+                    (cat, cat, template_id, uid),
                 )
                 row = cur.fetchone()
             conn.commit()

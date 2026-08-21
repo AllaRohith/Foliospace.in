@@ -64,16 +64,19 @@
           <h1 class="fm-editor-title">Edit <em>profile.</em></h1>
           <p class="fm-editor-sub">Public — the way others see you on FolioSpace.</p>
 
+          {% set _base_match = (templates_catalog | selectattr('id', 'equalto', current_template_id) | list) if (templates_catalog is defined and current_template_id) else [] %}
+          <div class="fm-base-pill" data-fm-base-pill>
+            <span class="fm-base-pill-eyebrow">→ Base</span>
+            <span class="fm-base-pill-name">{{ _base_match[0].name if _base_match else 'Other Base' }}</span>
+            <span class="fm-base-pill-sub">Auto-set from your role. <a href="/welcome">Change role →</a></span>
+          </div>
+
           {% if saved == 'template' %}
             <div class="fm-flash fm-flash-ok">✓ Template switched.</div>
           {% elif saved %}
             <div class="fm-flash fm-flash-ok">✓ Saved</div>
           {% endif %}
-          {% if err == 'template-pro' %}
-            <div class="fm-flash fm-flash-warn">That template is Pro-only. Upgrade from /dashboard/billing to unlock.</div>
-          {% elif err == 'template-not-found' %}
-            <div class="fm-flash fm-flash-warn">That template isn't available right now.</div>
-          {% elif err == 'display_name' %}
+          {% if err == 'display_name' %}
             <div class="fm-flash fm-flash-warn">Display name must be 2–80 characters.</div>
           {% elif err == 'bio' %}
             <div class="fm-flash fm-flash-warn">Bio must be 280 characters or fewer.</div>

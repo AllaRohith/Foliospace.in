@@ -6,13 +6,13 @@
  */
 
 /*
- * Note: tokens live on `body.pf-t3`, NOT `:root`, because
+ * Note: tokens live on `body.pf`, NOT `:root`, because
  * `style.css` loads AFTER `t3.css` and re-declares many of the
  * same tokens (--bg, --line, --accent, etc.) at `:root` — which
- * would otherwise win. Scoping to `body.pf-t3` gives us higher
+ * would otherwise win. Scoping to `body.pf` gives us higher
  * specificity (0,1,1) than `:root` (0,1,0) so our values apply.
  */
-body.pf-t3 {
+body.pf {
   /* Surfaces */
   --bg: #0a0a0b;
   --bg-2: #16161a;
@@ -65,43 +65,43 @@ body.pf-t3 {
   -webkit-font-smoothing: antialiased;
 }
 
-body.pf-t3 .pf-grain { display: none; }
-body.pf-t3 .pf-page { background-color: #0a0a0b; padding-top: 0; }
-body.pf-t3 .bg-topo { display: none; }
+body.pf .pf-grain { display: none; }
+body.pf .pf-page { background-color: #0a0a0b; padding-top: 0; }
+body.pf .bg-topo { display: none; }
 /* Suppress the empty Pro Spotlight nudge for t3 — the dark editorial layout
    shouldn't show "Highlight a project..." at the top. Other templates keep it. */
-body.pf-t3 .pf-spotlight.pf-spotlight-empty { display: none; }
+body.pf .pf-spotlight.pf-spotlight-empty { display: none; }
 /* Belt-and-braces: override style.css's body.dark .pf-hero and body.dark .pf-page
    so even if dark mode is on while viewing t3, the surface stays dark not cream. */
-body.dark.pf-t3 .pf-hero { background-color: #0a0a0b; border-color: var(--line); }
-body.dark.pf-t3 .pf-page { background-color: #0a0a0b; padding-top: 0; }
+body.dark.pf .pf-hero { background-color: #0a0a0b; border-color: var(--line); }
+body.dark.pf .pf-page { background-color: #0a0a0b; padding-top: 0; }
 
 /* html fallback — guarantees dark ground even before body rules apply */
-html body.pf-t3,
-.pf-t3 { background-color: #0a0a0b; }
+html body.pf,
+.pf { background-color: #0a0a0b; }
 
-body.pf-t3 .pf-name,
-body.pf-t3 .pf-card-heading,
-body.pf-t3 .pf-stat-num {
+body.pf .pf-name,
+body.pf .pf-card-heading,
+body.pf .pf-stat-num {
   font-family: var(--display);
   font-weight: 700;
   letter-spacing: -0.015em;
 }
 
-body.pf-t3 .pf-card-eyebrow,
-body.pf-t3 .pf-stat-lbl,
-body.pf-t3 .pf-foot-meta,
-body.pf-t3 .pf-repo-desc,
-body.pf-t3 .pf-li-meta,
-body.pf-t3 .pf-li-headline,
-body.pf-t3 .pf-work-title,
-body.pf-t3 .pf-work-sub,
-body.pf-t3 .pf-proof-label,
-body.pf-t3 .pf-edu-deg,
-body.pf-t3 .pf-role,
-body.pf-t3 .pf-bio,
-body.pf-t3 .pf-cta-label,
-body.pf-t3 .pf-link-label {
+body.pf .pf-card-eyebrow,
+body.pf .pf-stat-lbl,
+body.pf .pf-foot-meta,
+body.pf .pf-repo-desc,
+body.pf .pf-li-meta,
+body.pf .pf-li-headline,
+body.pf .pf-work-title,
+body.pf .pf-work-sub,
+body.pf .pf-proof-label,
+body.pf .pf-edu-deg,
+body.pf .pf-role,
+body.pf .pf-bio,
+body.pf .pf-cta-label,
+body.pf .pf-link-label {
   font-family: var(--body);
 }
 
@@ -109,7 +109,7 @@ body.pf-t3 .pf-link-label {
    Spotlight (top callout)
    ======================================================================== */
 
-.pf-t3 .pf-spotlight {
+.pf .pf-spotlight {
   background-color: var(--card);
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -117,7 +117,7 @@ body.pf-t3 .pf-link-label {
   padding: 12px 18px;
   margin-bottom: 18px;
 }
-.pf-t3 .pf-spotlight-eyebrow {
+.pf .pf-spotlight-eyebrow {
   color: var(--coral);
   font-family: var(--mono);
   font-size: 11px;
@@ -125,22 +125,22 @@ body.pf-t3 .pf-link-label {
   text-transform: uppercase;
   letter-spacing: 0.22em;
 }
-.pf-t3 .pf-spotlight-emoji { color: var(--coral); margin: 0 8px; }
-.pf-t3 .pf-spotlight-text { color: var(--text); }
-.pf-t3 .pf-spotlight-cta {
+.pf .pf-spotlight-emoji { color: var(--coral); margin: 0 8px; }
+.pf .pf-spotlight-text { color: var(--text); }
+.pf .pf-spotlight-cta {
   color: var(--coral);
   text-decoration: none;
   border-bottom: 1px solid var(--coral);
   padding-bottom: 1px;
 }
-.pf-t3 .pf-spotlight-cta:hover { color: var(--text); border-color: var(--text); }
-.pf-t3 .pf-spotlight-empty { color: var(--text-muted); border-style: dashed; }
+.pf .pf-spotlight-cta:hover { color: var(--text); border-color: var(--text); }
+.pf .pf-spotlight-empty { color: var(--text-muted); border-style: dashed; }
 
 /* ========================================================================
    Hero
    ======================================================================== */
 
-.pf-t3 .pf-hero {
+.pf .pf-hero {
   position: relative;
   padding: 16px 0 28px;
   overflow: hidden;
@@ -154,14 +154,14 @@ body.pf-t3 .pf-link-label {
 }
 
 /* Doodle / graffiti layer — corner brackets + scattered glyphs */
-.pf-t3 .pf-hero-doodles {
+.pf .pf-hero-doodles {
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 2;
 }
 
-.pf-t3 .pf-hero-glyph {
+.pf .pf-hero-glyph {
   position: absolute;
   left: var(--x, 50%);
   top: var(--y, 50%);
@@ -175,9 +175,9 @@ body.pf-t3 .pf-link-label {
   text-shadow: 0 0 18px color-mix(in srgb, var(--c, var(--coral)) 30%, transparent);
   animation: t3-doodle-float 7s ease-in-out infinite;
 }
-.pf-t3 .pf-hero-glyph:nth-of-type(2n) { animation-delay: -1.4s; animation-duration: 8s; }
-.pf-t3 .pf-hero-glyph:nth-of-type(3n) { animation-delay: -3s;   animation-duration: 9s; }
-.pf-t3 .pf-hero-glyph:nth-of-type(4n) { animation-delay: -4.6s; animation-duration: 7.5s; }
+.pf .pf-hero-glyph:nth-of-type(2n) { animation-delay: -1.4s; animation-duration: 8s; }
+.pf .pf-hero-glyph:nth-of-type(3n) { animation-delay: -3s;   animation-duration: 9s; }
+.pf .pf-hero-glyph:nth-of-type(4n) { animation-delay: -4.6s; animation-duration: 7.5s; }
 
 @keyframes t3-doodle-float {
   0%, 100% { transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) translateY(0); }
@@ -186,23 +186,23 @@ body.pf-t3 .pf-link-label {
 
 /* Corner brackets that frame the portrait (echoes source's portrait-frame).
    Sized ~28px, blue stroke, sitting at the 4 corners of the portrait. */
-.pf-t3 .pf-hero-glyph-bracket-tl,
-.pf-t3 .pf-hero-glyph-bracket-tr,
-.pf-t3 .pf-hero-glyph-bracket-bl,
-.pf-t3 .pf-hero-glyph-bracket-br {
+.pf .pf-hero-glyph-bracket-tl,
+.pf .pf-hero-glyph-bracket-tr,
+.pf .pf-hero-glyph-bracket-bl,
+.pf .pf-hero-glyph-bracket-br {
   position: absolute;
   width: 28px;
   height: 28px;
   color: var(--blue);
   z-index: 3;
 }
-.pf-t3 .pf-hero-glyph-bracket-tl { top: -10px;    left: -16px;   transform: none; animation: none; }
-.pf-t3 .pf-hero-glyph-bracket-tr { top: -10px;    right: -16px;  transform: none; animation: none; }
-.pf-t3 .pf-hero-glyph-bracket-bl { bottom: -10px; left: -16px;   transform: none; animation: none; }
-.pf-t3 .pf-hero-glyph-bracket-br { bottom: -10px; right: -16px;  transform: none; animation: none; }
+.pf .pf-hero-glyph-bracket-tl { top: -10px;    left: -16px;   transform: none; animation: none; }
+.pf .pf-hero-glyph-bracket-tr { top: -10px;    right: -16px;  transform: none; animation: none; }
+.pf .pf-hero-glyph-bracket-bl { bottom: -10px; left: -16px;   transform: none; animation: none; }
+.pf .pf-hero-glyph-bracket-br { bottom: -10px; right: -16px;  transform: none; animation: none; }
 
 /* Hero masthead */
-.pf-t3 .pf-hero-masthead {
+.pf .pf-hero-masthead {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -217,14 +217,14 @@ body.pf-t3 .pf-link-label {
   position: relative;
   z-index: 4;
 }
-.pf-t3 .pf-hero-masthead-stamp {
+.pf .pf-hero-masthead-stamp {
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 6px 14px;
   color: var(--text-muted);
   background-color: var(--card);
 }
-.pf-t3 .pf-hero-masthead-mark {
+.pf .pf-hero-masthead-mark {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -234,7 +234,7 @@ body.pf-t3 .pf-link-label {
   color: var(--coral);
   background-color: rgba(242, 168, 155, 0.08);
 }
-.pf-t3 .pf-hero-masthead-mark::before {
+.pf .pf-hero-masthead-mark::before {
   content: "";
   width: 6px;
   height: 6px;
@@ -249,7 +249,7 @@ body.pf-t3 .pf-link-label {
 }
 
 /* Hero grid: centered avatar + info stacked below */
-.pf-t3 .pf-hero-grid {
+.pf .pf-hero-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 22px;
@@ -260,7 +260,7 @@ body.pf-t3 .pf-link-label {
   padding: 12px 0 8px;
 }
 
-.pf-t3 .pf-hero-portrait {
+.pf .pf-hero-portrait {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -270,7 +270,7 @@ body.pf-t3 .pf-link-label {
   padding-bottom: 16px;
 }
 
-.pf-t3 .pf-avatar-wrap {
+.pf .pf-avatar-wrap {
   position: relative;
   width: clamp(240px, 32vw, 380px);
   aspect-ratio: 1;
@@ -281,8 +281,8 @@ body.pf-t3 .pf-link-label {
   transform: none;
   padding: 0;
 }
-.pf-t3 .pf-avatar-wrap::before { display: none; }
-.pf-t3 .pf-avatar {
+.pf .pf-avatar-wrap::before { display: none; }
+.pf .pf-avatar {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -294,7 +294,7 @@ body.pf-t3 .pf-link-label {
   position: relative;
   filter: contrast(1.02);
 }
-.pf-t3 .pf-avatar-fallback {
+.pf .pf-avatar-fallback {
   width: 100%;
   height: 100%;
   font-family: var(--display);
@@ -311,11 +311,11 @@ body.pf-t3 .pf-link-label {
   background-color: var(--bg-2);
   box-shadow: none;
 }
-.pf-t3 .pf-avatar-bar { display: none; }
-.pf-t3 .pf-status, .pf-t3 .pf-status-dot { display: none; }
+.pf .pf-avatar-bar { display: none; }
+.pf .pf-status, .pf .pf-status-dot { display: none; }
 
 /* Right column (info) */
-.pf-t3 .pf-hero-id {
+.pf .pf-hero-id {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -328,7 +328,7 @@ body.pf-t3 .pf-link-label {
   z-index: 1;
 }
 
-.pf-t3 .pf-name {
+.pf .pf-name {
   font-size: clamp(40px, 6vw, 72px);
   line-height: 0.95;
   margin: 0;
@@ -336,9 +336,9 @@ body.pf-t3 .pf-link-label {
   position: relative;
   display: inline-block;
 }
-.pf-t3 .pf-name::after { content: none; }
+.pf .pf-name::after { content: none; }
 
-.pf-t3 .pf-role {
+.pf .pf-role {
   font-family: var(--mono);
   font-weight: 500;
   font-size: 13px;
@@ -347,9 +347,9 @@ body.pf-t3 .pf-link-label {
   letter-spacing: 0.28em;
   margin: 0;
 }
-.pf-t3 .pf-role::before { content: none; }
+.pf .pf-role::before { content: none; }
 
-.pf-t3 .pf-loc {
+.pf .pf-loc {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -361,27 +361,27 @@ body.pf-t3 .pf-link-label {
   color: var(--text-muted);
   background-color: var(--card);
 }
-.pf-t3 .pf-loc-mark { color: var(--blue); }
-.pf-t3 .pf-loc-text { color: var(--text); }
+.pf .pf-loc-mark { color: var(--blue); }
+.pf .pf-loc-text { color: var(--text); }
 
-.pf-t3 .pf-bio {
+.pf .pf-bio {
   margin: 6px 0 4px;
   font-size: 16px;
   line-height: 1.65;
   color: var(--text-muted);
   max-width: 56ch;
 }
-.pf-t3 .pf-bio::first-letter { content: none; }
+.pf .pf-bio::first-letter { content: none; }
 
 /* CTA buttons — coral primary, ghost secondary */
-.pf-t3 .pf-cta-row {
+.pf .pf-cta-row {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 10px;
   justify-content: center;
 }
-.pf-t3 .pf-cta {
+.pf .pf-cta {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -396,27 +396,27 @@ body.pf-t3 .pf-link-label {
   text-decoration: none;
   transition: transform 0.18s ease, background-color 0.18s ease;
 }
-.pf-t3 .pf-cta:hover {
+.pf .pf-cta:hover {
   background-color: var(--text);
   transform: translateY(-1px);
 }
-.pf-t3 .pf-cta-quiet {
+.pf .pf-cta-quiet {
   background-color: transparent;
   color: var(--text);
   border: 1px solid var(--line-strong);
 }
-.pf-t3 .pf-cta-quiet:hover {
+.pf .pf-cta-quiet:hover {
   background-color: var(--card-hover);
   color: var(--text);
   border-color: var(--coral);
 }
-.pf-t3 .pf-cta-arrow { font-size: 15px; }
+.pf .pf-cta-arrow { font-size: 15px; }
 
 /* ========================================================================
    Stats strip
    ======================================================================== */
 
-.pf-t3 .pf-hero-stats {
+.pf .pf-hero-stats {
   margin-top: 28px;
   padding: 16px 0;
   border-top: 1px solid var(--line);
@@ -428,7 +428,7 @@ body.pf-t3 .pf-link-label {
   flex-wrap: wrap;
   gap: 12px 36px;
 }
-.pf-t3 .pf-stat {
+.pf .pf-stat {
   display: inline-flex;
   align-items: baseline;
   gap: 8px;
@@ -437,14 +437,14 @@ body.pf-t3 .pf-link-label {
   padding: 0;
   border-radius: 0;
 }
-.pf-t3 .pf-stat-num {
+.pf .pf-stat-num {
   font-size: 28px;
   color: var(--coral);
   line-height: 1;
   font-family: var(--display);
   font-weight: 700;
 }
-.pf-t3 .pf-stat-lbl {
+.pf .pf-stat-lbl {
   font-size: 11.5px;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -452,13 +452,13 @@ body.pf-t3 .pf-link-label {
   font-family: var(--mono);
   font-weight: 500;
 }
-.pf-t3 .pf-stat-sep { color: var(--text-soft); font-size: 18px; }
+.pf .pf-stat-sep { color: var(--text-soft); font-size: 18px; }
 
 /* ========================================================================
    Cards (sections)
    ======================================================================== */
 
-.pf-t3 .pf-card {
+.pf .pf-card {
   position: relative;
   background-color: var(--card);
   border: 1px solid var(--line);
@@ -466,13 +466,13 @@ body.pf-t3 .pf-link-label {
   padding: 24px;
   transition: background-color 0.18s ease, border-color 0.18s ease;
 }
-.pf-t3 .pf-card::before { content: none; }
-.pf-t3 .pf-card:hover {
+.pf .pf-card::before { content: none; }
+.pf .pf-card:hover {
   background-color: var(--card-hover);
   border-color: var(--line-strong);
 }
 
-.pf-t3 .pf-card-eyebrow {
+.pf .pf-card-eyebrow {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -485,7 +485,7 @@ body.pf-t3 .pf-link-label {
   margin: 0 0 12px;
 }
 
-.pf-t3 .pf-card-heading {
+.pf .pf-card-heading {
   font-size: clamp(24px, 3.2vw, 32px);
   line-height: 1.1;
   margin: 0 0 18px;
@@ -495,25 +495,25 @@ body.pf-t3 .pf-link-label {
   letter-spacing: -0.01em;
 }
 
-.pf-t3 .pf-card-work,
-.pf-t3 .pf-card-links,
-.pf-t3 .pf-card-imports-repos,
-.pf-t3 .pf-card-imports-contributions,
-.pf-t3 .pf-card-imports-profile,
-.pf-t3 .pf-card-proof,
-.pf-t3 .pf-card-experience,
-.pf-t3 .pf-card-education {
+.pf .pf-card-work,
+.pf .pf-card-links,
+.pf .pf-card-imports-repos,
+.pf .pf-card-imports-contributions,
+.pf .pf-card-imports-profile,
+.pf .pf-card-proof,
+.pf .pf-card-experience,
+.pf .pf-card-education {
   background-color: var(--card);
 }
 
-.pf-t3 .pf-card-work .pf-card-eyebrow { color: var(--coral); }
-.pf-t3 .pf-card-work .pf-card-heading { color: var(--text); }
+.pf .pf-card-work .pf-card-eyebrow { color: var(--coral); }
+.pf .pf-card-work .pf-card-heading { color: var(--text); }
 
 /* ========================================================================
    Footer
    ======================================================================== */
 
-.pf-t3 .pf-foot {
+.pf .pf-foot {
   margin-top: 32px;
   padding: 18px 0;
   border-top: 1px solid var(--line);
@@ -526,22 +526,22 @@ body.pf-t3 .pf-link-label {
   color: var(--text-muted);
   letter-spacing: 0.1em;
 }
-.pf-t3 .pf-foot-meta { color: var(--text-muted); }
-.pf-t3 .pf-foot-handle { color: var(--coral); }
-.pf-t3 .pf-foot-top {
+.pf .pf-foot-meta { color: var(--text-muted); }
+.pf .pf-foot-handle { color: var(--coral); }
+.pf .pf-foot-top {
   color: var(--coral);
   text-decoration: none;
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 4px 12px;
 }
-.pf-t3 .pf-foot-top:hover { color: var(--text); border-color: var(--coral); }
+.pf .pf-foot-top:hover { color: var(--text); border-color: var(--coral); }
 
 /* ========================================================================
    Page wrapper
    ======================================================================== */
 
-.pf-t3 .pf-shell {
+.pf .pf-shell {
   display: flex;
   flex-direction: column;
   gap: 22px;
@@ -552,7 +552,7 @@ body.pf-t3 .pf-link-label {
    Link list (custom links)
    ======================================================================== */
 
-.pf-t3 .pf-link-list {
+.pf .pf-link-list {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -560,8 +560,8 @@ body.pf-t3 .pf-link-label {
   flex-direction: column;
   gap: 10px;
 }
-.pf-t3 .pf-link-row { list-style: none; }
-.pf-t3 .pf-link-anchor {
+.pf .pf-link-row { list-style: none; }
+.pf .pf-link-anchor {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -573,41 +573,41 @@ body.pf-t3 .pf-link-label {
   text-decoration: none;
   transition: background-color 0.18s ease, border-color 0.18s ease;
 }
-.pf-t3 .pf-link-anchor:hover {
+.pf .pf-link-anchor:hover {
   background-color: rgba(255, 255, 255, 0.06);
   border-color: var(--coral);
 }
-.pf-t3 .pf-link-label { color: var(--text); font-weight: 500; }
+.pf .pf-link-label { color: var(--text); font-weight: 500; }
 
 /* ========================================================================
    Work (What I do) cards
    ======================================================================== */
 
-.pf-t3 .pf-work-grid {
+.pf .pf-work-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 12px;
 }
-.pf-t3 .pf-work-item {
+.pf .pf-work-item {
   background-color: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 14px 16px;
 }
-.pf-t3 .pf-work-num {
+.pf .pf-work-num {
   font-family: var(--display);
   font-weight: 700;
   font-size: 22px;
   color: var(--coral);
 }
-.pf-t3 .pf-work-title {
+.pf .pf-work-title {
   font-family: var(--display);
   font-weight: 700;
   font-size: 16px;
   color: var(--text);
   margin: 4px 0 4px;
 }
-.pf-t3 .pf-work-sub {
+.pf .pf-work-sub {
   font-family: var(--body);
   font-size: 13px;
   color: var(--text-muted);
@@ -618,7 +618,7 @@ body.pf-t3 .pf-link-label {
    Repos card
    ======================================================================== */
 
-.pf-t3 .pf-repo-list {
+.pf .pf-repo-list {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -626,7 +626,7 @@ body.pf-t3 .pf-link-label {
   flex-direction: column;
   gap: 10px;
 }
-.pf-t3 .pf-repo-row {
+.pf .pf-repo-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -636,15 +636,15 @@ body.pf-t3 .pf-link-label {
   border: 1px solid var(--line);
   border-radius: 8px;
 }
-.pf-t3 .pf-repo-anchor {
+.pf .pf-repo-anchor {
   color: var(--text);
   text-decoration: none;
   font-family: var(--body);
   font-weight: 500;
 }
-.pf-t3 .pf-repo-anchor:hover { color: var(--coral); }
-.pf-t3 .pf-repo-desc { color: var(--text-muted); font-size: 13px; }
-.pf-t3 .pf-repo-lang {
+.pf .pf-repo-anchor:hover { color: var(--coral); }
+.pf .pf-repo-desc { color: var(--text-muted); font-size: 13px; }
+.pf .pf-repo-lang {
   font-family: var(--mono);
   font-size: 11px;
   text-transform: uppercase;
@@ -659,7 +659,7 @@ body.pf-t3 .pf-link-label {
    Contribution graph
    ======================================================================== */
 
-.pf-t3 .pf-contrib-head-num {
+.pf .pf-contrib-head-num {
   font-family: var(--display);
   font-weight: 700;
   font-size: clamp(48px, 7vw, 84px);
@@ -667,7 +667,7 @@ body.pf-t3 .pf-link-label {
   letter-spacing: -0.02em;
   line-height: 1;
 }
-.pf-t3 .pf-contrib-head-label {
+.pf .pf-contrib-head-label {
   font-family: var(--display);
   font-weight: 700;
   font-size: clamp(20px, 2.4vw, 28px);
@@ -675,7 +675,7 @@ body.pf-t3 .pf-link-label {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-.pf-t3 .pf-contrib-grid {
+.pf .pf-contrib-grid {
   display: grid;
   grid-auto-flow: column;
   grid-template-rows: repeat(7, 12px);
@@ -683,17 +683,17 @@ body.pf-t3 .pf-link-label {
   overflow-x: auto;
   padding-bottom: 6px;
 }
-.pf-t3 .pf-contrib-cell {
+.pf .pf-contrib-cell {
   width: 12px;
   height: 12px;
   border-radius: 2px;
   background-color: rgba(255, 255, 255, 0.05);
 }
-.pf-t3 .pf-contrib-cell.is-1 { background-color: rgba(242, 168, 155, 0.22); }
-.pf-t3 .pf-contrib-cell.is-2 { background-color: rgba(242, 168, 155, 0.45); }
-.pf-t3 .pf-contrib-cell.is-3 { background-color: rgba(242, 168, 155, 0.72); }
-.pf-t3 .pf-contrib-cell.is-4 { background-color: var(--coral); }
-.pf-t3 .pf-contrib-axis {
+.pf .pf-contrib-cell.is-1 { background-color: rgba(242, 168, 155, 0.22); }
+.pf .pf-contrib-cell.is-2 { background-color: rgba(242, 168, 155, 0.45); }
+.pf .pf-contrib-cell.is-3 { background-color: rgba(242, 168, 155, 0.72); }
+.pf .pf-contrib-cell.is-4 { background-color: var(--coral); }
+.pf .pf-contrib-axis {
   display: flex;
   justify-content: space-between;
   font-family: var(--mono);
@@ -707,31 +707,31 @@ body.pf-t3 .pf-link-label {
    LinkedIn profile card
    ======================================================================== */
 
-.pf-t3 .pf-li-grid {
+.pf .pf-li-grid {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 16px;
   align-items: center;
 }
-.pf-t3 .pf-li-avatar {
+.pf .pf-li-avatar {
   width: 64px;
   height: 64px;
   border-radius: 50%;
   border: 1px solid var(--line-strong);
   object-fit: cover;
 }
-.pf-t3 .pf-li-name {
+.pf .pf-li-name {
   font-family: var(--display);
   font-weight: 700;
   font-size: 18px;
   color: var(--text);
 }
-.pf-t3 .pf-li-headline {
+.pf .pf-li-headline {
   color: var(--text-muted);
   font-size: 13px;
   margin: 2px 0 0;
 }
-.pf-t3 .pf-li-meta {
+.pf .pf-li-meta {
   font-family: var(--mono);
   font-size: 11px;
   color: var(--text-soft);
@@ -739,7 +739,7 @@ body.pf-t3 .pf-link-label {
   letter-spacing: 0.14em;
   margin-top: 6px;
 }
-.pf-t3 .pf-li-cta {
+.pf .pf-li-cta {
   display: inline-block;
   margin-top: 12px;
   font-family: var(--mono);
@@ -752,26 +752,26 @@ body.pf-t3 .pf-link-label {
   border-radius: 6px;
   padding: 5px 14px;
 }
-.pf-t3 .pf-li-cta:hover { background-color: var(--coral); color: var(--bg); }
+.pf .pf-li-cta:hover { background-color: var(--coral); color: var(--bg); }
 
 /* ========================================================================
    Last 30 days (views) card
    ======================================================================== */
 
-.pf-t3 .pf-proof-grid {
+.pf .pf-proof-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 16px;
   align-items: end;
 }
-.pf-t3 .pf-proof-num {
+.pf .pf-proof-num {
   font-family: var(--display);
   font-weight: 700;
   font-size: clamp(40px, 5vw, 56px);
   color: var(--coral);
   line-height: 1;
 }
-.pf-t3 .pf-proof-label {
+.pf .pf-proof-label {
   font-family: var(--mono);
   font-size: 11px;
   color: var(--text-muted);
@@ -779,7 +779,7 @@ body.pf-t3 .pf-link-label {
   letter-spacing: 0.2em;
   margin-top: 4px;
 }
-.pf-t3 .pf-foot-note {
+.pf .pf-foot-note {
   font-family: var(--mono);
   font-size: 11px;
   color: var(--text-soft);
@@ -791,7 +791,7 @@ body.pf-t3 .pf-link-label {
    Experience / Education items
    ======================================================================== */
 
-.pf-t3 .pf-li-list {
+.pf .pf-li-list {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -799,25 +799,25 @@ body.pf-t3 .pf-link-label {
   flex-direction: column;
   gap: 12px;
 }
-.pf-t3 .pf-li-row {
+.pf .pf-li-row {
   padding: 14px 16px;
   background-color: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--line);
   border-radius: 8px;
 }
-.pf-t3 .pf-li-row-headline {
+.pf .pf-li-row-headline {
   font-family: var(--display);
   font-weight: 700;
   font-size: 15px;
   color: var(--text);
 }
-.pf-t3 .pf-li-row-sub {
+.pf .pf-li-row-sub {
   font-family: var(--body);
   font-size: 13px;
   color: var(--text-muted);
   margin: 2px 0 0;
 }
-.pf-t3 .pf-edu-deg {
+.pf .pf-edu-deg {
   font-family: var(--mono);
   font-size: 11px;
   color: var(--yellow);
@@ -830,23 +830,23 @@ body.pf-t3 .pf-link-label {
    ======================================================================== */
 
 @media (max-width: 720px) {
-  .pf-t3 .pf-hero { padding: 28px 0 18px; }
-  .pf-t3 .pf-avatar-wrap { width: 200px; }
-  .pf-t3 .pf-hero-glyph-bracket-tl,
-  .pf-t3 .pf-hero-glyph-bracket-tr,
-  .pf-t3 .pf-hero-glyph-bracket-bl,
-  .pf-t3 .pf-hero-glyph-bracket-br { width: 22px; height: 22px; }
-  .pf-t3 .pf-hero-glyph-bracket-tl { top: -8px;    left: -10px; }
-  .pf-t3 .pf-hero-glyph-bracket-tr { top: -8px;    right: -10px; }
-  .pf-t3 .pf-hero-glyph-bracket-bl { bottom: -8px; left: -10px; }
-  .pf-t3 .pf-hero-glyph-bracket-br { bottom: -8px; right: -10px; }
-  .pf-t3 .pf-card { padding: 18px 16px; }
-  .pf-t3 .pf-hero-grid { gap: 22px; padding: 18px 0 8px; }
+  .pf .pf-hero { padding: 28px 0 18px; }
+  .pf .pf-avatar-wrap { width: 200px; }
+  .pf .pf-hero-glyph-bracket-tl,
+  .pf .pf-hero-glyph-bracket-tr,
+  .pf .pf-hero-glyph-bracket-bl,
+  .pf .pf-hero-glyph-bracket-br { width: 22px; height: 22px; }
+  .pf .pf-hero-glyph-bracket-tl { top: -8px;    left: -10px; }
+  .pf .pf-hero-glyph-bracket-tr { top: -8px;    right: -10px; }
+  .pf .pf-hero-glyph-bracket-bl { bottom: -8px; left: -10px; }
+  .pf .pf-hero-glyph-bracket-br { bottom: -8px; right: -10px; }
+  .pf .pf-card { padding: 18px 16px; }
+  .pf .pf-hero-grid { gap: 22px; padding: 18px 0 8px; }
 }
 
 @media (max-width: 480px) {
-  .pf-t3 .pf-avatar-wrap { width: 160px; }
-  .pf-t3 .pf-card-heading { font-size: 22px; }
+  .pf .pf-avatar-wrap { width: 160px; }
+  .pf .pf-card-heading { font-size: 22px; }
 }
 
 /* ========================================================================
@@ -854,8 +854,8 @@ body.pf-t3 .pf-link-label {
    ======================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
-  .pf-t3 .pf-hero-glyph,
-  .pf-t3 .pf-hero-masthead-mark::before {
+  .pf .pf-hero-glyph,
+  .pf .pf-hero-masthead-mark::before {
     animation: none !important;
   }
 }
@@ -865,41 +865,41 @@ body.pf-t3 .pf-link-label {
    style.css (`.pf-work-cell`, `.pf-repo-row`, `.pf-repo-pill`, `.pf-li-pill`,
    `.pf-contrib-bar`). style.css also sets a "dark" variant that flips them
    to `var(--cream-2)` (cream-dark) — neither is what we want. Override both
-   with `body.pf-t3` scope so we win on specificity (0,1,1) and keep them
+   with `body.pf` scope so we win on specificity (0,1,1) and keep them
    on the same dark palette as the rest of the page.
    ======================================================================== */
 
-.pf-t3 .pf-work-cell,
-.pf-t3 .pf-repo-row,
-.pf-t3 .pf-repo-pill,
-.pf-t3 .pf-li-pill,
-.pf-t3 .pf-li-cta {
+.pf .pf-work-cell,
+.pf .pf-repo-row,
+.pf .pf-repo-pill,
+.pf .pf-li-pill,
+.pf .pf-li-cta {
   background-color: rgba(255, 255, 255, 0.03);
   color: var(--text);
   border: 1px solid var(--line);
 }
-.pf-t3 .pf-work-cell:hover,
-.pf-t3 .pf-repo-row:hover {
+.pf .pf-work-cell:hover,
+.pf .pf-repo-row:hover {
   background-color: rgba(255, 255, 255, 0.06);
   border-color: var(--line-strong);
 }
-.pf-t3 .pf-work-cell .pf-work-title,
-.pf-t3 .pf-repo-row .pf-repo-name {
+.pf .pf-work-cell .pf-work-title,
+.pf .pf-repo-row .pf-repo-name {
   color: var(--text);
 }
-.pf-t3 .pf-work-cell .pf-work-sub,
-.pf-t3 .pf-repo-row .pf-repo-desc {
+.pf .pf-work-cell .pf-work-sub,
+.pf .pf-repo-row .pf-repo-desc {
   color: var(--text-muted);
 }
-.pf-t3 .pf-contrib-bar {
+.pf .pf-contrib-bar {
   background-color: rgba(255, 255, 255, 0.10);
 }
-.pf-t3 .pf-contrib-bar.is-active {
+.pf .pf-contrib-bar.is-active {
   background-color: var(--coral);
 }
-body.dark.pf-t3 .pf-work-cell,
-body.dark.pf-t3 .pf-repo-row,
-body.dark.pf-t3 .pf-repo-pill,
-body.dark.pf-t3 .pf-li-pill {
+body.dark.pf .pf-work-cell,
+body.dark.pf .pf-repo-row,
+body.dark.pf .pf-repo-pill,
+body.dark.pf .pf-li-pill {
   background-color: rgba(255, 255, 255, 0.03);
 }
