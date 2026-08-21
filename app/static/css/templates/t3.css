@@ -66,12 +66,12 @@ body.pf-t3 {
 }
 
 body.pf-t3 .pf-grain { display: none; }
-body.pf-t3 .pf-page { background-color: #0a0a0b; }
+body.pf-t3 .pf-page { background-color: #0a0a0b; padding-top: 28px; }
 body.pf-t3 .bg-topo { display: none; }
 /* Belt-and-braces: override style.css's body.dark .pf-hero and body.dark .pf-page
    so even if dark mode is on while viewing t3, the surface stays dark not cream. */
 body.dark.pf-t3 .pf-hero { background-color: #0a0a0b; border-color: var(--line); }
-body.dark.pf-t3 .pf-page { background-color: #0a0a0b; }
+body.dark.pf-t3 .pf-page { background-color: #0a0a0b; padding-top: 28px; }
 
 /* html fallback — guarantees dark ground even before body rules apply */
 html body.pf-t3,
@@ -112,7 +112,7 @@ body.pf-t3 .pf-link-label {
   border-radius: 10px;
   color: var(--text);
   padding: 12px 18px;
-  margin-bottom: 26px;
+  margin-bottom: 18px;
 }
 .pf-t3 .pf-spotlight-eyebrow {
   color: var(--coral);
@@ -139,7 +139,7 @@ body.pf-t3 .pf-link-label {
 
 .pf-t3 .pf-hero {
   position: relative;
-  padding: 48px 0 36px;
+  padding: 16px 0 28px;
   overflow: hidden;
   isolation: isolate;
   background: #0a0a0b;
@@ -210,7 +210,7 @@ body.pf-t3 .pf-link-label {
   text-transform: uppercase;
   letter-spacing: 0.22em;
   color: var(--text-muted);
-  margin-bottom: 28px;
+  margin-bottom: 18px;
   position: relative;
   z-index: 4;
 }
@@ -249,12 +249,12 @@ body.pf-t3 .pf-link-label {
 .pf-t3 .pf-hero-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 32px;
+  gap: 22px;
   align-items: center;
   justify-items: center;
   position: relative;
   z-index: 1;
-  padding: 28px 0 18px;
+  padding: 12px 0 8px;
 }
 
 .pf-t3 .pf-hero-portrait {
@@ -263,6 +263,8 @@ body.pf-t3 .pf-link-label {
   align-items: center;
   gap: 0;
   position: relative;
+  padding-top: 16px;
+  padding-bottom: 16px;
 }
 
 .pf-t3 .pf-avatar-wrap {
