@@ -139,6 +139,12 @@ body.pf-t3 .pf-link-label {
   padding: 48px 0 36px;
   overflow: hidden;
   isolation: isolate;
+  background: #0a0a0b;
+  border-color: var(--line);
+  min-height: 0;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 /* Outlined hero watermark — name broken into parts (Rohith / Naidu / Alla).
