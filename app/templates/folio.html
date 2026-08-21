@@ -66,7 +66,7 @@
   {% if current_tid == 't3' %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Patrick+Hand&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Caveat:wght@400;700&family=JetBrains+Mono:wght@400;500&family=Permanent+Marker&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap">
   {% endif %}
 {% endblock %}
 
@@ -94,6 +94,27 @@
   {% endif %}
 
   <header class="pf-hero">
+      {% set _ghost_name = (user.display_name or user.slug) | e %}
+      {% set _ghost_parts = _ghost_name.split() %}
+      <div class="pf-hero-name-bg" aria-hidden="true">
+        {% for part in _ghost_parts %}<span class="pf-hero-name-bg-line">{{ part }}</span>{% endfor %}
+      </div>
+
+      <div class="pf-hero-doodles" aria-hidden="true">
+        <svg class="pf-hero-glyph pf-hero-glyph-bracket-tl" viewBox="0 0 40 40"><path d="M 4 16 L 4 4 L 16 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        <svg class="pf-hero-glyph pf-hero-glyph-bracket-tr" viewBox="0 0 40 40"><path d="M 24 4 L 36 4 L 36 16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        <svg class="pf-hero-glyph pf-hero-glyph-bracket-bl" viewBox="0 0 40 40"><path d="M 4 24 L 4 36 L 16 36" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        <svg class="pf-hero-glyph pf-hero-glyph-bracket-br" viewBox="0 0 40 40"><path d="M 24 36 L 36 36 L 36 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        <span class="pf-hero-glyph pf-hero-glyph-star" style="--x:6%;--y:14%;--rot:-8deg;--c:var(--coral)">✦</span>
+        <span class="pf-hero-glyph pf-hero-glyph-heart" style="--x:10%;--y:38%;--rot:-14deg;--c:var(--blue)">♡</span>
+        <span class="pf-hero-glyph pf-hero-glyph-arrow" style="--x:18%;--y:78%;--rot:-10deg;--c:var(--blue)">↗</span>
+        <span class="pf-hero-glyph pf-hero-glyph-check" style="--x:9%;--y:62%;--rot:6deg;--c:var(--coral)">✓</span>
+        <span class="pf-hero-glyph pf-hero-glyph-star" style="--x:92%;--y:14%;--rot:10deg;--c:var(--yellow)">✦</span>
+        <span class="pf-hero-glyph pf-hero-glyph-arrow" style="--x:88%;--y:34%;--rot:170deg;--c:var(--coral)">↗</span>
+        <span class="pf-hero-glyph pf-hero-glyph-heart" style="--x:95%;--y:58%;--rot:8deg;--c:var(--rose)">♡</span>
+        <span class="pf-hero-glyph pf-hero-glyph-x" style="--x:90%;--y:78%;--rot:-6deg;--c:var(--coral)">✕</span>
+        <span class="pf-hero-glyph pf-hero-glyph-monogram" style="--x:50%;--y:6%;--rot:0deg;--c:var(--blue)">✚</span>
+      </div>
       <div class="pf-hero-masthead">
         <span class="pf-hero-masthead-stamp">FOLIO · {{ now.strftime('%b %Y') if now else '' }}</span>
         <span class="pf-hero-masthead-mark">{% if is_open %}OPEN TO WORK{% else %}PRIVATE{% endif %}</span>
