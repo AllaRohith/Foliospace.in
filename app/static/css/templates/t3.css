@@ -5,7 +5,14 @@
  * hand-drawn doodle layer, paper-cut marquee dividers.
  */
 
-:root {
+/*
+ * Note: tokens live on `body.pf-t3`, NOT `:root`, because
+ * `style.css` loads AFTER `t3.css` and re-declares many of the
+ * same tokens (--bg, --line, --accent, etc.) at `:root` — which
+ * would otherwise win. Scoping to `body.pf-t3` gives us higher
+ * specificity (0,1,1) than `:root` (0,1,0) so our values apply.
+ */
+body.pf-t3 {
   /* Surfaces */
   --bg: #0a0a0b;
   --bg-2: #16161a;
@@ -45,14 +52,9 @@
   --hero-name: 'Archivo Black', 'Syne', sans-serif;
   --hand: 'Caveat', 'Patrick Hand', cursive;
   --marker: 'Permanent Marker', cursive;
-}
 
-/* ========================================================================
-   Base
-   ======================================================================== */
-
-body.pf-t3 {
-  background-color: var(--bg);
+  /* Apply surfaces */
+  background-color: #0a0a0b;
   background-image:
     radial-gradient(900px 600px at 50% -10%, rgba(184, 216, 232, 0.05), transparent 60%),
     radial-gradient(700px 500px at 80% 30%, rgba(242, 168, 155, 0.04), transparent 65%);
@@ -65,7 +67,12 @@ body.pf-t3 {
 }
 
 body.pf-t3 .pf-grain { display: none; }
-body.pf-t3 .pf-page { background-color: var(--bg); }
+body.pf-t3 .pf-page { background-color: #0a0a0b; }
+body.pf-t3 .bg-topo { display: none; }
+
+/* html fallback — guarantees dark ground even before body rules apply */
+html body.pf-t3,
+.pf-t3 { background-color: #0a0a0b; }
 
 body.pf-t3 .pf-name,
 body.pf-t3 .pf-card-heading,
