@@ -209,7 +209,12 @@ body.pf-t3 .pf-card-heading {
   transform: translate(4px, 4px);
 }
 
-.pf-t3 .pf-hero { padding: 14px 0 22px; position: relative; }
+.pf-t3 .pf-hero {
+  padding: 14px 0 22px;
+  position: relative;
+  max-width: 880px;
+  margin: 0 auto;
+}
 .pf-t3 .pf-hero::after {
   content: "";
   position: absolute;
@@ -228,6 +233,7 @@ body.pf-t3 .pf-card-heading {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   font-family: var(--hand-display);
   font-weight: 700;
   font-size: 12.5px;
@@ -235,6 +241,7 @@ body.pf-t3 .pf-card-heading {
   letter-spacing: 0.22em;
   color: var(--ink-soft);
   margin-bottom: 22px;
+  max-width: 540px;
 }
 .pf-t3 .pf-hero-masthead-stamp {
   transform: rotate(var(--tilt-left));
@@ -242,20 +249,34 @@ body.pf-t3 .pf-card-heading {
   border-radius: var(--wob-pill);
   padding: 4px 14px;
   background-color: var(--paper-soft);
+  white-space: nowrap;
 }
 .pf-t3 .pf-hero-masthead-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   color: var(--marker);
   transform: rotate(var(--tilt-right));
   border: 2px solid var(--marker);
   border-radius: var(--wob-pill);
   padding: 4px 14px;
   background-color: var(--marker-tint);
+  white-space: nowrap;
+}
+.pf-t3 .pf-hero-masthead-mark::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--marker);
+  box-shadow: 0 0 0 3px rgba(255, 77, 77, 0.18);
+  animation: t3-pulse 2.4s ease-in-out infinite;
 }
 
 .pf-t3 .pf-hero-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-  gap: 28px;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  gap: 32px;
   align-items: start;
 }
 
@@ -263,68 +284,63 @@ body.pf-t3 .pf-card-heading {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   align-items: flex-start;
 }
 .pf-t3 .pf-avatar-wrap {
   position: relative;
-  width: 100%;
-  max-width: 180px;
-  padding: 8px;
-  background-color: var(--paper-soft);
-  border: 3px solid var(--ink);
-  border-radius: var(--wob-lg);
-  box-shadow: var(--shadow-card);
-  transform: rotate(-1deg);
+  width: 168px;
+  padding: 0;
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  transform: none;
 }
-.pf-t3 .pf-avatar-wrap::before {
-  content: "";
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%) rotate(2deg);
-  width: 70px;
-  height: 14px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(45, 45, 45, 0.18);
-}
+.pf-t3 .pf-avatar-wrap::before { display: none; }
 .pf-t3 .pf-avatar {
-  width: 100%;
-  aspect-ratio: 1 / 1;
+  width: 168px;
+  height: 168px;
   object-fit: cover;
-  border: 2px solid var(--ink);
-  border-radius: var(--wob-circle);
+  border: 3px solid var(--ink);
+  border-radius: 50%;
   display: block;
   background-color: var(--postit);
+  box-shadow: 5px 5px 0 0 var(--ink);
+  position: relative;
 }
 .pf-t3 .pf-avatar-fallback {
+  width: 168px;
+  height: 168px;
   font-family: var(--hand-display);
   font-weight: 700;
   font-size: 64px;
   color: var(--ink);
   text-align: center;
-  line-height: 1;
+  line-height: 168px;
   align-items: center;
   justify-content: center;
   display: flex;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background-color: var(--postit);
+  box-shadow: 5px 5px 0 0 var(--ink);
 }
-.pf-t3 .pf-avatar-bar { display: none; }
+.pf-t3 .pf-avatar-bar {
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: -14px;
+  transform: translateX(-50%) rotate(2deg);
+  width: 70px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(45, 45, 45, 0.18);
+  pointer-events: none;
+}
 
 .pf-t3 .pf-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 14px 5px 12px;
-  background-color: var(--marker-tint);
-  border: 2px solid var(--marker);
-  border-radius: var(--wob-pill);
-  font-family: var(--hand-display);
-  font-weight: 700;
-  font-size: 12.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: var(--marker);
-  transform: rotate(-0.6deg);
+  display: none;
 }
 .pf-t3 .pf-status-dot {
   width: 10px;
