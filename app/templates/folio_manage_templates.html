@@ -29,7 +29,7 @@
         <header class="tpl-screen-head">
           <div class="tpl-screen-eyebrow">→ Templates</div>
           <h1 class="tpl-screen-title">Pick a <em>look.</em></h1>
-          <p class="tpl-screen-sub">Each template is one cohesive layout. <strong>Editorial</strong> is your safe base — others swap in around it. Pro templates unlock with an active plan.</p>
+          <p class="tpl-screen-sub">Each template is one cohesive layout. <strong>Folio</strong> is the FolioSpace default — others are on the way.</p>
         </header>
 
         {% if saved_kind == 'template' or saved == 'template' %}
@@ -46,8 +46,9 @@
         <ul class="tpl-gallery" aria-label="Template gallery">
           {% for t in templates_catalog %}
             {% set is_active = (t.id == current_template_id) %}
-            {% set can_pick = (not t.is_pro_only) or (user_plan == 'pro') or is_internal %}
-            <li class="tpl-card {{ 'is-active' if is_active else '' }} {{ 'is-locked' if not can_pick else '' }} {{ 'is-default' if t.is_default else '' }}"
+            {% set can_pick = t.is_selectable %}
+            {% set is_locked = t.is_visible and not t.is_selectable %}
+            <li class="tpl-card {{ 'is-active' if is_active else '' }} {{ 'is-locked' if is_locked else '' }} {{ 'is-default' if t.is_default else '' }}"
                 data-template-id="{{ t.id }}">
               <div class="tpl-card-head">
                 <span class="tpl-card-eyebrow">→ Template · {{ '%02d'|format(t.sort) }}</span>
@@ -60,23 +61,20 @@
               </div>
               <div class="tpl-card-badges">
                 {% if t.is_default %}<span class="tpl-badge tpl-badge-base">Base</span>{% endif %}
-                {% if t.is_pro_only %}<span class="tpl-badge tpl-badge-pro">Pro</span>{% endif %}
                 {% if is_active %}<span class="tpl-badge tpl-badge-active">Active</span>{% endif %}
               </div>
               <div class="tpl-card-foot">
-                {% if can_pick %}
+                {% if is_active %}
+                  <button type="button" class="tpl-btn tpl-btn-active" disabled aria-current="true">Currently active ✓</button>
+                {% elif can_pick %}
                   <form method="post" action="/{{ user.slug }}/manage/template" class="tpl-card-form">
                     <input type="hidden" name="template_id" value="{{ t.id }}" />
-                    {% if is_active %}
-                      <button type="button" class="tpl-btn tpl-btn-active" disabled aria-current="true">Currently active ✓</button>
-                    {% else %}
-                      <button type="submit" class="tpl-btn tpl-btn-activate">Activate {{ t.name }} →</button>
-                    {% endif %}
+                    <button type="submit" class="tpl-btn tpl-btn-activate">Activate {{ t.name }} →</button>
                   </form>
                 {% else %}
-                  <a class="tpl-btn tpl-btn-locked" href="/dashboard/billing" aria-disabled="true">
-                    <span class="tpl-btn-lock" aria-hidden="true">◇</span> Upgrade to unlock
-                  </a>
+                  <button type="button" class="tpl-btn tpl-btn-locked" disabled aria-disabled="true">
+                    <span class="tpl-btn-lock" aria-hidden="true">◇</span> Coming soon
+                  </button>
                 {% endif %}
               </div>
             </li>

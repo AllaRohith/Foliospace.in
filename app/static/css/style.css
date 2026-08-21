@@ -13443,10 +13443,17 @@ body.dark .dash-side-item.is-active .dash-side-item-meta { color: var(--cream); 
 }
 .tpl-btn-locked {
   background: transparent;
-  color: var(--accent);
-  border-color: var(--accent);
+  color: var(--text-dim, #707070);
+  border: 1px dashed var(--line-strong, rgba(255,255,255,0.18));
+  cursor: not-allowed;
+  opacity: 0.75;
 }
-.tpl-btn-locked:hover { background: var(--accent); color: var(--cream); border-color: var(--accent); }
+.tpl-btn-locked:hover {
+  background: transparent;
+  color: var(--text-dim, #707070);
+  border-color: var(--line-strong, rgba(255,255,255,0.18));
+  transform: none;
+}
 .tpl-btn-lock { font-size: 14px; }
 
 .tpl-screen-foot { padding-top: 4px; }

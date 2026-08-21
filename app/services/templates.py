@@ -5,86 +5,94 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_TEMPLATE_ID = "t1"
+DEFAULT_TEMPLATE_ID = "t3"
 
 DEFAULT_CATALOG = [
     {
         "id": "t1",
         "name": "Editorial",
-        "description": "Cream editorial spread with proof rail, what-I-do grid, and WhatsApp CTA.",
+        "description": "Coming soon",
         "is_visible": True,
-        "is_default": True,
+        "is_default": False,
         "is_pro_only": False,
+        "is_selectable": False,
         "thumb": "t1.svg",
         "sort": 1,
     },
     {
         "id": "t2",
         "name": "Developer",
-        "description": "Mono accents, repo-first, contribution graph hero.",
+        "description": "Coming soon",
         "is_visible": True,
         "is_default": False,
         "is_pro_only": False,
+        "is_selectable": False,
         "thumb": "t2.svg",
         "sort": 2,
     },
     {
         "id": "t3",
-        "name": "Designer",
-        "description": "Photo-led portfolio, large type, generous whitespace.",
+        "name": "Folio",
+        "description": "Dark editorial canvas, big portrait, outlined type. The FolioSpace default.",
         "is_visible": True,
-        "is_default": False,
+        "is_default": True,
         "is_pro_only": False,
+        "is_selectable": True,
         "thumb": "t3.svg",
         "sort": 3,
     },
     {
         "id": "t4",
         "name": "Chef",
-        "description": "Photo gallery, tasting menu rail, hours card.",
+        "description": "Coming soon",
         "is_visible": True,
         "is_default": False,
         "is_pro_only": True,
+        "is_selectable": False,
         "thumb": "t4.svg",
         "sort": 4,
     },
     {
         "id": "t5",
         "name": "Consultant",
-        "description": "Strategy rail, advisory pricing, calendar CTA.",
+        "description": "Coming soon",
         "is_visible": True,
         "is_default": False,
         "is_pro_only": True,
+        "is_selectable": False,
         "thumb": "t5.svg",
         "sort": 5,
     },
     {
         "id": "t6",
         "name": "Shop",
-        "description": "Product grid, hours, walk-in CTA.",
+        "description": "Coming soon",
         "is_visible": True,
         "is_default": False,
         "is_pro_only": True,
+        "is_selectable": False,
         "thumb": "t6.svg",
         "sort": 6,
     },
     {
         "id": "t7",
         "name": "Founder",
-        "description": "Thesis-led, advisory rails, angel CTA.",
+        "description": "Coming soon",
         "is_visible": True,
         "is_default": False,
         "is_pro_only": True,
+        "is_selectable": False,
         "thumb": "t7.svg",
         "sort": 7,
     },
     {
         "id": "t8",
         "name": "Student",
-        "description": "Coursework, internships, open-source PR list.",
+        "description": "Coming soon",
         "is_visible": True,
         "is_default": False,
         "is_pro_only": False,
+        "is_selectable": False,
         "thumb": "t8.svg",
         "sort": 8,
     },
@@ -126,6 +134,7 @@ def list_catalog() -> list[dict]:
                     "is_visible": bool(t.get("is_visible", False)),
                     "is_default": bool(t.get("is_default", False)),
                     "is_pro_only": bool(t.get("is_pro_only", False)),
+                    "is_selectable": bool(t.get("is_selectable", False)),
                     "thumb": str(t.get("thumb") or ""),
                     "sort": int(t.get("sort") or 0),
                 }
@@ -150,6 +159,7 @@ def save_catalog(items: list[dict], updated_by: str = "") -> bool:
                 "is_visible": bool(t.get("is_visible", False)),
                 "is_default": bool(t.get("is_default", False)),
                 "is_pro_only": bool(t.get("is_pro_only", False)),
+                "is_selectable": bool(t.get("is_selectable", False)),
                 "thumb": str(t.get("thumb") or ""),
                 "sort": int(t.get("sort") or 0),
             }
@@ -205,10 +215,7 @@ def can_user_pick(user: dict, template_id: str) -> bool:
     t = get(template_id)
     if not t or not t["is_visible"]:
         return False
-    if not t["is_pro_only"]:
-        return True
-    plan = (user.get("plan") or "").lower()
-    return plan == "pro" or bool(user.get("is_internal"))
+    return bool(t.get("is_selectable", False))
 
 
 def safe_default(user: dict) -> str:
