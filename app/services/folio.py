@@ -225,7 +225,8 @@ def find_user_by_slug(slug: str, *, require_public: bool = True) -> dict | None:
                template_id,
                created_at, updated_at, deleted_at, linkedin_url,
                spotlight_kind, spotlight_ref_id, spotlight_text, spotlight_url, spotlight_emoji,
-               seo_title, seo_description, og_image_override_url
+               seo_title, seo_description, og_image_override_url,
+               work_rail
           FROM users
          WHERE slug = %s
             OR lower(slug) = lower(%s)
@@ -250,7 +251,8 @@ def find_user_by_slug(slug: str, *, require_public: bool = True) -> dict | None:
                NULL::text AS spotlight_text, NULL::text AS spotlight_url,
                NULL::text AS spotlight_emoji,
                NULL::text AS seo_title, NULL::text AS seo_description,
-               NULL::text AS og_image_override_url
+               NULL::text AS og_image_override_url,
+               '[]'::jsonb AS work_rail
           FROM users
          WHERE slug = %s
             OR lower(slug) = lower(%s)

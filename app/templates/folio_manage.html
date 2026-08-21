@@ -177,6 +177,31 @@
               <div class="fm-avatar-error" data-fm-avatar-video-error hidden></div>
             </div>
 
+            <div class="fm-field fm-field-work-rail">
+              <label>What I do <span class="fm-field-hint">(rows that show on your public folio under “What I do”)</span></label>
+              <p class="fm-work-rail-hint">Free + Pro · add as many as you want. Title + one short line. Order = top to bottom.</p>
+              <div class="fm-work-rail-rows" data-fm-work-rail-rows aria-label="What I do rows">
+                {% for r in work_rail_rows %}
+                  <div class="fm-work-rail-row" data-fm-work-rail-row>
+                    <label class="fm-work-rail-cell fm-work-rail-cell-title">
+                      <span class="fm-visually-hidden">Title</span>
+                      <input type="text" maxlength="60" placeholder="e.g. Brand systems" value="{{ r.title }}" data-fm-work-rail-title />
+                    </label>
+                    <label class="fm-work-rail-cell fm-work-rail-cell-body">
+                      <span class="fm-visually-hidden">Body</span>
+                      <input type="text" maxlength="120" placeholder="e.g. Logos, type, decks" value="{{ r.body }}" data-fm-work-rail-body />
+                    </label>
+                    <button type="button" class="fm-work-rail-remove" data-fm-work-rail-remove aria-label="Remove row">×</button>
+                  </div>
+                {% endfor %}
+              </div>
+              <div class="fm-work-rail-actions">
+                <button type="button" class="fm-avatar-btn" data-fm-work-rail-add>+ Add another</button>
+                <button type="button" class="fm-avatar-btn fm-work-rail-save" data-fm-work-rail-save>Save What I do</button>
+                <span class="fm-work-rail-status" data-fm-work-rail-status hidden></span>
+              </div>
+            </div>
+
             <div class="fm-field fm-field-spotlight">
               <label>Spotlight <span class="fm-field-hint">(Pro · one always-on-top CTA)</span></label>
               {% if user.plan != 'pro' and not user.is_internal %}
@@ -622,5 +647,6 @@
 <script defer src="{{ request.url_for('static', path='js/folio_manage_seo.js') }}?v={{ asset_v }}"></script>
 <script defer src="{{ request.url_for('static', path='js/folio_manage_fonts.js') }}?v={{ asset_v }}"></script>
 <script defer src="{{ request.url_for('static', path='js/folio_manage_links.js') }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path='js/folio_manage_work_rail.js') }}?v={{ asset_v }}"></script>
 <script src="https://www.linkedin.com/autofill/js/autofill.js" type="text/javascript" async></script>
 {% endblock %}

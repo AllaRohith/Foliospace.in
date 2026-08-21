@@ -7,20 +7,7 @@
 {% set initials = ((user.display_name or user.slug or '?').strip()[0])|upper %}
 {% set digits = (user.phone or '')|replace(' ', '')|replace('(', '')|replace(')', '')|replace('-', '')|replace('+', '') %}
 
-{% set work_rail = {
-  'designer': [('Brand systems', 'Logos, type, colour, decks.'), ('Web + landing pages', 'One-pagers that ship.'), ('Pitch decks', 'Investor, sales, internal.')],
-  'developer': [('Web apps', 'Ship in weeks, not quarters.'), ('APIs + backends', 'FastAPI, Postgres, queues.'), ('AI integrations', 'LLM glue that actually runs.')],
-  'chef': [('Tasting menus', 'Seasonal, 6–9 courses.'), ('Catering', '10–200 covers, on-site.'), ('Recipe dev', 'Restaurants + cookbooks.')],
-  'consultant': [('Strategy', 'Pricing, GTM, ops.'), ('Fractional leadership', 'CPO/COO for hire.'), ('Workshops', 'Off-sites that move metrics.')],
-  'shop': [('Made-to-order', 'Custom builds, 2–4 weeks.'), ('Walk-in hours', 'See the workshop, place an order.'), ('Wholesale', 'Stockists + bulk enquiries.')],
-  'founder': [('Advisory', 'Hourly + monthly retainers.'), ('Angel cheques', 'Pre-seed, India + SEA.'), ('Office hours', 'Tuesdays, 30 min slots.')],
-  'student': [('Freelance', 'Design + dev, part-time.'), ('Internships', 'Summer + semester.'), ('Open source', 'PRs welcome.')],
-} %}
-
-{% set matched_role = 'designer' %}
-{% for key in work_rail.keys() %}
-  {% if key in role_lower %}{% set matched_role = key %}{% endif %}
-{% endfor %}
+{% set work_rail_rows = (user.work_rail if user.work_rail is iterable and user.work_rail is not string else []) %}
 
 {% block title %}{{ user.seo_title if user.seo_title else page_title }}{% endblock %}
 {% block description %}{{ user.seo_description if user.seo_description else description }}{% endblock %}
@@ -259,17 +246,17 @@
         </section>
       {% endif %}
     {% endif %}
-    {% if is_pro %}
+    {% if work_rail_rows %}
       <section class="pf-card pf-card-work" aria-labelledby="pf-work-heading">
         <div class="pf-card-eyebrow">→ What I do</div>
         <h2 class="pf-card-heading" id="pf-work-heading">How people hire me</h2>
         <ul class="pf-work-rail">
-          {% for title, body in work_rail[matched_role] %}
+          {% for row in work_rail_rows %}
             <li class="pf-work-cell">
               <div class="pf-work-num">{{ '%02d' % (loop.index) }}</div>
               <div class="pf-work-body">
-                <div class="pf-work-title">{{ title }}</div>
-                <div class="pf-work-sub">{{ body }}</div>
+                <div class="pf-work-title">{{ row.title }}</div>
+                <div class="pf-work-sub">{{ row.body }}</div>
               </div>
             </li>
           {% endfor %}

@@ -12352,6 +12352,93 @@ body.dark .fm-completion-row { color: var(--cream); }
 .fm-spotlight-preview .pf-spotlight-eyebrow { color: var(--accent); }
 .fm-spotlight-preview .fm-avatar-btn-quiet { margin-left: auto; }
 
+.fm-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.fm-work-rail-hint {
+  margin: 4px 0 10px;
+  font-family: 'Saira', sans-serif;
+  font-size: 13px;
+  color: var(--text-dim, #707070);
+}
+.fm-work-rail-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.fm-work-rail-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.6fr) minmax(180px, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+.fm-work-rail-cell {
+  display: flex;
+}
+.fm-work-rail-cell input {
+  width: 100%;
+  font-family: 'Saira', sans-serif;
+  font-size: 14px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink, #181818);
+}
+.fm-work-rail-cell input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.18);
+}
+.fm-work-rail-remove {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-dim, #707070);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+.fm-work-rail-remove:hover {
+  background: rgba(192, 57, 43, 0.08);
+  border-color: #c0392b;
+  color: #c0392b;
+}
+.fm-work-rail-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.fm-work-rail-status {
+  font-family: 'Saira', sans-serif;
+  font-size: 13px;
+  margin-left: 4px;
+}
+.fm-work-rail-status[data-kind="ok"] { color: #2a8d4f; }
+.fm-work-rail-status[data-kind="err"] { color: #c0392b; }
+@media (max-width: 540px) {
+  .fm-work-rail-row {
+    grid-template-columns: 1fr;
+  }
+  .fm-work-rail-remove {
+    width: 100%;
+    height: 36px;
+  }
+}
+
 .fm-field-seo {
   border: 1px solid var(--line);
   border-radius: 8px;

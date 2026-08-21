@@ -231,6 +231,15 @@ async def owner_folio_manage(request: Request, slug: str):
     user_fonts = user_fonts_svc.list_fonts(str(viewer["id"]))
     from app.services import user_links as user_links_svc
     user_links = user_links_svc.list_links(str(viewer["id"]))
+    raw_work_rail = user.get("work_rail") if isinstance(user.get("work_rail"), list) else []
+    work_rail_rows = [
+        {
+            "title": (str(r.get("title", "")) if isinstance(r, dict) else "").strip()[:60],
+            "body": (str(r.get("body", "")) if isinstance(r, dict) else "").strip()[:120],
+        }
+        for r in raw_work_rail
+        if isinstance(r, dict) and ((str(r.get("title", ""))).strip() or (str(r.get("body", ""))).strip())
+    ]
     response = templates.TemplateResponse(
         request,
         "folio_manage.html",
@@ -275,6 +284,7 @@ async def owner_folio_manage(request: Request, slug: str):
             "is_pro": is_pro,
             "user_fonts": user_fonts,
             "user_links": user_links,
+            "work_rail_rows": work_rail_rows,
             "flash": request.session.pop("flash", None),
             "now": datetime.utcnow(),
         },
@@ -708,6 +718,36 @@ async def owner_seo_save(
         "folio.seo.saved",
     )
     return JSONResponse({"ok": True})
+
+
+@router.post("/{slug}/manage/work-rail")
+async def owner_work_rail_save(
+    request: Request,
+    slug: str,
+    payload: dict = Body(...),
+):
+    from app.utils.text import strip_control
+    from app.services import user_auth as user_auth_svc
+    safe_slug = strip_control((slug or "").strip())[:48]
+    user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
+    if not user or user.get("deleted_at"):
+        return JSONResponse({"ok": False}, status_code=404)
+    viewer = user_auth_svc.require_user(request)
+    if not viewer or str(viewer["id"]) != str(user["id"]):
+        return JSONResponse({"ok": False}, status_code=403)
+    raw_rows = payload.get("rows") or []
+    if not isinstance(raw_rows, list):
+        return JSONResponse({"ok": False, "message": "bad-input"}, status_code=400)
+    updated = user_auth_svc.update_work_rail(str(user["id"]), raw_rows)
+    if not updated:
+        return JSONResponse({"ok": False, "message": "save-failed"}, status_code=500)
+    user_auth_svc.audit_user(
+        request,
+        str(user["id"]),
+        "folio.work_rail.saved",
+        metadata={"count": len(updated.get("work_rail") or [])},
+    )
+    return JSONResponse({"ok": True, "rows": updated.get("work_rail") or []})
 
 
 @router.get("/{slug}/manage/fonts/sign")

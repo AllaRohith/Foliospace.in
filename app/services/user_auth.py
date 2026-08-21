@@ -138,7 +138,7 @@ def create_user(email: str, password: str, role: str | None = None) -> dict:
                               claim_token, claim_expires_at, deleted_at,
                               plan, plan_expires_at, is_trial,
                               trial_reminder_7d_sent_at, trial_reminder_4d_sent_at, trial_reminder_2d_sent_at,
-                              template_id
+                              template_id, work_rail
                     """,
                     (email_clean, pw_hash, slug, email_clean.split("@", 1)[0], role, now, now, now),
                 )
@@ -177,7 +177,8 @@ def find_user_by_email(email: str) -> dict | None:
                            is_internal,
                            template_id, linkedin_url,
                            spotlight_kind, spotlight_ref_id, spotlight_text, spotlight_url, spotlight_emoji,
-                           seo_title, seo_description, og_image_override_url
+                           seo_title, seo_description, og_image_override_url,
+                           work_rail
                       FROM users
                      WHERE email = %s
                     """,
@@ -209,7 +210,8 @@ def find_user_by_id(user_id: str | UUID) -> dict | None:
                            is_internal,
                            template_id, linkedin_url,
                            spotlight_kind, spotlight_ref_id, spotlight_text, spotlight_url, spotlight_emoji,
-                           seo_title, seo_description, og_image_override_url
+                           seo_title, seo_description, og_image_override_url,
+                           work_rail
                       FROM users
                      WHERE id = %s
                     """,
@@ -515,7 +517,8 @@ def find_user_by_provider_uid(provider: str, provider_uid: str) -> dict | None:
                            u.is_trial, u.is_internal, u.template_id,
                            u.email_verified, u.created_at, u.deleted_at,
                            u.spotlight_kind, u.spotlight_ref_id, u.spotlight_text, u.spotlight_url, u.spotlight_emoji,
-                           u.seo_title, u.seo_description, u.og_image_override_url
+                           u.seo_title, u.seo_description, u.og_image_override_url,
+                           u.work_rail
                       FROM social_accounts sa
                       JOIN users u ON u.id = sa.user_id
                      WHERE sa.provider = %s AND sa.provider_uid = %s
@@ -591,7 +594,8 @@ def create_user_from_oauth(
                               phone, avatar_url, avatar_public_id, is_public,
                               plan, plan_expires_at, payment_failed_at,
                               is_trial, is_internal, template_id,
-                              email_verified, created_at, linkedin_url
+                              email_verified, created_at, linkedin_url,
+                              work_rail
                     """,
                     (uid, email_clean, slug, name, (role or "")[:60] or None),
                 )
@@ -1055,6 +1059,44 @@ def update_repo_sort(user_id, repo_sort: str) -> dict | None:
             conn.commit()
     except (psycopg.Error, ValueError, TypeError) as e:
         logger.exception("update_repo_sort failed: %s", e)
+        return None
+    return row
+
+
+def update_work_rail(user_id, rows) -> dict | None:
+    if not isinstance(rows, list):
+        return None
+    cleaned = []
+    for r in rows:
+        if not isinstance(r, dict):
+            continue
+        title = (str(r.get("title", ""))).strip()[:60]
+        body = (str(r.get("body", ""))).strip()[:120]
+        if not title and not body:
+            continue
+        cleaned.append({"title": title, "body": body})
+        if len(cleaned) >= 30:
+            break
+    payload = json.dumps(cleaned)
+    try:
+        uid = UUID(user_id) if not isinstance(user_id, UUID) else user_id
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE users
+                       SET work_rail = %s::jsonb,
+                           updated_at = NOW()
+                     WHERE id = %s
+                       AND deleted_at IS NULL
+                    RETURNING id, work_rail
+                    """,
+                    (payload, uid),
+                )
+                row = cur.fetchone()
+            conn.commit()
+    except (psycopg.Error, ValueError, TypeError) as e:
+        logger.exception("update_work_rail failed: %s", e)
         return None
     return row
 
