@@ -31,8 +31,9 @@
   <link rel="apple-touch-icon" sizes="180x180" href="{{ request.url_for('static', path='img/apple-touch-icon.png') }}?v={{ asset_v }}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Stalinist+One&family=Saira:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
+  <link rel="preload" as="style" data-async-style href="https://fonts.googleapis.com/css2?family=Stalinist+One&family=Saira:wght@400;500;600;700;800&display=swap" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Stalinist+One&family=Saira:wght@400;500;600;700;800&display=swap" /></noscript>
+  <script defer src="{{ request.url_for('static', path='js/async-fonts.js') }}?v={{ asset_v }}"></script>
 
   {% block jsonld %}{% endblock %}
 
