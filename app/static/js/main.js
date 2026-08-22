@@ -372,24 +372,27 @@
   if (reduceMotion) {
     document.querySelectorAll('.reveal, .reveal-stagger').forEach(function (el) { el.classList.add('is-in'); });
   } else {
-    document.querySelectorAll('.reveal, .reveal-stagger').forEach(function (el) {
-      const r = el.getBoundingClientRect();
-      if (r.top < window.innerHeight && r.bottom > 0) el.classList.add('is-in');
-    });
-
-    if ('IntersectionObserver' in window) {
-      const io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-in');
-            io.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0, rootMargin: '0px 0px 200px 0px' });
-      document.querySelectorAll('.reveal:not(.is-in), .reveal-stagger:not(.is-in)').forEach(function (el) {
-        io.observe(el);
+    var revealEls = document.querySelectorAll('.reveal, .reveal-stagger');
+    var initReveals = function () {
+      revealEls.forEach(function (el) {
+        const r = el.getBoundingClientRect();
+        if (r.top < window.innerHeight && r.bottom > 0) el.classList.add('is-in');
       });
-    }
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-in');
+              io.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0, rootMargin: '0px 0px 200px 0px' });
+        revealEls.forEach(function (el) {
+          if (!el.classList.contains('is-in')) io.observe(el);
+        });
+      }
+    };
+    (window.requestIdleCallback || window.setTimeout)(initReveals, { timeout: 800 });
 
     setTimeout(function () {
       document.querySelectorAll('.reveal:not(.is-in), .reveal-stagger:not(.is-in)').forEach(function (el) {
