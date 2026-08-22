@@ -384,6 +384,15 @@ async def sitemap():
     return response
 
 
+_GSC_VERIFY_FILE = os.getenv("GOOGLE_SITE_VERIFICATION_FILE", "").strip()
+_GSC_VERIFY_CONTENT = os.getenv("GOOGLE_SITE_VERIFICATION_CONTENT", "").strip()
+if _GSC_VERIFY_FILE and _GSC_VERIFY_CONTENT:
+    @app.get(f"/{_GSC_VERIFY_FILE}", include_in_schema=False)
+    async def google_site_verification():
+        from fastapi.responses import PlainTextResponse
+        return PlainTextResponse(_GSC_VERIFY_CONTENT, media_type="text/html")
+
+
 from app.routers import folio as _folio_router
 app.include_router(_folio_router.router)
 
