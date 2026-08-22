@@ -24,6 +24,6 @@
     </main>
   </div>
 </div>
-<script defer src="{{ request.url_for('static', path='js/dash.js') }}?v={{ asset_v }}"></script>
-<script defer src="{{ request.url_for('static', path='js/share.js') }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path='js/dash.min.js') }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path='js/share.min.js') }}?v={{ asset_v }}"></script>
 {% endblock %}

@@ -263,9 +263,9 @@
 {% if razorpay_configured %}
 <meta name="razorpay-key" content="{{ razorpay_key_id }}">
 <script defer src="/static/vendor/razorpay/checkout.js"></script>
-<script defer src="{{ request.url_for('static', path='js/dash.js') }}?v={{ asset_v }}"></script>
-<script defer src="{{ request.url_for('static', path='js/billing.js') }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path='js/dash.min.js') }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path='js/billing.min.js') }}?v={{ asset_v }}"></script>
 {% else %}
-<script defer src="{{ request.url_for('static', path='js/dash.js') }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path='js/dash.min.js') }}?v={{ asset_v }}"></script>
 {% endif %}
 {% endblock %}

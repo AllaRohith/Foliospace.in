@@ -13668,3 +13668,34 @@ body.dark .tpl-foot-link:hover { color: var(--accent-text); }
   .tpl-card, .tpl-btn { transition: none; }
   .tpl-card.is-active { box-shadow: 0 0 0 1px var(--accent); }
 }
+
+.auth-explainer {
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  font-size: var(--text-sm);
+  line-height: 1.65;
+  color: var(--ink-2);
+  opacity: 0.78;
+}
+body.dark .auth-explainer { color: var(--ink-2); opacity: 0.7; }
+.auth-explainer h3 {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--ink);
+  opacity: 0.9;
+  margin: 0 0 10px;
+}
+.auth-explainer p { margin: 0 0 10px; }
+.auth-explainer p:last-child { margin-bottom: 0; }
+.auth-explainer a { color: var(--accent-text); font-weight: 600; }
+.auth-explainer code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  background: var(--cream-2, rgba(0,0,0,0.04));
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+body.dark .auth-explainer code { background: rgba(255,255,255,0.06); }

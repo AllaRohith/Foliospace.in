@@ -1,0 +1,43 @@
+# FolioSpace
+
+> One-page portfolio for every Indian professional — chefs, developers, students, consultants, shop owners, agencies, founders. ₹149/month via UPI AutoPay.
+
+## About
+
+FolioSpace turns a single URL into a public folio. Sign up with email or OAuth (GitHub, Google, LinkedIn). Pick a slug, fill in your work, ship a portfolio. Free forever, Pro unlocks custom domain + analytics + remove branding.
+
+- Pricing: ₹0 free, ₹149/month Pro (₹1,499/year)
+- Trial: 15-day Pro on signup, no card required
+- Cancel anytime via UPI AutoPay
+
+## Key pages
+
+- [Home](https://foliospace.in/): product overview, social proof, pricing summary
+- [Pricing](https://foliospace.in/pricing): full plan comparison, FAQ
+- [Features](https://foliospace.in/features): what's shipped today, what's next on the roadmap (GitHub import, LinkedIn import, custom domain)
+- [Community](https://foliospace.in/space-community): waitlist + charter for the community tier
+- [Privacy](https://foliospace.in/privacy): data retention, GDPR/India DPDP
+- [Terms](https://foliospace.in/terms): UPI AutoPay cancellation terms
+
+## Public folios
+
+Every user gets `/<slug>`. Examples live at:
+- https://foliospace.in/allarohithnaidu (founder)
+
+## API surface
+
+Public:
+- `GET /sitemap.xml`: sitemap of every public folio + static pages
+- `GET /<slug>`: public folio (404 if `is_public=false`)
+- `GET /<slug>/og.png`: dynamic Open Graph image (1200×630)
+- `GET /<slug>/qr.png`: QR code for share
+- `GET /robots.txt`: blocks `/admin/`, `/dashboard/`, `/api/`
+
+Authenticated:
+- `POST /signup`, `POST /login`, `POST /forgot`, `POST /reset`
+- `GET/POST /<slug>/manage`: edit folio
+- `GET /dashboard`: visits analytics (30-day sparkline)
+
+## Owner
+
+Rohith Naidu Alla — rohithnaidualla on GitHub.

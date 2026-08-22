@@ -52,11 +52,11 @@ def _origin_key(origin: str) -> str:
 def _csp() -> str:
     parts = [
         "default-src 'self'",
-        "script-src 'self' https://checkout.razorpay.com https://cdn.razorpay.com https://platform.linkedin.com https://www.linkedin.com",
+        "script-src 'self' https://checkout.razorpay.com https://cdn.razorpay.com https://platform.linkedin.com https://www.linkedin.com https://www.googletagmanager.com",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com data:",
-        "img-src 'self' data: blob: https://res.cloudinary.com https://platform.linkedin.com https://www.linkedin.com",
-        "connect-src 'self' https://lumberjack.razorpay.com https://api.cloudinary.com https://api.gravatar.com",
+        "img-src 'self' data: blob: https://res.cloudinary.com https://platform.linkedin.com https://www.linkedin.com https://www.googletagmanager.com https://www.google-analytics.com",
+        "connect-src 'self' https://lumberjack.razorpay.com https://api.cloudinary.com https://api.gravatar.com https://www.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com",
         "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://platform.linkedin.com https://www.linkedin.com",
         "frame-ancestors 'none'",
         "form-action 'self'",
