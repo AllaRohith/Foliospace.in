@@ -31,6 +31,8 @@
   <link rel="apple-touch-icon" sizes="180x180" href="{{ request.url_for('static', path='img/apple-touch-icon.png') }}?v={{ asset_v }}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://www.googletagmanager.com" />
+  <link rel="preconnect" href="https://www.google-analytics.com" />
   <link rel="preload" as="style" data-async-style href="https://fonts.googleapis.com/css2?family=Stalinist+One&family=Saira:wght@400;500;600;700;800&display=swap" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Stalinist+One&family=Saira:wght@400;500;600;700;800&display=swap" /></noscript>
   <script defer src="{{ request.url_for('static', path='js/async-fonts.min.js') }}?v={{ asset_v }}"></script>
@@ -41,7 +43,6 @@
 
   <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.min.css') }}?v={{ asset_v }}" />
   <script src="{{ request.url_for('static', path='js/gtag-init.min.js') }}?v={{ asset_v }}"></script>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-R006WBR858"></script>
   <script defer src="{{ request.url_for('static', path='js/curtain.min.js') }}?v={{ asset_v }}"></script>
 </head>
 <body{% if launched %} data-launched="1"{% endif %} class="{% block body_class %}{% endblock %}">
