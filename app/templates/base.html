@@ -31,14 +31,14 @@
   <link rel="apple-touch-icon" sizes="180x180" href="{{ request.url_for('static', path='img/apple-touch-icon.png') }}?v={{ asset_v }}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Stalinist+One&family=Saira:wght@400;500;600;700;800&display=swap" />
-  <link href="https://fonts.googleapis.com/css2?family=Stalinist+One&family=Saira:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Stalinist+One&family=Saira:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Stalinist+One&family=Saira:wght@400;500;600;700;800&display=swap" /></noscript>
 
   {% block jsonld %}{% endblock %}
 
   {% block head_extra %}{% endblock %}
 
-  <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}?v={{ asset_v }}" />
+  <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.min.css') }}?v={{ asset_v }}" />
   <script defer src="{{ request.url_for('static', path='js/curtain.js') }}?v={{ asset_v }}"></script>
 </head>
 <body{% if launched %} data-launched="1"{% endif %} class="{% block body_class %}{% endblock %}">

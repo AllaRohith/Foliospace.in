@@ -2,7 +2,10 @@
 <header class="nav-wrap" id="nav-wrap">
     <div class="nav" data-state="top">
       <a href="/" class="brand">
-        <img class="brand-mark brand-mark-img" src="{{ request.url_for('static', path='img/logo-mark.png') }}?v={{ asset_v }}" alt="" width="748" height="390" />
+        <picture>
+          <source type="image/webp" srcset="{{ request.url_for('static', path='img/logo-mark.webp') }}?v={{ asset_v }}" />
+          <img class="brand-mark brand-mark-img" src="{{ request.url_for('static', path='img/logo-mark.png') }}?v={{ asset_v }}" alt="" width="748" height="390" />
+        </picture>
         <span class="brand-name">FolioSpace</span>
       </a>
 
