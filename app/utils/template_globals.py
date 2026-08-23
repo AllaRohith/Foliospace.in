@@ -41,6 +41,8 @@ def install_template_globals(templates) -> None:
         FREE_PRICE_INR as _FREE_PRICE_INR,
         PRO_MONTHLY_INR as _PRO_MONTHLY_INR,
         PRO_ANNUAL_INR as _PRO_ANNUAL_INR,
+        PRO_YEAR1_INR as _PRO_YEAR1_INR,
+        PRO_YEAR2_INR as _PRO_YEAR2_INR,
         TRIAL_DAYS as _TRIAL_DAYS,
         FOUNDER_COHORT_LIMIT as _FOUNDER_COHORT_LIMIT,
         annual_savings_percent as _annual_savings_percent,
@@ -50,6 +52,8 @@ def install_template_globals(templates) -> None:
     templates.env.globals["FREE_PRICE_INR"] = _FREE_PRICE_INR
     templates.env.globals["PRO_MONTHLY_INR"] = _PRO_MONTHLY_INR
     templates.env.globals["PRO_ANNUAL_INR"] = _PRO_ANNUAL_INR
+    templates.env.globals["PRO_YEAR1_INR"] = _PRO_YEAR1_INR
+    templates.env.globals["PRO_YEAR2_INR"] = _PRO_YEAR2_INR
     templates.env.globals["TRIAL_DAYS"] = _TRIAL_DAYS
     templates.env.globals["FOUNDER_COHORT_LIMIT"] = _FOUNDER_COHORT_LIMIT
     templates.env.globals["annual_savings_percent"] = _annual_savings_percent
