@@ -3441,6 +3441,14 @@ body.dark .who-row:hover .who-desc { color: var(--who-hover-fg, var(--cream)); }
   margin-left: 6px;
   opacity: 0.85;
 }
+.receipt-fineprint {
+  margin: 10px 0 0;
+  font-family: 'Saira', sans-serif;
+  font-size: 11px;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--muted);
+}
 
 .receipt-sub {
   margin: 0;
