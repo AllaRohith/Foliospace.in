@@ -48,9 +48,16 @@
 
     <section class="pricing-figure" aria-label="Plan summary">
       <div class="pricing-figure-main" id="pricing-figure-main">
-        <div class="pricing-figure-eyebrow">→ Year 1 — launch offer</div>
-        <div class="pricing-figure-num">₹{{ "{:,}".format(PRO_YEAR1_INR) }}</div>
-        <div class="pricing-figure-unit">/year · ₹{{ "{:,}".format(PRO_YEAR2_INR) }} from Year 2</div>
+        <div class="pricing-figure-eyebrow">→ Annual Pro</div>
+        <div class="pricing-figure-was-row">
+          <span class="pricing-figure-was-label">Regular</span>
+          <span class="pricing-figure-was">₹{{ "{:,}".format(PRO_YEAR2_INR) }}</span>
+        </div>
+        <div class="pricing-figure-now-row">
+          <span class="pricing-figure-num">₹{{ "{:,}".format(PRO_YEAR1_INR) }}</span>
+          <span class="pricing-figure-badge">{{ annual_savings_percent() }}% OFF</span>
+        </div>
+        <div class="pricing-figure-unit">/year · Year-1 launch offer</div>
       </div>
       <div class="pricing-figure-detail">
         <div class="pricing-figure-row"><span>Year 1 (launch)</span><strong>₹{{ "{:,}".format(PRO_YEAR1_INR) }} via Cashfree UPI AutoPay</strong></div>
@@ -58,7 +65,7 @@
         <div class="pricing-figure-row"><span>Setup fee</span><strong>None</strong></div>
         <div class="pricing-figure-row"><span>Cancel</span><strong>Any time — two taps</strong></div>
       </div>
-      <div class="pricing-figure-note">Refer 5 verified friends and your Year-2 renewal stays at ₹{{ "{:,}".format(PRO_YEAR1_INR) }} — <em>forever</em>.</div>
+      <div class="pricing-figure-note">Refer 10 verified friends and your Year-2 renewal stays at ₹{{ "{:,}".format(PRO_YEAR1_INR) }} — <em>forever</em>.</div>
     </section>
 
     <section class="pricing-section" aria-label="What's included">
@@ -105,7 +112,7 @@
           <div class="pricing-step-num">04</div>
           <div class="pricing-step-body">
             <div class="pricing-step-title">Year 2 — swap or stay</div>
-            <p>On renewal, you pay ₹{{ "{:,}".format(PRO_YEAR2_INR) }} — unless you've referred 5 verified friends, in which case Year 1 pricing stays locked for your renewal.</p>
+            <p>On renewal, you pay ₹{{ "{:,}".format(PRO_YEAR2_INR) }} — unless you've referred 10 verified friends, in which case Year 1 pricing stays locked for your renewal.</p>
           </div>
         </div>
       </div>
@@ -118,7 +125,7 @@
         <details class="faq-item">
           <summary><span>Why does Year 2 cost more?</span><span class="faq-icon" aria-hidden="true"></span></summary>
           <div class="faq-body">
-            <p>Year 1 is the launch offer — a 40% off thank-you for early adopters. From Year 2 the regular price is ₹{{ "{:,}".format(PRO_YEAR2_INR) }}. Refer 5 verified friends and we lock your renewal at the Year-1 price — every year, as long as you stay subscribed.</p>
+            <p>Year 1 is the launch offer — a 40% off thank-you for early adopters. From Year 2 the regular price is ₹{{ "{:,}".format(PRO_YEAR2_INR) }}. Refer 10 verified friends and we lock your renewal at the Year-1 price — every year, as long as you stay subscribed.</p>
           </div>
         </details>
         <details class="faq-item">
