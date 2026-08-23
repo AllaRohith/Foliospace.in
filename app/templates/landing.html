@@ -581,7 +581,7 @@
               <li><span class="receipt-bullet">›</span>foliospace.in/yourname</li>
               <li><span class="receipt-bullet">›</span>Built for slower mobile networks</li>
             </ul>
-            <a href="#join" class="btn btn-ghost receipt-cta">Start free</a>
+            <a href="#join" class="btn btn-ghost receipt-cta" aria-disabled="true" tabindex="-1">Start free <span class="receipt-cta-note">— coming soon</span></a>
             <span class="receipt-perf" aria-hidden="true"></span>
           </article>
 
@@ -597,6 +597,10 @@
               <span class="receipt-price">₹{{ "{:,}".format(PRO_YEAR1_INR) }}</span>
               <span class="receipt-unit">/year</span>
             </div>
+            <div class="receipt-was-row">
+              <span class="receipt-was">₹{{ "{:,}".format(PRO_YEAR2_INR) }}</span>
+              <span class="receipt-badge">{{ annual_savings_percent() }}% OFF · Year 1</span>
+            </div>
             <p class="receipt-sub">UPI AutoPay or Card · annual billing · cancel in two taps.</p>
             <ul class="receipt-items">
               <li><span class="receipt-bullet">›</span>Every template, unlocked</li>
@@ -607,7 +611,7 @@
               <li><span class="receipt-bullet">›</span>30-day visit analytics</li>
               <li><span class="receipt-bullet">›</span>Edit from your phone, in any language</li>
             </ul>
-            <a href="/dashboard/billing" class="btn btn-primary receipt-cta">Activate ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr →</a>
+            <a href="/dashboard/billing" class="btn btn-primary receipt-cta" aria-disabled="true" tabindex="-1">Activate at ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr — save {{ annual_savings_percent() }}% <span class="receipt-cta-note">— coming soon</span></a>
             <span class="receipt-perf" aria-hidden="true"></span>
           </article>
         </div>

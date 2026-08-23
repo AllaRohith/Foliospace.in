@@ -3391,6 +3391,56 @@ body.dark .who-row:hover .who-desc { color: var(--who-hover-fg, var(--cream)); }
   color: var(--muted);
 }
 .receipt-featured .receipt-unit { color: rgba(250, 247, 242, 0.6); }
+.receipt-was-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: -2px;
+  margin-bottom: 6px;
+}
+.receipt-was {
+  font-family: 'Saira', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  letter-spacing: 0.01em;
+}
+.receipt-featured .receipt-was { color: rgba(250, 247, 242, 0.55); }
+.receipt-badge {
+  display: inline-block;
+  background: var(--accent);
+  color: var(--cream);
+  font-family: 'Saira', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.receipt-cta[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: grayscale(0.6);
+}
+.receipt-cta[aria-disabled="true"]:hover {
+  transform: none;
+}
+.receipt-cta-note {
+  font-family: 'Saira', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-left: 6px;
+  opacity: 0.85;
+}
 
 .receipt-sub {
   margin: 0;
