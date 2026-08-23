@@ -18,6 +18,10 @@ SESSION_TTL_HOURS = int(os.getenv("USER_SESSION_TTL_HOURS", "720"))
 IDLE_TTL_MINUTES = int(os.getenv("USER_SESSION_IDLE_MINUTES", "1440"))
 FAIL_WINDOW_MINUTES = int(os.getenv("USER_LOGIN_FAIL_WINDOW_MINUTES", "15"))
 LOCKOUT_TRIGGER_FAILS = int(os.getenv("USER_LOGIN_FAILS_TRIGGER", "10"))
+
+# Trial window — disabled Phase B (2026-08). Kept as an env-driven int for one
+# backward-compat SELECT that may still reference it.
+from app.pricing import TRIAL_DAYS as _TRIAL_DAYS
 BCRYPT_ROUNDS = int(os.getenv("USER_BCRYPT_ROUNDS", "12"))
 
 SESSION_COOKIE = "fs_usr"
@@ -81,6 +85,24 @@ def _slug_from_email(email: str, suffix: str) -> str:
     return f"{base}-{suffix[:6]}"
 
 
+def _generate_unique_referral_code() -> str:
+    """14-char hex (7 random bytes). Retries on UNIQUE conflict (max 3)."""
+    if not DATABASE_URL:
+        return secrets.token_hex(7)  # pre-DB fallback; backfilled by migration
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                for _ in range(3):
+                    code = secrets.token_hex(7)
+                    cur.execute("SELECT 1 FROM users WHERE referral_code = %s", (code,))
+                    if cur.fetchone() is None:
+                        return code
+            conn.commit()
+    except psycopg.Error:
+        pass
+    return secrets.token_hex(7)
+
+
 RESERVED_SLUGS = frozenset({
     "admin", "login", "signup", "logout", "logout", "me",
     "dashboard", "api", "static", "sitemap", "robots",
@@ -90,6 +112,12 @@ RESERVED_SLUGS = frozenset({
     "blog", "pricing", "teams", "changelog", "status", "app", "www",
     "staticfiles", "feed", "rss", "manifest", "service-worker",
     "robots.txt", "humans.txt", "security", "support",
+    # SEO landing pages (see app/routers/seo_pages.py)
+    "portfolio-builder", "student-portfolio", "developer-portfolio",
+    "designer-portfolio", "chef-portfolio", "consultant-portfolio",
+    "freelancer-portfolio", "small-business-website",
+    # Phase C: referral program catch-all
+    "ref",
 })
 
 
@@ -109,7 +137,19 @@ def _reserve_slug(cur, email: str) -> str:
     return f"{base}-{suffix[:6]}"
 
 
-def create_user(email: str, password: str, role: str | None = None) -> dict:
+def create_user(
+    email: str,
+    password: str,
+    role: str | None = None,
+    referred_by: str | None = None,
+) -> dict:
+    """Create a new user with email + password.
+
+    `referred_by` is the UUID of the referring user (resolved from the
+    `fs_ref` cookie by the /signup router). The Phase C referrals row is
+    inserted as status='pending' and flipped to 'verified'/'active' as the
+    referee progresses through verification + publishing their folio.
+    """
     email_clean = (email or "").strip().lower()[:MAX_EMAIL_LEN]
     if not EMAIL_RE.match(email_clean):
         raise HTTPException(status_code=400, detail="Invalid email.")
@@ -117,6 +157,7 @@ def create_user(email: str, password: str, role: str | None = None) -> dict:
         raise HTTPException(status_code=400, detail="Password must be at least 8 characters.")
     pw_hash = hash_password(password)
     now = datetime.now(timezone.utc)
+    referral_code = _generate_unique_referral_code()
     try:
         with _connect() as conn:
             with conn.cursor() as cur:
@@ -129,18 +170,20 @@ def create_user(email: str, password: str, role: str | None = None) -> dict:
                     INSERT INTO users (
                         email, password_hash, slug, display_name, role,
                         email_verified, created_at, updated_at,
-                        plan, plan_expires_at, is_trial
+                        plan, referral_code, referred_by
                     )
                     VALUES (%s, %s, %s, %s, %s, FALSE, %s, %s,
-                            'pro', %s + INTERVAL '14 days', TRUE)
+                            'free', %s, %s)
                     RETURNING id, email, slug, display_name, role, email_verified,
                               created_at, updated_at, last_login_at, claimed_at,
                               claim_token, claim_expires_at, deleted_at,
-                              plan, plan_expires_at, is_trial,
-                              trial_reminder_7d_sent_at, trial_reminder_4d_sent_at, trial_reminder_2d_sent_at,
-                              template_id, work_rail
+                              plan, plan_expires_at,
+                              template_id, work_rail, referral_code
                     """,
-                    (email_clean, pw_hash, slug, email_clean.split("@", 1)[0], role, now, now, now),
+                    (
+                        email_clean, pw_hash, slug, email_clean.split("@", 1)[0],
+                        role, now, now, referral_code, referred_by,
+                    ),
                 )
                 row = cur.fetchone()
                 prefill = _apply_waitlist_to_user(cur, row["id"], email_clean)
@@ -156,6 +199,15 @@ def create_user(email: str, password: str, role: str | None = None) -> dict:
     except psycopg.Error as e:
         logger.exception("create_user failed: %s", e)
         raise HTTPException(status_code=503, detail="Signup temporarily unavailable.")
+
+    # Phase C: record the referral row (pending). Idempotent — self-refer is
+    # rejected inside record_referral; same referee can't be attributed twice.
+    if referred_by:
+        try:
+            from app.services.referrals import record_referral
+            record_referral(referred_by, str(row["id"]), referral_code)
+        except Exception as e:
+            logger.warning("record_referral failed (non-fatal): %s", e)
     return row
 
 
@@ -172,8 +224,7 @@ def find_user_by_email(email: str) -> dict | None:
                            bio, phone, avatar_url, avatar_public_id, avatar_video_url, avatar_video_public_id, avatar_video_kind, is_public,
                            email_verified, created_at, updated_at, last_login_at,
                            claimed_at, claim_token, claim_expires_at, deleted_at,
-                           plan, plan_expires_at, payment_failed_at, razorpay_customer_id,
-                           is_trial, trial_reminder_7d_sent_at, trial_reminder_4d_sent_at, trial_reminder_2d_sent_at,
+                           plan, plan_expires_at, payment_failed_at, cashfree_customer_id,
                            is_internal,
                            template_id, linkedin_url,
                            spotlight_kind, spotlight_ref_id, spotlight_text, spotlight_url, spotlight_emoji,
@@ -205,8 +256,7 @@ def find_user_by_id(user_id: str | UUID) -> dict | None:
                            bio, phone, avatar_url, avatar_public_id, avatar_video_url, avatar_video_public_id, avatar_video_kind, is_public,
                            email_verified, created_at, updated_at, last_login_at,
                            claimed_at, claim_token, claim_expires_at, deleted_at,
-                           plan, plan_expires_at, payment_failed_at, razorpay_customer_id,
-                           is_trial, trial_reminder_7d_sent_at, trial_reminder_4d_sent_at, trial_reminder_2d_sent_at,
+                           plan, plan_expires_at, payment_failed_at, cashfree_customer_id,
                            is_internal,
                            template_id, linkedin_url,
                            spotlight_kind, spotlight_ref_id, spotlight_text, spotlight_url, spotlight_emoji,
@@ -474,6 +524,15 @@ def mark_email_verified(user_id: str | UUID) -> bool:
                 )
                 rowcount = cur.rowcount
             conn.commit()
+        if rowcount > 0:
+            # Phase C: flip this referee's pending row to 'verified'. active_count
+            # stays at 0 until the referee publishes their folio (the
+            # update_user_profile is_public hook handles that transition).
+            try:
+                from app.services.referrals import verify_referrer
+                verify_referrer(str(uid))
+            except Exception as e:
+                logger.warning("verify_referrer failed (non-fatal): %s", e)
         return rowcount > 0
     except (psycopg.Error, ValueError, TypeError) as e:
         logger.exception("mark_email_verified failed: %s", e)
@@ -514,7 +573,7 @@ def find_user_by_provider_uid(provider: str, provider_uid: str) -> dict | None:
                     SELECT u.id, u.email, u.slug, u.display_name, u.role, u.bio,
                            u.phone, u.avatar_url, u.avatar_public_id, u.avatar_video_url, u.avatar_video_public_id, u.avatar_video_kind, u.is_public,
                            u.plan, u.plan_expires_at, u.payment_failed_at,
-                           u.is_trial, u.is_internal, u.template_id,
+                           u.is_internal, u.template_id,
                            u.email_verified, u.created_at, u.deleted_at,
                            u.spotlight_kind, u.spotlight_ref_id, u.spotlight_text, u.spotlight_url, u.spotlight_emoji,
                            u.seo_title, u.seo_description, u.og_image_override_url,
@@ -563,7 +622,16 @@ def create_user_from_oauth(
     provider_uid: str,
     display_name: str | None = None,
     role: str | None = None,
+    referred_by: str | None = None,
 ) -> dict | None:
+    """Create a user from an OAuth callback. OAuth emails are pre-verified.
+
+    `referred_by` is the UUID of the referrer resolved from the parallel
+    `fs_oauth_ref` cookie. The Phase C referrals row is inserted as
+    status='pending' then immediately flipped to 'verified' (since OAuth
+    emails arrive pre-verified); flips to 'active' when the referee publishes
+    their folio.
+    """
     email_clean = (email or "").strip().lower()[:254]
     if not email_clean or not EMAIL_RE.match(email_clean):
         return None
@@ -571,6 +639,7 @@ def create_user_from_oauth(
     suffix = secrets.token_hex(4)
     slug = _slug_from_email(email_clean, suffix)
     name = (display_name or "").strip()[:80] or None
+    referral_code = _generate_unique_referral_code()
     try:
         with _connect() as conn:
             with conn.cursor() as cur:
@@ -586,18 +655,19 @@ def create_user_from_oauth(
                     INSERT INTO users (
                         id, email, slug, password_hash, display_name, role,
                         email_verified, created_at, updated_at,
-                        plan, plan_expires_at, is_trial
+                        plan, referral_code, referred_by
                     )
                     VALUES (%s, %s, %s, NULL, %s, %s, TRUE, NOW(), NOW(),
-                            'pro', NOW() + INTERVAL '14 days', TRUE)
+                            'free', %s, %s)
                     RETURNING id, email, slug, display_name, role, bio,
                               phone, avatar_url, avatar_public_id, is_public,
                               plan, plan_expires_at, payment_failed_at,
-                              is_trial, is_internal, template_id,
+                              is_internal, template_id,
                               email_verified, created_at, linkedin_url,
-                              work_rail
+                              work_rail, referral_code
                     """,
-                    (uid, email_clean, slug, name, (role or "")[:60] or None),
+                    (uid, email_clean, slug, name, (role or "")[:60] or None,
+                     referral_code, referred_by),
                 )
                 user = cur.fetchone()
                 if user:
@@ -609,10 +679,21 @@ def create_user_from_oauth(
                         (provider[:16], provider_uid[:255], user["id"], email_clean),
                     )
             conn.commit()
-        return user
     except psycopg.Error as e:
         logger.exception("create_user_from_oauth failed: %s", e)
         return None
+
+    # Phase C: record the referral row + flip pending -> verified (OAuth emails
+    # are pre-verified, so the email gate is already passed). Row will then
+    # flip to 'active' the moment the referee publishes their folio.
+    if referred_by and user:
+        try:
+            from app.services.referrals import record_referral, verify_referrer
+            record_referral(referred_by, str(user["id"]), referral_code)
+            verify_referrer(str(user["id"]))
+        except Exception as e:
+            logger.warning("referral record/verify failed (non-fatal): %s", e)
+    return user
 
 
 def list_social_accounts(user_id: str | UUID) -> list[dict]:
@@ -729,11 +810,15 @@ def _clean_text(value, max_len):
 
 
 def _clean_url(value):
+    from app.utils.url_safety import safe_public_url
     s = (value or "").strip()
     if not s:
         return None
     if not re.match(r"^https?://", s, re.IGNORECASE):
         raise ValueError("avatar_url must start with http:// or https://")
+    ok, _reason = safe_public_url(s)
+    if not ok:
+        raise ValueError("avatar_url must be a public http(s) URL")
     return s[:MAX_AVATAR_URL_LEN]
 
 
@@ -917,9 +1002,12 @@ def update_user_seo(user_id, seo_title: str | None = None, seo_description: str 
         sets.append("seo_description = %s")
         params.append((seo_description or "").strip()[:160] or None)
     if og_image_override_url is not None:
+        from app.utils.url_safety import safe_public_url
         url_clean = (og_image_override_url or "").strip()[:2048] or None
-        if url_clean and not url_clean.startswith("https://res.cloudinary.com/"):
-            url_clean = None
+        if url_clean:
+            ok_url, _reason = safe_public_url(url_clean)
+            if not ok_url:
+                url_clean = None
         sets.append("og_image_override_url = %s")
         params.append(url_clean)
     if not sets:
@@ -965,6 +1053,16 @@ def update_user_profile(
     try:
         with _connect() as conn:
             with conn.cursor() as cur:
+                # Phase C: capture prior is_public BEFORE the UPDATE so we can
+                # detect the FALSE -> TRUE transition (the live trigger for
+                # flipping a referee from verified -> active).
+                cur.execute(
+                    "SELECT is_public FROM users WHERE id = %s AND deleted_at IS NULL",
+                    (uid,),
+                )
+                prior = cur.fetchone()
+                prior_is_public = bool(prior and prior.get("is_public"))
+
                 set_clauses = [
                     "display_name = %s",
                     "role         = %s",
@@ -1006,6 +1104,17 @@ def update_user_profile(
     except (psycopg.Error, ValueError, TypeError) as e:
         logger.exception("update_user_profile failed: %s", e)
         return None
+
+    # Phase C hook: if is_public just transitioned FALSE -> TRUE, flip any
+    # verified referral row for this referee to active. May trigger a plan
+    # swap if the referrer's active_count crosses the threshold.
+    if row and not prior_is_public and bool(is_public):
+        try:
+            from app.services.referrals import activate_referral_if_public
+            activate_referral_if_public(str(uid), False, True)
+        except Exception as e:
+            logger.warning("activate_referral_if_public failed (non-fatal): %s", e)
+
     return row
 
 

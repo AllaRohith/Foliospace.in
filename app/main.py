@@ -26,6 +26,8 @@ from app.routers import waitlist
 from app.routers import stats
 from app.routers import folio
 from app.routers import billing
+from app.routers import passkey
+from app.routers import referral as _referral_router
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -198,7 +200,50 @@ async def healthz():
 @app.get("/")
 async def landing(request: Request):
     from app.services.email_service import LAUNCH_DATE as _LD
+    from app.pricing import PRO_YEAR1_INR as _PRO_YEAR1_INR, FOUNDER_COHORT_LIMIT as _FOUNDER_COHORT_LIMIT
+    import os as _os
+    import psycopg as _psycopg
+    from psycopg.rows import dict_row as _dict_row
+
     launch_iso = _LD.isoformat() if _LD else ""
+
+    # Live waitlist count + public-folio slug list. Server-side so the
+    # landing page is honest at first paint — no hardcoded 16 / 100.
+    waitlist_count = 0
+    founder_seats_left = None
+    marquee_slugs: list[str] = []
+    _db_url = _os.getenv("DATABASE_URL", "").strip()
+    if _db_url:
+        try:
+            with _psycopg.connect(_db_url, row_factory=_dict_row) as _conn:
+                with _conn.cursor() as _cur:
+                    _cur.execute("SELECT count(*) AS n FROM waitlist")
+                    waitlist_count = int((_cur.fetchone() or {}).get("n", 0))
+                    _cur.execute(
+                        """
+                        SELECT slug, display_name FROM users
+                         WHERE is_public = TRUE
+                           AND slug ~ '^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$'
+                           AND slug NOT LIKE 'me-test-%%'
+                           AND slug NOT LIKE 'avatar-test-%%'
+                           AND slug NOT LIKE 'fm-test-%%'
+                           AND slug NOT LIKE 'test-%%'
+                         ORDER BY updated_at DESC NULLS LAST
+                         LIMIT 7
+                        """
+                    )
+                    rows = _cur.fetchall() or []
+                    for r in rows:
+                        slug = (r.get("slug") or "").strip()
+                        if slug:
+                            marquee_slugs.append(f"foliospace.in/{slug}")
+                _conn.commit()
+            founder_seats_left = max(0, _FOUNDER_COHORT_LIMIT - waitlist_count)
+        except Exception:
+            # Never break the landing page over a stats query — show 0.
+            waitlist_count = 0
+            founder_seats_left = _FOUNDER_COHORT_LIMIT
+
     return templates.TemplateResponse(
         request,
         "landing.html",
@@ -206,8 +251,11 @@ async def landing(request: Request):
             "site_name": "FolioSpace",
             "tagline": "Your story. One link. Done.",
             "page_title": "FolioSpace — Your portfolio. Your link. Done.",
-            "description": "One link for every Indian pro — chefs, devs, students, consultants, shops, founders. ₹149/mo via UPI AutoPay. 14-day free trial.",
+            "description": f"One link for every Indian pro — chefs, devs, students, consultants, shops, founders. Pro is ₹{_PRO_YEAR1_INR}/yr in Year 1, ₹1,499 from Year 2.",
             "launch_iso": launch_iso,
+            "waitlist_count": waitlist_count,
+            "founder_seats_left": founder_seats_left,
+            "marquee_slugs": marquee_slugs,
         },
     )
 
@@ -251,9 +299,23 @@ async def features(request: Request):
     )
 
 
+@app.get("/security")
+async def security(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "security.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Security — FolioSpace",
+            "description": "How FolioSpace is built and what we do — and don't do — to keep your data and your folios safe.",
+        },
+    )
+
+
 @app.get("/pricing")
 async def pricing(request: Request):
     from app.services import user_auth, billing as billing_svc
+    from app.pricing import PRO_YEAR1_INR as _PRO_YEAR1_INR, PRO_YEAR2_INR as _PRO_YEAR2_INR
     try:
         viewer_redirect = user_auth.require_user(request)
         if viewer_redirect:
@@ -263,9 +325,8 @@ async def pricing(request: Request):
     ctx = {
         "site_name": "FolioSpace",
         "page_title": "Pricing — FolioSpace",
-        "description": "One plan. ₹149/mo via UPI AutoPay. 14-day free trial. Cancel anytime. The single source of truth for FolioSpace pricing.",
+        "description": f"Pro is ₹{_PRO_YEAR1_INR}/yr in Year 1, ₹{_PRO_YEAR2_INR}/yr from Year 2 — UPI AutoPay or Card AutoPay via Cashfree. Cancel any time.",
         "viewer": None,
-        "trial_days_left": 0,
         "grace_days_left": 0,
     }
     user = None
@@ -286,13 +347,11 @@ async def pricing(request: Request):
             "avatar_public_id": user.get("avatar_public_id") or "",
             "is_public": bool(user.get("is_public")),
             "is_internal": bool(user.get("is_internal")),
-            "is_trial": bool(user.get("is_trial")),
             "payment_failed_at": user.get("payment_failed_at"),
             "plan_expires_at": user.get("plan_expires_at"),
             "plan": user.get("plan") or "free",
             "template_id": (user.get("template_id") or "other-base").strip()[:32],
         }
-        ctx["trial_days_left"] = billing_svc.trial_days_left(user)
         ctx["grace_days_left"] = billing_svc.grace_days_left(user)
     return templates.TemplateResponse(request, "pricing.html", ctx)
 
@@ -356,6 +415,7 @@ async def sitemap():
     from datetime import datetime, timezone
     from fastapi.responses import PlainTextResponse
     from app.services import folio as folio_svc
+    from app.routers.seo_pages import list_seo_paths
     base = os.getenv("PUBLIC_BASE_URL", "https://foliospace.in").rstrip("/")
     today = datetime.now(timezone.utc).date().isoformat()
     legal_lastmod = "2026-08-15"
@@ -364,10 +424,15 @@ async def sitemap():
         f'  <url><loc>{base}/</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>',
         f'  <url><loc>{base}/privacy</loc><lastmod>{legal_lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>',
         f'  <url><loc>{base}/terms</loc><lastmod>{legal_lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>',
+        f'  <url><loc>{base}/security</loc><lastmod>{legal_lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>',
         f'  <url><loc>{base}/features</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>',
         f'  <url><loc>{base}/pricing</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>',
         f'  <url><loc>{base}/space-community</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>',
     ]
+    for path, _lastmod in list_seo_paths():
+        urls.append(
+            f'  <url><loc>{base}{path}</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>'
+        )
     for slug, lastmod in public_users:
         lm = lastmod or today
         urls.append(
@@ -394,6 +459,15 @@ if _GSC_VERIFY_FILE and _GSC_VERIFY_CONTENT:
 
 
 from app.routers import folio as _folio_router
+from app.routers import seo_pages as _seo_pages_router
+
+# Mount SEO landing pages BEFORE the folio catch-all router so /<role-slug>
+# paths resolve to the SEO page rather than a 404-folio.
+app.include_router(_seo_pages_router.router)
+# Phase C: referral router MUST mount BEFORE the folio catch-all so /ref/{code}
+# resolves to the referral landing (303 to /signup) instead of trying to render
+# 'ref' as a folio slug. RESERVED_SLUGS also blocks 'ref' as a defense-in-depth.
+app.include_router(_referral_router.router)
 app.include_router(_folio_router.router)
 
 

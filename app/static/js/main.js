@@ -302,7 +302,7 @@
         kIdx = 0;
         document.body.classList.toggle('fs-konami');
         const msg = document.createElement('div');
-        msg.textContent = '🎉 Konami unlocked — you get 50% off launch pricing forever.';
+        msg.textContent = '🎉 Konami unlocked. (No secret discount — just an easter egg.)';
         Object.assign(msg.style, {
           position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)',
           padding: '12px 18px', background: '#0F1419', color: '#FAF7F2',
@@ -352,6 +352,10 @@
         setMsg(body.message || "You're in.", 'ok');
         form.reset();
         refreshMicrocopy();
+        if (typeof window.fsEvent === 'function') {
+          var role = (data.get('role') || 'other').toString();
+          window.fsEvent('waitlist_signup', { method: 'waitlist_form', role: role });
+        }
       } catch (err) {
         setMsg('Network error. Try again.', 'err');
       } finally {

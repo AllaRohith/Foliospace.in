@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% set folio_base = "https://foliospace.in" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block description %}{{ description }}{% endblock %}
+{% block canonical %}/dashboard/passkeys{% endblock %}
+{% block og_title %}Passkeys — FolioSpace{% endblock %}
+{% block og_description %}{{ description }}{% endblock %}
+{% block og_image_alt %}Passkey sign-in on FolioSpace{% endblock %}
+{% block robots %}noindex,nofollow{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+  {% include "partials/_dash_sidebar.html" %}
+  <div class="dash-app">
+    <header class="dash-bar">
+      <button type="button" class="dash-bar-hamburger" aria-label="Toggle navigation" data-dash-burger>☰</button>
+      <span class="dash-bar-issue">→ Issue No. 04</span>
+      <div class="dash-bar-right">
+        <a class="dash-bar-link" href="/{{ u.slug }}/manage" data-fm-tab="manage">Edit folio →</a>
+        {% import "partials/_plan_summary.html" as ps_macro %}
+        {{ ps_macro.pill(u) }}
+      </div>
+    </header>
+
+    <main id="main" class="dash-main">
+      {% if saved == 'passkey' %}
+        <div class="fm-flash fm-flash-ok">✓ Passkey enrolled. Next time, tap "Use passkey" on /login.</div>
+      {% elif saved == 'revoked' %}
+        <div class="fm-flash fm-flash-ok">✓ Passkey removed. Email + password still works.</div>
+      {% elif err == 'unverified_email' %}
+        <div class="fm-flash fm-flash-warn">Verify your email first to enable passkeys.</div>
+      {% elif err == 'already_enrolled' %}
+        <div class="fm-flash fm-flash-warn">You already have a passkey. Remove the existing one first.</div>
+      {% elif err == 'attestation_failed' %}
+        <div class="fm-flash fm-flash-warn">Couldn't register that passkey. Try again on a different device or browser.</div>
+      {% elif err %}
+        <div class="fm-flash fm-flash-warn">Something didn't go through. Please try again.</div>
+      {% endif %}
+
+      <div class="fm-grid">
+        <section class="fm-editor" aria-label="Passkeys">
+          <div class="fm-bill-section">
+            <div class="fm-bill-section-eyebrow">→ Security</div>
+            <h2 class="fm-bill-section-title">Your <em>passkey.</em></h2>
+            <p class="fm-bill-section-sub">
+              A passkey lets you sign in with your fingerprint, face, or device PIN — no password, no inbox code.
+              It's a phishing-resistant credential, scoped to foliospace.in, and lives only on this device or in your password manager.
+            </p>
+          </div>
+
+          {% if passkeys %}
+            <div class="fm-bill-section">
+              <div class="fm-bill-section-eyebrow">→ Active passkey</div>
+              <ul class="passkey-list">
+                {% for pk in passkeys %}
+                  <li class="passkey-row">
+                    <div class="passkey-row-icon" aria-hidden="true">🔑</div>
+                    <div class="passkey-row-meta">
+                      <div class="passkey-row-name">{{ pk.friendly_name or 'Default passkey' }}</div>
+                      <div class="passkey-row-sub">
+                        Added {{ pk.created_at[:10] if pk.created_at else 'recently' }}
+                        {% if pk.last_used_at %} · Last used {{ pk.last_used_at[:10] }}{% endif %}
+                      </div>
+                    </div>
+                    <button type="button" class="passkey-row-remove" data-passkey-revoke="{{ pk.credential_id_b64u }}" aria-label="Remove passkey">
+                      Remove
+                    </button>
+                  </li>
+                {% endfor %}
+              </ul>
+              <p class="passkey-foot">
+                Lost the device this passkey lives on? Use email + password to sign in (the "Forgot?" link emails a reset link),
+                then enroll a new passkey.
+              </p>
+            </div>
+          {% else %}
+            <div class="fm-bill-section">
+              <div class="fm-bill-section-eyebrow">→ Add a passkey</div>
+              <p class="fm-bill-section-sub">
+                FolioSpace lets you enroll one passkey at a time. iCloud Keychain and Google Password Manager sync it
+                to your other Apple or Android devices automatically.
+              </p>
+              {% if u.email_verified %}
+                <button type="button" class="auth-submit auth-passkey-cta passkey-add" data-passkey-register>
+                  <span class="auth-passkey-mark" aria-hidden="true">🔑</span>
+                  <span>Create passkey</span>
+                </button>
+              {% else %}
+                <p class="passkey-foot">Verify your email first to enable passkeys. <a href="/signup/verify?email={{ u.email }}">Resend code</a></p>
+              {% endif %}
+              <span class="welcome-card-err" data-passkey-error role="alert" aria-live="polite"></span>
+            </div>
+          {% endif %}
+        </section>
+
+        <aside class="fm-preview" aria-label="How passkeys work">
+          <div class="fm-bill-section">
+            <div class="fm-bill-section-eyebrow">→ Why a passkey</div>
+            <ul class="fm-bill-list">
+              <li><span class="fm-bill-list-bullet">›</span><span><strong>One tap.</strong> Face ID, Touch ID, or your device PIN — no typing.</span></li>
+              <li><span class="fm-bill-list-bullet">›</span><span><strong>Phishing-resistant.</strong> The credential is scoped to foliospace.in and can't be tricked into working elsewhere.</span></li>
+              <li><span class="fm-bill-list-bullet">›</span><span><strong>Syncs to your devices.</strong> iCloud Keychain and Google Password Manager carry it across.</span></li>
+              <li><span class="fm-bill-list-bullet">›</span><span><strong>Email + password still works.</strong> You can sign in either way. Lost the device? Hit "Forgot?".</span></li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script defer src="{{ request.url_for('static', path='js/passkey.min.js') }}?v={{ asset_v }}"></script>
+{% endblock %}

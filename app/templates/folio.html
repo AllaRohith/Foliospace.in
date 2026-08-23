@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block body_class %}pf pf-role-{{ user.category or 'other' }}{% endblock %}
+{% if is_test_slug %}{% block robots %}noindex,nofollow{% endblock %}{% endif %}
 {% set folio_base = public_base_url %}
 {% set role_lower = (user.role or '')|lower %}
 {% set is_pro = user.plan == 'pro' %}

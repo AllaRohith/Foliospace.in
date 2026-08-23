@@ -820,3 +820,232 @@ async def fonts_reject(font_id: str, request: Request):
         metadata={"user_id": updated.get("user_id"), "font_name": updated.get("font_name")},
     )
     return RedirectResponse("/admin/fonts?msg=rejected", status_code=303)
+
+
+@router.get("/grants", response_class=HTMLResponse)
+async def grants_list(request: Request):
+    guard = _gate(request)
+    if isinstance(guard, RedirectResponse):
+        return guard
+    sid = guard
+    q = _sanitize(request.query_params.get("q", ""))[:128]
+    show_only_active = request.query_params.get("filter", "") == "active"
+    page_raw = _sanitize(request.query_params.get("page", "1"))[:6]
+    try:
+        page = max(1, int(page_raw))
+    except ValueError:
+        page = 1
+    offset = (page - 1) * PAGE_SIZE
+
+    rows: list[dict] = []
+    total = 0
+    user_lookup: dict[str, dict] = {}
+    if DATABASE_URL:
+        try:
+            with _connect() as conn:
+                with conn.cursor() as cur:
+                    where = ["sg.id IS NOT NULL"]
+                    params: list = []
+                    if q:
+                        where.append("(lower(u.email) LIKE %s OR lower(u.slug) LIKE %s OR lower(u.display_name) LIKE %s)")
+                        like = f"%{q.lower()}%"
+                        params.extend([like, like, like])
+                    if show_only_active:
+                        where.append("sg.revoked_at IS NULL AND (sg.expires_at IS NULL OR sg.expires_at > NOW())")
+                    where_sql = " WHERE " + " AND ".join(where)
+                    cur.execute(
+                        f"""
+                        SELECT count(*) AS n
+                          FROM subscription_grants sg
+                          JOIN users u ON u.id = sg.user_id
+                          {where_sql}
+                        """,
+                        params,
+                    )
+                    total = int((cur.fetchone() or {}).get("n") or 0)
+                    cur.execute(
+                        f"""
+                        SELECT sg.id, sg.user_id, sg.expires_at, sg.reason, sg.notes,
+                               sg.created_at, sg.revoked_at, sg.revoke_reason,
+                               u.email, u.slug, u.display_name, u.plan, u.cashfree_customer_id
+                          FROM subscription_grants sg
+                          JOIN users u ON u.id = sg.user_id
+                          {where_sql}
+                         ORDER BY sg.created_at DESC
+                         LIMIT %s OFFSET %s
+                        """,
+                        [*params, PAGE_SIZE, offset],
+                    )
+                    rows = list(cur.fetchall())
+                conn.commit()
+        except psycopg.Error as e:
+            logger.exception("grants list query failed: %s", e)
+
+    admin_auth.audit(
+        request,
+        sid,
+        "grants.list",
+        metadata={"q": q, "filter": "active" if show_only_active else "all", "page": page, "total": total},
+    )
+    response = templates.TemplateResponse(
+        request,
+        "admin/grants.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Comp · FolioSpace Admin",
+            "description": "Admin comp/grants for Pro tier.",
+            "rows": rows,
+            "total": total,
+            "page": page,
+            "total_pages": max(1, (total + PAGE_SIZE - 1) // PAGE_SIZE),
+            "page_size": PAGE_SIZE,
+            "q": q,
+            "filter": "active" if show_only_active else "all",
+            "msg": request.query_params.get("msg", ""),
+            "err": request.query_params.get("err", ""),
+            "nav_active": "grants",
+        },
+    )
+    return _no_cache(response)
+
+
+@router.post("/users/grant")
+@limiter.limit("20/minute")
+async def grants_grant(request: Request):
+    guard = _gate(request)
+    if isinstance(guard, RedirectResponse):
+        return guard
+    sid = guard
+    form = await request.form()
+    uid = _sanitize(str(form.get("user_id", "")))[:64]
+    if not uid:
+        return RedirectResponse("/admin/grants?err=missing-user", status_code=303)
+    duration = _sanitize(str(form.get("duration", "forever")))[:16].lower()
+    reason = _sanitize(str(form.get("reason", "")))[:500]
+    notes = _sanitize(str(form.get("notes", "")))[:1000]
+    expires_at = None
+    if duration == "forever":
+        expires_at = None
+    elif duration.endswith("y"):
+        try:
+            years = int(duration[:-1] or "1")
+        except ValueError:
+            years = 1
+        years = max(1, min(years, 99))
+        from datetime import timedelta as _td
+        expires_at = datetime.now(timezone.utc) + _td(days=365 * years)
+    else:
+        return RedirectResponse("/admin/grants?err=bad-duration", status_code=303)
+
+    if not DATABASE_URL:
+        return RedirectResponse("/admin/grants?err=db", status_code=303)
+    ok = False
+    target_email = ""
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT email FROM users WHERE id = %s LIMIT 1", (uid,))
+                u = cur.fetchone()
+                if not u:
+                    return RedirectResponse("/admin/grants?err=user-not-found", status_code=303)
+                target_email = u["email"] or ""
+                cur.execute(
+                    """
+                    INSERT INTO subscription_grants (user_id, granted_by_admin, expires_at, reason, notes)
+                    VALUES (%s, TRUE, %s, %s, %s)
+                    ON CONFLICT (user_id) DO UPDATE
+                        SET expires_at = EXCLUDED.expires_at,
+                            reason     = EXCLUDED.reason,
+                            notes      = EXCLUDED.notes,
+                            revoked_at = NULL,
+                            revoke_reason = NULL,
+                            revoked_by_user_id = NULL,
+                            created_at = NOW()
+                    """,
+                    (uid, expires_at, reason or None, notes or None),
+                )
+                cur.execute(
+                    "UPDATE users SET plan = 'pro', payment_failed_at = NULL, "
+                    "updated_at = NOW() WHERE id = %s",
+                    (uid,),
+                )
+            conn.commit()
+            ok = True
+    except psycopg.Error as e:
+        logger.exception("grant upsert failed for user=%s: %s", uid, e)
+        return RedirectResponse("/admin/grants?err=save-failed", status_code=303)
+
+    admin_auth.audit(
+        request,
+        sid,
+        "grant.create",
+        target=uid,
+        metadata={
+            "expires_at": expires_at.isoformat() if expires_at else None,
+            "reason": reason,
+            "email": target_email,
+        },
+    )
+    return RedirectResponse(f"/admin/grants?msg=granted:{duration}", status_code=303)
+
+
+@router.post("/users/{user_id}/revoke-grant")
+@limiter.limit("20/minute")
+async def grants_revoke(user_id: str, request: Request):
+    guard = _gate(request)
+    if isinstance(guard, RedirectResponse):
+        return guard
+    sid = guard
+    uid = _sanitize(user_id)[:64]
+    if not uid:
+        return RedirectResponse("/admin/grants?err=missing-user", status_code=303)
+    form = await request.form()
+    revoke_reason = _sanitize(str(form.get("revoke_reason", "")))[:500]
+    if not DATABASE_URL:
+        return RedirectResponse("/admin/grants?err=db", status_code=303)
+    ok = False
+    target_email = ""
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT email FROM users WHERE id = %s LIMIT 1", (uid,))
+                u = cur.fetchone()
+                if not u:
+                    return RedirectResponse("/admin/grants?err=user-not-found", status_code=303)
+                target_email = u["email"] or ""
+                cur.execute(
+                    """
+                    UPDATE subscription_grants
+                       SET revoked_at = NOW(),
+                           revoke_reason = %s
+                     WHERE user_id = %s AND revoked_at IS NULL
+                    """,
+                    (revoke_reason or None, uid),
+                )
+                cur.execute(
+                    """
+                    UPDATE users SET plan = 'free', plan_expires_at = NULL,
+                                    payment_failed_at = NULL, updated_at = NOW()
+                     WHERE id = %s AND NOT EXISTS (
+                         SELECT 1 FROM subscription_grants sg
+                          WHERE sg.user_id = %s
+                            AND sg.revoked_at IS NULL
+                            AND (sg.expires_at IS NULL OR sg.expires_at > NOW())
+                     )
+                    """,
+                    (uid, uid),
+                )
+            conn.commit()
+            ok = True
+    except psycopg.Error as e:
+        logger.exception("grant revoke failed for user=%s: %s", uid, e)
+        return RedirectResponse("/admin/grants?err=save-failed", status_code=303)
+
+    admin_auth.audit(
+        request,
+        sid,
+        "grant.revoke",
+        target=uid,
+        metadata={"reason": revoke_reason, "email": target_email},
+    )
+    return RedirectResponse("/admin/grants?msg=revoked", status_code=303)

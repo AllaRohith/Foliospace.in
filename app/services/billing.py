@@ -1,22 +1,35 @@
+"""Cashfree-backed billing service.
+
+State of play (post Phase B):
+* No trial. New users see "Free". Pro activates on first payment.
+* Two Cashfree plans: pro_year1_discount (₹899) + pro_year2_full (₹1,499).
+* Plan swap to year-2 plan happens on first `subscription.charged` webhook after
+  the year-1 cycle completes. Daily cron also re-evaluates for any user whose
+  renewal is within the next 7 days, in case comp state changed in between.
+* Admin comp/grants are looked up FIRST — they override subscription state.
+"""
 import json
 import logging
 import os
-import time
 from datetime import datetime, timezone
 
 import psycopg
 from fastapi import HTTPException
 from psycopg.rows import dict_row
 
-from app.services import razorpay as razorpay_svc
+from app.services import cashfree as cashfree_svc
 from app.services import user_auth
+from app.services.referrals import REFERRAL_THRESHOLD
+from app.pricing import (
+    PRO_YEAR1_INR,
+    PRO_YEAR2_INR,
+    FREE_PRICE_INR,
+    PRO_ANNUAL_INR,
+)
 
 logger = logging.getLogger(__name__)
 
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
-
-RECURRING_AMOUNT_PAISE = 14900
-SUBSCRIPTION_TOTAL_COUNT = 120
 
 
 def _connect():
@@ -39,67 +52,118 @@ def _to_iso(dt) -> str:
     return str(dt)[:10]
 
 
-def _paise_to_rupees(paise) -> str:
-    try:
-        n = int(paise or 0)
-    except (TypeError, ValueError):
-        return "0.00"
-    return f"{n / 100:.2f}"
+# ── Plan helpers ────────────────────────────────────────────────────────────────────────────────────────────────────
 
+def pick_plan_for_new_subscription() -> str:
+    """First subscription on signup always uses the year-1 discount plan."""
+    return cashfree_svc.plan_year1_id()
+
+
+def pick_plan_for_renewal(user_id: str) -> str | None:
+    """Called on subscription.charged webhook + daily cron for near-renewals.
+
+    Returns:
+        * pro_year1 plan id — keep discount for another year (referral reward OR
+                               comp grant gap returning)
+        * pro_year2 plan id — move to full price
+        * None — comp/grants handle the renewal (do nothing)
+    """
+    if not DATABASE_URL:
+        return cashfree_svc.plan_year2_id()
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT sg.expires_at
+                      FROM subscription_grants sg
+                     WHERE sg.user_id = %s
+                       AND sg.revoked_at IS NULL
+                       AND (sg.expires_at IS NULL OR sg.expires_at > NOW())
+                     LIMIT 1
+                    """,
+                    (user_id,),
+                )
+                row = cur.fetchone()
+            conn.commit()
+        if row:
+            return None
+    except psycopg.Error as e:
+        logger.exception("pick_plan_for_renewal grant check failed: %s", e)
+
+    # Phase C: 10+ active referrals -> keep Year-1 plan at renewal (permanent reward).
+    try:
+        if _referral_count(user_id) >= REFERRAL_THRESHOLD:
+            return cashfree_svc.plan_year1_id()
+    except psycopg.Error as e:
+        logger.exception("pick_plan_for_renewal referral check failed: %s", e)
+    return cashfree_svc.plan_year2_id()
+
+
+def _referral_count(user_id: str) -> int:
+    """Active referrals count (status='active' only). Hot path; uses partial idx."""
+    if not DATABASE_URL or not user_id:
+        return 0
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT COUNT(*) AS n FROM referrals "
+                    "WHERE referrer_id = %s AND status = 'active'",
+                    (user_id,),
+                )
+                row = cur.fetchone()
+        return int((row or {}).get("n", 0))
+    except psycopg.Error as e:
+        logger.exception("_referral_count failed for user=%s: %s", user_id, e)
+        return 0
+
+
+# ── Subscriptions ─────────────────────────────────────────────────────────────────────────────────────────────────
 
 def _get_or_create_customer_id(user: dict) -> str:
     if not DATABASE_URL:
         raise HTTPException(status_code=503, detail="Database not configured.")
-    cust = (user.get("razorpay_customer_id") or "").strip()
+    cust = (user.get("cashfree_customer_id") or "").strip()
     if cust:
         try:
-            razorpay_svc.get_client().customer.fetch(cust)
+            cashfree_svc.fetch_customer(cust)
             return cust
-        except Exception as e:
-            logger.warning("stale razorpay_customer_id=%s (%s), will recreate", cust, type(e).__name__)
+        except Exception:
             cust = ""
     name = (user.get("display_name") or user.get("slug") or "FolioSpace user")[:30]
     email = (user.get("email") or "")[:254]
-    contact = (user.get("phone") or "")[:20]
-    created = razorpay_svc.create_customer(name=name, email=email, contact=contact, notes={"user_id": str(user["id"])})
-    cust_id = created.get("id") or ""
+    created = cashfree_svc.create_customer(
+        name=name,
+        email=email,
+        contact=(user.get("phone") or "")[:20],
+        user_id=str(user["id"]),
+    )
+    cust_id = (created or {}).get("customer_id") or (created or {}).get("id") or ""
     if not cust_id:
-        raise HTTPException(status_code=502, detail="Razorpay customer create failed.")
+        raise HTTPException(status_code=502, detail="Cashfree customer create failed.")
     with _connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "UPDATE users SET razorpay_customer_id = %s, updated_at = NOW() WHERE id = %s",
+                "UPDATE users SET cashfree_customer_id = %s, updated_at = NOW() WHERE id = %s",
                 (cust_id, str(user["id"])),
             )
         conn.commit()
     return cust_id
 
 
-def _wait_for_customer(client, customer_id: str, max_wait_s: float = 8.0) -> bool:
-    deadline = time.monotonic() + max_wait_s
-    delay = 0.4
-    while True:
-        try:
-            client.customer.fetch(customer_id)
-            return True
-        except Exception:
-            if time.monotonic() >= deadline:
-                return False
-            time.sleep(min(delay, deadline - time.monotonic()))
-            delay = min(delay * 1.6, 1.5)
+def create_subscription(user_id: str) -> str:
+    """Create a new Cashfree Subscription on the year-1 discount plan.
 
-
-def create_subscription(user_id: str, period: str = "monthly") -> str:
-    if period not in {"monthly", "annual"}:
-        raise HTTPException(status_code=400, detail="Invalid period.")
-    if not razorpay_svc.is_configured():
-        raise HTTPException(status_code=503, detail="Razorpay not configured.")
-    if period == "annual" and not razorpay_svc.is_annual_configured():
-        raise HTTPException(status_code=503, detail="Annual plan not configured.")
+    Returns the Cashfree `subscription_session_id` (or full subscription id) — used
+    by the router to redirect the user to the Cashfree checkout page.
+    """
+    if not cashfree_svc.is_configured():
+        raise HTTPException(status_code=503, detail="Cashfree not configured.")
     with _connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT id, email, slug, display_name, phone, razorpay_customer_id, created_at, deleted_at "
+                "SELECT id, email, slug, display_name, phone, cashfree_customer_id, deleted_at "
                 "FROM users WHERE id = %s LIMIT 1",
                 (user_id,),
             )
@@ -108,38 +172,71 @@ def create_subscription(user_id: str, period: str = "monthly") -> str:
     if not user or user.get("deleted_at"):
         raise HTTPException(status_code=404, detail="User not found.")
     customer_id = _get_or_create_customer_id(user)
-    if period == "annual":
-        plan_id = razorpay_svc.annual_plan_id()
-        total_count = 12
-    else:
-        plan_id = razorpay_svc.plan_id()
-        total_count = SUBSCRIPTION_TOTAL_COUNT
-    logger.info("create_subscription: period=%s plan_id=%r customer_id=%r user_id=%s",
-                period, plan_id, customer_id, user_id)
-    client = razorpay_svc.get_client()
-    if not _wait_for_customer(client, customer_id):
-        raise HTTPException(status_code=503, detail="Razorpay customer propagation timeout, please retry.")
-    sub = razorpay_svc.create_subscription(
+    plan_id = pick_plan_for_new_subscription()
+    sub = cashfree_svc.create_subscription(
+        cf_customer_id=customer_id,
         plan_id=plan_id,
-        customer_id=customer_id,
-        total_count=total_count,
-        notes={
-            "user_id": str(user["id"]),
-            "kind": "recurring",
-            "period": period,
-            "slug": (user.get("slug") or "")[:48],
-        },
+        user_id=str(user["id"]),
+        slug=(user.get("slug") or ""),
     )
-    return sub.get("id") or ""
+    cf_sub_id = sub.get("cf_subscription_id") or sub.get("subscription_id") or ""
+    session_id = sub.get("subscription_session_id") or ""
+    if cf_sub_id:
+        _upsert_subscription_row(
+            user_id=str(user["id"]),
+            cf_subscription_id=cf_sub_id,
+            plan_id=plan_id,
+            status=(sub.get("subscription_status") or "created"),
+            raw=sub,
+        )
+    return {"subscription_id": cf_sub_id, "session_id": session_id, "plan_id": plan_id}
+
+
+def _upsert_subscription_row(
+    *,
+    user_id: str,
+    cf_subscription_id: str,
+    plan_id: str,
+    status: str,
+    short_url: str | None = None,
+    current_period_start: datetime | None = None,
+    current_period_end: datetime | None = None,
+    raw: dict | None = None,
+) -> None:
+    with _connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO user_subscriptions (
+                    user_id, cashfree_subscription_id, cashfree_plan_id,
+                    original_plan_id, status, short_url,
+                    current_period_start, current_period_end, last_event_at, updated_at
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW())
+                ON CONFLICT (cashfree_subscription_id) DO UPDATE
+                    SET cashfree_plan_id = EXCLUDED.cashfree_plan_id,
+                        status = EXCLUDED.status,
+                        short_url = COALESCE(EXCLUDED.short_url, user_subscriptions.short_url),
+                        current_period_start = COALESCE(EXCLUDED.current_period_start, user_subscriptions.current_period_start),
+                        current_period_end   = COALESCE(EXCLUDED.current_period_end,   user_subscriptions.current_period_end),
+                        last_event_at = NOW(),
+                        updated_at = NOW()
+                """,
+                (
+                    user_id, cf_subscription_id, plan_id, plan_id, status,
+                    short_url, current_period_start, current_period_end,
+                ),
+            )
+        conn.commit()
 
 
 def cancel_subscription(user_id: str) -> bool:
-    if not razorpay_svc.is_configured():
+    if not cashfree_svc.is_configured():
         return False
     with _connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT id, razorpay_subscription_id, cancel_at_period_end FROM user_subscriptions "
+                "SELECT id, cashfree_subscription_id, cancel_at_period_end FROM user_subscriptions "
                 "WHERE user_id = %s ORDER BY created_at DESC LIMIT 1",
                 (user_id,),
             )
@@ -147,22 +244,24 @@ def cancel_subscription(user_id: str) -> bool:
         conn.commit()
     if not row or row.get("cancel_at_period_end"):
         return False
-    sub_id = row["razorpay_subscription_id"]
+    sub_id = row["cashfree_subscription_id"]
     try:
-        razorpay_svc.cancel_subscription_remote(sub_id, cancel_at_cycle_end=True)
+        cashfree_svc.cancel_subscription(sub_id, cancel_at_cycle_end=True)
     except Exception as e:
-        logger.exception("razorpay cancel failed for sub=%s: %s", sub_id, e)
+        logger.exception("cashfree cancel failed for sub=%s: %s", sub_id, e)
         return False
     with _connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "UPDATE user_subscriptions SET cancel_at_period_end = TRUE, updated_at = NOW(), "
-                "last_event_at = NOW() WHERE razorpay_subscription_id = %s",
+                "last_event_at = NOW() WHERE cashfree_subscription_id = %s",
                 (sub_id,),
             )
         conn.commit()
     return True
 
+
+# ── Reads ─────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 def current_subscription(user_id: str) -> dict | None:
     if not DATABASE_URL:
@@ -196,18 +295,20 @@ def list_invoices(user_id: str, limit: int = 50) -> list[dict]:
         with _connect() as conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "SELECT * FROM payments WHERE user_id = %s ORDER BY paid_at DESC NULLS LAST, created_at DESC LIMIT %s",
+                    "SELECT * FROM payments WHERE user_id = %s "
+                    "ORDER BY paid_at DESC NULLS LAST, created_at DESC LIMIT %s",
                     (user_id, int(limit)),
                 )
                 rows = cur.fetchall() or []
             conn.commit()
         out = []
         for r in rows:
+            amount_paise = int(r.get("amount_paise") or 0)
             out.append({
-                "razorpay_payment_id": r.get("razorpay_payment_id") or "",
+                "cashfree_payment_id": r.get("cashfree_payment_id") or "",
                 "description": r.get("description") or "",
-                "amount_paise": r.get("amount_paise") or 0,
-                "amount_rupees": _paise_to_rupees(r.get("amount_paise")),
+                "amount_paise": amount_paise,
+                "amount_rupees": f"{amount_paise / 100:.2f}",
                 "currency": r.get("currency") or "INR",
                 "status": r.get("status") or "",
                 "method": r.get("method") or "",
@@ -221,6 +322,8 @@ def list_invoices(user_id: str, limit: int = 50) -> list[dict]:
         logger.exception("list_invoices failed for user=%s: %s", user_id, e)
         return []
 
+
+# ── Webhook dispatch ─────────────────────────────────────────────────────────────────────────────────────────
 
 def handle_webhook(event: str, payload: dict) -> str:
     event_id = payload.get("id") or ""
@@ -248,7 +351,7 @@ def handle_webhook(event: str, payload: dict) -> str:
             conn.commit()
         return "ok"
     except psycopg.errors.UndefinedTable:
-        logger.warning("billing tables missing; run scripts/billing.sql")
+        logger.warning("billing tables missing; run scripts/cashfree_billing.sql")
         return "schema-missing"
     except Exception as e:
         logger.exception("webhook %s failed: %s", event_id, e)
@@ -265,272 +368,399 @@ def handle_webhook(event: str, payload: dict) -> str:
         return "error"
 
 
-def _notes_kind(payload: dict) -> str:
-    entity = payload.get("payload") or {}
-    inner = entity.get("payment") or entity.get("subscription") or {}
-    notes = inner.get("notes") or {}
-    return (notes.get("kind") or "").strip()
+# ── Webhook helpers ────────────────────────────────────────────────────────────────────────────────────────────
+
+def _tags(payload: dict) -> dict:
+    entity = payload.get("data") or {}
+    inner = entity.get("object") or {}
+    return (
+        (inner.get("customer_details") or {}).get("customer_details", {})
+        if isinstance(inner.get("customer_details"), dict)
+        else inner.get("subscription_tags") or {}
+    ) if False else (inner.get("subscription_tags") or {})
 
 
-def _notes_user_id(payload: dict) -> str:
-    entity = payload.get("payload") or {}
-    inner = entity.get("payment") or entity.get("subscription") or {}
-    notes = inner.get("notes") or {}
-    uid = notes.get("user_id")
-    return str(uid) if uid else ""
+def _tags_payload(payload: dict) -> tuple[str, str]:
+    """Return (user_id, slug) from Cashfree subscription_tags we set."""
+    inner = (payload.get("data") or {}).get("object") or {}
+    inner = inner if isinstance(inner, dict) else {}
+    tags = inner.get("subscription_tags") or {}
+    if not isinstance(tags, dict):
+        tags = {}
+    # Cashfree sometimes nests tags under "subscription_tags" inside "object"
+    user_id = str(tags.get("user_id") or "").strip()
+    slug = str(tags.get("slug") or "").strip()
+    return user_id, slug
 
 
-def _vpa_suffix(vpa: str | None) -> str:
-    if not vpa:
-        return ""
-    s = str(vpa).strip()
-    return s[-4:] if len(s) > 4 else s
+def _inner(payload: dict) -> dict:
+    """Drill down to the inner 'object' dict in Cashfree webhook payloads."""
+    inner = (payload.get("data") or {}).get("object") or {}
+    return inner if isinstance(inner, dict) else {}
 
 
-def _on_payment_captured(cur, payload: dict):
-    entity = (payload.get("payload") or {}).get("payment") or {}
-    payment_entity = entity.get("entity") or {}
-    payment_id = payment_entity.get("id") or ""
-    if not payment_id:
+def _on_payment_succeeded(cur, payload: dict):
+    inner = _inner(payload)
+    cf_payment_id = str(inner.get("cf_payment_id") or "").strip()
+    if not cf_payment_id:
         return
-    user_id = _notes_user_id(payload)
+    user_id, _slug = _tags_payload(payload)
     if not user_id:
         return
-    kind = _notes_kind(payload)
-    amount = int(payment_entity.get("amount") or 0)
-    currency = (payment_entity.get("currency") or "INR").upper()
-    status = (payment_entity.get("status") or "captured").lower()
-    method = (payment_entity.get("method") or "").lower() or None
-    vpa_suffix = _vpa_suffix(payment_entity.get("vpa"))
+    amount = int(inner.get("payment_amount") or 0)
+    currency = (inner.get("payment_currency") or "INR").upper()
+    status = (inner.get("payment_status") or "SUCCESS").lower()
+    method = (inner.get("payment_method") or {}).get("payment_method") or inner.get("payment_method") or None
     description = "Pro subscription"
-    invoice_id = payment_entity.get("invoice_id") or None
-    invoice_url = None
-    if invoice_id:
-        invoice_url = f"https://rzp.io/invoice/{invoice_id}"
-    paid_at_iso = payment_entity.get("captured_at") or payment_entity.get("created_at")
+    paid_at_iso = inner.get("payment_completion_time") or inner.get("payment_created_at")
     paid_at = None
     if paid_at_iso:
         try:
             paid_at = datetime.fromtimestamp(int(paid_at_iso), tz=timezone.utc)
         except (TypeError, ValueError):
             paid_at = None
-    order_id = (payment_entity.get("order_id") or "") or None
+    invoice_id = inner.get("cf_invoice_id") or None
+    invoice_url = None  # Cashfree doesn't expose a stable invoice URL pattern from webhooks yet
+
+    cf_sub_id = str(inner.get("subscription_id") or "").strip() or None
+
     cur.execute(
         """
         INSERT INTO payments (
-            user_id, razorpay_payment_id, razorpay_order_id, razorpay_invoice_id, invoice_url,
-            amount_paise, currency, status, method, vpa_suffix, description, kind, paid_at, raw_event
+            user_id, cashfree_payment_id, cashfree_invoice_id, invoice_url,
+            amount_paise, currency, status, method, description, paid_at, raw_event
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::jsonb)
-        ON CONFLICT (razorpay_payment_id) DO NOTHING
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::jsonb)
+        ON CONFLICT (cashfree_payment_id) DO NOTHING
         """,
         (
-            user_id, payment_id, order_id, invoice_id, invoice_url,
-            amount, currency, status, method, vpa_suffix, description, kind, paid_at,
-            json.dumps(payload, default=str)[:64000],
+            user_id, cf_payment_id, invoice_id, invoice_url,
+            amount, currency, status, method, description,
+            paid_at, json.dumps(payload, default=str)[:64000],
         ),
     )
-    if kind == "recurring":
-        period_end_iso = (payment_entity.get("notes") or {}).get("current_period_end")
-        period_end = None
-        if period_end_iso:
-            try:
-                period_end = datetime.fromtimestamp(int(period_end_iso), tz=timezone.utc)
-            except (TypeError, ValueError):
-                period_end = None
-        if period_end is None:
-            period_end = datetime.now(timezone.utc)
+
+    # Promote user to Pro on first successful payment
+    sub_uuid = None
+    if cf_sub_id:
+        cur.execute("SELECT id FROM user_subscriptions WHERE cashfree_subscription_id = %s LIMIT 1",
+                    (cf_sub_id,))
+        srow = cur.fetchone()
+        sub_uuid = srow["id"] if srow else None
+
+    if status == "success":
         cur.execute(
-            "UPDATE users SET plan = 'pro', plan_expires_at = %s, "
-            "is_trial = FALSE, "
-            "setup_paid_at = COALESCE(setup_paid_at, NOW()), "
-            "trial_reminder_7d_sent_at = NULL, "
-            "trial_reminder_4d_sent_at = NULL, "
-            "trial_reminder_2d_sent_at = NULL, "
+            "UPDATE users SET plan = 'pro', payment_failed_at = NULL, "
             "updated_at = NOW() WHERE id = %s",
-            (period_end, user_id),
+            (user_id,),
         )
 
 
 def _on_payment_failed(cur, payload: dict):
-    entity = (payload.get("payload") or {}).get("payment") or {}
-    payment_entity = entity.get("entity") or {}
-    payment_id = payment_entity.get("id") or ""
-    if not payment_id:
+    inner = _inner(payload)
+    cf_payment_id = str(inner.get("cf_payment_id") or "").strip()
+    if not cf_payment_id:
         return
-    user_id = _notes_user_id(payload)
+    user_id, _slug = _tags_payload(payload)
     if not user_id:
         return
-    kind = _notes_kind(payload)
-    amount = int(payment_entity.get("amount") or 0)
-    currency = (payment_entity.get("currency") or "INR").upper()
-    method = (payment_entity.get("method") or "").lower() or None
-    vpa_suffix = _vpa_suffix(payment_entity.get("vpa"))
+    amount = int(inner.get("payment_amount") or 0)
+    currency = (inner.get("payment_currency") or "INR").upper()
+    method = (inner.get("payment_method") or {}).get("payment_method") or inner.get("payment_method") or None
     description = "Pro subscription"
-    order_id = (payment_entity.get("order_id") or "") or None
     cur.execute(
         """
         INSERT INTO payments (
-            user_id, razorpay_payment_id, razorpay_order_id,
-            amount_paise, currency, status, method, vpa_suffix, description, kind, raw_event
+            user_id, cashfree_payment_id, amount_paise, currency, status,
+            method, description, raw_event
         )
-        VALUES (%s, %s, %s, %s, %s, 'failed', %s, %s, %s, %s, %s::jsonb)
-        ON CONFLICT (razorpay_payment_id) DO NOTHING
+        VALUES (%s, %s, %s, %s, 'failed', %s, %s, %s::jsonb)
+        ON CONFLICT (cashfree_payment_id) DO NOTHING
         """,
         (
-            user_id, payment_id, order_id,
-            amount, currency, method, vpa_suffix, description, kind,
+            user_id, cf_payment_id, amount, currency, method, description,
             json.dumps(payload, default=str)[:64000],
         ),
     )
 
 
 def _on_subscription_activated(cur, payload: dict):
-    sub = ((payload.get("payload") or {}).get("subscription") or {}).get("entity") or {}
-    sub_id = sub.get("id") or ""
-    if not sub_id:
+    inner = _inner(payload)
+    cf_sub_id = str(inner.get("cf_subscription_id") or "").strip()
+    if not cf_sub_id:
         return
-    user_id = _notes_user_id(payload)
+    user_id, _ = _tags_payload(payload)
     if not user_id:
         return
-    plan_id = (sub.get("plan_id") or "").strip()
-    status = (sub.get("status") or "active").lower()
-    short_url = sub.get("short_url") or None
+    plan_id = str(inner.get("plan_id") or "").strip()
+    status = (inner.get("subscription_status") or "active").lower()
     cur.execute(
         """
         INSERT INTO user_subscriptions (
-            user_id, razorpay_subscription_id, razorpay_plan_id, status, short_url, last_event_at, updated_at
+            user_id, cashfree_subscription_id, cashfree_plan_id,
+            original_plan_id, status, last_event_at, updated_at
         )
         VALUES (%s, %s, %s, %s, %s, NOW(), NOW())
-        ON CONFLICT (razorpay_subscription_id) DO UPDATE
-            SET status = EXCLUDED.status,
-                short_url = COALESCE(EXCLUDED.short_url, user_subscriptions.short_url),
+        ON CONFLICT (cashfree_subscription_id) DO UPDATE
+            SET cashfree_plan_id = EXCLUDED.cashfree_plan_id,
+                status = EXCLUDED.status,
                 last_event_at = NOW(),
                 updated_at = NOW()
         """,
-        (user_id, sub_id, plan_id, status, short_url),
+        (user_id, cf_sub_id, plan_id, plan_id, status),
     )
-    if status in ("active", "authenticated", "created"):
-        cur.execute(
-            "UPDATE users SET plan = 'pro', payment_failed_at = NULL, "
-            "is_trial = FALSE, "
-            "trial_reminder_7d_sent_at = NULL, "
-            "trial_reminder_4d_sent_at = NULL, "
-            "trial_reminder_2d_sent_at = NULL, "
-            "updated_at = NOW() WHERE id = %s",
-            (user_id,),
-        )
+    cur.execute(
+        "UPDATE users SET plan = 'pro', payment_failed_at = NULL, "
+        "updated_at = NOW() WHERE id = %s",
+        (user_id,),
+    )
 
 
 def _on_subscription_charged(cur, payload: dict):
-    sub = ((payload.get("payload") or {}).get("subscription") or {}).get("entity") or {}
-    sub_id = sub.get("id") or ""
-    if not sub_id:
+    """Year-2 plan-swap trigger + period refresh."""
+    inner = _inner(payload)
+    cf_sub_id = str(inner.get("cf_subscription_id") or "").strip()
+    if not cf_sub_id:
         return
-    user_id = _notes_user_id(payload)
+    user_id, _ = _tags_payload(payload)
     if not user_id:
         return
-    plan_id = (sub.get("plan_id") or "").strip()
-    status = (sub.get("status") or "active").lower()
-    cps = sub.get("current_period_start")
-    cpe = sub.get("current_period_end")
-    period_start = None
+    plan_id = str(inner.get("plan_id") or "").strip()
+    status = (inner.get("subscription_status") or "active").lower()
+    next_pay_iso = inner.get("next_charge_at") or inner.get("scheduled_charge_at")
     period_end = None
-    if cps:
+    if next_pay_iso:
         try:
-            period_start = datetime.fromtimestamp(int(cps), tz=timezone.utc)
-        except (TypeError, ValueError):
-            period_start = None
-    if cpe:
-        try:
-            period_end = datetime.fromtimestamp(int(cpe), tz=timezone.utc)
+            period_end = datetime.fromtimestamp(int(next_pay_iso), tz=timezone.utc)
         except (TypeError, ValueError):
             period_end = None
+
     cur.execute(
         """
-        INSERT INTO user_subscriptions (
-            user_id, razorpay_subscription_id, razorpay_plan_id, status,
-            current_period_start, current_period_end, last_event_at, updated_at
-        )
-        VALUES (%s, %s, %s, %s, %s, %s, NOW(), NOW())
-        ON CONFLICT (razorpay_subscription_id) DO UPDATE
-            SET status = EXCLUDED.status,
-                current_period_start = COALESCE(EXCLUDED.current_period_start, user_subscriptions.current_period_start),
-                current_period_end   = COALESCE(EXCLUDED.current_period_end,   user_subscriptions.current_period_end),
-                last_event_at = NOW(),
-                updated_at = NOW()
+        UPDATE user_subscriptions
+           SET cashfree_plan_id = COALESCE(NULLIF(%s, ''), cashfree_plan_id),
+               status = %s,
+               current_period_end = COALESCE(%s, current_period_end),
+               last_event_at = NOW(),
+               updated_at = NOW()
+         WHERE cashfree_subscription_id = %s
         """,
-        (user_id, sub_id, plan_id, status, period_start, period_end),
+        (plan_id, status, period_end, cf_sub_id),
     )
-    payment_entity = (sub.get("payment") or {}).get("entity") if isinstance(sub.get("payment"), dict) else None
-    if payment_entity and payment_entity.get("id"):
-        _upsert_payment_from_charge(cur, user_id, sub_id, payment_entity)
+
     if period_end is not None:
         cur.execute(
             "UPDATE users SET plan = 'pro', plan_expires_at = %s, payment_failed_at = NULL, "
-            "is_trial = FALSE, "
-            "setup_paid_at = COALESCE(setup_paid_at, NOW()), "
-            "trial_reminder_7d_sent_at = NULL, "
-            "trial_reminder_4d_sent_at = NULL, "
-            "trial_reminder_2d_sent_at = NULL, "
             "updated_at = NOW() WHERE id = %s",
             (period_end, user_id),
         )
 
+    # Plan-swap decision: keep discount plan only if comp grants still active.
+    # Cashfree Subscriptions doesn't include a clean "subscription.tags" roundtrip
+    # in this payload, so re-fetch tags from our DB row.
+    cur.execute(
+        "SELECT original_plan_id FROM user_subscriptions WHERE cashfree_subscription_id = %s",
+        (cf_sub_id,),
+    )
+    orig = cur.fetchone()
+    original_plan_id = (orig or {}).get("original_plan_id") if orig else None
 
-def _upsert_payment_from_charge(cur, user_id: str, sub_razorpay_id: str, payment_entity: dict):
-    payment_id = payment_entity.get("id") or ""
-    if not payment_id:
-        return
-    amount = int(payment_entity.get("amount") or 0)
-    currency = (payment_entity.get("currency") or "INR").upper()
-    status = (payment_entity.get("status") or "captured").lower()
-    method = (payment_entity.get("method") or "").lower() or None
-    vpa_suffix = _vpa_suffix(payment_entity.get("vpa"))
-    description = "Pro subscription"
-    invoice_id = payment_entity.get("invoice_id") or None
-    invoice_url = f"https://rzp.io/invoice/{invoice_id}" if invoice_id else None
-    paid_at_iso = payment_entity.get("captured_at") or payment_entity.get("created_at")
-    paid_at = None
-    if paid_at_iso:
-        try:
-            paid_at = datetime.fromtimestamp(int(paid_at_iso), tz=timezone.utc)
-        except (TypeError, ValueError):
-            paid_at = None
-    cur.execute(
-        "SELECT id FROM user_subscriptions WHERE razorpay_subscription_id = %s LIMIT 1",
-        (sub_razorpay_id,),
-    )
-    row = cur.fetchone()
-    sub_uuid = row["id"] if row else None
-    cur.execute(
-        """
-        INSERT INTO payments (
-            user_id, subscription_id, razorpay_payment_id, razorpay_invoice_id, invoice_url,
-            amount_paise, currency, status, method, vpa_suffix, description, kind,
-            billing_period_start, billing_period_end, paid_at
+    target_plan = pick_plan_for_renewal(user_id)
+    if target_plan and target_plan != plan_id and original_plan_id == cashfree_svc.plan_year1_id():
+        # Comp gap expired mid-cycle (or never existed) and on year-1 plan — swap up.
+        _swap_to_plan_in_conn(
+            cur,
+            user_id=user_id,
+            cf_subscription_id=cf_sub_id,
+            target_plan_id=target_plan,
+            reason="comp_gap_expired",
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'recurring', %s, %s, %s)
-        ON CONFLICT (razorpay_payment_id) DO NOTHING
-        """,
-        (
-            user_id, sub_uuid, payment_id, invoice_id, invoice_url,
-            amount, currency, status, method, vpa_suffix, description,
-            paid_at, paid_at, paid_at,
-        ),
+
+
+def _swap_to_plan_in_conn(
+    cur,
+    *,
+    user_id: str,
+    cf_subscription_id: str,
+    target_plan_id: str,
+    reason: str,
+) -> dict:
+    """Plan-swap helper that reuses an open psycopg cursor (webhook path).
+
+    Calls Cashfree's update_subscription_plan, mirrors the new plan_id into
+    user_subscriptions, and writes a user_audit_log row. Returns {"swapped": bool}.
+    `reason` is one of: "comp_gap_expired", "referral_unlock", "cron_backstop".
+    """
+    try:
+        cashfree_svc.update_subscription_plan(cf_subscription_id, target_plan_id)
+    except HTTPException:
+        logger.exception(
+            "plan swap failed: sub=%s target=%s reason=%s",
+            cf_subscription_id, target_plan_id, reason,
+        )
+        return {"swapped": False, "error": "cashfree_failed"}
+    cur.execute(
+        "UPDATE user_subscriptions SET cashfree_plan_id = %s, updated_at = NOW() "
+        "WHERE cashfree_subscription_id = %s",
+        (target_plan_id, cf_subscription_id),
     )
+    direction = (
+        "year2_to_year1" if target_plan_id == cashfree_svc.plan_year1_id()
+        else "year1_to_year2"
+    )
+    user_auth.audit_user(
+        None,
+        user_id,
+        f"billing.plan_swap.{direction}.{reason}",
+        metadata={
+            "cf_subscription_id": cf_subscription_id,
+            "new_plan": target_plan_id,
+            "reason": reason,
+        },
+    )
+    return {"swapped": True, "new_plan": target_plan_id}
+
+
+def _swap_to_plan(user_id: str, target_plan_id: str, *, reason: str) -> dict | None:
+    """Plan-swap helper that opens its own psycopg connection.
+
+    Used by `app/services/referrals.evaluate_user_referrals()` and by the
+    daily cron (`app/jobs/referral_evaluator.py`). Both call sites do not
+    have an open cursor to share.
+
+    Idempotent — if the user's subscription is already on the target plan,
+    returns {"swapped": False} without calling Cashfree.
+    """
+    if not DATABASE_URL:
+        return None
+    if not user_id or not target_plan_id:
+        return None
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT cashfree_subscription_id, cashfree_plan_id, status
+                      FROM user_subscriptions
+                     WHERE user_id = %s
+                     ORDER BY updated_at DESC NULLS LAST
+                     LIMIT 1
+                    """,
+                    (user_id,),
+                )
+                row = cur.fetchone()
+            conn.commit()
+        if not row:
+            return {"swapped": False, "reason": "no_subscription"}
+        cf_sub_id = (row.get("cashfree_subscription_id") or "").strip()
+        current_plan = (row.get("cashfree_plan_id") or "").strip()
+        status = (row.get("status") or "").lower()
+        if not cf_sub_id or current_plan == target_plan_id:
+            return {"swapped": False, "reason": "already_on_target"}
+        if status not in ("active", "authenticated"):
+            return {"swapped": False, "reason": "sub_not_active"}
+        # Open a fresh connection for the cashfree call + DB writes (Cashfree
+        # call can take a few seconds; we don't want to hold a DB connection
+        # open unnecessarily). Mirrors the helper above but no shared cursor.
+        try:
+            cashfree_svc.update_subscription_plan(cf_sub_id, target_plan_id)
+        except HTTPException:
+            logger.exception(
+                "plan swap failed (own-conn): sub=%s target=%s reason=%s",
+                cf_sub_id, target_plan_id, reason,
+            )
+            return {"swapped": False, "error": "cashfree_failed"}
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "UPDATE user_subscriptions SET cashfree_plan_id = %s, updated_at = NOW() "
+                    "WHERE cashfree_subscription_id = %s",
+                    (target_plan_id, cf_sub_id),
+                )
+            conn.commit()
+        direction = (
+            "year2_to_year1" if target_plan_id == cashfree_svc.plan_year1_id()
+            else "year1_to_year2"
+        )
+        user_auth.audit_user(
+            None,
+            user_id,
+            f"billing.plan_swap.{direction}.{reason}",
+            metadata={
+                "cf_subscription_id": cf_sub_id,
+                "new_plan": target_plan_id,
+                "reason": reason,
+            },
+        )
+        return {"swapped": True, "new_plan": target_plan_id}
+    except psycopg.Error as e:
+        logger.exception("_swap_to_plan DB failed: user=%s reason=%s err=%s", user_id, reason, e)
+        return {"swapped": False, "error": "db_error"}
+
+
+def _on_subscription_cancelled(cur, payload: dict):
+    inner = _inner(payload)
+    cf_sub_id = str(inner.get("cf_subscription_id") or "").strip()
+    if not cf_sub_id:
+        return
+    user_id, _ = _tags_payload(payload)
+    next_pay_iso = inner.get("next_charge_at")
+    period_end = None
+    if next_pay_iso:
+        try:
+            period_end = datetime.fromtimestamp(int(next_pay_iso), tz=timezone.utc)
+        except (TypeError, ValueError):
+            period_end = None
+    cur.execute(
+        "UPDATE user_subscriptions SET status = 'cancelled', cancelled_at = NOW(), "
+        "current_period_end = COALESCE(%s, current_period_end), "
+        "last_event_at = NOW(), updated_at = NOW() WHERE cashfree_subscription_id = %s",
+        (period_end, cf_sub_id),
+    )
+    if user_id:
+        if period_end and period_end > datetime.now(timezone.utc):
+            cur.execute(
+                "UPDATE users SET plan = 'pro', plan_expires_at = %s, updated_at = NOW() "
+                "WHERE id = %s",
+                (period_end, user_id),
+            )
+        else:
+            cur.execute(
+                "UPDATE users SET plan = 'free', plan_expires_at = NULL, "
+                "updated_at = NOW() WHERE id = %s",
+                (user_id,),
+            )
+
+
+def _on_subscription_completed(cur, payload: dict):
+    inner = _inner(payload)
+    cf_sub_id = str(inner.get("cf_subscription_id") or "").strip()
+    if not cf_sub_id:
+        return
+    user_id, _ = _tags_payload(payload)
+    cur.execute(
+        "UPDATE user_subscriptions SET status = 'completed', cancelled_at = NOW(), "
+        "last_event_at = NOW(), updated_at = NOW() WHERE cashfree_subscription_id = %s",
+        (cf_sub_id,),
+    )
+    if user_id:
+        cur.execute(
+            "UPDATE users SET plan = 'free', plan_expires_at = NULL, updated_at = NOW() "
+            "WHERE id = %s",
+            (user_id,),
+        )
 
 
 def _on_subscription_halted(cur, payload: dict):
-    sub = ((payload.get("payload") or {}).get("subscription") or {}).get("entity") or {}
-    sub_id = sub.get("id") or ""
-    if not sub_id:
+    inner = _inner(payload)
+    cf_sub_id = str(inner.get("cf_subscription_id") or "").strip()
+    if not cf_sub_id:
         return
-    user_id = _notes_user_id(payload)
+    user_id, _ = _tags_payload(payload)
     cur.execute(
-        "UPDATE user_subscriptions SET status = 'halted', last_event_at = NOW(), updated_at = NOW() "
-        "WHERE razorpay_subscription_id = %s",
-        (sub_id,),
+        "UPDATE user_subscriptions SET status = 'halted', last_event_at = NOW(), "
+        "updated_at = NOW() WHERE cashfree_subscription_id = %s",
+        (cf_sub_id,),
     )
     if user_id:
         cur.execute(
@@ -540,113 +770,73 @@ def _on_subscription_halted(cur, payload: dict):
         )
 
 
-def _on_subscription_cancelled(cur, payload: dict):
-    sub = ((payload.get("payload") or {}).get("subscription") or {}).get("entity") or {}
-    sub_id = sub.get("id") or ""
-    if not sub_id:
-        return
-    user_id = _notes_user_id(payload)
-    cpe = sub.get("current_period_end")
-    period_end = None
-    if cpe:
-        try:
-            period_end = datetime.fromtimestamp(int(cpe), tz=timezone.utc)
-        except (TypeError, ValueError):
-            period_end = None
-    cur.execute(
-        "UPDATE user_subscriptions SET status = 'cancelled', cancelled_at = NOW(), "
-        "current_period_end = COALESCE(%s, current_period_end), last_event_at = NOW(), updated_at = NOW() "
-        "WHERE razorpay_subscription_id = %s",
-        (period_end, sub_id),
-    )
-    if user_id:
-        if period_end and period_end > datetime.now(timezone.utc):
-            cur.execute(
-                "UPDATE users SET plan = 'pro', plan_expires_at = %s, "
-                "is_trial = FALSE, "
-                "trial_reminder_7d_sent_at = NULL, "
-                "trial_reminder_4d_sent_at = NULL, "
-                "trial_reminder_2d_sent_at = NULL, "
-                "updated_at = NOW() WHERE id = %s",
-                (period_end, user_id),
-            )
-        else:
-            cur.execute(
-                "UPDATE users SET plan = 'free', plan_expires_at = NULL, "
-                "is_trial = FALSE, "
-                "trial_reminder_7d_sent_at = NULL, "
-                "trial_reminder_4d_sent_at = NULL, "
-                "trial_reminder_2d_sent_at = NULL, "
-                "updated_at = NOW() WHERE id = %s",
-                (user_id,),
-            )
-
-
-def _on_subscription_completed(cur, payload: dict):
-    sub = ((payload.get("payload") or {}).get("subscription") or {}).get("entity") or {}
-    sub_id = sub.get("id") or ""
-    if not sub_id:
-        return
-    user_id = _notes_user_id(payload)
-    cur.execute(
-        "UPDATE user_subscriptions SET status = 'completed', cancelled_at = NOW(), "
-        "last_event_at = NOW(), updated_at = NOW() WHERE razorpay_subscription_id = %s",
-        (sub_id,),
-    )
-    if user_id:
-        cur.execute(
-            "UPDATE users SET plan = 'free', plan_expires_at = NULL, "
-            "is_trial = FALSE, "
-            "trial_reminder_7d_sent_at = NULL, "
-            "trial_reminder_4d_sent_at = NULL, "
-            "trial_reminder_2d_sent_at = NULL, "
-            "updated_at = NOW() WHERE id = %s",
-            (user_id,),
-        )
-
-
-def _on_subscription_paused(cur, payload: dict):
-    sub = ((payload.get("payload") or {}).get("subscription") or {}).get("entity") or {}
-    sub_id = sub.get("id") or ""
-    if not sub_id:
-        return
-    cur.execute(
-        "UPDATE user_subscriptions SET status = 'paused', last_event_at = NOW(), updated_at = NOW() "
-        "WHERE razorpay_subscription_id = %s",
-        (sub_id,),
-    )
-
-
-def _on_subscription_resumed(cur, payload: dict):
-    sub = ((payload.get("payload") or {}).get("subscription") or {}).get("entity") or {}
-    sub_id = sub.get("id") or ""
-    if not sub_id:
-        return
-    user_id = _notes_user_id(payload)
-    cur.execute(
-        "UPDATE user_subscriptions SET status = 'active', last_event_at = NOW(), updated_at = NOW() "
-        "WHERE razorpay_subscription_id = %s",
-        (sub_id,),
-    )
-    if user_id:
-        cur.execute(
-            "UPDATE users SET plan = 'pro', updated_at = NOW() WHERE id = %s",
-            (user_id,),
-        )
-
-
+# Cashfree event names we listen to (mapped via _DISPATCH below).
 _DISPATCH = {
-    "payment.captured": _on_payment_captured,
-    "payment.failed": _on_payment_failed,
-    "subscription.activated": _on_subscription_activated,
-    "subscription.charged": _on_subscription_charged,
-    "subscription.halted": _on_subscription_halted,
-    "subscription.cancelled": _on_subscription_cancelled,
-    "subscription.completed": _on_subscription_completed,
-    "subscription.paused": _on_subscription_paused,
-    "subscription.resumed": _on_subscription_resumed,
+    "PAYMENT_SUCCESS_WEBHOOK":       _on_payment_succeeded,
+    "PAYMENT_FAILED_WEBHOOK":        _on_payment_failed,
+    "SUBSCRIPTION_ACTIVATED":        _on_subscription_activated,
+    "SUBSCRIPTION_CHARGED":          _on_subscription_charged,
+    "SUBSCRIPTION_CANCELLED":        _on_subscription_cancelled,
+    "SUBSCRIPTION_COMPLETED":        _on_subscription_completed,
+    "SUBSCRIPTION_HALTED":           _on_subscription_halted,
 }
 
+
+# ── Effective-plan decision ──────────────────────────────────────────────────────────────────────────────────
+
+def effective_plan_for(user_id: str) -> dict:
+    """Returns {plan, expires_at, source} where source ∈ {comp, subscription, free}.
+
+    Comp grants always win. Then Cashfree subscription. Else free.
+    Also returns `referral_count` (status='active' rows in referrals) so
+    templates can render the "X / 10 friends" badge without a second query.
+    """
+    if not DATABASE_URL:
+        return {"plan": "free", "expires_at": None, "source": "free", "referral_count": 0}
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT sg.expires_at
+                      FROM subscription_grants sg
+                     WHERE sg.user_id = %s
+                       AND sg.revoked_at IS NULL
+                       AND (sg.expires_at IS NULL OR sg.expires_at > NOW())
+                     ORDER BY sg.created_at DESC LIMIT 1
+                    """,
+                    (user_id,),
+                )
+                grant = cur.fetchone()
+                if grant:
+                    return {
+                        "plan": "pro",
+                        "expires_at": grant["expires_at"],
+                        "source": "comp",
+                        "referral_count": _referral_count(user_id),
+                    }
+                cur.execute(
+                    "SELECT plan, plan_expires_at FROM users WHERE id = %s LIMIT 1",
+                    (user_id,),
+                )
+                u = cur.fetchone()
+            conn.commit()
+        if not u:
+            return {"plan": "free", "expires_at": None, "source": "free", "referral_count": 0}
+        plan = u.get("plan") or "free"
+        expires_at = u.get("plan_expires_at")
+        return {
+            "plan": plan,
+            "expires_at": expires_at,
+            "source": "subscription" if plan == "pro" else "free",
+            "referral_count": _referral_count(user_id),
+        }
+    except psycopg.Error as e:
+        logger.exception("effective_plan_for failed for user=%s: %s", user_id, e)
+        return {"plan": "free", "expires_at": None, "source": "free", "referral_count": 0}
+
+
+# ── Plan summary for templates ─────────────────────────────────────────────────────────────────────────────
 
 def grace_days_left(user: dict) -> int:
     expires_at = user.get("plan_expires_at")
@@ -660,32 +850,20 @@ def grace_days_left(user: dict) -> int:
 
 
 def trial_days_left(user: dict) -> int:
-    if not user.get("is_trial"):
-        return 0
-    expires_at = user.get("plan_expires_at")
-    if not expires_at:
-        return 0
-    delta = expires_at - datetime.now(timezone.utc)
-    if delta.total_seconds() <= 0:
-        return 0
-    return int((delta.total_seconds() + 86399) // 86400)
+    return 0  # trial disabled Phase B
 
 
 def plan_summary(user: dict) -> dict:
-    """Single source of truth for the user's plan state across every surface.
+    """Backward-compat surface for templates.
 
-    Returns a dict with one branch key (`state`) plus display strings every
-    template consumes. Any template that wants to show the plan reads from
-    this — keeps sidebar pill, manage-page pill, billing-page pill, billing
-    plan card, billing FAQ eyebrow, and pricing-page block in lockstep.
+    Same shape the old Razorpay-era `plan_summary` returned. Trial state is removed.
+    Grace state preserved for failed-payment scenarios.
     """
     user = user or {}
     is_internal = bool(user.get("is_internal"))
-    is_trial = bool(user.get("is_trial"))
     is_pro = (user.get("plan") or "free") == "pro"
     has_grace = bool(user.get("payment_failed_at")) and bool(grace_days_left(user))
     grace_left = grace_days_left(user)
-    trial_left = trial_days_left(user)
 
     if is_internal:
         return {
@@ -709,29 +887,6 @@ def plan_summary(user: dict) -> dict:
             "trial_days_left": 0,
             "grace_days_left": 0,
         }
-    if is_trial and trial_left > 0:
-        d = f"{trial_left} day{'s' if trial_left != 1 else ''}"
-        return {
-            "state": "trial",
-            "plan": "pro",
-            "is_unlimited": False,
-            "eyebrow": "→ Free trial",
-            "headline": f"Trial ends in {trial_left} day{'s' if trial_left != 1 else ''}",
-            "headline_html": f"Trial ends in <em>{trial_left}</em> day{'s' if trial_left != 1 else ''}",
-            "sub": "Full Pro during trial — no card, no mandate.",
-            "value_key": "Status",
-            "value_val": f"Trial · {d} left",
-            "billing_key": "Trial",
-            "billing_val": f"{d} left",
-            "pill_class": "trial",
-            "pill_label": f"⚡ Trial · {trial_left}d →",
-            "pill_title": f"Free trial — {d} left",
-            "pill_short": f"⚡ Trial · {trial_left}d",
-            "cta_kind": "activate",
-            "cta_label": f"Activate Pro → {d.replace(' day', '-day').replace(' days', '-day')}",
-            "trial_days_left": trial_left,
-            "grace_days_left": 0,
-        }
     if has_grace:
         d = f"{grace_left} day{'s' if grace_left != 1 else ''}"
         return {
@@ -741,7 +896,7 @@ def plan_summary(user: dict) -> dict:
             "eyebrow": "→ Payment failed",
             "headline": f"Pro ends in {d}",
             "headline_html": f"Pro ends in <em>{grace_left}</em> day{'s' if grace_left != 1 else ''}",
-            "sub": "Razorpay couldn't charge your last payment. Update payment to keep Pro.",
+            "sub": "Cashfree couldn't charge your last payment. Update payment to keep Pro.",
             "value_key": "Status",
             "value_val": f"⚠ Failed · {d} left",
             "billing_key": "Mandate",
@@ -761,13 +916,13 @@ def plan_summary(user: dict) -> dict:
             "plan": "pro",
             "is_unlimited": False,
             "eyebrow": "→ Pro · Active",
-            "headline": "Pro · ₹149/mo",
-            "headline_html": "Pro <em>₹149/mo.</em>",
+            "headline": f"Pro · ₹{PRO_YEAR2_INR:,}/yr",
+            "headline_html": f"Pro <em>₹{PRO_YEAR2_INR:,}/yr.</em>",
             "sub": "Active subscription",
             "value_key": "Status",
             "value_val": "Active",
-            "billing_key": "Mandate",
-            "billing_val": "UPI AutoPay",
+            "billing_key": "Renewal",
+            "billing_val": f"₹{PRO_YEAR2_INR:,}/yr · UPI AutoPay",
             "pill_class": "pro",
             "pill_label": "Pro · Active",
             "pill_title": "Pro subscription — manage",
@@ -782,48 +937,39 @@ def plan_summary(user: dict) -> dict:
         "plan": "free",
         "is_unlimited": False,
         "eyebrow": "→ Your plan",
-        "headline": "Pro features from ₹149/mo",
-        "headline_html": "Pro features<br>from <strong>₹149/mo</strong>",
-        "sub": "UPI AutoPay or Card · cancel any time",
+        "headline": f"Pro features from ₹{PRO_YEAR1_INR:,}/yr",
+        "headline_html": f"Pro features<br>from <strong>₹{PRO_YEAR1_INR:,}</strong>/yr",
+        "sub": "UPI AutoPay or Card · annual billing · cancel any time",
         "value_key": "Status",
         "value_val": "Free",
         "billing_key": "Billing",
-        "billing_val": "₹149/mo via UPI AutoPay",
+        "billing_val": f"₹{PRO_YEAR1_INR:,}/yr via UPI AutoPay",
         "pill_class": "free",
         "pill_label": "Free · Upgrade →",
         "pill_title": "Free tier — upgrade to Pro",
         "pill_short": "Free · Upgrade →",
         "cta_kind": "activate",
-        "cta_label": "Activate ₹149/mo AutoPay →",
+        "cta_label": f"Activate ₹{PRO_YEAR1_INR:,}/yr →",
         "trial_days_left": 0,
         "grace_days_left": 0,
     }
 
 
 def enforce_plan_grace(user_id: str, user: dict) -> dict:
+    """Downgrade users whose plan_expires_at has passed."""
     if user.get("is_internal"):
         return user
     if user.get("plan") != "pro":
         return user
     expires_at = user.get("plan_expires_at")
-    if not expires_at:
-        return user
-    if expires_at > datetime.now(timezone.utc):
-        try:
-            maybe_send_trial_reminders(user_id, user)
-        except Exception:
-            logger.exception("trial reminder failed for user=%s", user_id)
+    if not expires_at or expires_at > datetime.now(timezone.utc):
         return user
     try:
         with _connect() as conn:
             with conn.cursor() as cur:
                 cur.execute(
                     "UPDATE users SET plan = 'free', plan_expires_at = NULL, "
-                    "payment_failed_at = NULL, is_trial = FALSE, "
-                    "trial_reminder_7d_sent_at = NULL, "
-                    "trial_reminder_4d_sent_at = NULL, "
-                    "trial_reminder_2d_sent_at = NULL, "
-                    "updated_at = NOW() "
+                    "payment_failed_at = NULL, updated_at = NOW() "
                     "WHERE id = %s AND plan = 'pro'",
                     (user_id,),
                 )
@@ -834,60 +980,4 @@ def enforce_plan_grace(user_id: str, user: dict) -> dict:
     user["plan"] = "free"
     user["plan_expires_at"] = None
     user["payment_failed_at"] = None
-    user["is_trial"] = False
-    user["trial_reminder_7d_sent_at"] = None
-    user["trial_reminder_4d_sent_at"] = None
-    user["trial_reminder_2d_sent_at"] = None
     return user
-
-
-def maybe_send_trial_reminders(user_id: str, user: dict) -> bool:
-    if not user.get("is_trial"):
-        return False
-    days_left = trial_days_left(user)
-    if not (0 < days_left <= 7):
-        return False
-    sent = False
-    thresholds = [
-        (7, "trial_reminder_7d_sent_at"),
-        (4, "trial_reminder_4d_sent_at"),
-        (2, "trial_reminder_2d_sent_at"),
-    ]
-    for threshold, sent_col in thresholds:
-        if days_left > threshold:
-            continue
-        if user.get(sent_col) is not None:
-            continue
-        if _fire_trial_reminder(user_id, sent_col, days_left):
-            sent = True
-    return sent
-
-
-def _fire_trial_reminder(user_id: str, sent_col: str, days_left: int) -> bool:
-    from app.services import email_service
-    fresh = user_auth.find_user_by_id(user_id) or {}
-    if not fresh.get("email"):
-        return False
-    ok, _msg_id = email_service.send_trial_ending_email(
-        fresh["email"], days_left
-    )
-    if not ok:
-        logger.warning("trial reminder send failed for user=%s days_left=%s", user_id, days_left)
-        return False
-    try:
-        with _connect() as conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    f"UPDATE users SET {sent_col} = NOW(), updated_at = NOW() "
-                    f"WHERE id = %s AND {sent_col} IS NULL",
-                    (user_id,),
-                )
-                updated = cur.rowcount
-            conn.commit()
-    except psycopg.Error as e:
-        logger.exception("trial reminder mark-sent failed for user=%s: %s", user_id, e)
-        return False
-    if updated == 0:
-        logger.info("trial reminder race: another worker already sent %s for user=%s",
-                    sent_col, user_id)
-    return True

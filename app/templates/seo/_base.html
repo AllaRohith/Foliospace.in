@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} — FolioSpace{% endblock %}
+{% block description %}{{ description }}{% endblock %}
+{% block og_title %}{{ title }} — FolioSpace{% endblock %}
+{% block og_description %}{{ description }}{% endblock %}
+{% block twitter_title %}{{ title }} — FolioSpace{% endblock %}
+{% block twitter_description %}{{ description }}{% endblock %}
+
+{% block content %}
+{% include "partials/_nav.html" %}
+<main class="seo-page">
+  <nav class="seo-breadcrumb" aria-label="Breadcrumb">
+    <a href="/">FolioSpace</a>
+    <span aria-hidden="true">›</span>
+    <span>{{ crumb }}</span>
+  </nav>
+
+  <header class="seo-hero">
+    <p class="seo-eyebrow">{{ eyebrow }}</p>
+    <h1 class="seo-title">{{ title }}</h1>
+    <p class="seo-lede">{{ lede }}</p>
+    <div class="seo-cta-row">
+      <a class="seo-cta seo-cta-primary" href="/signup" data-fs-event="seo_cta_signup" data-fs-page="{{ page_key }}">Start free →</a>
+      <a class="seo-cta seo-cta-secondary" href="/pricing" data-fs-event="seo_cta_pricing" data-fs-page="{{ page_key }}">See pricing</a>
+    </div>
+    <p class="seo-meta-line">
+      <span>Free forever for the basics</span>
+      <span aria-hidden="true">·</span>
+      <span>No card required</span>
+      <span aria-hidden="true">·</span>
+      <span>₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr Pro</span>
+    </p>
+  </header>
+
+  <section class="seo-section" aria-labelledby="seo-why-{{ page_key }}">
+    <h2 id="seo-why-{{ page_key }}" class="seo-section-title">Why this role picks FolioSpace</h2>
+    <ul class="seo-points">
+      {% for point in why_points %}
+        <li>
+          <strong>{{ point.title }}</strong>
+          <span>{{ point.body }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="seo-section" aria-labelledby="seo-features-{{ page_key }}">
+    <h2 id="seo-features-{{ page_key }}" class="seo-section-title">What you get on day one</h2>
+    <div class="seo-feature-grid">
+      {% for feat in features %}
+        <article class="seo-feature-card">
+          <h3>{{ feat.title }}</h3>
+          <p>{{ feat.body }}</p>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="seo-section seo-how" aria-labelledby="seo-how-{{ page_key }}">
+    <h2 id="seo-how-{{ page_key }}" class="seo-section-title">How it works</h2>
+    <ol class="seo-steps">
+      {% for step in steps %}
+        <li>
+          <span class="seo-step-num" aria-hidden="true">{{ loop.index }}</span>
+          <div>
+            <h3>{{ step.title }}</h3>
+            <p>{{ step.body }}</p>
+          </div>
+        </li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  <section class="seo-section seo-honest" aria-labelledby="seo-honest-{{ page_key }}">
+    <h2 id="seo-honest-{{ page_key }}" class="seo-section-title">What FolioSpace is — and isn't</h2>
+    <ul class="seo-truth">
+      {% for line in honest %}
+        <li>{{ line }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="seo-section seo-faq" aria-labelledby="seo-faq-{{ page_key }}">
+    <h2 id="seo-faq-{{ page_key }}" class="seo-section-title">Questions you might have</h2>
+    <dl class="seo-faq-list">
+      {% for q in faqs %}
+        <div class="seo-faq-item">
+          <dt>{{ q.q }}</dt>
+          <dd>{{ q.a }}</dd>
+        </div>
+      {% endfor %}
+    </dl>
+  </section>
+
+  <section class="seo-cta-band">
+    <h2>Try it on your own story.</h2>
+    <p>Sign up, claim your slug, and have something live in under five minutes.</p>
+    <a class="seo-cta seo-cta-primary" href="/signup" data-fs-event="seo_cta_signup" data-fs-page="{{ page_key }}">Start free →</a>
+  </section>
+</main>
+{% include "partials/_footer.html" %}
+{% endblock %}
+
+{% block jsonld %}
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "mainEntity": [
+ {% for q in faqs %}
+ {
+ "@type": "Question",
+ "name": {{ q.q|tojson }},
+ "acceptedAnswer": {
+ "@type": "Answer",
+ "text": {{ q.a|tojson }}
+ }
+ }{% if not loop.last %},{% endif %}
+ {% endfor %}
+ ]
+}
+</script>
+{% endblock %}

@@ -23,11 +23,11 @@
     <ul class="auth-brand-proof" aria-label="Why FolioSpace">
       <li>
         <span class="auth-brand-proof-mark" aria-hidden="true">▰</span>
-        <span class="auth-brand-proof-text"><strong>14-day Pro trial</strong> — full kit, no card.</span>
+        <span class="auth-brand-proof-text"><strong>Free forever</strong> — upgrade to Pro when you're ready, no card to start.</span>
       </li>
       <li>
         <span class="auth-brand-proof-mark" aria-hidden="true">▰</span>
-        <span class="auth-brand-proof-text"><strong>₹149/mo</strong> after — UPI AutoPay, cancel any time.</span>
+        <span class="auth-brand-proof-text"><strong>₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr</strong> Year 1 — UPI AutoPay, cancel any time.</span>
       </li>
       <li>
         <span class="auth-brand-proof-mark" aria-hidden="true">▰</span>
@@ -80,8 +80,15 @@
             </a>
           {% endfor %}
         </div>
-        <div class="auth-divider"><span>or with email</span></div>
       {% endif %}
+
+      <button type="button" class="auth-submit auth-passkey-cta" data-passkey-login aria-label="Sign in with passkey">
+        <span class="auth-passkey-mark" aria-hidden="true">🔑</span>
+        <span>Use passkey</span>
+      </button>
+      <p class="auth-passkey-hint" data-passkey-error role="alert" aria-live="polite"></p>
+
+      <div class="auth-divider"><span>or with email</span></div>
 
       <form method="post" action="/login{% if next %}?next={{ next }}{% endif %}" autocomplete="on" novalidate>
         <div class="auth-field">
@@ -126,9 +133,13 @@
       <section class="auth-explainer" aria-label="About your FolioSpace account">
         <h3>About your session</h3>
         <p>Your folio, dashboard, and the 30-day visits sparkline are right where you left them. Sessions stay signed in on this browser for 30 days, or until you sign out — whichever comes first.</p>
-        <p>We hash your password on this server with bcrypt. The cleartext never touches our logs, our database, or our staff. If you've forgotten it, the "Forgot?" link above emails a one-time reset link — valid for 30 minutes, single use, then it expires. New to FolioSpace? <a href="/signup">Create an account</a> — the first 14 days of Pro are on us.</p>
+        <p>We hash your password on this server with bcrypt. The cleartext never touches our logs, our database, or our staff. If you've forgotten it, the "Forgot?" link above emails a one-time reset link — valid for 30 minutes, single use, then it expires. New to FolioSpace? <a href="/signup">Create an account</a> — FolioSpace is free forever, upgrade to Pro when you're ready.</p>
       </section>
     </div>
   </section>
 </main>
+{% endblock %}
+
+{% block scripts %}
+<script defer src="{{ request.url_for('static', path='js/passkey.min.js') }}?v={{ asset_v }}"></script>
 {% endblock %}

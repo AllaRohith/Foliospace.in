@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
 {% block title %}Pricing — FolioSpace{% endblock %}
-{% block description %}One plan. ₹149/mo via UPI AutoPay. 14-day free trial. Cancel anytime. The single source of truth for FolioSpace pricing.{% endblock %}
+{% block description %}Pro is ₹{{ PRO_YEAR1_INR }}/yr in Year 1 (launch offer, 40% off), then ₹{{ PRO_YEAR2_INR }}/yr. UPI AutoPay or Card AutoPay via Cashfree. Free forever for the basics.{% endblock %}
 {% block canonical %}/pricing{% endblock %}
 
 {% block content %}
+{% include "partials/_nav.html" %}
 <main id="main" class="pricing-page">
   <div class="container">
 
@@ -12,8 +13,8 @@
 
     <header class="pricing-head">
       <div class="pricing-eyebrow">→ The receipt</div>
-      <h1 class="pricing-title">One plan. <em>One number.</em></h1>
-      <p class="pricing-lede">Pro is <strong>₹149 every month</strong> — or <strong>₹1,499 every year</strong> (saves 16%) — charged by UPI AutoPay. Fourteen days free, then the autopay kicks in. Cancel any time from your dashboard — two taps.</p>
+      <h1 class="pricing-title">One plan. <em>Two numbers.</em></h1>
+      <p class="pricing-lede">Pro is <strong>₹{{ "{:,}".format(PRO_YEAR1_INR) }} in Year 1</strong> (launch offer, 40% off) and <strong>₹{{ "{:,}".format(PRO_YEAR2_INR) }} from Year 2</strong> — charged annually by UPI AutoPay or Card AutoPay through Cashfree. No card, no foreign currency, no surprises. Cancel any time from your dashboard — two taps.</p>
 
       {% if viewer %}
         {% set ps = plan_summary(viewer) %}
@@ -21,17 +22,15 @@
           <div class="pricing-current-eyebrow">{{ ps.eyebrow }}</div>
           <div class="pricing-current-state">
             {% if ps.state == 'internal' %}Founder access
-            {% elif ps.state == 'trial' %}Free trial · {{ ps.trial_days_left }} day{{ '' if ps.trial_days_left == 1 else 's' }} left
-            {% elif ps.state == 'grace' %}Payment failed · {{ ps.grace_days_left }} day{{ '' if ps.grace_days_left == 1 else 's' }} grace
+            {% elif ps.state == 'grace' %}Payment failed · {{ ps.grace_days_left }} day{{ '' if ps.grace_days_left != 1 else '' }} grace
             {% elif ps.state == 'pro' %}Pro · Active
             {% else %}Free{% endif %}
           </div>
           <div class="pricing-current-sub">
             {% if ps.state == 'internal' %}All Pro features unlocked, no expiry.
-            {% elif ps.state == 'trial' %}Full Pro during trial · no card, no mandate. Activate below to keep it after.
             {% elif ps.state == 'grace' %}UPI mandate didn't approve. Update payment from /dashboard/billing to keep Pro.
-            {% elif ps.state == 'pro' %}₹149/mo via UPI AutoPay. Manage or cancel from /dashboard/billing.
-            {% else %}Pro features from ₹149/mo. Activate below to unlock all of the above.{% endif %}
+            {% elif ps.state == 'pro' %}₹{{ "{:,}".format(PRO_YEAR2_INR) }}/yr via Cashfree AutoPay. Manage or cancel from /dashboard/billing.
+            {% else %}Pro features from ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr. Activate below to unlock all of the above.{% endif %}
           </div>
         </div>
       {% endif %}
@@ -41,27 +40,25 @@
           <a class="btn btn-primary btn-lg" href="/dashboard/billing">Manage billing →</a>
           <a class="btn btn-ghost btn-lg" href="/{{ viewer.slug }}/manage">Edit your folio →</a>
         {% else %}
-          <a class="btn btn-primary btn-lg" href="/signup">Start 14-day trial →</a>
+          <a class="btn btn-primary btn-lg" href="/signup">Sign up — pick later →</a>
           <a class="btn btn-ghost btn-lg" href="/login">I already have a folio</a>
         {% endif %}
       </div>
     </header>
 
     <section class="pricing-figure" aria-label="Plan summary">
-      <div class="pricing-cycle" role="tablist" aria-label="Billing cycle">
-        <button type="button" class="pricing-cycle-btn is-active" data-cycle="monthly" role="tab" aria-selected="true">Monthly</button>
-        <button type="button" class="pricing-cycle-btn" data-cycle="annual" role="tab" aria-selected="false">Annual <span class="pricing-cycle-save">Save 16%</span></button>
-      </div>
-      <div class="pricing-figure-main" id="pricing-figure-main" data-cycle-view="monthly">
-        <div class="pricing-figure-num" data-pricing-cycle-num>₹149</div>
-        <div class="pricing-figure-unit" data-pricing-cycle-unit>/month</div>
+      <div class="pricing-figure-main" id="pricing-figure-main">
+        <div class="pricing-figure-eyebrow">→ Year 1 — launch offer</div>
+        <div class="pricing-figure-num">₹{{ "{:,}".format(PRO_YEAR1_INR) }}</div>
+        <div class="pricing-figure-unit">/year · ₹{{ "{:,}".format(PRO_YEAR2_INR) }} from Year 2</div>
       </div>
       <div class="pricing-figure-detail">
-        <div class="pricing-figure-row"><span>First 14 days</span><strong>Free</strong></div>
-        <div class="pricing-figure-row"><span>After trial</span><strong data-pricing-cycle-row="after-strong">₹149/mo via UPI AutoPay</strong></div>
+        <div class="pricing-figure-row"><span>Year 1 (launch)</span><strong>₹{{ "{:,}".format(PRO_YEAR1_INR) }} via Cashfree UPI AutoPay</strong></div>
+        <div class="pricing-figure-row"><span>Year 2+ (renewal)</span><strong>₹{{ "{:,}".format(PRO_YEAR2_INR) }} via Cashfree UPI AutoPay</strong></div>
         <div class="pricing-figure-row"><span>Setup fee</span><strong>None</strong></div>
         <div class="pricing-figure-row"><span>Cancel</span><strong>Any time — two taps</strong></div>
       </div>
+      <div class="pricing-figure-note">Refer 5 verified friends and your Year-2 renewal stays at ₹{{ "{:,}".format(PRO_YEAR1_INR) }} — <em>forever</em>.</div>
     </section>
 
     <section class="pricing-section" aria-label="What's included">
@@ -75,12 +72,13 @@
         <div class="pricing-list-row"><span class="pricing-list-bullet">›</span><span><strong>Visit analytics</strong> — 30-day rolling sparkline of views and unique visitors.</span></div>
         <div class="pricing-list-row"><span class="pricing-list-bullet">›</span><span><strong>WhatsApp contact button</strong> — visitors message you without leaving your folio.</span></div>
         <div class="pricing-list-row"><span class="pricing-list-bullet">›</span><span><strong>Privacy toggle</strong> — flip public on or off, default is off. You decide who sees.</span></div>
+        <div class="pricing-list-row"><span class="pricing-list-bullet">›</span><span><strong>Passkey sign-in</strong> — one-tap Face ID / Touch ID login via WebAuthn.</span></div>
       </div>
     </section>
 
     <section class="pricing-section" aria-label="How billing works">
       <div class="pricing-section-eyebrow">→ How billing works</div>
-      <h2 class="pricing-section-title">No card. <em>No wallet.</em></h2>
+      <h2 class="pricing-section-title">Pay upfront. <em>No card.</em></h2>
       <div class="pricing-steps">
         <div class="pricing-step">
           <div class="pricing-step-num">01</div>
@@ -92,22 +90,22 @@
         <div class="pricing-step">
           <div class="pricing-step-num">02</div>
           <div class="pricing-step-body">
-            <div class="pricing-step-title">14 days free</div>
-            <p>Full Pro access. No card needed, no mandate started, nothing to forget.</p>
+            <div class="pricing-step-title">Click Activate</div>
+            <p>From your dashboard, one tap opens Cashfree's secure UPI mandate page.</p>
           </div>
         </div>
         <div class="pricing-step">
           <div class="pricing-step-num">03</div>
           <div class="pricing-step-body">
-            <div class="pricing-step-title">Activate Pro</div>
-            <p>From your dashboard, click <em>Activate</em>. Approve the UPI AutoPay mandate in your UPI app. ₹149 a month, charged automatically.</p>
+            <div class="pricing-step-title">Approve in your UPI app</div>
+            <p>PhonePe, Google Pay, Paytm, BHIM — any UPI app. You approve a one-tap annual eMandate for ₹{{ "{:,}".format(PRO_YEAR1_INR) }}.</p>
           </div>
         </div>
         <div class="pricing-step">
           <div class="pricing-step-num">04</div>
           <div class="pricing-step-body">
-            <div class="pricing-step-title">Cancel any time</div>
-            <p>Two taps in your dashboard. Access stays until the end of the paid period. No retention call, no "are you sure" survey.</p>
+            <div class="pricing-step-title">Year 2 — swap or stay</div>
+            <p>On renewal, you pay ₹{{ "{:,}".format(PRO_YEAR2_INR) }} — unless you've referred 5 verified friends, in which case Year 1 pricing stays locked for your renewal.</p>
           </div>
         </div>
       </div>
@@ -118,27 +116,27 @@
       <h2 class="pricing-section-title">The <em>honest</em> answers.</h2>
       <div class="faq-list">
         <details class="faq-item">
-          <summary><span>Why ₹149?</span><span class="faq-icon" aria-hidden="true"></span></summary>
+          <summary><span>Why does Year 2 cost more?</span><span class="faq-icon" aria-hidden="true"></span></summary>
           <div class="faq-body">
-            <p>It covers payment processing, hosting, the OG image renderer, the QR generator, and the analytics storage — for one folio per user. We add features, not price hikes.</p>
+            <p>Year 1 is the launch offer — a 40% off thank-you for early adopters. From Year 2 the regular price is ₹{{ "{:,}".format(PRO_YEAR2_INR) }}. Refer 5 verified friends and we lock your renewal at the Year-1 price — every year, as long as you stay subscribed.</p>
           </div>
         </details>
         <details class="faq-item">
           <summary><span>Do I need a card or netbanking?</span><span class="faq-icon" aria-hidden="true"></span></summary>
           <div class="faq-body">
-            <p>No. Pro is paid by <strong>UPI AutoPay</strong> only — PhonePe, Google Pay, Paytm, BHIM, any UPI app. You approve a one-tap mandate once, then it auto-charges monthly.</p>
+            <p>No. Pro is paid by <strong>UPI AutoPay</strong> — PhonePe, Google Pay, Paytm, BHIM, any UPI app. You approve a one-tap annual mandate once, then it auto-charges yearly. Card AutoPay also supported if you prefer.</p>
           </div>
         </details>
         <details class="faq-item">
           <summary><span>What if my payment fails?</span><span class="faq-icon" aria-hidden="true"></span></summary>
           <div class="faq-body">
-            <p>You get <strong>7 grace days</strong> with full Pro access. We email you on day 1 and day 5. If the charge still fails after day 7, your folio flips to <strong>Free</strong> — same template, with the FolioSpace badge.</p>
+            <p>You get <strong>7 grace days</strong> with full Pro access. We email you on day 1. If the charge still fails after day 7, your folio flips to <strong>Free</strong> — same template, with the FolioSpace badge.</p>
           </div>
         </details>
         <details class="faq-item">
-          <summary><span>Is the trial actually free?</span><span class="faq-icon" aria-hidden="true"></span></summary>
+          <summary><span>Who handles the UPI mandate?</span><span class="faq-icon" aria-hidden="true"></span></summary>
           <div class="faq-body">
-            <p>Yes. No card, no mandate, no charge on day 14. We remind you by email at day 7, 4, and 2. If you don't activate, your folio goes to Free on day 15.</p>
+            <p><strong>Cashfree Payments</strong> — a RBI-licensed payment aggregator. Your UPI mandate is created inside your UPI app, not by FolioSpace. We never see your UPI PIN or your account number.</p>
           </div>
         </details>
         <details class="faq-item">
@@ -150,7 +148,7 @@
         <details class="faq-item">
           <summary><span>Can I get a refund?</span><span class="faq-icon" aria-hidden="true"></span></summary>
           <div class="faq-body">
-            <p>Cancel inside the first 7 days of any paid month and we refund the charge — email <strong>foliospace.in@gmail.com</strong> and we'll process it same-day.</p>
+            <p>Cancel inside the first 7 days of a paid year and we refund the charge — email <strong>foliospace.in@gmail.com</strong> and we'll process it same-day.</p>
           </div>
         </details>
         <details class="faq-item">
@@ -163,13 +161,13 @@
     </section>
 
     <section class="pricing-bottom-cta">
-      <h2 class="pricing-section-title">Try it for <em>fourteen days.</em></h2>
-      <p class="pricing-bottom-sub">No card. No mandate. Full Pro. Cancel any time, even during the trial.</p>
+      <h2 class="pricing-section-title">Ready for Year 1 <em>at ₹{{ "{:,}".format(PRO_YEAR1_INR) }}?</em></h2>
+      <p class="pricing-bottom-sub">Cancel any time from your dashboard or your UPI app. We never store your UPI PIN.</p>
       <div class="pricing-cta-row">
         {% if viewer %}
           <a class="btn btn-primary btn-lg" href="/dashboard/billing">Manage billing →</a>
         {% else %}
-          <a class="btn btn-primary btn-lg" href="/signup">Start 14-day trial →</a>
+          <a class="btn btn-primary btn-lg" href="/signup">Sign up →</a>
           <a class="btn btn-ghost btn-lg" href="/">See examples first</a>
         {% endif %}
       </div>
@@ -177,37 +175,5 @@
 
   </div>
 </main>
-{% endblock %}
-
-{% block scripts %}
-<script>
-(function () {
-  var buttons = document.querySelectorAll('.pricing-cycle-btn');
-  if (!buttons.length) return;
-  buttons.forEach(function (b) {
-    b.addEventListener('click', function () {
-      var cycle = b.getAttribute('data-cycle') || 'monthly';
-      buttons.forEach(function (other) {
-        var on = other === b;
-        other.classList.toggle('is-active', on);
-        other.setAttribute('aria-selected', on ? 'true' : 'false');
-      });
-      var main = document.getElementById('pricing-figure-main');
-      if (main) main.setAttribute('data-cycle-view', cycle);
-      var num = document.querySelector('[data-pricing-cycle-num]');
-      var unit = document.querySelector('[data-pricing-cycle-unit]');
-      var rowStrong = document.querySelector('[data-pricing-cycle-row="after-strong"]');
-      if (cycle === 'annual') {
-        if (num) num.textContent = '₹1,499';
-        if (unit) unit.textContent = '/year';
-        if (rowStrong) rowStrong.textContent = '₹1,499/yr via UPI AutoPay';
-      } else {
-        if (num) num.textContent = '₹149';
-        if (unit) unit.textContent = '/month';
-        if (rowStrong) rowStrong.textContent = '₹149/mo via UPI AutoPay';
-      }
-    });
-  });
-})();
-</script>
+{% include "partials/_footer.html" %}
 {% endblock %}

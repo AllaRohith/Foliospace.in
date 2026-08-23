@@ -52,14 +52,14 @@ def _origin_key(origin: str) -> str:
 def _csp() -> str:
     parts = [
         "default-src 'self'",
-        "script-src 'self' https://checkout.razorpay.com https://cdn.razorpay.com https://platform.linkedin.com https://www.linkedin.com https://www.googletagmanager.com",
+        "script-src 'self' https://platform.linkedin.com https://www.linkedin.com https://www.googletagmanager.com",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com data:",
         "img-src 'self' data: blob: https://res.cloudinary.com https://platform.linkedin.com https://www.linkedin.com https://www.googletagmanager.com https://www.google-analytics.com",
-        "connect-src 'self' https://lumberjack.razorpay.com https://api.cloudinary.com https://api.gravatar.com https://www.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com",
-        "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://platform.linkedin.com https://www.linkedin.com",
+        "connect-src 'self' https://api.cashfree.com https://sandbox.cashfree.com https://api.cloudinary.com https://api.gravatar.com https://www.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com",
+        "frame-src 'self' https://payments.cashfree.com https://sandbox-payments.cashfree.com https://platform.linkedin.com https://www.linkedin.com",
         "frame-ancestors 'none'",
-        "form-action 'self'",
+        "form-action 'self' https://payments.cashfree.com https://sandbox-payments.cashfree.com",
         "base-uri 'self'",
         "object-src 'none'",
         "media-src 'self' https://res.cloudinary.com",
@@ -121,6 +121,14 @@ class OriginCheckMiddleware(BaseHTTPMiddleware):
             "/dashboard/billing/subscribe",
             "/dashboard/billing/cancel",
         )
+        # Same routes but accepting application/json — WebAuthn ceremonies
+        # post JSON bodies. JSON bodies are still origin/referer-checked.
+        self.json_protected_paths = (
+            "/passkey/login/begin",
+            "/passkey/login/complete",
+            "/passkey/register/begin",
+            "/passkey/register/complete",
+        )
         self.protected_prefixes = (
             "/admin/signups/",
         )
@@ -143,9 +151,14 @@ class OriginCheckMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
-        if request.method not in self.safe_methods and self._is_protected(path) and not self._is_trusted_internal(request):
+        if request.method not in self.safe_methods and (
+            self._is_protected(path) or path in self.json_protected_paths
+        ) and not self._is_trusted_internal(request):
             ctype = (request.headers.get("content-type") or "").split(";")[0].strip().lower()
-            if ctype not in ALLOWED_FORM_CONTENT_TYPES:
+            allowed_ct = set(ALLOWED_FORM_CONTENT_TYPES)
+            if path in self.json_protected_paths:
+                allowed_ct.add("application/json")
+            if ctype not in allowed_ct:
                 return JSONResponse(
                     {"ok": False, "message": "Unsupported Content-Type."},
                     status_code=415,

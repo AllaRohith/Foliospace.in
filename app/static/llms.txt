@@ -1,13 +1,13 @@
 # FolioSpace
 
-> One-page portfolio for every Indian professional — chefs, developers, students, consultants, shop owners, agencies, founders. ₹149/month via UPI AutoPay.
+> One-page portfolio for every Indian professional — chefs, developers, students, consultants, shop owners, agencies, founders. ₹899/yr in Year 1, ₹1,499/yr from Year 2 via UPI AutoPay.
 
 ## About
 
 FolioSpace turns a single URL into a public folio. Sign up with email or OAuth (GitHub, Google, LinkedIn). Pick a slug, fill in your work, ship a portfolio. Free forever, Pro unlocks custom domain + analytics + remove branding.
 
-- Pricing: ₹0 free, ₹149/month Pro (₹1,499/year)
-- Trial: 15-day Pro on signup, no card required
+- Pricing: ₹0 free forever, Pro ₹899 in Year 1, ₹1,499 from Year 2 (annual only)
+- No trial — pay upfront to access Pro
 - Cancel anytime via UPI AutoPay
 
 ## Key pages

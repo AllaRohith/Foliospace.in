@@ -182,6 +182,11 @@ def _draw_avatar_image(draw, img, user, cx, cy, diameter=240):
     if not avatar_url:
         return False
     try:
+        from app.utils.url_safety import safe_public_url
+        ok_url, _reason = safe_public_url(avatar_url)
+        if not ok_url:
+            logger.info("avatar fetch/skip: unsafe url")
+            return False
         import urllib.request
         from urllib.error import URLError
         from socket import timeout as _socket_timeout
@@ -220,8 +225,8 @@ def find_user_by_slug(slug: str, *, require_public: bool = True) -> dict | None:
         SELECT id, slug, display_name, role, category, bio, phone, avatar_url,
                avatar_public_id, avatar_video_url, avatar_video_public_id, avatar_video_kind,
                is_public,
-               plan, is_internal, is_trial, payment_failed_at,
-               setup_paid_at, plan_expires_at,
+               plan, is_internal, payment_failed_at,
+               plan_expires_at,
                template_id,
                created_at, updated_at, deleted_at, linkedin_url,
                spotlight_kind, spotlight_ref_id, spotlight_text, spotlight_url, spotlight_emoji,
@@ -241,9 +246,8 @@ def find_user_by_slug(slug: str, *, require_public: bool = True) -> dict | None:
                NULL::text AS avatar_public_id, NULL::text AS avatar_video_url,
                NULL::text AS avatar_video_public_id, NULL::text AS avatar_video_kind,
                FALSE AS is_public,
-               'free'::text AS plan, FALSE AS is_internal, FALSE AS is_trial,
+               'free'::text AS plan, FALSE AS is_internal,
                NULL::timestamp AS payment_failed_at,
-               NULL::timestamp AS setup_paid_at,
                NULL::timestamp AS plan_expires_at,
                'other-base'::text AS template_id,
                NULL::text AS linkedin_url,
@@ -305,6 +309,10 @@ def list_public_slugs() -> list[tuple[str, str]]:
                        AND length(trim(display_name)) > 0
                        AND slug IS NOT NULL
                        AND length(trim(slug)) >= %s
+                       AND slug !~ '^me-test-[0-9]+$'
+                       AND slug !~ '^avatar-test-[0-9]+$'
+                       AND slug !~ '^fm-test-[0-9]+$'
+                       AND slug !~ '^test-'
                      ORDER BY created_at DESC
                      LIMIT 5000
                     """,

@@ -36,6 +36,26 @@ def install_template_globals(templates) -> None:
     templates.env.globals["plan_summary"] = plan_summary
     templates.env.globals["compute_completion"] = compute_completion
 
+    # Pricing / trial / founder-cohort SSOT — every template reads from here.
+    from app.pricing import (
+        FREE_PRICE_INR as _FREE_PRICE_INR,
+        PRO_MONTHLY_INR as _PRO_MONTHLY_INR,
+        PRO_ANNUAL_INR as _PRO_ANNUAL_INR,
+        TRIAL_DAYS as _TRIAL_DAYS,
+        FOUNDER_COHORT_LIMIT as _FOUNDER_COHORT_LIMIT,
+        annual_savings_percent as _annual_savings_percent,
+        fmt_inr as _fmt_inr,
+        trial_label as _trial_label,
+    )
+    templates.env.globals["FREE_PRICE_INR"] = _FREE_PRICE_INR
+    templates.env.globals["PRO_MONTHLY_INR"] = _PRO_MONTHLY_INR
+    templates.env.globals["PRO_ANNUAL_INR"] = _PRO_ANNUAL_INR
+    templates.env.globals["TRIAL_DAYS"] = _TRIAL_DAYS
+    templates.env.globals["FOUNDER_COHORT_LIMIT"] = _FOUNDER_COHORT_LIMIT
+    templates.env.globals["annual_savings_percent"] = _annual_savings_percent
+    templates.env.globals["fmt_inr"] = _fmt_inr
+    templates.env.globals["trial_label"] = _trial_label
+
     try:
         from app.services.email_service import LAUNCH_DATE as _LD, is_launched as _is_launched
         from datetime import timezone as _tz

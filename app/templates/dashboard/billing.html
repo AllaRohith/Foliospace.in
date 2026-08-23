@@ -24,43 +24,36 @@
     </header>
 
     <main id="main" class="dash-main">
+      {% if cf_return %}
+        <div class="fm-flash fm-flash-ok">✓ Payment received — Pro will activate as soon as Cashfree confirms.</div>
+      {% endif %}
       {% if cancelled %}
         <div class="fm-flash fm-flash-ok">✓ Cancelled — Pro ends on {{ subscription.current_period_end_iso if subscription and subscription.current_period_end_iso else 'next cycle' }}.</div>
       {% endif %}
       {% if err == 'config' and user.is_internal %}
-        <div class="fm-flash fm-flash-warn">Razorpay isn't configured yet. Set the RAZORPAY_* env vars and redeploy.</div>
-      {% elif err == 'annual-unavailable' %}
-        <div class="fm-flash fm-flash-warn">Annual plan not configured yet — try Monthly.</div>
+        <div class="fm-flash fm-flash-warn">Cashfree isn't configured yet. Set the CASHFREE_* env vars and redeploy.</div>
       {% elif err == 'server' %}
         <div class="fm-flash fm-flash-warn">Couldn't open checkout. Try again in a moment.</div>
       {% elif err == 'cancel' %}
         <div class="fm-flash fm-flash-warn">Couldn't cancel right now — refresh and try again.</div>
-      {% elif err == 'type' %}
-        <div class="fm-flash fm-flash-warn">Unknown checkout type.</div>
       {% endif %}
 
       <div class="fm-grid">
         <section class="fm-editor" aria-label="Billing and subscription">
 
           <div class="fm-bill-figure">
-            <div class="fm-bill-cycle" role="tablist" aria-label="Billing cycle">
-              <button type="button" class="fm-bill-cycle-btn is-active" data-cycle="monthly" role="tab" aria-selected="true" aria-controls="fm-bill-figure-main">
-                Monthly
-              </button>
-              <button type="button" class="fm-bill-cycle-btn" data-cycle="annual" role="tab" aria-selected="false" aria-controls="fm-bill-figure-main">
-                Annual <span class="fm-bill-cycle-save">Save 16%</span>
-              </button>
-            </div>
-            <div class="fm-bill-figure-main" id="fm-bill-figure-main" data-cycle-view="monthly">
-              <div class="fm-bill-figure-num" data-bill-cycle-num>₹149</div>
-              <div class="fm-bill-figure-unit" data-bill-cycle-unit>/month</div>
+            <div class="fm-bill-figure-main" id="fm-bill-figure-main">
+              <div class="fm-bill-figure-eyebrow">→ Year 1 — launch offer</div>
+              <div class="fm-bill-figure-num">₹{{ "{:,}".format(PRO_YEAR1_INR) }}</div>
+              <div class="fm-bill-figure-unit">/year · ₹{{ "{:,}".format(PRO_YEAR2_INR) }} from Year 2</div>
             </div>
             <div class="fm-bill-figure-detail">
-              <div class="fm-bill-figure-row"><span>First 14 days</span><strong>Free</strong></div>
-              <div class="fm-bill-figure-row"><span data-bill-cycle-row="after">After trial</span><strong data-bill-cycle-row="after-strong">₹149/mo via UPI AutoPay</strong></div>
+              <div class="fm-bill-figure-row"><span>Year 1 (launch)</span><strong>₹{{ "{:,}".format(PRO_YEAR1_INR) }} via UPI AutoPay</strong></div>
+              <div class="fm-bill-figure-row"><span>Year 2+ (renewal)</span><strong>₹{{ "{:,}".format(PRO_YEAR2_INR) }} via UPI AutoPay</strong></div>
               <div class="fm-bill-figure-row"><span>Setup fee</span><strong>None</strong></div>
               <div class="fm-bill-figure-row"><span>Cancel</span><strong>Anytime — two taps</strong></div>
             </div>
+            <div class="fm-bill-figure-note"><a href="/dashboard/referrals">Refer 10 verified friends</a> and your Year-2 renewal stays at ₹{{ "{:,}".format(PRO_YEAR1_INR) }} — <em>forever</em>.</div>
           </div>
 
           <div class="fm-bill-section">
@@ -74,39 +67,40 @@
               <li><span class="fm-bill-list-bullet">›</span><span><strong>Visit analytics</strong> — 30-day rolling sparkline of views and unique visitors.</span></li>
               <li><span class="fm-bill-list-bullet">›</span><span><strong>WhatsApp contact button</strong> — visitors message you without leaving your folio.</span></li>
               <li><span class="fm-bill-list-bullet">›</span><span><strong>Privacy toggle</strong> — flip public on or off, default is off. You decide who sees.</span></li>
+              <li><span class="fm-bill-list-bullet">›</span><span><strong>Passkey sign-in</strong> — one-tap Face ID / Touch ID login via WebAuthn.</span></li>
             </ul>
           </div>
 
           <div class="fm-bill-section">
             <div class="fm-bill-section-eyebrow">→ How billing works</div>
-            <h2 class="fm-bill-section-title">No card. <em>No wallet.</em></h2>
+            <h2 class="fm-bill-section-title">Pay upfront. <em>No card.</em></h2>
             <ol class="fm-bill-steps">
               <li class="fm-bill-step">
                 <div class="fm-bill-step-num">01</div>
                 <div class="fm-bill-step-body">
-                  <div class="fm-bill-step-title">Sign up</div>
-                  <p>Email + password, one role field. Two minutes.</p>
+                  <div class="fm-bill-step-title">Click Activate</div>
+                  <p>One tap opens Cashfree's secure UPI mandate page.</p>
                 </div>
               </li>
               <li class="fm-bill-step">
                 <div class="fm-bill-step-num">02</div>
                 <div class="fm-bill-step-body">
-                  <div class="fm-bill-step-title">14 days free</div>
-                  <p>Full Pro access. No card needed, no mandate started, nothing to forget.</p>
+                  <div class="fm-bill-step-title">Approve in your UPI app</div>
+                  <p>PhonePe, Google Pay, Paytm, BHIM — any UPI app. You approve a one-tap annual eMandate for ₹{{ "{:,}".format(PRO_YEAR1_INR) }}.</p>
                 </div>
               </li>
               <li class="fm-bill-step">
                 <div class="fm-bill-step-num">03</div>
                 <div class="fm-bill-step-body">
-                  <div class="fm-bill-step-title">Activate Pro</div>
-                  <p>Click <em>Activate</em> below. Approve the UPI AutoPay mandate in your UPI app. ₹149 a month, charged automatically.</p>
+                  <div class="fm-bill-step-title">Year 2 — swap or stay</div>
+                  <p>On renewal, you pay ₹{{ "{:,}".format(PRO_YEAR2_INR) }} — unless you've <a href="/dashboard/referrals">referred 10 verified friends</a>, in which case the Year-1 price stays locked for your renewal.</p>
                 </div>
               </li>
               <li class="fm-bill-step">
                 <div class="fm-bill-step-num">04</div>
                 <div class="fm-bill-step-body">
                   <div class="fm-bill-step-title">Cancel any time</div>
-                  <p>Two taps from the card on the right. Access stays until the end of the paid period.</p>
+                  <p>Two taps from the card on the right. Access stays until the end of the paid year.</p>
                 </div>
               </li>
             </ol>
@@ -116,20 +110,20 @@
             <div class="fm-bill-section-eyebrow">→ Questions</div>
             <h2 class="fm-bill-section-title">The <em>honest</em> answers.</h2>
             <details class="fm-bill-faq-item">
-              <summary><span>Why ₹149?</span><span class="fm-bill-faq-icon" aria-hidden="true"></span></summary>
-              <div class="fm-bill-faq-body"><p>It covers payment processing, hosting, the OG image renderer, the QR generator, and the analytics storage — for one folio per user. We add features, not price hikes.</p></div>
+              <summary><span>Why does Year 2 cost more?</span><span class="fm-bill-faq-icon" aria-hidden="true"></span></summary>
+              <div class="fm-bill-faq-body"><p>Year 1 is the launch offer — a 40% off thank-you for early adopters. From Year 2 the regular price is ₹{{ "{:,}".format(PRO_YEAR2_INR) }}. <a href="/dashboard/referrals">Refer 10 verified friends</a> and we lock your renewal at the Year-1 price — every year, as long as you stay subscribed.</p></div>
             </details>
             <details class="fm-bill-faq-item">
               <summary><span>Do I need a card or netbanking?</span><span class="fm-bill-faq-icon" aria-hidden="true"></span></summary>
-              <div class="fm-bill-faq-body"><p>No. Pro is paid by <strong>UPI AutoPay</strong> only — PhonePe, Google Pay, Paytm, BHIM, any UPI app. You approve a one-tap mandate once, then it auto-charges monthly.</p></div>
+              <div class="fm-bill-faq-body"><p>No. Pro is paid by <strong>UPI AutoPay</strong> only — PhonePe, Google Pay, Paytm, BHIM, any UPI app. You approve a one-tap mandate once, then it auto-charges annually. Card AutoPay also supported if you prefer.</p></div>
             </details>
             <details class="fm-bill-faq-item">
               <summary><span>What if my payment fails?</span><span class="fm-bill-faq-icon" aria-hidden="true"></span></summary>
-              <div class="fm-bill-faq-body"><p>You get <strong>7 grace days</strong> with full Pro access. We email you on day 1 and day 5. If the charge still fails after day 7, your folio flips to <strong>Free</strong> — same template, with the FolioSpace badge.</p></div>
+              <div class="fm-bill-faq-body"><p>You get <strong>7 grace days</strong> with full Pro access. We email you on day 1. If the charge still fails after day 7, your folio flips to <strong>Free</strong> — same template, with the FolioSpace badge.</p></div>
             </details>
             <details class="fm-bill-faq-item">
-              <summary><span>Is the trial actually free?</span><span class="fm-bill-faq-icon" aria-hidden="true"></span></summary>
-              <div class="fm-bill-faq-body"><p>Yes. No card, no mandate, no charge on day 14. We remind you by email at day 7, 4, and 2. If you don't activate, your folio goes to Free on day 15.</p></div>
+              <summary><span>Who handles the UPI mandate?</span><span class="fm-bill-faq-icon" aria-hidden="true"></span></summary>
+              <div class="fm-bill-faq-body"><p><strong>Cashfree Payments</strong> — a RBI-licensed payment aggregator. Your UPI mandate is created inside your UPI app, not by FolioSpace. We never see your UPI PIN or your account number.</p></div>
             </details>
             <details class="fm-bill-faq-item">
               <summary><span>What happens to my folio if I cancel?</span><span class="fm-bill-faq-icon" aria-hidden="true"></span></summary>
@@ -137,7 +131,7 @@
             </details>
             <details class="fm-bill-faq-item">
               <summary><span>Can I get a refund?</span><span class="fm-bill-faq-icon" aria-hidden="true"></span></summary>
-              <div class="fm-bill-faq-body"><p>Cancel inside the first 7 days of any paid month and we refund the charge — email <strong>foliospace.in@gmail.com</strong> and we'll process it same-day.</p></div>
+              <div class="fm-bill-faq-body"><p>Cancel inside the first 7 days of a paid year and we refund the charge — email <strong>foliospace.in@gmail.com</strong> and we'll process it same-day.</p></div>
             </details>
           </div>
 
@@ -149,8 +143,8 @@
             <div class="fm-card-eyebrow">{{ plan_summary(user).eyebrow }}</div>
 
             <div class="fm-card-plan-hero">
-              <div class="fm-card-plan-num">₹149</div>
-              <div class="fm-card-plan-unit">/month</div>
+              <div class="fm-card-plan-num">₹{{ "{:,}".format(PRO_YEAR1_INR) }}</div>
+              <div class="fm-card-plan-unit">/year · ₹{{ "{:,}".format(PRO_YEAR2_INR) }} from Year 2</div>
             </div>
 
             <div class="fm-card-plan-rows">
@@ -158,9 +152,9 @@
               {% if ps.state == 'internal' %}
                 <div class="fm-card-row"><span class="fm-card-row-key">{{ ps.value_key }}</span><span class="fm-card-row-val">{{ ps.value_val }}</span></div>
                 <div class="fm-card-row"><span class="fm-card-row-key">{{ ps.billing_key }}</span><span class="fm-card-row-val">{{ ps.billing_val }}</span></div>
-              {% elif not razorpay_configured and user.is_internal %}
-                <div class="fm-card-row"><span class="fm-card-row-key">Setup</span><span class="fm-card-row-val">Razorpay env vars missing</span></div>
-                <div class="fm-card-foot">Set RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET, RAZORPAY_PLAN_ID_PRO and redeploy.</div>
+              {% elif not cashfree_configured and user.is_internal %}
+                <div class="fm-card-row"><span class="fm-card-row-key">Setup</span><span class="fm-card-row-val">Cashfree env vars missing</span></div>
+                <div class="fm-card-foot">Set CASHFREE_APP_ID, CASHFREE_SECRET_KEY, CASHFREE_WEBHOOK_SECRET, CASHFREE_PLAN_ID_PRO_YEAR1_DISCOUNT, CASHFREE_PLAN_ID_PRO_YEAR2_FULL and redeploy.</div>
               {% elif subscription and subscription.status in ('active', 'authenticated') %}
                 <div class="fm-card-row"><span class="fm-card-row-key">Status</span><span class="fm-card-row-val">
                   {% if subscription.cancel_at_period_end %}Cancelling
@@ -170,17 +164,13 @@
                 <div class="fm-card-row"><span class="fm-card-row-key">{% if subscription.cancel_at_period_end %}Ends{% else %}Renews{% endif %}</span><span class="fm-card-row-val">{{ subscription.current_period_end_iso }}</span></div>
                 <div class="fm-card-row"><span class="fm-card-row-key">Mandate</span><span class="fm-card-row-val">UPI AutoPay</span></div>
                 <div class="fm-card-row"><span class="fm-card-row-key">Setup fee</span><span class="fm-card-row-val">None</span></div>
-              {% elif ps.state == 'trial' %}
-                <div class="fm-card-row"><span class="fm-card-row-key">Trial</span><span class="fm-card-row-val">{{ ps.trial_days_left }} day{{ '' if ps.trial_days_left == 1 else 's' }} left{% if trial_expires_at_iso %} — {{ trial_expires_at_iso }}{% endif %}</span></div>
-                <div class="fm-card-row"><span class="fm-card-row-key">{{ ps.billing_key }}</span><span class="fm-card-row-val">₹149/mo via UPI AutoPay</span></div>
-                <div class="fm-card-row"><span class="fm-card-row-key">Cancel</span><span class="fm-card-row-val">Anytime — until period end</span></div>
               {% elif ps.state == 'grace' %}
                 <div class="fm-card-row"><span class="fm-card-row-key">Status</span><span class="fm-card-row-val">⚠ Failed · {{ ps.grace_days_left }}d left</span></div>
                 <div class="fm-card-row"><span class="fm-card-row-key">Mandate</span><span class="fm-card-row-val">UPI AutoPay — re-approve</span></div>
                 <div class="fm-card-row"><span class="fm-card-row-key">Ends</span><span class="fm-card-row-val">{{ user.plan_expires_at.isoformat()[:10] if user.plan_expires_at else 'soon' }}</span></div>
               {% else %}
-                <div class="fm-card-row"><span class="fm-card-row-key">Trial</span><span class="fm-card-row-val">Not started</span></div>
-                <div class="fm-card-row"><span class="fm-card-row-key">Billing</span><span class="fm-card-row-val">₹149/mo via UPI AutoPay</span></div>
+                <div class="fm-card-row"><span class="fm-card-row-key">Year 1</span><span class="fm-card-row-val">₹{{ "{:,}".format(PRO_YEAR1_INR) }} via UPI AutoPay</span></div>
+                <div class="fm-card-row"><span class="fm-card-row-key">Year 2</span><span class="fm-card-row-val">₹{{ "{:,}".format(PRO_YEAR2_INR) }} — <a href="/dashboard/referrals">unless you refer 10 friends</a></span></div>
                 <div class="fm-card-row"><span class="fm-card-row-key">Cancel</span><span class="fm-card-row-val">Anytime — until period end</span></div>
               {% endif %}
             </div>
@@ -189,7 +179,7 @@
               {% set ps = plan_summary(user) %}
               {% if ps.state == 'internal' %}
                 <a class="fm-card-link-cta" href="/{{ user.slug }}/manage" data-fm-tab="manage">Edit folio →</a>
-              {% elif not razorpay_configured %}
+              {% elif not cashfree_configured %}
                 <a class="fm-card-link-cta" href="/{{ user.slug }}/manage" data-fm-tab="manage">Edit folio →</a>
               {% elif subscription and subscription.status in ('active', 'authenticated') %}
                 {% if not subscription.cancel_at_period_end %}
@@ -201,7 +191,7 @@
                 {% endif %}
                 <a class="fm-card-link-cta" href="/{{ user.slug }}/manage" data-fm-tab="manage">Edit folio →</a>
               {% else %}
-                <button class="fm-card-cta" type="button" id="billing-cta" data-billing-product="Pro — ₹149/mo via UPI AutoPay" data-billing-cycle="monthly">Activate ₹149/mo AutoPay →</button>
+                <button class="fm-card-cta" type="button" id="billing-cta" data-billing-product="Pro — ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr via UPI AutoPay" data-billing-cta-label="Activate ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr AutoPay →">Activate ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr AutoPay →</button>
                 <a class="fm-card-link-cta" href="/{{ user.slug }}/manage" data-fm-tab="manage">Edit folio →</a>
               {% endif %}
             </div>
@@ -218,6 +208,7 @@
                 <tr><td>Live preview</td><td>✓</td><td>✓</td></tr>
                 <tr><td>Privacy toggle</td><td>✓</td><td>✓</td></tr>
                 <tr><td>WhatsApp button</td><td>✓</td><td>✓</td></tr>
+                <tr><td>Passkey sign-in</td><td>✓</td><td>✓</td></tr>
                 <tr><td>Dynamic OG image</td><td>—</td><td>✓</td></tr>
                 <tr><td>QR + share kit</td><td>—</td><td>✓</td></tr>
                 <tr><td>30-day analytics</td><td>—</td><td>✓</td></tr>
@@ -260,12 +251,8 @@
   </div>
 </div>
 
-{% if razorpay_configured %}
-<meta name="razorpay-key" content="{{ razorpay_key_id }}">
-<script defer src="/static/vendor/razorpay/checkout.js"></script>
 <script defer src="{{ request.url_for('static', path='js/dash.min.js') }}?v={{ asset_v }}"></script>
+{% if cashfree_configured %}
 <script defer src="{{ request.url_for('static', path='js/billing.min.js') }}?v={{ asset_v }}"></script>
-{% else %}
-<script defer src="{{ request.url_for('static', path='js/dash.min.js') }}?v={{ asset_v }}"></script>
 {% endif %}
 {% endblock %}

@@ -3,21 +3,13 @@
   <a class="fm-plan-pill fm-plan-pill-{{ ps.pill_class }} {{ extra_class }}" href="/dashboard/billing" title="{{ ps.pill_title }}">{{ ps.pill_label }}</a>
 {%- endmacro %}
 
-{% macro sidebar_card(user, trial_days_left=0, grace_days_left=0, subscription=None) -%}
+{% macro sidebar_card(user, grace_days_left=0, subscription=None) -%}
   {%- set ps = plan_summary(user) -%}
   {%- if ps.state == 'internal' -%}
     <div class="dash-side-plan dash-side-plan-internal">
       <div class="dash-side-plan-eyebrow">{{ ps.eyebrow | replace('→ ', '') }}</div>
       <div class="dash-side-plan-headline">{{ ps.headline }}</div>
       <div class="dash-side-plan-sub">No expiry — founder account</div>
-    </div>
-  {%- elif ps.state == 'trial' -%}
-    <div class="dash-side-plan dash-side-plan-trial">
-      <div class="dash-side-plan-eyebrow">{{ ps.eyebrow | replace('→ ', '') }}</div>
-      <div class="dash-side-plan-headline">
-        Trial ends in<br><strong>{{ ps.trial_days_left }}</strong> day{{ '' if ps.trial_days_left == 1 else 's' }}
-      </div>
-      <a class="dash-side-plan-cta" href="/dashboard/billing">Activate Pro →</a>
     </div>
   {%- elif ps.state == 'grace' -%}
     <div class="dash-side-plan dash-side-plan-grace">
@@ -42,7 +34,7 @@
     <div class="dash-side-plan dash-side-plan-free">
       <div class="dash-side-plan-eyebrow">Free</div>
       <div class="dash-side-plan-headline">
-        Pro features<br>from <strong>₹149/mo</strong>
+        Pro features<br>from <strong>₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr</strong>
       </div>
       <a class="dash-side-plan-cta" href="/dashboard/billing">Activate Pro →</a>
     </div>

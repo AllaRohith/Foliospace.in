@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Your FolioSpace trial ends in {{ days_left }} day{{ '' if days_left == 1 else 's' }}</title>
+  <title>Action needed — your FolioSpace Pro payment didn't go through</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Saira:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -16,34 +16,24 @@
           <tr>
             <td style="background:#FFFFFF; border:1px solid #e7e3da; border-radius:12px; padding:32px 28px;">
               <div style="font-size:11px; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; color:#FF6B35; margin-bottom:14px;">
-                → Free trial
+                → Action needed
               </div>
               <h1 style="font-family:'Saira', sans-serif; font-weight:800; font-size:28px; line-height:1.15; margin:0 0 16px; color:#1a1a1a;">
-                Your trial ends in <em style="font-style:italic; color:#FF6B35;">{{ days_left }} day{{ '' if days_left == 1 else 's' }}.</em>
+                Your Pro charge <em style="font-style:italic; color:#FF6B35;">didn't go through.</em>
               </h1>
               <p style="font-size:15px; line-height:1.55; margin:0 0 14px; color:#1a1a1a;">
-                Hi {{ first_name }} — your FolioSpace Pro trial has {{ days_left }} day{{ '' if days_left == 1 else 's' }} left. After that, your portfolio locks to the Free tier until you activate Pro.
-              </p>
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f4f1ea; border:1px solid #e7e3da; border-radius:999px; height:12px; margin:18px 0 8px;" height="12">
-                <tr>
-                  <td style="background:#FF6B35; border-radius:999px; font-size:0; line-height:0; width: {{ ((7 - days_left) * 100 / 7) if days_left <= 7 else 0 }}%;" height="12">
-                    &nbsp;
-                  </td>
-                </tr>
-              </table>
-              <p style="font-size:12px; line-height:1.4; margin:0 0 16px; color:#6a6a6a;">
-                {{ days_left }} day{{ '' if days_left == 1 else 's' }} of urgency left.
+                Hi {{ first_name }} — Cashfree couldn't auto-debit your UPI mandate this cycle. Your Pro access stays active for <strong>{{ days_left }} day{{ '' if days_left == 1 else 's' }}</strong> of grace. After that your folio flips to Free until you fix the payment.
               </p>
               <p style="font-size:15px; line-height:1.55; margin:0 0 16px; color:#1a1a1a;">
-                Pro is <strong>₹149/mo via UPI AutoPay</strong> — set a UPI mandate, cancel anytime. No card, no netbanking.
+                The most common cause: your UPI app is blocking the eMandate. Open PhonePe, Google Pay, or whichever UPI app you used, check the autopay section, and approve the pending debit. Then click below to retry.
               </p>
               <p style="margin:24px 0 4px;">
                 <a href="{{ billing_url }}" style="display:inline-block; background:#FF6B35; color:#FFFFFF; padding:14px 22px; border-radius:999px; font-weight:700; font-size:14px; text-decoration:none; font-family:'Saira', sans-serif;">
-                  Activate Pro →
+                  Update payment →
                 </a>
               </p>
               <p style="font-size:12px; color:#6a6a6a; margin-top:24px; line-height:1.5;">
-                Cancel anytime from your dashboard. Need help? Reply to this email.
+                Your handle (<code>foliospace.in/{{ slug or 'your-name' }}</code>) is yours forever — it won't be released while you sort this out. Need help? Reply to this email.
               </p>
             </td>
           </tr>

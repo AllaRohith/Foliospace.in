@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Security — FolioSpace{% endblock %}
+{% block description %}How FolioSpace is built and what we do — and don't do — to keep your data and your folios safe.{% endblock %}
+{% block canonical %}/security{% endblock %}
+{% block og_image_alt %}FolioSpace security notes — what we build, what we don't, and how to report a problem.{% endblock %}
+
+{% block content %}
+{% include "partials/_nav.html" %}
+<main class="legal-page">
+  <div class="container">
+    <p class="legal-eyebrow">→ Security notes · v1</p>
+    <h1 class="legal-title">How FolioSpace is built.</h1>
+    <p class="legal-meta">Last updated <time datetime="2026-08-22">22 Aug 2026</time> · applies to foliospace.in</p>
+
+    <section class="legal-section">
+      <h2>What we build</h2>
+      <ul>
+        <li>Strict Content Security Policy — script-src restricted to <code>'self'</code> with explicit allow-lists for LinkedIn and Google Analytics.</li>
+        <li>HSTS with <code>includeSubDomains</code> and <code>preload</code> opt-in via <code>Strict-Transport-Security</code> header on every response.</li>
+        <li>TrustedHost middleware that 404s any request with a non-allow-listed <code>Host</code> header.</li>
+        <li>CSRF tokens on every state-changing form, session-bound and server-validated.</li>
+        <li>Rate limits via <code>slowapi</code> on login, signup, forgot-password, reset, OAuth callbacks, webhooks, and admin login.</li>
+        <li>Argon2/bcrypt password hashing via <code>passlib</code>; OAuth users have a NULL password_hash and are gated by require_user checks.</li>
+        <li>Server-side fetch of OG image URLs and avatars through a public-URL allow-list that rejects private IP ranges, embedded credentials, and non-http schemes. DNS is resolved at write time.</li>
+        <li>Webhook endpoints exempted from Origin checks but verified via HMAC-SHA256 (Cashfree).</li>
+        <li>Database queries are parameterised — no string interpolation into SQL.</li>
+      </ul>
+    </section>
+
+    <section class="legal-section">
+      <h2>What we don't build</h2>
+      <ul>
+        <li>We don't load third-party ad scripts, retargeting pixels, or session-replay tools in your folio or on any logged-in page.</li>
+        <li>We don't store card numbers, UPI PINs, or any payment instrument. Cashfree holds the mandate; we store only a subscription ID.</li>
+        <li>We don't run a JS framework on the client. Your folio is server-rendered HTML + vanilla JS — there is no React, Vue, or hydration in the page you share.</li>
+        <li>We don't sell or share your data. See the <a href="/privacy">privacy policy</a> for the long version.</li>
+      </ul>
+    </section>
+
+    <section class="legal-section">
+      <h2>What we monitor</h2>
+      <ul>
+        <li>Application logs are retained for 30 days on Render free tier; longer retention is on the roadmap.</li>
+        <li>Failed login attempts and rate-limit hits are logged with anonymised IPs (last octet zeroed).</li>
+        <li>Security headers are tested on every deploy via a smoke test in CI.</li>
+      </ul>
+    </section>
+
+    <section class="legal-section">
+      <h2>Reporting a problem</h2>
+      <p>Found a vulnerability or something that worries you? Email <a href="mailto:security@foliospace.in">security@foliospace.in</a>. We respond within 72 hours and credit researchers on a public page if you'd like.</p>
+      <p>We do not run a paid bug bounty yet. This will change once the product reaches steady state.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>Open dependencies</h2>
+      <p>FolioSpace is built on FastAPI, Jinja2, psycopg, passlib, slowapi, python-multipart, and httpx for Cashfree Subscriptions API calls. The full dependency tree lives in <code>requirements.txt</code>. Server-rendered templates use vanilla CSS/JS only.</p>
+    </section>
+  </div>
+</main>
+{% include "partials/_footer.html" %}
+{% endblock %}

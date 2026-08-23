@@ -1,16 +1,15 @@
 import json
 import logging
 import os
-from datetime import timedelta, timezone
 from pathlib import Path
 
-from fastapi import APIRouter, Form, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from starlette.concurrency import run_in_threadpool
 
 from app.services import billing as billing_svc
-from app.services import razorpay as razorpay_svc
+from app.services import cashfree as cashfree_svc
 from app.services import user_auth
 from app.rate_limit import limiter
 
@@ -46,8 +45,6 @@ def _user_to_context(user) -> dict:
         "plan": user.get("plan") or "free",
         "plan_expires_at": user.get("plan_expires_at"),
         "payment_failed_at": user.get("payment_failed_at"),
-        "setup_paid_at": user.get("setup_paid_at"),
-        "is_trial": bool(user.get("is_trial")),
         "is_internal": bool(user.get("is_internal")),
         "template_id": (user.get("template_id") or "other-base").strip()[:32],
     }
@@ -60,12 +57,8 @@ async def dashboard_billing(request: Request):
         return RedirectResponse("/login?next=/dashboard/billing", status_code=303)
     sub = billing_svc.current_subscription(str(user["id"]))
     invoices = billing_svc.list_invoices(str(user["id"]))
-    configured = razorpay_svc.is_configured()
-    trial_days_left = billing_svc.trial_days_left(user)
-    trial_expires_at_iso = ""
-    if user.get("is_trial") and user.get("plan_expires_at"):
-        ist = timezone(timedelta(hours=5, minutes=30))
-        trial_expires_at_iso = user["plan_expires_at"].astimezone(ist).strftime("%Y-%m-%d %H:%M IST")
+    configured = cashfree_svc.is_configured()
+    cf_return = request.query_params.get("cf_return") == "1"
     return _no_cache(templates.TemplateResponse(
         request,
         "dashboard/billing.html",
@@ -76,12 +69,9 @@ async def dashboard_billing(request: Request):
             "user": _user_to_context(user),
             "subscription": sub,
             "invoices": invoices,
-            "razorpay_configured": configured,
-            "razorpay_key_id": razorpay_svc.public_key() if configured else "",
-            "setup_paid": bool(user.get("setup_paid_at")),
+            "cashfree_configured": configured,
+            "cf_return": cf_return,
             "grace_days_left": billing_svc.grace_days_left(user),
-            "trial_days_left": trial_days_left,
-            "trial_expires_at_iso": trial_expires_at_iso,
             "err": (request.query_params.get("err") or "")[:24],
             "cancelled": request.query_params.get("cancel") == "1",
             "nav_active": "billing",
@@ -95,16 +85,10 @@ async def billing_subscribe(request: Request):
     user = user_auth.require_user(request)
     if not user:
         return RedirectResponse("/login", status_code=303)
-    if not razorpay_svc.is_configured():
+    if not cashfree_svc.is_configured():
         return RedirectResponse("/dashboard/billing?err=config", status_code=303)
-    form = await request.form()
-    period = str(form.get("period", "monthly") or "monthly").strip().lower()
-    if period not in {"monthly", "annual"}:
-        period = "monthly"
-    if period == "annual" and not razorpay_svc.is_annual_configured():
-        return RedirectResponse("/dashboard/billing?err=annual-unavailable", status_code=303)
     try:
-        sub_id = await run_in_threadpool(billing_svc.create_subscription, str(user["id"]), period)
+        result = await run_in_threadpool(billing_svc.create_subscription, str(user["id"]))
     except HTTPException as e:
         return RedirectResponse(f"/dashboard/billing?err={'config' if e.status_code == 503 else 'server'}", status_code=303)
     except Exception as e:
@@ -114,9 +98,21 @@ async def billing_subscribe(request: Request):
         request,
         str(user["id"]),
         "billing.checkout.created",
-        metadata={"kind": "recurring", "period": period},
+        metadata={
+            "subscription_id": result.get("subscription_id") or "",
+            "plan_id": result.get("plan_id") or "",
+            "provider": "cashfree",
+        },
     )
-    return JSONResponse({"kind": "recurring", "subscription_id": sub_id, "key": razorpay_svc.public_key(), "period": period})
+    return JSONResponse(
+        {
+            "ok": True,
+            "provider": "cashfree",
+            "subscription_id": result.get("subscription_id") or "",
+            "session_id": result.get("session_id") or "",
+            "plan_id": result.get("plan_id") or "",
+        }
+    )
 
 
 @router.post("/dashboard/billing/cancel")
@@ -134,29 +130,41 @@ async def billing_cancel(request: Request):
         request,
         str(user["id"]),
         "billing.cancel" if ok else "billing.cancel.fail",
+        metadata={"provider": "cashfree"},
     )
     if ok:
         return RedirectResponse("/dashboard/billing?cancel=1", status_code=303)
     return RedirectResponse("/dashboard/billing?err=cancel", status_code=303)
 
 
-@router.post("/webhooks/razorpay")
-@limiter.limit("120/minute")
-async def razorpay_webhook(request: Request):
+# Signature header per Cashfree docs is `x-cashfree-signature` with timestamp
+# header `x-cashfree-timestamp`. The raw POST body is the HMAC input.
+@router.post("/webhooks/cashfree")
+@limiter.limit("240/minute")
+async def cashfree_webhook(request: Request):
     body = await request.body()
-    sig = request.headers.get("X-Razorpay-Signature", "")
-    if not razorpay_svc.verify_signature(body, sig):
-        return JSONResponse({"ok": False}, status_code=400)
+    sig = (
+        request.headers.get("x-cashfree-signature")
+        or request.headers.get("X-Cashfree-Signature")
+        or ""
+    )
+    ts = (
+        request.headers.get("x-cashfree-timestamp")
+        or request.headers.get("X-Cashfree-Timestamp")
+        or ""
+    )
+    if not cashfree_svc.verify_webhook_signature(body, sig, ts):
+        return JSONResponse({"ok": False, "error": "signature"}, status_code=400)
     try:
         payload = json.loads(body.decode("utf-8"))
     except Exception:
-        return JSONResponse({"ok": False}, status_code=400)
-    event_id = payload.get("id", "") if isinstance(payload, dict) else ""
-    event = payload.get("event", "") if isinstance(payload, dict) else ""
-    if not event_id or not event:
-        return JSONResponse({"ok": False}, status_code=400)
+        return JSONResponse({"ok": False, "error": "payload"}, status_code=400)
+    event = payload.get("type") or payload.get("event") or ""
+    if not event:
+        return JSONResponse({"ok": False, "error": "missing-event"}, status_code=400)
     try:
         await run_in_threadpool(billing_svc.handle_webhook, event, payload)
     except Exception as e:
-        logger.exception("webhook dispatch failed: %s", e)
+        logger.exception("cashfree webhook dispatch failed: %s", e)
+        return JSONResponse({"ok": False, "error": "dispatch"}, status_code=500)
     return JSONResponse({"ok": True}, status_code=200)

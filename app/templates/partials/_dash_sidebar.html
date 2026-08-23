@@ -10,6 +10,25 @@
     <a class="dash-side-item {% if nav_active == 'billing' %}is-active{% endif %}" href="/dashboard/billing">Billing + plan →</a>
   </nav>
 
+  <nav class="dash-side-section">
+    <div class="dash-side-section-label">Growth</div>
+    <a class="dash-side-item {% if nav_active == 'referrals' %}is-active{% endif %}" href="/dashboard/referrals">Referrals →</a>
+  </nav>
+
+  <nav class="dash-side-section">
+    <div class="dash-side-section-label">Security</div>
+    <a class="dash-side-item {% if nav_active == 'passkeys' %}is-active{% endif %}" href="/dashboard/passkeys">Passkeys →</a>
+  </nav>
+
+  {% if user.is_internal %}
+    <nav class="dash-side-section">
+      <div class="dash-side-section-label">Admin</div>
+      <a class="dash-side-item" href="/admin/" rel="noopener">Admin home →</a>
+      <a class="dash-side-item {% if nav_active == 'admin-grants' %}is-active{% endif %}" href="/admin/grants" rel="noopener">Comp / grants →</a>
+      <a class="dash-side-item" href="/admin/signups" rel="noopener">Signups →</a>
+    </nav>
+  {% endif %}
+
   <div class="dash-side-section">
     <div class="dash-side-section-label">Account</div>
     <form method="post" action="/logout" class="dash-side-signout-form">
@@ -20,7 +39,7 @@
   <div class="dash-side-plan-wrap">
     <div class="dash-side-section-label dash-side-plan-label">Your plan</div>
     {% import "partials/_plan_summary.html" as ps_macro %}
-    {{ ps_macro.sidebar_card(user, trial_days_left=trial_days_left|default(0), grace_days_left=grace_days_left|default(0), subscription=subscription|default(None)) }}
+    {{ ps_macro.sidebar_card(user, grace_days_left=grace_days_left|default(0), subscription=subscription|default(None)) }}
   </div>
 
   <div class="dash-side-foot">

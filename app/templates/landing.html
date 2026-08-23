@@ -166,8 +166,8 @@
 
       <a href="#workshop" class="cover-stub" id="cover-counter" aria-label="People on the waitlist" aria-live="polite" aria-atomic="true">
         <span class="cover-stub-stub" aria-hidden="true">
-          <span class="cover-stub-num" data-count="16">16</span>
-          <span class="cover-stub-cap">folios</span>
+          <span class="cover-stub-num" data-count="{{ waitlist_count }}">{{ waitlist_count }}</span>
+          <span class="cover-stub-cap">on waitlist</span>
         </span>
         <span class="cover-stub-perf" aria-hidden="true"></span>
         <span class="cover-stub-main" aria-hidden="true">
@@ -178,46 +178,48 @@
 
       <div class="cover-marquee" aria-hidden="true">
         <div class="cover-marquee-track">
-          <span class="cover-marquee-item">foliospace.in/priya-iyer</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/arjun-menon</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/lakshmi-pillai</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/aarav-mehta</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/sara-rao</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/karan-kapoor</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/priya-shetty</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/vikram-iyer</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/chai-corner</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/studio-mehta</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/priya-iyer</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/arjun-menon</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/lakshmi-pillai</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/aarav-mehta</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/sara-rao</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/karan-kapoor</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/priya-shetty</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/vikram-iyer</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/chai-corner</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/studio-mehta</span>
-          <span class="cover-marquee-dot">·</span>
+          {% if marquee_slugs and marquee_slugs|length >= 4 %}
+            {% for slug in marquee_slugs %}
+              <span class="cover-marquee-item">{{ slug }}</span>
+              <span class="cover-marquee-dot">·</span>
+            {% endfor %}
+          {% else %}
+            <span class="cover-marquee-item">foliospace.in/sample-developer</span>
+            <span class="cover-marquee-dot">·</span>
+            <span class="cover-marquee-item">foliospace.in/sample-chef</span>
+            <span class="cover-marquee-dot">·</span>
+            <span class="cover-marquee-item">foliospace.in/sample-student</span>
+            <span class="cover-marquee-dot">·</span>
+            <span class="cover-marquee-item">foliospace.in/sample-consultant</span>
+            <span class="cover-marquee-dot">·</span>
+            <span class="cover-marquee-item">foliospace.in/sample-shop</span>
+            <span class="cover-marquee-dot">·</span>
+            <span class="cover-marquee-item">foliospace.in/sample-studio</span>
+            <span class="cover-marquee-dot">·</span>
+            <span class="cover-marquee-item">foliospace.in/sample-founder</span>
+            <span class="cover-marquee-dot">·</span>
+          {% endif %}
+          {% if marquee_slugs and marquee_slugs|length >= 4 %}
+            {% for slug in marquee_slugs %}
+              <span class="cover-marquee-item">{{ slug }}</span>
+              <span class="cover-marquee-dot">·</span>
+            {% endfor %}
+          {% else %}
+            <span class="cover-marquee-item">foliospace.in/sample-developer</span>
+            <span class="cover-marquee-dot">·</span>
+            <span class="cover-marquee-item">foliospace.in/sample-chef</span>
+            <span class="cover-marquee-dot">·</span>
+            <span class="cover-marquee-item">foliospace.in/sample-student</span>
+            <span class="cover-marquee-dot">·</span>
+            <span class="cover-marquee-item">foliospace.in/sample-consultant</span>
+            <span class="cover-marquee-dot">·</span>
+            <span class="cover-marquee-item">foliospace.in/sample-shop</span>
+            <span class="cover-marquee-dot">·</span>
+            <span class="cover-marquee-item">foliospace.in/sample-studio</span>
+            <span class="cover-marquee-dot">·</span>
+            <span class="cover-marquee-item">foliospace.in/sample-founder</span>
+            <span class="cover-marquee-dot">·</span>
+          {% endif %}
         </div>
       </div>
     </section>
@@ -233,8 +235,8 @@
               <span class="workshop-line workshop-line-3">Just works.</span>
             </h2>
             <div class="workshop-pullquote">
-              <p class="workshop-quote">A portfolio that loads on a 2G phone in Dharavi. A menu that renders before the customer finishes asking. A consultant's six-figure week that started with a single link in a group chat.</p>
-              <span class="workshop-attribution">— Three real FolioSpace users, fall 2026</span>
+              <p class="workshop-quote">A one-page portfolio. A menu customers can preview before they arrive. A single link recruiters actually open — fast on any phone, anywhere in India.</p>
+              <span class="workshop-attribution">— What FolioSpace is built for</span>
             </div>
           </div>
           <div class="workshop-right">
@@ -314,28 +316,28 @@
         </div>
 
         <div class="story-track">
-          <article class="story-step story-step--old" aria-label="2020 — three broken places">
+          <article class="story-step story-step--old" aria-label="Example — scattered work">
             <header class="story-step-head">
-              <span class="story-num">2020</span>
+              <span class="story-num">Before</span>
               <span class="story-step-tag">Three places to lose your work</span>
             </header>
             <h3>A <em>Notion page</em>, a Drive folder, a LinkedIn attachment.</h3>
-            <p>Where your work used to live. Three links, three contexts, three places nobody opens.</p>
+            <p>Where work used to live for many professionals — three links, three contexts, three places nobody opens.</p>
             <div class="story-mock story-mock--old">
               <div class="story-mock-row" style="--d:0">
                 <span class="story-mock-mark" aria-hidden="true">×</span>
-                <span class="story-mock-label">/drive/aarav-mehta.pdf</span>
-                <span class="story-mock-meta">4.7 MB · won't open on 2G</span>
+                <span class="story-mock-label">/drive/portfolio.pdf</span>
+                <span class="story-mock-meta">Heavy, slow on mobile</span>
               </div>
               <div class="story-mock-row" style="--d:1">
                 <span class="story-mock-mark" aria-hidden="true">×</span>
-                <span class="story-mock-label">linkedin.com/in/aarav—attachment</span>
+                <span class="story-mock-label">linkedin.com/in/you—attachment</span>
                 <span class="story-mock-meta">Lost in a DM</span>
               </div>
               <div class="story-mock-row" style="--d:2">
                 <span class="story-mock-mark" aria-hidden="true">×</span>
-                <span class="story-mock-label">notion.so/aarav-portfolio</span>
-                <span class="story-mock-meta">12 seconds to load</span>
+                <span class="story-mock-label">notion.so/your-portfolio</span>
+                <span class="story-mock-meta">Slow on weaker networks</span>
               </div>
             </div>
           </article>
@@ -343,24 +345,24 @@
           <div class="story-arrow" aria-hidden="true">
             <span class="story-arrow-line"></span>
             <span class="story-arrow-head">→</span>
-            <span class="story-arrow-tag">6&nbsp;years</span>
+            <span class="story-arrow-tag">FolioSpace</span>
           </div>
 
-          <article class="story-step story-step--new" aria-label="2026 — one folio URL">
+          <article class="story-step story-step--new" aria-label="Example — one FolioSpace link">
             <header class="story-step-head">
-              <span class="story-num story-num--new">2026</span>
+              <span class="story-num story-num--new">After</span>
               <span class="story-step-tag">One link. Every kind of work.</span>
             </header>
             <h3>One <em>link</em>. Every kind of work.</h3>
-            <p>Same person. Same work. One URL that loads in 800ms on a 2G phone in Dharavi, previews as a WhatsApp link card, reads as a LinkedIn OG image, and downloads as a single-tap PDF. Built once. Lands everywhere.</p>
+            <p>Built to load fast on slower mobile connections, preview as a WhatsApp link card, render a clean LinkedIn OG image, and export as a PDF. One URL, every channel.</p>
             <div class="story-mock story-mock--new">
               <div class="story-mock-url">
-                <span class="story-mock-protocol">https://</span><span class="story-mock-domain">foliospace.in/</span><span class="story-mock-slug">aarav-mehta</span>
+                <span class="story-mock-protocol">https://</span><span class="story-mock-domain">foliospace.in/</span><span class="story-mock-slug">your-name</span>
               </div>
               <div class="story-mock-stats">
-                <span class="story-mock-stat"><b>800ms</b><span>on 2G</span></span>
-                <span class="story-mock-stat"><b>80KB</b><span>total</span></span>
-                <span class="story-mock-stat"><b>1 tap</b><span>to PDF</span></span>
+                <span class="story-mock-stat"><b>Lightweight</b><span>first load</span></span>
+                <span class="story-mock-stat"><b>Share-ready</b><span>OG previews</span></span>
+                <span class="story-mock-stat"><b>One tap</b><span>to PDF</span></span>
               </div>
               <div class="story-mock-channels">
                 <span class="story-mock-chip">WhatsApp preview</span>
@@ -385,11 +387,11 @@
       </div>
       <div class="ticker-rail">
         <div class="ticker-track" aria-hidden="true">
-          <span class="ticker-eyebrow">→ Breaking</span>
-          <span class="ticker-headline">FolioSpace crosses 100 signups in 11 days.</span>
+          <span class="ticker-eyebrow">→ Waitlist</span>
+          <span class="ticker-headline">{{ waitlist_count }} people have joined the waitlist.</span>
           <span class="ticker-dot">●</span>
           <span class="ticker-eyebrow">→ Pricing</span>
-          <span class="ticker-headline">No setup fee. ₹149/mo, cancel any time.</span>
+          <span class="ticker-headline">No setup fee. ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr in Year 1 — ₹{{ "{:,}".format(PRO_YEAR2_INR) }} from Year 2.</span>
           <span class="ticker-dot">●</span>
           <span class="ticker-eyebrow">→ Newsroom</span>
           <span class="ticker-headline">One link. Every kind of work.</span>
@@ -409,9 +411,11 @@
           <span class="ticker-eyebrow">→ Mobile</span>
           <span class="ticker-headline">Edit on your phone, in any language.</span>
           <span class="ticker-dot">●</span>
+          {% if founder_seats_left is defined and founder_seats_left is not none %}
           <span class="ticker-eyebrow">→ Founders</span>
-          <span class="ticker-headline">The first 100 get a founder badge that lasts.</span>
+          <span class="ticker-headline">{% if founder_seats_left > 0 %}{{ founder_seats_left }} founder seats left in the first {{ FOUNDER_COHORT_LIMIT }}.{% else %}Founder cohort is full — join the waitlist for the next wave.{% endif %}</span>
           <span class="ticker-dot">●</span>
+          {% endif %}
           <span class="ticker-eyebrow">→ Shops</span>
           <span class="ticker-headline">A shopfront link your customers actually open.</span>
           <span class="ticker-dot">●</span>
@@ -421,11 +425,11 @@
           <span class="ticker-eyebrow">→ Roadmap</span>
           <span class="ticker-headline">A say in what we build next — quarterly calls.</span>
           <span class="ticker-dot">●</span>
-          <span class="ticker-eyebrow">→ Breaking</span>
-          <span class="ticker-headline">FolioSpace crosses 100 signups in 11 days.</span>
+          <span class="ticker-eyebrow">→ Waitlist</span>
+          <span class="ticker-headline">{{ waitlist_count }} people have joined the waitlist.</span>
           <span class="ticker-dot">●</span>
           <span class="ticker-eyebrow">→ Pricing</span>
-          <span class="ticker-headline">No setup fee. ₹149/mo, cancel any time.</span>
+          <span class="ticker-headline">No setup fee. ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr in Year 1 — ₹{{ "{:,}".format(PRO_YEAR2_INR) }} from Year 2.</span>
           <span class="ticker-dot">●</span>
           <span class="ticker-eyebrow">→ Newsroom</span>
           <span class="ticker-headline">One link. Every kind of work.</span>
@@ -445,9 +449,11 @@
           <span class="ticker-eyebrow">→ Mobile</span>
           <span class="ticker-headline">Edit on your phone, in any language.</span>
           <span class="ticker-dot">●</span>
+          {% if founder_seats_left is defined and founder_seats_left is not none %}
           <span class="ticker-eyebrow">→ Founders</span>
-          <span class="ticker-headline">The first 100 get a founder badge that lasts.</span>
+          <span class="ticker-headline">{% if founder_seats_left > 0 %}{{ founder_seats_left }} founder seats left in the first {{ FOUNDER_COHORT_LIMIT }}.{% else %}Founder cohort is full — join the waitlist for the next wave.{% endif %}</span>
           <span class="ticker-dot">●</span>
+          {% endif %}
           <span class="ticker-eyebrow">→ Shops</span>
           <span class="ticker-headline">A shopfront link your customers actually open.</span>
           <span class="ticker-dot">●</span>
@@ -501,8 +507,8 @@
             <div class="who-dir-mark who-dir-mark--4" aria-hidden="true">C</div>
             <div class="who-dir-body">
               <h3 class="who-dir-title">Consultants.</h3>
-              <span class="who-dir-tag">Case studies · testimonials · book a call</span>
-              <p class="who-dir-desc">Turn "send me your CV" into "wow, take my money". Case studies, testimonials, a one-tap "book a call" — built so a six-figure week starts with a single link.</p>
+              <span class="who-dir-tag">Case studies · book a call · share</span>
+              <p class="who-dir-desc">Case studies, a one-tap "book a call" button, and a PDF that exports clean — all on one link a recruiter actually opens.</p>
             </div>
             <span class="who-dir-arrow" aria-hidden="true">→</span>
           </article>
@@ -565,7 +571,7 @@
               <span class="receipt-tier">Free, in India</span>
             </header>
             <div class="receipt-tally">
-              <span class="receipt-price">₹0</span>
+              <span class="receipt-price">₹{{ "{:,}".format(FREE_PRICE_INR) }}</span>
               <span class="receipt-unit">/forever</span>
             </div>
             <p class="receipt-sub">No card, no UPI, no Aadhaar. Just sign up.</p>
@@ -573,7 +579,7 @@
               <li><span class="receipt-bullet">›</span>1 clean template</li>
               <li><span class="receipt-bullet">›</span>"Made with FolioSpace" badge</li>
               <li><span class="receipt-bullet">›</span>foliospace.in/yourname</li>
-              <li><span class="receipt-bullet">›</span>Loads fast on a 2G phone in Dharavi</li>
+              <li><span class="receipt-bullet">›</span>Built for slower mobile networks</li>
             </ul>
             <a href="#join" class="btn btn-ghost receipt-cta">Start free</a>
             <span class="receipt-perf" aria-hidden="true"></span>
@@ -588,10 +594,10 @@
               <span class="receipt-tier">★ Most loved</span>
             </header>
             <div class="receipt-tally">
-              <span class="receipt-price">₹149</span>
-              <span class="receipt-unit">/month</span>
+              <span class="receipt-price">₹{{ "{:,}".format(PRO_YEAR1_INR) }}</span>
+              <span class="receipt-unit">/year</span>
             </div>
-            <p class="receipt-sub">UPI AutoPay or Card · 14 days free · cancel in two taps.</p>
+            <p class="receipt-sub">UPI AutoPay or Card · annual billing · cancel in two taps.</p>
             <ul class="receipt-items">
               <li><span class="receipt-bullet">›</span>Every template, unlocked</li>
               <li><span class="receipt-bullet">›</span>One-tap PDF download</li>
@@ -601,7 +607,7 @@
               <li><span class="receipt-bullet">›</span>30-day visit analytics</li>
               <li><span class="receipt-bullet">›</span>Edit from your phone, in any language</li>
             </ul>
-            <a href="/dashboard/billing" class="btn btn-primary receipt-cta">Activate ₹149/mo →</a>
+            <a href="/dashboard/billing" class="btn btn-primary receipt-cta">Activate ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr →</a>
             <span class="receipt-perf" aria-hidden="true"></span>
           </article>
         </div>
@@ -614,26 +620,26 @@
         <h2 class="reveal">Built for the speed of a tap.</h2>
         <div class="stats-hero">
           <div class="stats-hero-main">
-            <span class="stats-hero-eyebrow">The brand number</span>
-            <span class="stats-hero-num"><span data-count="80">80</span><span class="stats-hero-unit">KB</span></span>
-            <span class="stats-hero-label" style="--d:0">first-load weight</span>
+            <span class="stats-hero-eyebrow">Built for the speed of a tap</span>
+            <span class="stats-hero-num">Light<em>weight</em></span>
+            <span class="stats-hero-label" style="--d:0">by design</span>
             <span class="stats-hero-note">Most pages ship at 1.5MB. We don't.</span>
           </div>
           <div class="stats-hero-orbit">
             <div class="stat-orbit" style="--d:1">
-              <strong><span data-count="60">60</span><span class="stat-unit">s</span></strong>
-              <span class="stat-label">to first portfolio</span>
-              <span class="stat-note">Type → preview → live. That's it.</span>
+              <strong>Share<em>Pre</em>view</strong>
+              <span class="stat-label">optimised</span>
+              <span class="stat-note">WhatsApp, LinkedIn, X — same OG image.</span>
             </div>
             <div class="stat-orbit" style="--d:2">
-              <strong><span data-count="3">3</span><span class="stat-unit">s</span></strong>
-              <span class="stat-label">to WhatsApp-ready</span>
-              <span class="stat-note">OG image + preview rendered on save.</span>
+              <strong>One<em>tap</em></strong>
+              <span class="stat-label">PDF export</span>
+              <span class="stat-note">Print-ready, from your folio URL.</span>
             </div>
             <div class="stat-orbit" style="--d:3">
-              <strong>₹<span data-count="99">99</span></strong>
-              <span class="stat-label">per month after</span>
-              <span class="stat-note">Less than your samosa. UPI autopay.</span>
+              <strong>₹{{ "{:,}".format(PRO_YEAR1_INR) }}<span class="stat-unit">/yr</span></strong>
+              <span class="stat-label">Pro, billed annually</span>
+              <span class="stat-note">UPI AutoPay. Cancel any time.</span>
             </div>
           </div>
         </div>
@@ -650,88 +656,88 @@
           <div class="horizontal-set">
             <article class="h-card">
               <div class="h-avatar">S</div>
-              <span class="h-role">Student · Pan-India</span>
-              <h3>Three projects, one link, four interviews.</h3>
-              <p>Pre-final year, no CV. Just a FolioSpace link sent in the group chat.</p>
+              <span class="h-role">Example Folio · Student</span>
+              <h3>Projects, talks, internships.</h3>
+              <p>Projects, talks, internships — one link a recruiter can preview in WhatsApp before opening.</p>
               <div class="h-foot"><span class="badge muted">PDF ready</span></div>
             </article>
             <article class="h-card">
               <div class="h-avatar">C</div>
-              <span class="h-role">Chef · Pan-India</span>
-              <h3>Menus that load before the customer finishes asking.</h3>
-              <p>Photos, plating, supplier story — all on one page that WhatsApp can preview.</p>
+              <span class="h-role">Example Folio · Chef</span>
+              <h3>Menus, plating, supplier story.</h3>
+              <p>Menus, plating, supplier story — all on one page that WhatsApp previews as a card.</p>
               <div class="h-foot"><span class="badge">Contact form</span></div>
             </article>
             <article class="h-card">
               <div class="h-avatar">I</div>
-              <span class="h-role">Illustrator</span>
-              <h3>Portfolio that loads on a 2G network in Dharavi.</h3>
-              <p>Hand-drawn thumbnails → under 80KB. Tap any tile to view in fullscreen.</p>
+              <span class="h-role">Example Folio · Illustrator</span>
+              <h3>Gallery that loads on slower networks.</h3>
+              <p>Hand-drawn thumbnails, light tiles, full-screen tap-to-view — built to work without fibre.</p>
               <div class="h-foot"><span class="badge">All templates</span></div>
             </article>
             <article class="h-card">
               <div class="h-avatar">C</div>
-              <span class="h-role">Consultant · Remote</span>
-              <h3>"Send me your CV" → "wow, take my money".</h3>
-              <p>Three case studies, one PDF, one contact button. Six figures closed in a week.</p>
+              <span class="h-role">Example Folio · Consultant</span>
+              <h3>Case studies, book a call, PDF export.</h3>
+              <p>Three case studies, one PDF, one contact button — all under your slug.</p>
               <div class="h-foot"><span class="badge">PDF in one tap</span></div>
             </article>
             <article class="h-card">
               <div class="h-avatar">D</div>
-              <span class="h-role">Developer · Pan-India</span>
-              <h3>Repos, talks, OSS — all in one place, finally.</h3>
-              <p>Repos, talks, OSS — all in one place, finally. GitHub import on the way.</p>
-              <div class="h-foot"><span class="badge">No badge</span></div>
+              <span class="h-role">Example Folio · Developer</span>
+              <h3>Repos, talks, OSS.</h3>
+              <p>Repos, talks, OSS — in one place. GitHub import on the way.</p>
+              <div class="h-foot"><span class="badge">Coming soon</span></div>
             </article>
             <article class="h-card">
               <div class="h-avatar">P</div>
-              <span class="h-role">PM · Pan-India</span>
-              <h3>Side projects visible for the first time.</h3>
-              <p>Talks, blog posts, weekend builds. Now recruiters find them.</p>
+              <span class="h-role">Example Folio · Working pro</span>
+              <h3>Side projects, writing, talks.</h3>
+              <p>Talks, blog posts, weekend builds — somewhere they live.</p>
               <div class="h-foot"><span class="badge muted">Edit on mobile</span></div>
             </article>
           </div>
           <div class="horizontal-set" aria-hidden="true">
             <article class="h-card">
               <div class="h-avatar">S</div>
-              <span class="h-role">Student · Pan-India</span>
-              <h3>Three projects, one link, four interviews.</h3>
-              <p>Pre-final year, no CV. Just a FolioSpace link sent in the group chat.</p>
+              <span class="h-role">Example Folio · Student</span>
+              <h3>Projects, talks, internships.</h3>
+              <p>Projects, talks, internships — one link a recruiter can preview in WhatsApp before opening.</p>
               <div class="h-foot"><span class="badge muted">PDF ready</span></div>
             </article>
             <article class="h-card">
               <div class="h-avatar">C</div>
-              <span class="h-role">Chef · Pan-India</span>
-              <h3>Menus that load before the customer finishes asking.</h3>
-              <p>Photos, plating, supplier story — all on one page that WhatsApp can preview.</p>
+              <span class="h-role">Example Folio · Chef</span>
+              <h3>Menus, plating, supplier story.</h3>
+              <p>Menus, plating, supplier story — all on one page that WhatsApp previews as a card.</p>
               <div class="h-foot"><span class="badge">Contact form</span></div>
             </article>
             <article class="h-card">
               <div class="h-avatar">I</div>
-              <span class="h-role">Illustrator</span>
-              <h3>Portfolio that loads on a 2G network in Dharavi.</h3>
-              <p>Hand-drawn thumbnails → under 80KB. Tap any tile to view in fullscreen.</p>
+              <span class="h-role">Example Folio · Illustrator</span>
+              <h3>Gallery that loads on slower networks.</h3>
+              <p>Hand-drawn thumbnails, light tiles, full-screen tap-to-view — built to work without fibre.</p>
               <div class="h-foot"><span class="badge">All templates</span></div>
             </article>
             <article class="h-card">
               <div class="h-avatar">C</div>
-              <span class="h-role">Consultant · Remote</span>
-              <h3>"Send me your CV" → "wow, take my money".</h3>
-              <p>Three case studies, one PDF, one contact button. Six figures closed in a week.</p>
+              <span class="h-role">Example Folio · Consultant</span>
+              <h3>Case studies, book a call, PDF export.</h3>
+              <p>Three case studies, one PDF, one contact button — all under your slug.</p>
               <div class="h-foot"><span class="badge">PDF in one tap</span></div>
             </article>
             <article class="h-card">
               <div class="h-avatar">D</div>
-              <span class="h-role">Developer · Pan-India</span>
-              <h3>Repos, talks, OSS — all in one place, finally.</h3>
-              <p>Repos, talks, OSS — all in one place, finally. GitHub import on the way.</p>
-              <div class="h-foot"><span class="badge">No badge</span></div>
+              <span class="h-role">Example Folio · Developer</span>
+              <h3>Repos, talks, OSS.</h3>
+              <p>Repos, talks, OSS — in one place. GitHub import on the way.</p>
+              <div class="h-foot"><span class="badge">Coming soon</span></div>
             </article>
             <article class="h-card">
               <div class="h-avatar">P</div>
-              <span class="h-role">PM · Pan-India</span>
-              <h3>Side projects visible for the first time.</h3>
-              <p>Talks, blog posts, weekend builds. Now recruiters find them.</p>
+              <span class="h-role">Example Folio · Working pro</span>
+              <h3>Side projects, writing, talks.</h3>
+              <p>Talks, blog posts, weekend builds — somewhere they live.</p>
               <div class="h-foot"><span class="badge muted">Edit on mobile</span></div>
             </article>
           </div>
@@ -746,7 +752,7 @@
         <div class="faq-list reveal">
           <details class="faq-item">
             <summary>
-              <span>Why ₹149/month?</span>
+              <span>Why ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr?</span>
               <span class="faq-icon" aria-hidden="true"></span>
             </summary>
             <div class="faq-body">
@@ -768,16 +774,16 @@
               <span class="faq-icon" aria-hidden="true"></span>
             </summary>
             <div class="faq-body">
-              <p>We'll email you the moment launch slots open. First 100 get locked-in launch pricing, a founder badge, and a say in what we build next. No spam, no drip — just one ping when it's your turn.</p>
+              <p>We'll email you the moment launch slots open. {% if founder_seats_left is defined and founder_seats_left is not none and founder_seats_left > 0 %}The first {{ FOUNDER_COHORT_LIMIT }} join the founder cohort automatically — locked-in launch pricing, founder badge, and a say in what we build next.{% else %}The founder cohort is currently full — join the waitlist for the next wave.{% endif %} No spam, no drip — just one ping when it's your turn.</p>
             </div>
           </details>
           <details class="faq-item">
             <summary>
-              <span>Will my portfolio load on a 2G phone?</span>
+              <span>Will my portfolio load on slower mobile networks?</span>
               <span class="faq-icon" aria-hidden="true"></span>
             </summary>
             <div class="faq-body">
-              <p>Yes. We obsess over Core Web Vitals and ship under 80KB on first load. Your page renders in under a second on a flaky network — that's the whole point.</p>
+              <p>It's built to. Pages are intentionally lightweight, with lazy-loaded images and no heavy client-side framework. We measure Core Web Vitals on each release — actual numbers live on /perf (coming soon).</p>
             </div>
           </details>
         </div>
@@ -820,17 +826,70 @@
       </div>
     </section>
 
+    <section class="trust" id="trust">
+      <div class="container">
+        <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page 08<span class="folio-meta-sep">/</span>Built with intention</p>
+        <h2 class="reveal">The work that holds the work.</h2>
+        <p class="trust-lead reveal">FolioSpace is built on a small set of choices we'd defend in a code review. Here's the actual stack — no vague "we take security seriously" claims.</p>
+        <div class="trust-grid">
+          <article class="trust-card reveal">
+            <h3>Security headers, on every response.</h3>
+            <p>Content Security Policy, HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy — all set in middleware, not left to chance.</p>
+          </article>
+          <article class="trust-card reveal">
+            <h3>OG image SSRF guard.</h3>
+            <p>Custom OG image URLs are validated to block private IP ranges, embedded credentials, and non-http schemes. Crawlers can't be tricked into fetching internal hosts.</p>
+          </article>
+          <article class="trust-card reveal">
+            <h3>Avatar URL validation.</h3>
+            <p>Same allow-list logic on avatar URLs — only public https endpoints accepted. DNS resolution checked at write time.</p>
+          </article>
+          <article class="trust-card reveal">
+            <h3>Rate limits on auth endpoints.</h3>
+            <p>Login, signup, forgot-password, and reset endpoints are protected with slowapi rate limits tuned for human use.</p>
+          </article>
+          <article class="trust-card reveal">
+            <h3>CSRF tokens on every form.</h3>
+            <p>Session-bound tokens, validated server-side. Same-origin checks on state-changing endpoints.</p>
+          </article>
+          <article class="trust-card reveal">
+            <h3>No analytics on third-party pixels.</h3>
+            <p>Visit counts and custom events are server-rendered. No Facebook, Google Ads, or Hotjar scripts injected into your folio.</p>
+          </article>
+          <article class="trust-card reveal">
+            <h3>One price, public.</h3>
+            <p>₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr in Year 1, ₹{{ "{:,}".format(PRO_YEAR2_INR) }}/yr from Year 2. No tiers, no upsells mid-flow, no surprise currency conversion.</p>
+          </article>
+          <article class="trust-card reveal">
+            <h3>UPI AutoPay, not card storage.</h3>
+            <p>Card numbers never touch our servers. Cashfree holds the UPI AutoPay mandate. We store a subscription ID, never a payment instrument.</p>
+          </article>
+          <article class="trust-card reveal">
+            <h3>Open-source-friendly code.</h3>
+            <p>FastAPI + Jinja2 + vanilla CSS/JS. No proprietary frontend framework. What we ship, a senior engineer can read end to end.</p>
+          </article>
+        </div>
+        <p class="trust-foot reveal">
+          <a href="/privacy">Privacy policy</a>
+          <span aria-hidden="true">·</span>
+          <a href="/terms">Terms</a>
+          <span aria-hidden="true">·</span>
+          <a href="/security">Security notes</a>
+        </p>
+      </div>
+    </section>
+
     <section class="cta stamp">
       <div class="container">
-        <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page 08<span class="folio-meta-sep">/</span>The first 100</p>
+        <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page 08<span class="folio-meta-sep">/</span>The first {{ FOUNDER_COHORT_LIMIT }}</p>
 
         <div class="ticket">
           <div class="ticket-stub">
             <span class="ticket-stub-label">Admit</span>
-            <span class="ticket-stub-num">01</span>
+            <span class="ticket-stub-num">{% if founder_seats_left is defined and founder_seats_left is not none %}{{ founder_seats_left }}{% else %}—{% endif %}</span>
             <span class="ticket-stub-sep">/</span>
-            <span class="ticket-stub-cap">100</span>
-            <span class="ticket-stub-foot">First launch<br/>cohort</span>
+            <span class="ticket-stub-cap">{{ FOUNDER_COHORT_LIMIT }}</span>
+            <span class="ticket-stub-foot">Founder<br/>seats</span>
             <span class="ticket-stub-seal" aria-hidden="true">
               <span class="ticket-stub-seal-ring"></span>
               <span class="ticket-stub-seal-text">
@@ -839,7 +898,7 @@
                     <path id="sealCircle" d="M 100,100 m -78,0 a 78,78 0 1,1 156,0 a 78,78 0 1,1 -156,0"/>
                   </defs>
                   <text font-family="Saira, sans-serif" font-size="14" font-weight="700" letter-spacing="6" fill="currentColor">
-                    <textPath href="#sealCircle" startOffset="0">FOUNDER · COHORT · 01 · 100 ·  </textPath>
+                    <textPath href="#sealCircle" startOffset="0">FOUNDER · COHORT · 01 · {{ FOUNDER_COHORT_LIMIT }} ·  </textPath>
                   </text>
                 </svg>
               </span>
@@ -848,22 +907,22 @@
           </div>
 
           <div class="ticket-body">
-            <div class="ticket-eyebrow"><span class="ticket-eyebrow-dot"></span>The founding cohort · FolioSpace</div>
-            <h2 class="stamp-headline">The first <em>100</em> get lifetime perks.</h2>
-            <p class="stamp-sub">Locked-in launch pricing, founder badge, and a say in what we build next.</p>
+            <div class="ticket-eyebrow"><span class="ticket-eyebrow-dot"></span>{% if founder_seats_left is defined and founder_seats_left is not none and founder_seats_left > 0 %}Founder seats open · FolioSpace{% else %}Founder cohort full · FolioSpace{% endif %}</div>
+            <h2 class="stamp-headline">{% if founder_seats_left is defined and founder_seats_left is not none and founder_seats_left > 0 %}The first <em>{{ FOUNDER_COHORT_LIMIT }}</em> get founder perks.{% else %}Founder cohort is full — join the next wave.{% endif %}</h2>
+            <p class="stamp-sub">{% if founder_seats_left is defined and founder_seats_left is not none and founder_seats_left > 0 %}Locked-in launch pricing, founder badge, and a say in what we build next.{% else %}You're welcome to join the waitlist — the next cohort opens after launch.{% endif %}</p>
 
             <ul class="ticket-perks">
               <li class="ticket-perk" style="--i:1">
                 <span class="ticket-perk-num">01</span>
                 <div class="ticket-perk-body">
-                  <strong>14-day Pro trial.</strong>
+                  <strong>Year-1 launch offer at ₹{{ "{:,}".format(PRO_YEAR1_INR) }}.</strong>
                   <span>Full Pro features on signup — no card, no UPI mandate, no charge.</span>
                 </div>
               </li>
               <li class="ticket-perk" style="--i:2">
                 <span class="ticket-perk-num">02</span>
                 <div class="ticket-perk-body">
-                  <strong>₹149/mo, UPI AutoPay.</strong>
+                  <strong>₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr in Year 1, UPI AutoPay or Card AutoPay via Cashfree.</strong>
                   <span>Same price as everyone. No setup fee, no surprise hikes.</span>
                 </div>
               </li>
@@ -878,7 +937,7 @@
 
             <div class="ticket-cta-row">
               <a href="#join" class="btn btn-primary btn-lg magnetic ticket-cta-stamp">
-                <span class="ticket-cta-stamp-inner">Claim my spot →</span>
+                <span class="ticket-cta-stamp-inner">{% if founder_seats_left is defined and founder_seats_left is not none and founder_seats_left > 0 %}Claim my spot →{% else %}Join the waitlist →{% endif %}</span>
               </a>
               <span class="ticket-cta-foot">No card now · 1 email at launch</span>
             </div>

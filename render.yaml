@@ -30,11 +30,56 @@ services:
         sync: false
       - key: INTERNAL_TRUST_TOKEN
         sync: false
-      - key: RAZORPAY_KEY_ID
+      - key: CASHFREE_APP_ID
         sync: false
-      - key: RAZORPAY_KEY_SECRET
+      - key: CASHFREE_SECRET_KEY
         sync: false
-      - key: RAZORPAY_WEBHOOK_SECRET
+      - key: CASHFREE_API_VERSION
+        value: 2025-01-01
+      - key: CASHFREE_ENV
+        value: production
+      - key: CASHFREE_WEBHOOK_SECRET
         sync: false
-      - key: RAZORPAY_PLAN_ID_PRO
+      - key: CASHFREE_PLAN_ID_PRO_YEAR1_DISCOUNT
+        sync: false
+      - key: CASHFREE_PLAN_ID_PRO_YEAR2_FULL
+        sync: false
+      - key: PRO_YEAR1_INR
+        value: 899
+      - key: PRO_YEAR2_INR
+        value: 1499
+      - key: TRIAL_DAYS
+        value: 0
+      - key: FOUNDER_COHORT_LIMIT
+        value: 100
+
+  # Phase C: referral-program backstop. Runs at 03:00 IST (UTC: 30 21 * * *)
+  # daily. UPGRADE-ONLY — only swaps year-2 -> year-1. Uses INTERNAL_TRUST_TOKEN
+  # as a startup guard (matches the pattern Render Cron expects).
+  - type: cron
+    name: foliospace-referral-evaluator
+    env: python
+    region: oregon
+    plan: free
+    schedule: "30 21 * * *"
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m app.jobs.referral_evaluator
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: INTERNAL_TRUST_TOKEN
+        sync: false
+      - key: CASHFREE_APP_ID
+        sync: false
+      - key: CASHFREE_SECRET_KEY
+        sync: false
+      - key: CASHFREE_ENV
+        value: production
+      - key: CASHFREE_API_VERSION
+        value: 2025-01-01
+      - key: CASHFREE_PLAN_ID_PRO_YEAR1_DISCOUNT
+        sync: false
+      - key: CASHFREE_PLAN_ID_PRO_YEAR2_FULL
         sync: false

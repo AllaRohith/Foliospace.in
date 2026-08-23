@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -155,6 +156,12 @@ async def public_folio(request: Request, slug: str):
             "approved_fonts": approved_fonts,
             "public_links": public_links,
             "now": datetime.utcnow(),
+            # Test/dev folios (timestamp-suffix or "test-" prefix) must not
+            # be indexed. Detection is slug-pattern based; production slugs
+            # do not match these patterns.
+            "is_test_slug": bool(
+                re.match(r"^(me|avatar|fm)-test-[0-9]+$|^test-", safe_slug)
+            ),
         },
     )
     return _public_cache(response)
@@ -693,6 +700,7 @@ async def owner_seo_save(
     payload: dict = Body(...),
 ):
     from app.utils.text import strip_control
+    from app.utils.url_safety import safe_public_url
     from app.services import user_auth as user_auth_svc
     safe_slug = strip_control((slug or "").strip())[:48]
     user = folio_svc.find_user_by_slug(safe_slug, require_public=False)
@@ -703,7 +711,14 @@ async def owner_seo_save(
         return JSONResponse({"ok": False}, status_code=403)
     seo_title = strip_control(str(payload.get("seo_title", "")))[:70]
     seo_description = strip_control(str(payload.get("seo_description", "")))[:160]
-    og_image_override_url = strip_control(str(payload.get("og_image_override_url", "")))[:2048]
+    og_image_override_url_raw = strip_control(str(payload.get("og_image_override_url", "")))[:2048]
+    ok, reason = safe_public_url(og_image_override_url_raw)
+    if not ok:
+        return JSONResponse(
+            {"ok": False, "field": "og_image_override_url", "reason": reason},
+            status_code=400,
+        )
+    og_image_override_url = og_image_override_url_raw
     updated = user_auth_svc.update_user_seo(
         str(user["id"]),
         seo_title=seo_title,

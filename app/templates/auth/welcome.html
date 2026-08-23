@@ -16,7 +16,7 @@
   <section class="welcome-wrap">
     <div class="welcome-eyebrow">
       <span class="welcome-eyebrow-mark" aria-hidden="true">▰</span>
-      <span>15-DAY PRO TRIAL · ACTIVE</span>
+      <span>Step 2 of 3 · {{ trial_label() }}</span>
     </div>
 
     <h1 class="welcome-title">
@@ -101,16 +101,48 @@
           {% endif %}
         </footer>
       </article>
+
+      <article class="welcome-card {% if has_passkey %}is-connected{% endif %}" aria-label="Set up a passkey">
+        <header class="welcome-card-head">
+          <span class="welcome-card-mark welcome-card-mark-passkey" aria-hidden="true">🔑</span>
+          <span class="welcome-card-name">Passkey</span>
+          {% if has_passkey %}
+            <span class="welcome-card-state welcome-card-state-ok">Enabled</span>
+          {% else %}
+            <span class="welcome-card-state">Not set up</span>
+          {% endif %}
+        </header>
+        <div class="welcome-card-rule" aria-hidden="true"></div>
+        <p class="welcome-card-body">
+          Sign in next time with your fingerprint, face, or device PIN — no password, no inbox code. Stored only on this device or your password manager.
+        </p>
+        <footer class="welcome-card-foot">
+          {% if has_passkey %}
+            <span class="welcome-card-tick" aria-hidden="true">✓</span>
+            <span class="welcome-card-tick-text">Enrolled. Manage from your dashboard.</span>
+          {% elif u.email_verified %}
+            <button type="button" class="welcome-card-btn welcome-card-btn-passkey" data-passkey-register>
+              <span class="welcome-card-btn-label">Create passkey</span>
+              <span class="welcome-card-btn-arrow" aria-hidden="true">→</span>
+            </button>
+            <span class="welcome-card-err" data-passkey-error role="alert" aria-live="polite"></span>
+          {% else %}
+            <span class="welcome-card-off">Verify your email first to enable passkeys.</span>
+          {% endif %}
+        </footer>
+      </article>
     </div>
 
     <div class="welcome-cta-wrap">
       <a class="welcome-cta" href="/{{ u.slug }}/manage">
-        <span class="welcome-cta-label">{% if connected_providers %}Continue to your folio{% else %}Build your folio{% endif %}</span>
+        <span class="welcome-cta-label">{% if connected_providers or has_passkey %}Continue to your folio{% else %}Build your folio{% endif %}</span>
         <span class="welcome-cta-arrow" aria-hidden="true">→</span>
       </a>
       <div class="welcome-cta-meta">
         {% if connected_providers %}
           Connected: {{ connected_providers|join(' · ') }} · Connect more later from your folio
+        {% elif has_passkey %}
+          Passkey set up · Connect accounts later from your folio
         {% else %}
           You can connect both accounts later from <code>/{{ u.slug }}/manage</code>
         {% endif %}
@@ -118,8 +150,12 @@
     </div>
 
     <div class="welcome-trust">
-      <div class="welcome-trust-label">No card today · 14 days free · Cancel any time</div>
+      <div class="welcome-trust-label">No card today · Free forever · Cancel any time</div>
     </div>
   </section>
 </main>
+{% endblock %}
+
+{% block scripts %}
+<script defer src="{{ request.url_for('static', path='js/passkey.min.js') }}?v={{ asset_v }}"></script>
 {% endblock %}

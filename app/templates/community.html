@@ -187,30 +187,28 @@
 
       <div class="cover-marquee" aria-hidden="true">
         <div class="cover-marquee-track">
-          <span class="cover-marquee-item">foliospace.in/chef-mumbai</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/dev-bengaluru</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/consultant-delhi</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/studio-kochi</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/founder-hyderabad</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/student-guwahati</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/chef-mumbai</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/dev-bengaluru</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/consultant-delhi</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/studio-kochi</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/founder-hyderabad</span>
-          <span class="cover-marquee-dot">·</span>
-          <span class="cover-marquee-item">foliospace.in/student-guwahati</span>
-          <span class="cover-marquee-dot">·</span>
+          {% set marquee_slugs = (rows|map(attribute='slug')|list) if rows else [] %}
+          {% if marquee_slugs %}
+            {% for _ in range(2) %}
+              {% for s in marquee_slugs %}
+                <span class="cover-marquee-item">foliospace.in/{{ s }}</span>
+                <span class="cover-marquee-dot">·</span>
+              {% endfor %}
+            {% endfor %}
+          {% else %}
+            <span class="cover-marquee-item">foliospace.in/&lt;your-name&gt;</span>
+            <span class="cover-marquee-dot">·</span>
+            <span class="cover-marquee-item">No folios listed yet</span>
+            <span class="cover-marquee-dot">·</span>
+            <span class="cover-marquee-item">Be the first</span>
+            <span class="cover-marquee-dot">·</span>
+            <span class="cover-marquee-item">foliospace.in/&lt;your-name&gt;</span>
+            <span class="cover-marquee-dot">·</span>
+            <span class="cover-marquee-item">No folios listed yet</span>
+            <span class="cover-marquee-dot">·</span>
+            <span class="cover-marquee-item">Be the first</span>
+            <span class="cover-marquee-dot">·</span>
+          {% endif %}
         </div>
       </div>
     </section>

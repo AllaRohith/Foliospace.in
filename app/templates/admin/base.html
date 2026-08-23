@@ -27,6 +27,7 @@
     {% elif _path.startswith('/admin/audit') %}{% set _nav_active = 'audit' %}
     {% elif _path.startswith('/admin/fonts') %}{% set _nav_active = 'fonts' %}
     {% elif _path.startswith('/admin/templates') %}{% set _nav_active = 'templates' %}
+    {% elif _path.startswith('/admin/grants') %}{% set _nav_active = 'grants' %}
     {% elif _path.startswith('/admin/') %}{% set _nav_active = 'dashboard' %}
     {% endif %}
   {% endif %}
@@ -61,6 +62,10 @@
         <a href="/admin/fonts" class="sidebar-item {{ 'is-active' if _nav_active == 'fonts' else '' }}">
           <svg class="sidebar-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 13h10M5 11h6M4 8h8M5 5h6M6 2h4"/></svg>
           <span class="sidebar-label">Fonts</span>
+        </a>
+        <a href="/admin/grants" class="sidebar-item {{ 'is-active' if _nav_active == 'grants' else '' }}">
+          <svg class="sidebar-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 8l3-3 3 3-3 3-3-3zm6 0l3-3 3 3-3 3-3-3z"/></svg>
+          <span class="sidebar-label">Comp</span>
         </a>
       </nav>
     </div>

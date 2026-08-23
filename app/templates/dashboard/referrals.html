@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% set folio_base = "https://foliospace.in" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block description %}{{ description }}{% endblock %}
+{% block canonical %}/dashboard/referrals{% endblock %}
+{% block og_title %}Referrals — FolioSpace{% endblock %}
+{% block og_description %}{{ description }}{% endblock %}
+{% block og_image_alt %}Referral program on FolioSpace{% endblock %}
+{% block robots %}noindex,nofollow{% endblock %}
+
+{% block content %}
+<div class="dash-shell">
+  {% include "partials/_dash_sidebar.html" %}
+  <div class="dash-app">
+    <header class="dash-bar">
+      <button type="button" class="dash-bar-hamburger" aria-label="Toggle navigation" data-dash-burger>☰</button>
+      <span class="dash-bar-issue">→ Issue No. 05</span>
+      <div class="dash-bar-right">
+        <a class="dash-bar-link" href="/{{ user.slug }}/manage" data-fm-tab="manage">Edit folio →</a>
+        {% import "partials/_plan_summary.html" as ps_macro %}
+        {{ ps_macro.pill(user) }}
+      </div>
+    </header>
+
+    <main id="main" class="dash-main">
+      <div class="fm-grid">
+        <section class="fm-editor" aria-label="Referrals">
+
+          <div class="fm-bill-figure">
+            <div class="fm-bill-figure-main" id="referral-progress-main">
+              <div class="fm-bill-figure-eyebrow">
+                {% if progress.unlocked %}→ Year-1 unlocked{% else %}→ {{ progress.active_count }} of {{ progress.threshold }} friends{% endif %}
+              </div>
+              <div class="fm-bill-figure-num" data-referral-progress-num>
+                {{ progress.active_count }}/{{ progress.threshold }}
+              </div>
+              <div class="fm-bill-figure-unit">
+                {% if progress.unlocked %}
+                  Your renewal is locked at ₹899 — forever.
+                {% elif progress.remaining == 1 %}
+                  {{ progress.remaining }} more friend to lock Year-1.
+                {% else %}
+                  {{ progress.remaining }} more friends to lock Year-1.
+                {% endif %}
+              </div>
+            </div>
+            <div class="fm-bill-figure-detail" aria-label="Progress">
+              <div class="fm-bill-figure-row">
+                <span>Verified friends</span>
+                <strong data-referral-progress-active>{{ progress.active_count }} / {{ progress.threshold }}</strong>
+              </div>
+              <div class="fm-bill-figure-row">
+                <span>Reward</span>
+                <strong>Year-1 price locked forever</strong>
+              </div>
+              <div class="fm-bill-figure-row">
+                <span>Tier matters?</span>
+                <strong>No — Free and Pro both count</strong>
+              </div>
+              <div class="fm-bill-figure-row">
+                <span>Time window</span>
+                <strong>Cumulative — no expiry</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="fm-bill-section">
+            <div class="fm-bill-section-eyebrow">→ Your invite link</div>
+            <h2 class="fm-bill-section-title">Share it. <em>Watch the count climb.</em></h2>
+            <p class="fm-bill-section-sub">
+              Every friend who signs up through your link, verifies their email, and publishes their folio counts.
+              Tier doesn't matter — Free users count too.
+            </p>
+
+            <div class="referral-link-row" aria-label="Your referral link">
+              <code class="referral-link-code" data-referral-url>{{ referral_url }}</code>
+              <button type="button" class="auth-submit referral-copy-btn" data-referral-copy data-referral-copy-value="{{ referral_url }}">
+                <span class="referral-copy-label">Copy link</span>
+              </button>
+            </div>
+            <p class="referral-link-status" data-referral-copy-status role="status" aria-live="polite"></p>
+
+            <div class="referral-share-row" aria-label="Share buttons">
+              <a class="referral-share referral-share-whatsapp"
+                 data-share-channel="referral_whatsapp"
+                 href="https://wa.me/?text={{ ('I built my portfolio on FolioSpace — one link for everything. Use mine to get started: ' ~ referral_url) | urlencode }}"
+                 target="_blank" rel="noopener noreferrer">Share on WhatsApp →</a>
+              <a class="referral-share referral-share-linkedin"
+                 data-share-channel="referral_linkedin"
+                 href="https://www.linkedin.com/sharing/share-offsite/?url={{ referral_url | urlencode }}"
+                 target="_blank" rel="noopener noreferrer">Share on LinkedIn →</a>
+              <a class="referral-share referral-share-email"
+                 data-share-channel="referral_email"
+                 href="mailto:?subject={{ 'I built my portfolio on FolioSpace' | urlencode }}&body={{ ('One link for everything I do online. Try FolioSpace — use my link to get started: ' ~ referral_url) | urlencode }}">Share via email →</a>
+            </div>
+          </div>
+
+          <div class="fm-bill-section">
+            <div class="fm-bill-section-eyebrow">→ How a referral counts</div>
+            <h2 class="fm-bill-section-title">Three <em>boxes.</em></h2>
+            <ol class="fm-bill-steps">
+              <li class="fm-bill-step">
+                <div class="fm-bill-step-num">01</div>
+                <div class="fm-bill-step-body">
+                  <div class="fm-bill-step-title">They sign up via your link</div>
+                  <p>The <code>/ref/{code}</code> page drops a 30-day cookie. The signup form picks it up.</p>
+                </div>
+              </li>
+              <li class="fm-bill-step">
+                <div class="fm-bill-step-num">02</div>
+                <div class="fm-bill-step-body">
+                  <div class="fm-bill-step-title">They verify their email</div>
+                  <p>Their row flips from <em>pending</em> to <em>verified</em>. This happens the moment they click the OTP link.</p>
+                </div>
+              </li>
+              <li class="fm-bill-step">
+                <div class="fm-bill-step-num">03</div>
+                <div class="fm-bill-step-body">
+                  <div class="fm-bill-step-title">They publish their folio</div>
+                  <p>When they flip <em>Make my folio public</em> on, your count ticks up. That's the only moment a count can change.</p>
+                </div>
+              </li>
+            </ol>
+          </div>
+
+          <div class="fm-bill-section fm-bill-faq">
+            <div class="fm-bill-section-eyebrow">→ Questions</div>
+            <h2 class="fm-bill-section-title">The <em>honest</em> answers.</h2>
+            <details class="fm-bill-faq-item">
+              <summary><span>How long does the cookie last?</span><span class="fm-bill-faq-icon" aria-hidden="true"></span></summary>
+              <div class="fm-bill-faq-body"><p>30 days. If they sign up within that window via your link, you get credit.</p></div>
+            </details>
+            <details class="fm-bill-faq-item">
+              <summary><span>What if they don't make their folio public?</span><span class="fm-bill-faq-icon" aria-hidden="true"></span></summary>
+              <div class="fm-bill-faq-body"><p>They don't count — the third box is unflipped. The default for every FolioSpace user is private, so this is opt-in on their end.</p></div>
+            </details>
+            <details class="fm-bill-faq-item">
+              <summary><span>Do Free users count?</span><span class="fm-bill-faq-icon" aria-hidden="true"></span></summary>
+              <div class="fm-bill-faq-body"><p>Yes. Anyone who clears the three boxes counts, regardless of plan.</p></div>
+            </details>
+            <details class="fm-bill-faq-item">
+              <summary><span>What happens at 10?</span><span class="fm-bill-faq-icon" aria-hidden="true"></span></summary>
+              <div class="fm-bill-faq-body"><p>If you're on a year-2 subscription, we swap you back to the year-1 plan immediately. If you're on year-1, the discount stays locked — every renewal, forever. If you're on Free, your first Pro year starts at ₹899.</p></div>
+            </details>
+            <details class="fm-bill-faq-item">
+              <summary><span>Can I lose the lock once I've earned it?</span><span class="fm-bill-faq-icon" aria-hidden="true"></span></summary>
+              <div class="fm-bill-faq-body"><p>No. The lock is permanent. Cancelling and resubscribing still keeps the year-1 price.</p></div>
+            </details>
+          </div>
+
+        </section>
+
+        <aside class="fm-side" aria-label="Referral quick view">
+
+          <section class="fm-card">
+            <div class="fm-card-eyebrow">→ Your code</div>
+            <code class="referral-code-display" data-referral-code-display>{{ referral_code }}</code>
+            <p class="referral-card-foot">Anyone can type <code>foliospace.in/ref/{{ referral_code }}</code> to get your cookie set.</p>
+          </section>
+
+          <section class="fm-card">
+            <div class="fm-card-eyebrow">→ Progress</div>
+            {% if progress.unlocked %}
+              <div class="fm-card-numbers">
+                <div class="fm-card-stat">
+                  <div class="fm-card-num">✓</div>
+                  <div class="fm-card-label">Year-1 locked forever</div>
+                </div>
+              </div>
+              <div class="fm-card-foot">You crossed {{ progress.threshold }} on {{ progress.threshold }} referrals. Lock-in is permanent.</div>
+            {% else %}
+              <div class="fm-card-numbers">
+                <div class="fm-card-stat">
+                  <div class="fm-card-num" data-referral-card-num>{{ progress.active_count }}</div>
+                  <div class="fm-card-label">of {{ progress.threshold }} friends</div>
+                </div>
+                <div class="fm-card-stat">
+                  <div class="fm-card-num">{{ progress.remaining }}</div>
+                  <div class="fm-card-label">to go</div>
+                </div>
+              </div>
+              <div class="fm-card-foot">Each friend has to verify their email AND publish their folio before they count.</div>
+            {% endif %}
+          </section>
+
+          <section class="fm-card">
+            <div class="fm-card-eyebrow">→ Tips</div>
+            <ul class="fm-bill-list">
+              <li><span class="fm-bill-list-bullet">›</span><span><strong>Lead with a screenshot</strong> of your folio. People click what looks real.</span></li>
+              <li><span class="fm-bill-list-bullet">›</span><span><strong>WhatsApp a single friend</strong> who'd actually use it — your first three referrals usually come from one DM thread.</span></li>
+              <li><span class="fm-bill-list-bullet">›</span><span><strong>Add the link to your bio.</strong> Instagram, LinkedIn, X — every post that links to it is a future signup.</span></li>
+            </ul>
+          </section>
+
+        </aside>
+      </div>
+    </main>
+  </div>
+</div>
+
+<style>
+  .referral-link-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--cream);
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .referral-link-code {
+    flex: 1 1 280px;
+    min-width: 0;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px;
+    word-break: break-all;
+    color: var(--ink);
+    background: transparent;
+  }
+  .referral-copy-btn {
+    flex: 0 0 auto;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+  }
+  .referral-copy-btn.is-copied {
+    background: var(--ink);
+    color: var(--cream);
+  }
+  .referral-link-status {
+    margin: 8px 2px 0;
+    font-size: 13px;
+    color: var(--muted);
+    min-height: 1.2em;
+  }
+  .referral-share-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .referral-share {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-family: 'Saira', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    background: var(--cream);
+    text-decoration: none;
+    transition: background 120ms ease;
+  }
+  .referral-share:hover {
+    background: var(--ink);
+    color: var(--cream);
+  }
+  .referral-code-display {
+    display: block;
+    padding: 12px 14px;
+    margin: 8px 0 4px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--cream);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    word-break: break-all;
+  }
+  .referral-card-foot {
+    margin: 10px 0 0;
+    font-size: 12px;
+    color: var(--muted);
+  }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script defer src="{{ request.url_for('static', path='js/referrals.min.js') }}?v={{ asset_v }}"></script>
+{% endblock %}

@@ -11,6 +11,7 @@ from app.services import user_auth
 from app.services import auth_tokens
 from app.services import email_service
 from app.services import oauth as oauth_svc
+from app.services import passkey as passkey_svc
 from app.utils.text import strip_control
 from app.rate_limit import limiter
 
@@ -87,7 +88,10 @@ async def signup_submit(
             f"/signup?err=short&email={email_clean}", status_code=303
         )
     try:
-        user = user_auth.create_user(email_clean, pw)
+        # Phase C: pull referrer UUID from the fs_ref cookie (set by /ref/{code}).
+        # Clear the cookie after consumption so the referrer is attributed only once.
+        referred_by = request.cookies.get("fs_ref") or None
+        user = user_auth.create_user(email_clean, pw, referred_by=referred_by)
     except HTTPException as e:
         user_auth.record_login_attempt(ip, email_clean, False)
         if e.status_code == 409:
@@ -96,6 +100,9 @@ async def signup_submit(
         return RedirectResponse(
             f"/signup?err={detail}&email={email_clean}", status_code=303
         )
+    # Phase C: clear the fs_ref cookie now that it's been consumed. We do this
+    # BEFORE the OTP send so any subsequent signup attempts don't carry the
+    # attribution forward.
     user_auth.audit_user(request, str(user["id"]), "signup.created", target=ip)
     try:
         code, _expires_at = auth_tokens.issue_otp(email_clean)
@@ -110,7 +117,10 @@ async def signup_submit(
             "first_seen_iso": user["waitlist_created_at"].isoformat(),
             "role": user.get("role") or "",
         }
-    return RedirectResponse(f"/signup/verify?email={email_clean}", status_code=303)
+    response = RedirectResponse(f"/signup/verify?email={email_clean}", status_code=303)
+    # Phase C: clear fs_ref after consumption so the attribution is single-shot.
+    response.delete_cookie("fs_ref", path="/")
+    return response
 
 
 @router.get("/signup/verify", response_class=HTMLResponse)
@@ -217,8 +227,12 @@ async def welcome(request: Request):
         "slug": user["slug"],
         "display_name": user.get("display_name") or "",
         "is_pro": user.get("plan") == "pro",
-        "is_trial": bool(user.get("is_trial")),
+        "email_verified": bool(user.get("email_verified")),
     }
+    try:
+        has_passkey = bool(passkey_svc.list_user_passkeys(str(user["id"])))
+    except Exception:
+        has_passkey = False
     response = templates.TemplateResponse(
         request,
         "auth/welcome.html",
@@ -228,6 +242,7 @@ async def welcome(request: Request):
             "description": "Pull your repos, contribution graph and work history into your folio in one tap.",
             "u": u,
             "connected_providers": connected_providers,
+            "has_passkey": has_passkey,
             "saved_provider": _sanitize(request.query_params.get("provider", ""))[:16],
             "saved": _sanitize(request.query_params.get("saved", ""))[:16],
             "err": _sanitize(request.query_params.get("err", ""))[:64],
@@ -499,7 +514,6 @@ async def me(request: Request):
             "is_public": bool(user.get("is_public")),
             "plan": user.get("plan") or "free",
             "is_internal": bool(user.get("is_internal")),
-            "is_trial": bool(user.get("is_trial")),
             "payment_failed_at": user.get("payment_failed_at").isoformat() if user.get("payment_failed_at") else None,
             "plan_expires_at": user.get("plan_expires_at").isoformat() if user.get("plan_expires_at") else None,
         }
@@ -521,7 +535,6 @@ def _user_to_context(user) -> dict:
         "plan": user.get("plan") or "free",
         "plan_expires_at": user.get("plan_expires_at"),
         "payment_failed_at": user.get("payment_failed_at"),
-        "is_trial": bool(user.get("is_trial")),
         "is_internal": bool(user.get("is_internal")),
         "template_id": (user.get("template_id") or "other-base").strip()[:32],
     }
@@ -568,6 +581,23 @@ async def oauth_start(request: Request, provider: str, intent: str = "login"):
         samesite="lax",
         path="/auth/oauth",
     )
+    # Phase C: parallel cookie carries the referrer UUID across the OAuth
+    # round-trip. Only set on login-flow (link-flow attaches to an existing
+    # account — referrer attribution already happened at original signup).
+    if not link_mode:
+        ref_cookie = (request.cookies.get("fs_ref") or "").strip()[:64]
+        if ref_cookie:
+            response.set_cookie(
+                "fs_oauth_ref",
+                ref_cookie,
+                max_age=600,
+                httponly=True,
+                secure=True,
+                samesite="lax",
+                path="/auth/oauth",
+            )
+        else:
+            response.delete_cookie("fs_oauth_ref", path="/auth/oauth")
     if link_mode:
         response.set_cookie(
             "fs_oauth_intent",
@@ -610,9 +640,11 @@ async def oauth_callback(request: Request, provider: str):
     state_in = _sanitize(request.query_params.get("state", ""))[:128]
     state_cookie = request.cookies.get("fs_oauth_state", "")
     pid_cookie = request.cookies.get("fs_oauth_provider", "")
+    ref_cookie = (request.cookies.get("fs_oauth_ref") or "").strip()[:64]
     response = RedirectResponse("/login?err=oauth", status_code=303)
     response.delete_cookie("fs_oauth_state", path="/auth/oauth")
     response.delete_cookie("fs_oauth_provider", path="/auth/oauth")
+    response.delete_cookie("fs_oauth_ref", path="/auth/oauth")
     if not code:
         return response
     if not state_in or not state_cookie or state_in != state_cookie:
@@ -639,6 +671,7 @@ async def oauth_callback(request: Request, provider: str):
                 provider=pid,
                 provider_uid=profile["uid"],
                 display_name=profile.get("name") or "",
+                referred_by=ref_cookie or None,
             )
             if not user:
                 user_auth.audit_user(request, None, f"oauth.{pid}.create-failed", target=ip)
