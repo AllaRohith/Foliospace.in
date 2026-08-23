@@ -2192,15 +2192,16 @@ body.dark .pf-press { color: var(--cream); }
 
 .stats-hero-num {
   font-family: 'Stalinist One', 'Arial Black', sans-serif;
-  font-size: clamp(120px, 18vw, 240px);
+  font-size: clamp(64px, 11vw, 128px);
   font-weight: 400;
   line-height: 0.88;
   letter-spacing: -0.04em;
   color: var(--ink);
-  display: inline-flex;
+  display: block;
   align-items: baseline;
   position: relative;
   margin: 4px 0 0;
+  max-width: 100%;
 }
 .stats-hero-num::after {
   content: "";
