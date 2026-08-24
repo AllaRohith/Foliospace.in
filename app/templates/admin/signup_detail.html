@@ -9,96 +9,114 @@
 {% block breadcrumbs %}
 <div class="breadcrumbs">
   <a href="/admin/">Admin</a>
-  <span class="sep">/</span>
+  <span class="sep">›</span>
   <a href="/admin/signups">Signups</a>
-  <span class="sep">/</span>
-  <span class="here">#{{ '%04d'|format(row['id']) }}</span>
+  <span class="sep">›</span>
+  <span class="here">№{{ '%04d'|format(row['id']) }}</span>
 </div>
 {% endblock %}
 
 {% block body %}
 
-<div class="page-head">
-  <a href="/admin/signups" class="detail-back">← Back to roster</a>
-  <h1>Signup <em>#{{ '%04d'|format(row['id']) }}</em></h1>
-  <div class="rule"></div>
+<a href="/admin/signups" class="fig-back">← Back to roster</a>
+
+<div class="fig-page-head">
+  <div class="fig-eyebrow">Roster · Detail</div>
+  <h1 class="fig-h1">Signup <em>#{{ '%04d'|format(row['id']) }}</em></h1>
+  <div class="fig-rule"><span class="fig-rule-label">{{ row['email'] }}</span></div>
 </div>
 
-<div class="detail-grid">
-  <div class="detail-card">
-    <div class="detail-row">
-      <div class="label">ID</div>
-      <div class="val">#{{ '%04d'|format(row['id']) }}</div>
+<div class="fig-detail">
+  <div class="fig-card">
+    <div class="fig-card-head">
+      <div>
+        <div class="fig-card-eyebrow">→ Capture</div>
+        <h2>All the <em>fields</em></h2>
+      </div>
+      <div class="fig-card-meta">{{ row['created_at'].strftime('%Y-%m-%d %H:%M:%S') }} UTC</div>
     </div>
-    <div class="detail-row">
-      <div class="label">Email</div>
-      <div class="val text">{{ row['email'] }}</div>
-    </div>
-    <div class="detail-row">
-      <div class="label">Role</div>
-      <div class="val text">{{ row['role'] or '— unspecified —' }}</div>
-    </div>
-    <div class="detail-row">
-      <div class="label">Joined</div>
-      <div class="val">{{ row['created_at'].strftime('%Y-%m-%d %H:%M:%S') }} UTC</div>
-    </div>
-    <div class="detail-row">
-      <div class="label">IP at Signup</div>
-      <div class="val">{{ row['ip'] or '—' }}</div>
-    </div>
-    <div class="detail-row">
-      <div class="label">utm_source</div>
-      <div class="val">{{ row.get('utm_source') or '—' }}</div>
-    </div>
-    <div class="detail-row">
-      <div class="label">utm_medium</div>
-      <div class="val">{{ row.get('utm_medium') or '—' }}</div>
-    </div>
-    <div class="detail-row">
-      <div class="label">utm_campaign</div>
-      <div class="val">{{ row.get('utm_campaign') or '—' }}</div>
-    </div>
-    <div class="detail-row">
-      <div class="label">Referer</div>
-      <div class="val">{{ row.get('referer') or '—' }}</div>
+    <div class="fig-card-body">
+      <div class="fig-kv-row">
+        <div class="k">ID</div>
+        <div class="v">№{{ '%04d'|format(row['id']) }}</div>
+      </div>
+      <div class="fig-kv-row">
+        <div class="k">Email</div>
+        <div class="v text">{{ row['email'] }}</div>
+      </div>
+      <div class="fig-kv-row">
+        <div class="k">Role</div>
+        <div class="v text">{{ row['role'] or '— unspecified —' }}</div>
+      </div>
+      <div class="fig-kv-row">
+        <div class="k">Joined</div>
+        <div class="v">{{ row['created_at'].strftime('%Y-%m-%d %H:%M:%S') }} UTC</div>
+      </div>
+      <div class="fig-kv-row">
+        <div class="k">IP at signup</div>
+        <div class="v">{{ row['ip'] or '—' }}</div>
+      </div>
+      <div class="fig-kv-row">
+        <div class="k">utm_source</div>
+        <div class="v">{{ row.get('utm_source') or '—' }}</div>
+      </div>
+      <div class="fig-kv-row">
+        <div class="k">utm_medium</div>
+        <div class="v">{{ row.get('utm_medium') or '—' }}</div>
+      </div>
+      <div class="fig-kv-row">
+        <div class="k">utm_campaign</div>
+        <div class="v">{{ row.get('utm_campaign') or '—' }}</div>
+      </div>
+      <div class="fig-kv-row">
+        <div class="k">Referer</div>
+        <div class="v">{{ row.get('referer') or '—' }}</div>
+      </div>
     </div>
   </div>
 
-  <aside class="detail-actions" aria-label="Actions">
-    <h3>Right to be <em>forgotten</em></h3>
+  <aside class="fig-card fig-card-aside" aria-label="Actions">
+    <div class="fig-card-eyebrow">→ Danger zone</div>
+    <h3 style="margin-top:6px">Right to be <em>forgotten</em></h3>
     <p>Permanently removes this record. Cannot be undone.</p>
     <form method="post" action="/admin/signups/{{ row['id'] }}/delete" data-confirm="Delete {{ row['email'] }}? This is irreversible.">
-      <button type="submit" class="btn btn-danger">Delete Record</button>
+      <button type="submit" class="fig-btn is-danger" style="width:100%;">Delete record</button>
     </form>
   </aside>
 </div>
 
-<section class="detail-audit">
-  <h2><em>Audit</em> trail</h2>
-  <p class="muted">Last 10 admin actions on this signup.</p>
+<div class="fig-audit-strip" style="margin-top: 28px;">
+  <div class="fig-strip-head">
+    <h3>Audit <em>trail</em></h3>
+    <span style="font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.04em;">Last 10 admin actions on this signup</span>
+  </div>
   {% if audit_rows %}
-  <table class="table audit-table">
-    <thead>
-      <tr>
-        <th>When (UTC)</th>
-        <th>Action</th>
-        <th>IP</th>
-        <th>Session</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for a in audit_rows %}
-      <tr>
-        <td class="mono">{{ a['created_at'].strftime('%Y-%m-%d %H:%M:%S') }}</td>
-        <td><code>{{ a['action'] }}</code></td>
-        <td class="mono">{{ a['ip'] or '—' }}</td>
-        <td class="mono ellipsis">{{ a['session_id'][:8] if a['session_id'] else '—' }}…</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+    <div class="fig-table-wrap" style="border:none;border-top:1px solid var(--border);border-radius:0">
+      <table class="fig-table">
+        <thead>
+          <tr>
+            <th>When (UTC)</th>
+            <th>Action</th>
+            <th>IP</th>
+            <th>Session</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in audit_rows %}
+            <tr>
+              <td class="mono">{{ a['created_at'].strftime('%Y-%m-%d %H:%M:%S') }}</td>
+              <td><code>{{ a['action'] }}</code></td>
+              <td class="mono">{{ a['ip'] or '—' }}</td>
+              <td class="mono">{{ a['session_id'][:8] if a['session_id'] else '—' }}…</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   {% else %}
-  <p class="muted">No prior actions on this signup yet.</p>
+    <div class="fig-empty" style="margin: 18px;background:transparent;border:none;padding:24px;">
+      <p style="color:var(--muted)">No prior actions on this signup yet.</p>
+    </div>
   {% endif %}
-</section>
+</div>
 {% endblock %}

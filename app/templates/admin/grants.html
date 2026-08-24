@@ -1,226 +1,382 @@
 {% extends "admin/base.html" %}
 
 {% block title %}Comp · FolioSpace Admin{% endblock %}
-{% block description %}Grant or revoke Pro access by user — admin comp for press, partners, internal accounts, refunds.{% endblock %}
+{% block description %}Cut, track, and revoke Pro passes. Admin comp for press, partners, internal accounts, refunds.{% endblock %}
 
 {% set nav_active = 'grants' %}
 
 {% block breadcrumbs %}
 <div class="breadcrumbs">
   <a href="/admin/">Admin</a>
-  <span class="sep">/</span>
+  <span class="sep">›</span>
   <span class="here">Comp</span>
 </div>
 {% endblock %}
 
 {% block body %}
 
-<div class="page-head">
-  <div class="eyebrow">Operations</div>
-  <h1>Comp / <em>grants</em> desk</h1>
-  <div class="rule"></div>
-  <p class="page-lede">Grant Pro to a user for N years or forever. Useful for press, partners, internal accounts, refunds. Revoking immediately flips the user to Free unless they have a separate active comp.</p>
+<div class="fig-page-head">
+  <div class="fig-eyebrow">Operations · Comp desk</div>
+  <h1 class="fig-h1">Cut a <em>pass</em></h1>
+  <div class="fig-rule"><span class="fig-rule-label">{{ total }} active · {{ pending_total }} pending</span></div>
+  <p class="fig-page-lede">Hand someone Pro. Paste a user UUID for an existing account, or any email for a new one — we'll send them an invite that activates the moment they sign up and verify. No expiry on pending invites. You decide when to revoke.</p>
 </div>
 
 {% if msg and msg.startswith('granted:') %}
-  <div class="flash flash-ok">✓ Granted. User is on Pro until {% if msg == 'granted:forever' %}forever{% else %}{{ msg.split(':', 1)[1] }} from today{% endif %}.</div>
+  <div class="fig-banner is-ok">✓ Pass cut. {% if msg == 'granted:forever' %}Forever, no expiry.{% else %}{{ msg.split(':', 1)[1] }} from today.{% endif %}</div>
 {% elif msg and msg.startswith('invite-sent:') %}
-  <div class="flash flash-ok">✓ Invite sent. Pending comp grant for {% if msg == 'invite-sent:forever' %}forever{% else %}{{ msg.split(':', 1)[1] }}{% endif %} — will activate when this person signs up and verifies their email.</div>
+  <div class="fig-banner is-ok">✉ Invite sent. Pending comp for {% if msg == 'invite-sent:forever' %}forever{% else %}{{ msg.split(':', 1)[1] }}{% endif %} — activates on signup + email verification.</div>
 {% elif msg == 'revoked' %}
-  <div class="flash flash-ok">✓ Grant revoked. User has been re-evaluated against remaining grants + Cashfree subscription state.</div>
+  <div class="fig-banner is-ok">✓ Pass revoked. User re-evaluated against remaining grants + Cashfree state.</div>
 {% elif msg == 'pending-revoked' %}
-  <div class="flash flash-ok">✓ Pending invite revoked.</div>
+  <div class="fig-banner is-ok">✓ Invitation cancelled.</div>
 {% elif msg == 'pending-resent' %}
-  <div class="flash flash-ok">✓ Invite email re-sent.</div>
+  <div class="fig-banner is-ok">✉ Invite re-sent.</div>
 {% endif %}
 {% if err == 'user-not-found' %}
-  <div class="flash flash-warn">User id doesn't exist.</div>
+  <div class="fig-banner is-warn">That user id doesn't exist.</div>
 {% elif err == 'missing-user' %}
-  <div class="flash flash-warn">Missing user id or email.</div>
+  <div class="fig-banner is-warn">Need a UUID or an email.</div>
 {% elif err == 'bad-duration' %}
-  <div class="flash flash-warn">Duration must be 'forever' or a number of years (e.g. 1y, 2y).</div>
+  <div class="fig-banner is-warn">Duration must be 'forever', a number of months (e.g. 2m, 3m), or a number of years (e.g. 1y, 2y).</div>
 {% elif err == 'save-failed' %}
-  <div class="flash flash-warn">Save failed — DB error. Try again.</div>
+  <div class="fig-banner is-warn">Save failed — DB error. Try again.</div>
 {% elif err == 'db' %}
-  <div class="flash flash-warn">Database not configured.</div>
+  <div class="fig-banner is-warn">Database not configured.</div>
 {% elif err == 'pending-revoke-failed' %}
-  <div class="flash flash-warn">Couldn't revoke that invite.</div>
+  <div class="fig-banner is-warn">Couldn't cancel that invitation.</div>
 {% elif err == 'pending-not-resendable' %}
-  <div class="flash flash-warn">That invite is already consumed or revoked.</div>
+  <div class="fig-banner is-warn">That invitation is already claimed or cancelled.</div>
 {% elif err == 'pending-no-email' %}
-  <div class="flash flash-warn">That invite has no email to resend to.</div>
+  <div class="fig-banner is-warn">That invitation has no email to re-send to.</div>
 {% elif err == 'bad-pending-id' %}
-  <div class="flash flash-warn">Bad pending invite id.</div>
+  <div class="fig-banner is-warn">Bad invitation id.</div>
 {% endif %}
 
-<section class="card" aria-label="New grant">
-  <div class="card-head">
-    <div class="card-eyebrow">→ New grant</div>
-    <h2 class="card-title">Grant Pro to a user or email</h2>
-    <div class="card-sub">Paste a UUID (existing user) OR an email (anyone on the waitlist, cold lead, journalist, partner). If the email already belongs to a user, the grant is applied directly. Otherwise a pending invite is sent — it activates the moment that person signs up and verifies.</div>
-  </div>
-  <form method="post" action="/admin/users/grant" class="card-body" data-grant-form>
-    <label class="form-row">
-      <span class="form-label">User id (UUID) or email</span>
-      <input type="text" name="user_id" required maxlength="254" placeholder="UUID  or  someone@example.com" autocomplete="off" />
-    </label>
-    <label class="form-row">
-      <span class="form-label">Duration</span>
-      <select name="duration" required>
-        <option value="forever" selected>Forever (no expiry)</option>
-        <option value="1y">1 year</option>
-        <option value="2y">2 years</option>
-        <option value="3y">3 years</option>
-        <option value="5y">5 years</option>
-      </select>
-    </label>
-    <label class="form-row">
-      <span class="form-label">Reason (internal)</span>
-      <input type="text" name="reason" maxlength="500" placeholder="e.g. Press kit · TechCrunch demo · 2026 bug-bounty thank-you" />
-    </label>
-    <label class="form-row">
-      <span class="form-label">Notes (optional)</span>
-      <textarea name="notes" maxlength="1000" rows="2" placeholder="Anything future-you should know."></textarea>
-    </label>
-    <div class="card-foot">
-      <button type="submit" class="btn btn-primary" data-grant-confirm="Grant Pro to this user/email? If they don't have an account yet, an invite email will be sent and the comp activates on signup.">Grant Pro →</button>
+<section class="fig-grid cols-2" aria-label="Cut a new pass">
+  <div class="fig-card">
+    <div class="fig-card-head">
+      <div>
+        <div class="fig-card-eyebrow">→ New pass</div>
+        <h2>Cut a <em>pass</em></h2>
+        <p>Paste a UUID or an email — we'll figure out the rest.</p>
+      </div>
     </div>
-  </form>
-</section>
-
-<section class="card" aria-label="Existing grants">
-  <div class="card-head">
-    <div class="card-eyebrow">→ {{ filter|capitalize }} grants</div>
-    <h2 class="card-title">{{ total }} on file</h2>
-    <div class="card-sub">
-      <form method="get" action="/admin/grants" class="filter-row">
-        <input type="search" name="q" value="{{ q }}" placeholder="Search email, slug, name…" autocomplete="off" />
-        <select name="filter">
-          <option value="all" {% if filter != 'active' %}selected{% endif %}>All</option>
-          <option value="active" {% if filter == 'active' %}selected{% endif %}>Active only</option>
+    <form method="post" action="/admin/users/grant" class="fig-form" data-grant-form style="padding: 22px 26px 22px;">
+      <div class="fig-form-row">
+        <label class="fig-form-row-label" for="comp-target">User id (UUID) or email</label>
+        <input id="comp-target" type="text" name="user_id" required maxlength="254" class="fig-input" placeholder="UUID  or  someone@example.com" autocomplete="off" data-comp-target />
+      </div>
+      <div class="fig-form-row">
+        <label class="fig-form-row-label" for="comp-duration">How long</label>
+        <select id="comp-duration" name="duration" required class="fig-select">
+          <option value="forever" selected>Forever — no expiry</option>
+          <optgroup label="Months">
+            <option value="1m">1 month</option>
+            <option value="2m">2 months</option>
+            <option value="3m">3 months</option>
+            <option value="6m">6 months</option>
+          </optgroup>
+          <optgroup label="Years">
+            <option value="1y">1 year</option>
+            <option value="2y">2 years</option>
+            <option value="3y">3 years</option>
+            <option value="5y">5 years</option>
+          </optgroup>
         </select>
-        <button type="submit" class="btn btn-ghost">Filter</button>
-      </form>
-    </div>
+      </div>
+      <div class="fig-form-row">
+        <label class="fig-form-row-label" for="comp-reason">Why (internal)</label>
+        <input id="comp-reason" type="text" name="reason" maxlength="500" class="fig-input" placeholder="Press kit · TechCrunch demo · 2026 bug-bounty thank-you" />
+      </div>
+      <div class="fig-form-row">
+        <label class="fig-form-row-label" for="comp-notes">Notes (optional)</label>
+        <textarea id="comp-notes" name="notes" maxlength="1000" rows="2" class="fig-textarea" placeholder="Anything future-you should know."></textarea>
+      </div>
+      <div class="fig-form-foot">
+        <span class="fig-form-help">Press <kbd>Enter</kbd> to send the pass</span>
+        <button type="submit" class="fig-btn is-primary" data-grant-confirm="Cut this pass? If they don't have an account yet, an invite email will be sent and the comp activates the moment they sign up + verify.">Cut the pass →</button>
+      </div>
+    </form>
   </div>
-  {% if rows|length == 0 %}
-    <div class="empty-state">No grants match. Try the 'All' filter or clear the search.</div>
-  {% else %}
-    <div class="table-wrap">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>Plan</th>
-            <th>Expires</th>
-            <th>Reason</th>
-            <th>Created</th>
-            <th>Revoked</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for r in rows %}
-            <tr>
-              <td>
-                <strong>{{ r.display_name or '(no name)' }}</strong>
-                <div class="sub"><a href="mailto:{{ r.email }}">{{ r.email }}</a>{% if r.slug %} · <code>/{{ r.slug }}</code>{% endif %}</div>
-              </td>
-              <td><span class="badge badge-{{ r.plan if r.plan in ('pro', 'free', 'trial', 'internal') else 'muted' }}">{{ r.plan }}</span></td>
-              <td>
-                {% if r.expires_at %}
-                  {{ r.expires_at.strftime('%Y-%m-%d') }}
-                {% else %}
-                  <em>forever</em>
-                {% endif %}
-              </td>
-              <td>{{ r.reason or '—' }}</td>
-              <td>{{ r.created_at.strftime('%Y-%m-%d') if r.created_at else '—' }}</td>
-              <td>
-                {% if r.revoked_at %}
-                  <span class="badge badge-fail">{{ r.revoked_at.strftime('%Y-%m-%d') }}</span>
-                  {% if r.revoke_reason %}<div class="sub">{{ r.revoke_reason }}</div>{% endif %}
-                {% else %}
-                  <span class="sub">active</span>
-                {% endif %}
-              </td>
-              <td>
-                {% if not r.revoked_at %}
-                  <form method="post" action="/admin/users/{{ r.user_id }}/revoke-grant" class="inline-form" data-grant-revoke>
-                    <input type="hidden" name="revoke_reason" value="" />
-                    <button type="submit" class="btn btn-warn btn-sm">Revoke</button>
-                  </form>
-                {% endif %}
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+
+  <aside class="fig-card" aria-label="Live preview">
+    <div class="fig-card-head">
+      <div>
+        <div class="fig-card-eyebrow">→ Live preview</div>
+        <h2>What will <em>happen</em></h2>
+        <p>Updates as you type.</p>
+      </div>
     </div>
-    {% if total_pages > 1 %}
-      <nav class="pager" aria-label="Pages">
-        {% if page > 1 %}<a href="?q={{ q }}&amp;filter={{ filter }}&amp;page={{ page - 1 }}" class="pager-link">← Prev</a>{% endif %}
-        <span class="pager-current">Page {{ page }} of {{ total_pages }}</span>
-        {% if page < total_pages %}<a href="?q={{ q }}&amp;filter={{ filter }}&amp;page={{ page + 1 }}" class="pager-link">Next →</a>{% endif %}
-      </nav>
-    {% endif %}
-  {% endif %}
+    <div class="fig-card-body">
+      <div class="fig-preview-card" data-comp-preview-card>
+        <div>
+          <div class="fig-preview-tag" data-comp-preview-tag>
+            <span class="fig-preview-dot"></span>
+            <span data-comp-preview-kind>— idle</span>
+          </div>
+          <p class="fig-preview-target is-empty" data-comp-preview-target>paste a user id or email</p>
+          <p class="fig-preview-body" data-comp-preview-body>If you paste a UUID, we'll apply the pass directly to that user. If you paste an email, we'll send them an invite that auto-activates the moment they sign up + verify.</p>
+        </div>
+        <div class="fig-preview-meta">
+          <span><strong>Route</strong><span data-comp-preview-route>—</span></span>
+          <span><strong>Email sent</strong><span data-comp-preview-email>no</span></span>
+        </div>
+      </div>
+    </div>
+  </aside>
 </section>
 
-<section class="card" aria-label="Pending invites">
-  <div class="card-head">
-    <div class="card-eyebrow">→ Pending invites</div>
-    <h2 class="card-title">{{ pending_total }} waiting</h2>
-    <div class="card-sub">Comp grants keyed by email. Each row activates the moment that person signs up and verifies their email. Manual revoke = the comp never applies. No expiry — you decide when to clean up.</div>
+<style>
+  .fig-form { background: transparent; }
+  .fig-form-row { margin-bottom: 16px; }
+  .fig-form-row:last-of-type { margin-bottom: 0; }
+  .fig-form-row-label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .fig-form-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+  .fig-form-help {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .fig-form-help kbd {
+    background: var(--bg);
+    border: 1px solid var(--border-2);
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--neon);
+  }
+  .fig-preview-card {
+    background: var(--bg);
+    border: 1px dashed var(--border-2);
+    border-radius: 6px;
+    padding: 18px 20px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 14px;
+    transition: all 200ms ease;
+  }
+  .fig-preview-card.is-direct {
+    border-color: var(--neon);
+    border-style: solid;
+    background: var(--neon-dim);
+    box-shadow: 0 0 24px var(--neon-dim);
+  }
+  .fig-preview-card.is-pending {
+    border-color: var(--warn);
+    border-style: solid;
+    background: var(--warn-dim);
+  }
+  .fig-preview-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .fig-preview-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--muted);
+    display: inline-block;
+  }
+  .fig-preview-card.is-direct .fig-preview-tag,
+  .fig-preview-card.is-direct .fig-preview-dot { color: var(--neon); background: var(--neon); box-shadow: 0 0 6px var(--neon); }
+  .fig-preview-card.is-pending .fig-preview-tag { color: var(--warn); }
+  .fig-preview-card.is-pending .fig-preview-dot { background: var(--warn); }
+  .fig-preview-target {
+    font-family: var(--mono);
+    font-size: 18px;
+    line-height: 1.3;
+    color: var(--text);
+    word-break: break-all;
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.005em;
+  }
+  .fig-preview-target.is-empty {
+    color: var(--muted);
+    font-style: italic;
+    font-family: var(--sans);
+  }
+  .fig-preview-body {
+    font-family: var(--sans);
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-2);
+    margin: 8px 0 0;
+  }
+  .fig-preview-meta {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border-2);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .fig-preview-meta span strong {
+    color: var(--neon);
+    font-weight: 700;
+    margin-right: 6px;
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.20em;
+  }
+</style>
+
+<div class="fig-section-head">
+  <div class="left">
+    <h2>Active <em>passes</em><span class="fig-count">{{ total }}</span></h2>
+    <p>Comp grants on existing users. Revoking flips the user to Free unless they have another active pass.</p>
   </div>
-  {% if pending_rows|length == 0 %}
-    <div class="empty-state">No pending invites. Grant Pro to a fresh email above to create one.</div>
-  {% else %}
-    <div class="table-wrap">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Email</th>
-            <th>Expires</th>
-            <th>Reason</th>
-            <th>Created</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for r in pending_rows %}
-            <tr>
-              <td>
-                <strong><a href="mailto:{{ r.email }}">{{ r.email }}</a></strong>
-              </td>
-              <td>
-                {% if r.expires_at %}
-                  {{ r.expires_at.strftime('%Y-%m-%d') }}
-                {% else %}
-                  <em>forever</em>
-                {% endif %}
-              </td>
-              <td>{{ r.reason or '—' }}</td>
-              <td>{{ r.created_at.strftime('%Y-%m-%d') if r.created_at else '—' }}</td>
-              <td>
-                <form method="post" action="/admin/pending-grants/{{ r.id }}/resend" class="inline-form" data-pending-resend>
-                  <button type="submit" class="btn btn-ghost btn-sm">Resend</button>
-                </form>
-                <form method="post" action="/admin/pending-grants/{{ r.id }}/revoke" class="inline-form" data-pending-revoke>
-                  <button type="submit" class="btn btn-warn btn-sm">Revoke</button>
-                </form>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+  <form method="get" action="/admin/grants" class="fig-section-aside">
+    <input type="search" name="q" value="{{ q }}" placeholder="Search email, slug, name…" class="fig-input" style="min-width:200px" />
+    <select name="filter" class="fig-select" style="width:auto">
+      <option value="all" {% if filter != 'active' %}selected{% endif %}>All</option>
+      <option value="active" {% if filter == 'active' %}selected{% endif %}>Active only</option>
+    </select>
+    <button type="submit" class="fig-btn sm">Filter</button>
+  </form>
+</div>
+
+{% if rows|length == 0 %}
+  <div class="fig-empty">
+    <div class="fig-empty-eyebrow">→ No matches</div>
+    <h3>Nothing to show here.</h3>
+    <p>Try clearing the search, switching to 'All', or cut a pass above to seed the roster.</p>
+  </div>
+{% else %}
+  <div class="fig-ticket-list">
+    {% for r in rows %}
+      <div class="fig-ticket {% if r.revoked_at %}is-muted{% endif %}">
+        <div class="fig-ticket-num"><span class="no">№</span>{{ '%04d'|format(r.id) }}</div>
+        <div class="fig-ticket-body">
+          <p class="fig-ticket-name">
+            {{ r.display_name or '(no name)' }}
+            {% if r.email %} — <a href="mailto:{{ r.email }}">{{ r.email }}</a>{% endif %}
+          </p>
+          <p class="fig-ticket-meta">
+            {% if r.slug %}<code>/{{ r.slug }}</code><span class="sep">·</span>{% endif %}
+            <span>{{ r.reason or 'No reason recorded' }}</span>
+            <span class="sep">·</span>
+            <span>Cut {{ r.created_at.strftime('%Y-%m-%d') if r.created_at else '—' }}</span>
+          </p>
+        </div>
+        <div class="fig-pill {{ 'is-revoked' if r.revoked_at else ('is-pro' if r.plan == 'pro' else 'is-free') }}">
+          <span class="dot"></span>
+          {% if r.revoked_at %}revoked{% else %}{{ r.plan }}{% endif %}
+        </div>
+        <div class="fig-ticket-expiry">
+          {% if r.expires_at %}
+            <strong>{{ r.expires_at.strftime('%Y-%m-%d') }}</strong>
+            <span>expires</span>
+          {% else %}
+            <em class="forever">forever</em>
+            <span>{% if not r.revoked_at %}active{% else %}&nbsp;{% endif %}</span>
+          {% endif %}
+        </div>
+        <div class="fig-ticket-actions">
+          {% if not r.revoked_at %}
+            <form method="post" action="/admin/users/{{ r.user_id }}/revoke-grant" style="display:inline" data-grant-revoke>
+              <input type="hidden" name="revoke_reason" value="" />
+              <button type="submit" class="fig-mini-btn is-danger">Revoke</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  {% if total_pages > 1 %}
+    <nav class="fig-pager" aria-label="Pages" style="margin-top:14px">
+      {% if page > 1 %}<a href="?q={{ q }}&amp;filter={{ filter }}&amp;page={{ page - 1 }}">← Prev</a>{% endif %}
+      <span class="fig-pager-meta">Page {{ page }} of {{ total_pages }}</span>
+      {% if page < total_pages %}<a href="?q={{ q }}&amp;filter={{ filter }}&amp;page={{ page + 1 }}">Next →</a>{% endif %}
+    </nav>
   {% endif %}
-</section>
+{% endif %}
+
+<div class="fig-section-head">
+  <div class="left">
+    <h2>Pending <em>invites</em><span class="fig-count">{{ pending_total }}</span></h2>
+    <p>Comp grants keyed by email. Each one activates the moment that person signs up and verifies. No expiry — you decide when to cancel.</p>
+  </div>
+</div>
+
+{% if pending_rows|length == 0 %}
+  <div class="fig-empty">
+    <div class="fig-empty-eyebrow">→ Empty queue</div>
+    <h3>No invitations waiting.</h3>
+    <p>Cut a pass with an email above to send an invite — it'll live here until they claim it.</p>
+  </div>
+{% else %}
+  <div class="fig-ticket-list">
+    {% for r in pending_rows %}
+      <div class="fig-ticket is-urgent">
+        <div class="fig-ticket-num"><span class="no">№</span>{{ '%04d'|format(r.id) }}</div>
+        <div class="fig-ticket-body">
+          <p class="fig-ticket-name"><a href="mailto:{{ r.email }}">{{ r.email }}</a></p>
+          <p class="fig-ticket-meta">
+            <span>{{ r.reason or 'No reason recorded' }}</span>
+            <span class="sep">·</span>
+            <span>Sent {{ r.created_at.strftime('%Y-%m-%d') if r.created_at else '—' }}</span>
+            <span class="sep">·</span>
+            <span>activates on signup + verify</span>
+          </p>
+        </div>
+        <div class="fig-pill is-pending"><span class="dot"></span>pending</div>
+        <div class="fig-ticket-expiry">
+          {% if r.expires_at %}
+            <strong>{{ r.expires_at.strftime('%Y-%m-%d') }}</strong>
+            <span>expires</span>
+          {% else %}
+            <em class="forever">forever</em>
+            <span>no expiry</span>
+          {% endif %}
+        </div>
+        <div class="fig-ticket-actions">
+          <form method="post" action="/admin/pending-grants/{{ r.id }}/resend" style="display:inline" data-pending-resend>
+            <button type="submit" class="fig-mini-btn">Resend</button>
+          </form>
+          <form method="post" action="/admin/pending-grants/{{ r.id }}/revoke" style="display:inline" data-pending-revoke>
+            <button type="submit" class="fig-mini-btn is-danger">Revoke</button>
+          </form>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
 
 <script>
 (function () {
-  // Confirm before granting
   var grantForm = document.querySelector('[data-grant-form]');
   if (grantForm) {
     grantForm.addEventListener('submit', function (e) {
@@ -231,16 +387,65 @@
       }
     });
   }
-  // Prompt for revoke reason
   var revokeForms = document.querySelectorAll('[data-grant-revoke]');
   revokeForms.forEach(function (f) {
     f.addEventListener('submit', function (e) {
-      var reason = prompt('Reason for revoking this grant? (optional)');
+      var reason = prompt('Reason for revoking this pass? (optional)');
       if (reason === null) { e.preventDefault(); return; }
       var input = f.querySelector('input[name="revoke_reason"]');
       if (input) input.value = reason || '';
     });
   });
+  var pendingRevokeForms = document.querySelectorAll('[data-pending-revoke]');
+  pendingRevokeForms.forEach(function (f) {
+    f.addEventListener('submit', function (e) {
+      if (typeof confirm !== 'undefined' && !confirm('Cancel this invitation? The recipient will never receive Pro even if they sign up.')) {
+        e.preventDefault();
+      }
+    });
+  });
+
+  var target = document.querySelector('[data-comp-target]');
+  var card = document.querySelector('[data-comp-preview-card]');
+  var kindEl = document.querySelector('[data-comp-preview-kind]');
+  var targetEl = document.querySelector('[data-comp-preview-target]');
+  var bodyEl = document.querySelector('[data-comp-preview-body]');
+  var routeEl = document.querySelector('[data-comp-preview-route]');
+  var emailEl = document.querySelector('[data-comp-preview-email]');
+
+  function refreshPreview() {
+    if (!target) return;
+    var v = (target.value || '').trim();
+    card.classList.remove('is-direct', 'is-pending');
+    if (!v) {
+      kindEl.textContent = '— idle';
+      targetEl.textContent = 'paste a user id or email';
+      targetEl.classList.add('is-empty');
+      bodyEl.textContent = "If you paste a UUID, we'll apply the pass directly to that user. If you paste an email, we'll send them an invite that auto-activates the moment they sign up + verify.";
+      routeEl.textContent = '—';
+      emailEl.textContent = 'no';
+      return;
+    }
+    targetEl.classList.remove('is-empty');
+    targetEl.textContent = v;
+    if (v.indexOf('@') !== -1) {
+      card.classList.add('is-pending');
+      kindEl.textContent = 'invite';
+      bodyEl.textContent = "We'll send them an invite email at this address. The pass activates the moment they sign up + verify — no work needed on your end after this.";
+      routeEl.textContent = '/signup';
+      emailEl.textContent = 'yes';
+    } else {
+      card.classList.add('is-direct');
+      kindEl.textContent = 'direct';
+      bodyEl.textContent = "We'll apply this pass directly to the user. They're on Pro the instant you submit — no email needed.";
+      routeEl.textContent = '/dashboard';
+      emailEl.textContent = 'no';
+    }
+  }
+  if (target) {
+    target.addEventListener('input', refreshPreview);
+    refreshPreview();
+  }
 })();
 </script>
 {% endblock %}

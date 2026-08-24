@@ -10,27 +10,27 @@
 {% block breadcrumbs %}
 <div class="breadcrumbs">
   <a href="/admin/">Admin</a>
-  <span class="sep">/</span>
+  <span class="sep">›</span>
   <span class="here">Dashboard</span>
 </div>
 {% endblock %}
 
 {% block body %}
 
-<div class="page-head">
-  <div class="eyebrow">Daily Operations</div>
-  <h1>The <em>desk</em> today</h1>
-  <div class="rule"></div>
+<div class="fig-page-head">
+  <div class="fig-eyebrow">Live · Daily Operations</div>
+  <h1 class="fig-h1">The <em>desk</em> today</h1>
+  <div class="fig-rule"><span class="fig-rule-label">№ {{ issue() }}</span></div>
 </div>
 
-<section class="cold-open" aria-label="Lead">
-  <div class="kicker">Lead · {{ now().strftime('%H:%M') }} UTC</div>
+<section class="fig-cold-open">
+  <div class="kicker">{{ now().strftime('%H:%M') }} UTC · Lead</div>
   <div class="lead">{{ cold_open }}</div>
-  <div class="stamp">№ {{ issue() }}</div>
+  <div class="stamp">{{ now().strftime('%Y-%m-%d') }} ↳ ready</div>
 </section>
 
-<section class="stat-row" aria-label="Headline numbers">
-  <div class="stat">
+<section class="fig-stats" aria-label="Headline numbers">
+  <div class="fig-stat">
     <svg class="micro" viewBox="0 0 64 22" preserveAspectRatio="none" aria-hidden="true">
       {% set ms = per_day[-7:] if per_day else [] %}
       {% if ms|length >= 2 %}
@@ -44,12 +44,12 @@
         <circle class="dot" cx="64" cy="{{ '%.2f'|format(22 - (ms[-1][1] / mm) * 18) }}" r="1.6" />
       {% endif %}
     </svg>
-    <div class="stat-num"><span class="count-up" data-to="{{ total }}" data-duration="900">0</span></div>
-    <div class="stat-label">Total Waitlist</div>
-    <div class="sub">All-time roster</div>
+    <div class="fig-stat-num"><span class="count-up" data-to="{{ total }}" data-duration="900">0</span></div>
+    <div class="fig-stat-label">Total waitlist</div>
+    <div class="fig-stat-sub">All-time roster</div>
   </div>
 
-  <div class="stat">
+  <div class="fig-stat">
     <svg class="micro" viewBox="0 0 64 22" preserveAspectRatio="none" aria-hidden="true">
       {% if per_day|length >= 2 %}
         {% set mm = (per_day|map(attribute=1)|max) or 1 %}
@@ -62,11 +62,11 @@
         <circle class="dot" cx="64" cy="{{ '%.2f'|format(22 - (per_day[-1][1] / mm) * 18) }}" r="1.6" />
       {% endif %}
     </svg>
-    <div class="stat-num">
+    <div class="fig-stat-num">
       <span class="count-up" data-to="{{ last7 }}" data-duration="900">0</span><span class="unit">7d</span>
     </div>
-    <div class="stat-label">Last Seven Days</div>
-    <div class="delta {{ 'up' if delta_pct > 0 else ('down' if delta_pct < 0 else 'flat') }}">
+    <div class="fig-stat-label">Last seven days</div>
+    <div class="fig-delta {{ 'is-up' if delta_pct > 0 else ('is-down' if delta_pct < 0 else 'is-flat') }}">
       {% if delta_pct > 0 %}<span class="arrow">▲</span>
       {% elif delta_pct < 0 %}<span class="arrow">▼</span>
       {% else %}<span class="arrow">—</span>{% endif %}
@@ -75,7 +75,7 @@
     </div>
   </div>
 
-  <div class="stat">
+  <div class="fig-stat">
     <svg class="micro" viewBox="0 0 64 22" preserveAspectRatio="none" aria-hidden="true">
       {% if top_role_7d|length >= 2 %}
         {% set mm = (top_role_7d|map(attribute=1)|max) or 1 %}
@@ -88,158 +88,179 @@
         <circle class="dot" cx="64" cy="{{ '%.2f'|format(22 - (top_role_7d[-1][1] / mm) * 18) }}" r="1.6" />
       {% endif %}
     </svg>
-    <div class="stat-num"><span class="count-up" data-to="{{ top_role_count }}" data-duration="900">0</span></div>
-    <div class="stat-label">{{ top_role|capitalize }}</div>
-    <div class="sub">Top role · all-time</div>
+    <div class="fig-stat-num"><span class="count-up" data-to="{{ top_role_count }}" data-duration="900">0</span></div>
+    <div class="fig-stat-label">{{ top_role|capitalize }}</div>
+    <div class="fig-stat-sub">Top role · all-time</div>
   </div>
 
-  <div class="stat">
-    <div class="stat-num">
+  <div class="fig-stat">
+    <div class="fig-stat-num">
       {% if per_day %}
         <span class="count-up" data-to="{{ per_day[-1][1] }}" data-duration="700">0</span>
       {% else %}
         <span class="count-up" data-to="0" data-duration="0">0</span>
       {% endif %}
     </div>
-    <div class="stat-label">{{ per_day[-1][0].strftime('%a %d %b') if per_day else 'Latest Day' }}</div>
-    <div class="sub">Most recent day</div>
+    <div class="fig-stat-label">{{ per_day[-1][0].strftime('%a %d %b') if per_day else 'Latest Day' }}</div>
+    <div class="fig-stat-sub">Most recent day</div>
   </div>
 </section>
 
-<div class="main-grid">
-  <section class="panel" aria-label="Daily signups, 30 days">
-    <div class="panel-head">
-      <h2>Signups, last <em>30 days</em></h2>
-      <span class="meta">{{ per_day_30|length }} day{{ '' if per_day_30|length == 1 else 's' }} · hover for detail</span>
+<div class="fig-grid cols-2">
+  <div class="fig-card fig-chart-card">
+    <div class="fig-card-head">
+      <div>
+        <div class="fig-card-eyebrow">→ 30 Days</div>
+        <h2>Signups, <em>last 30 days</em></h2>
+      </div>
+      <div class="fig-card-meta">{{ per_day_30|length }} d · hover ↗</div>
     </div>
-    {% set series = per_day_30 if per_day_30 else per_day %}
-    {% set max_n = (series|map(attribute=1)|max) if series else 1 %}
-    {% if max_n < 1 %}{% set max_n = 1 %}{% endif %}
-    {% set cw = 560 %}
-    {% set ch = 180 %}
-    {% set pad_l = 36 %}
-    {% set pad_r = 8 %}
-    {% set pad_t = 14 %}
-    {% set pad_b = 24 %}
-    {% set plot_w = cw - pad_l - pad_r %}
-    {% set plot_h = ch - pad_t - pad_b %}
-    {% set n = series|length %}
-    <div class="chart-wrap">
-      <svg class="chart" viewBox="0 0 {{ cw }} {{ ch }}" preserveAspectRatio="none" role="img" aria-label="Daily signup counts, last 30 days">
-        <line class="grid" x1="{{ pad_l }}" y1="{{ pad_t }}" x2="{{ pad_l }}" y2="{{ ch - pad_b }}" />
-        <line class="grid" x1="{{ pad_l }}" y1="{{ ch - pad_b }}" x2="{{ cw - pad_r }}" y2="{{ ch - pad_b }}" />
-        <line class="grid" x1="{{ pad_l }}" y1="{{ pad_t + plot_h * 0.5 }}" x2="{{ cw - pad_r }}" y2="{{ pad_t + plot_h * 0.5 }}" />
-        <text class="label" x="{{ pad_l - 6 }}" y="{{ pad_t + 4 }}" text-anchor="end">{{ max_n }}</text>
-        <text class="label" x="{{ pad_l - 6 }}" y="{{ pad_t + plot_h * 0.5 + 4 }}" text-anchor="end">{{ (max_n / 2)|round(1) }}</text>
-        <text class="label" x="{{ pad_l - 6 }}" y="{{ ch - pad_b + 4 }}" text-anchor="end">0</text>
-        {% if n > 0 %}
-          {% set step = (plot_w / n) if n > 1 else plot_w %}
-          <path class="area" d="M{{ '%.2f'|format(pad_l) }},{{ ch - pad_b }}
-            {% for d, c in series %}{% set x = pad_l + (loop.index0 * step) + (step / 2) %}{% set y = pad_t + (1 - (c / max_n)) * plot_h %}{{ ' L%.2f,%.2f'|format(x, y) }}{% endfor %}
-            L{{ '%.2f'|format(pad_l + plot_w) }},{{ ch - pad_b }} Z" />
-          <path class="line" d="M{{ '%.2f'|format(pad_l + (step / 2)) }},{{ '%.2f'|format(pad_t + (1 - (series[0][1] / max_n)) * plot_h) }}
-            {% for d, c in series[1:] %}{% set x = pad_l + (loop.index0 * step) + (step / 2) %}{% set y = pad_t + (1 - (c / max_n)) * plot_h %}{{ ' L%.2f,%.2f'|format(x, y) }}{% endfor %}" />
-          {% for d, c in series %}
-            {% set x = pad_l + (loop.index0 * step) + (step / 2) %}
-            {% set y = pad_t + (1 - (c / max_n)) * plot_h %}
-            <circle class="pt" cx="{{ '%.2f'|format(x) }}" cy="{{ '%.2f'|format(y) }}" r="2" data-i="{{ loop.index0 }}" data-day="{{ d.strftime('%Y-%m-%d') if d else '' }}" data-n="{{ c }}" />
-          {% endfor %}
-          {% set tick_every = (n / 6)|round(0, 'floor')|int %}
-          {% if tick_every < 1 %}{% set tick_every = 1 %}{% endif %}
-          {% for d, c in series %}
-            {% if loop.index0 % tick_every == 0 or loop.index0 == n - 1 %}
+    <div class="fig-card-body">
+      {% set series = per_day_30 if per_day_30 else per_day %}
+      {% set max_n = (series|map(attribute=1)|max) if series else 1 %}
+      {% if max_n < 1 %}{% set max_n = 1 %}{% endif %}
+      {% set cw = 560 %}
+      {% set ch = 200 %}
+      {% set pad_l = 36 %}
+      {% set pad_r = 8 %}
+      {% set pad_t = 14 %}
+      {% set pad_b = 28 %}
+      {% set plot_w = cw - pad_l - pad_r %}
+      {% set plot_h = ch - pad_t - pad_b %}
+      {% set n = series|length %}
+      <div class="fig-chart-wrap">
+        <svg class="fig-chart" viewBox="0 0 {{ cw }} {{ ch }}" preserveAspectRatio="none" role="img" aria-label="Daily signup counts, last 30 days">
+          <line class="grid" x1="{{ pad_l }}" y1="{{ pad_t }}" x2="{{ pad_l }}" y2="{{ ch - pad_b }}" />
+          <line class="grid" x1="{{ pad_l }}" y1="{{ ch - pad_b }}" x2="{{ cw - pad_r }}" y2="{{ ch - pad_b }}" />
+          <line class="grid" x1="{{ pad_l }}" y1="{{ pad_t + plot_h * 0.5 }}" x2="{{ cw - pad_r }}" y2="{{ pad_t + plot_h * 0.5 }}" />
+          <text class="label" x="{{ pad_l - 6 }}" y="{{ pad_t + 4 }}" text-anchor="end">{{ max_n }}</text>
+          <text class="label" x="{{ pad_l - 6 }}" y="{{ pad_t + plot_h * 0.5 + 4 }}" text-anchor="end">{{ (max_n / 2)|round(1) }}</text>
+          <text class="label" x="{{ pad_l - 6 }}" y="{{ ch - pad_b + 4 }}" text-anchor="end">0</text>
+          {% if n > 0 %}
+            {% set step = (plot_w / n) if n > 1 else plot_w %}
+            <path class="area" d="M{{ '%.2f'|format(pad_l) }},{{ ch - pad_b }}
+              {% for d, c in series %}{% set x = pad_l + (loop.index0 * step) + (step / 2) %}{% set y = pad_t + (1 - (c / max_n)) * plot_h %}{{ ' L%.2f,%.2f'|format(x, y) }}{% endfor %}
+              L{{ '%.2f'|format(pad_l + plot_w) }},{{ ch - pad_b }} Z" />
+            <path class="line" d="M{{ '%.2f'|format(pad_l + (step / 2)) }},{{ '%.2f'|format(pad_t + (1 - (series[0][1] / max_n)) * plot_h) }}
+              {% for d, c in series[1:] %}{% set x = pad_l + (loop.index0 * step) + (step / 2) %}{% set y = pad_t + (1 - (c / max_n)) * plot_h %}{{ ' L%.2f,%.2f'|format(x, y) }}{% endfor %}" />
+            {% for d, c in series %}
               {% set x = pad_l + (loop.index0 * step) + (step / 2) %}
-              <text class="label k" x="{{ '%.2f'|format(x) }}" y="{{ ch - 8 }}" text-anchor="middle">{{ d.strftime('%d %b') if d else '' }}</text>
-            {% endif %}
-          {% endfor %}
-        {% else %}
-          <text class="label" x="{{ cw / 2 }}" y="{{ ch / 2 }}" text-anchor="middle" font-family="Stalinist One, serif" font-style="italic" font-size="16">No signups yet in this window.</text>
-        {% endif %}
-      </svg>
-      <div class="chart-tip" id="chart-tip">
-        <div class="tip-day" id="tip-day"></div>
-        <div><span id="tip-n"></span> signup<span id="tip-plural"></span></div>
+              {% set y = pad_t + (1 - (c / max_n)) * plot_h %}
+              <circle class="pt" cx="{{ '%.2f'|format(x) }}" cy="{{ '%.2f'|format(y) }}" r="2.2" data-i="{{ loop.index0 }}" data-day="{{ d.strftime('%Y-%m-%d') if d else '' }}" data-n="{{ c }}" />
+            {% endfor %}
+            {% set tick_every = (n / 6)|round(0, 'floor')|int %}
+            {% if tick_every < 1 %}{% set tick_every = 1 %}{% endif %}
+            {% for d, c in series %}
+              {% if loop.index0 % tick_every == 0 or loop.index0 == n - 1 %}
+                {% set x = pad_l + (loop.index0 * step) + (step / 2) %}
+                <text class="label k" x="{{ '%.2f'|format(x) }}" y="{{ ch - 10 }}" text-anchor="middle">{{ d.strftime('%d %b') if d else '' }}</text>
+              {% endif %}
+            {% endfor %}
+          {% else %}
+            <text class="label" x="{{ cw / 2 }}" y="{{ ch / 2 }}" text-anchor="middle">No signups in window.</text>
+          {% endif %}
+        </svg>
+        <div class="fig-chart-tip" id="chart-tip">
+          <div class="fig-tip-day" id="tip-day"></div>
+          <div><span id="tip-n"></span> signup<span id="tip-plural"></span></div>
+        </div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <section class="panel" aria-label="Role breakdown">
-    <div class="panel-head">
-      <h2>Role <em>breakdown</em></h2>
-      <span class="meta">{{ role_breakdown|length }} categor{{ 'y' if role_breakdown|length == 1 else 'ies' }}</span>
+  <div class="fig-card">
+    <div class="fig-card-head">
+      <div>
+        <div class="fig-card-eyebrow">→ Segments</div>
+        <h2>Role <em>breakdown</em></h2>
+      </div>
+      <div class="fig-card-meta">{{ role_breakdown|length }} categor{{ 'y' if role_breakdown|length == 1 else 'ies' }}</div>
     </div>
-    {% set max_role_n = (role_breakdown|map(attribute=1)|max) if role_breakdown else 1 %}
-    {% if max_role_n < 1 %}{% set max_role_n = 1 %}{% endif %}
-    <div class="role-list">
-      {% for role_name, n in role_breakdown %}
-        <div class="role-row">
-          <div class="role-name">{{ role_name }}</div>
-          <div class="role-bar"><div class="role-bar-fill" style="width: {{ (n / max_role_n * 100)|round(1) }}%"></div></div>
-          <div class="role-n">{{ n }}</div>
-        </div>
-      {% else %}
-        <div class="empty">
-          <div class="empty-italic">No signups yet.</div>
-          <div class="empty-sub">The desk is quiet</div>
-        </div>
-      {% endfor %}
+    <div class="fig-card-body">
+      <div class="fig-role-list">
+        {% set max_role_n = (role_breakdown|map(attribute=1)|max) if role_breakdown else 1 %}
+        {% if max_role_n < 1 %}{% set max_role_n = 1 %}{% endif %}
+        {% for role_name, n in role_breakdown %}
+          <div class="fig-role-row">
+            <div class="fig-role-name">{{ role_name }}</div>
+            <div class="fig-role-bar"><div class="fig-role-bar-fill" style="width: {{ (n / max_role_n * 100)|round(1) }}%"></div></div>
+            <div class="fig-role-n">{{ n }}</div>
+          </div>
+        {% else %}
+          <div class="fig-empty" style="padding: 32px 20px;">
+            <div class="fig-empty-eyebrow">→ Empty</div>
+            <p>No signups yet — the desk is quiet.</p>
+          </div>
+        {% endfor %}
+      </div>
     </div>
-  </section>
+  </div>
 </div>
 
-<div class="main-grid">
-  <section class="panel" aria-label="Top sources">
-    <div class="panel-head">
-      <h2>Top <em>sources</em></h2>
-      <span class="meta">utm_source · top 5</span>
+<div class="fig-grid cols-2">
+  <div class="fig-card">
+    <div class="fig-card-head">
+      <div>
+        <div class="fig-card-eyebrow">→ Attribution</div>
+        <h2>Top <em>sources</em></h2>
+      </div>
+      <div class="fig-card-meta">utm_source · top 5</div>
     </div>
-    {% set max_src_n = (top_sources|map(attribute=1)|max) if top_sources else 1 %}
-    {% if max_src_n < 1 %}{% set max_src_n = 1 %}{% endif %}
-    <div class="role-list">
-      {% for src, n in top_sources %}
-        <div class="role-row">
-          <div class="role-name">{{ src }}</div>
-          <div class="role-bar"><div class="role-bar-fill" style="width: {{ (n / max_src_n * 100)|round(1) }}%"></div></div>
-          <div class="role-n">{{ n }}</div>
-        </div>
-      {% else %}
-        <div class="empty">
-          <div class="empty-italic">No tagged traffic yet.</div>
-          <div class="empty-sub">Share the link with <code>?utm_source=</code> to start attributing</div>
-        </div>
-      {% endfor %}
+    <div class="fig-card-body">
+      <div class="fig-role-list">
+        {% set max_src_n = (top_sources|map(attribute=1)|max) if top_sources else 1 %}
+        {% if max_src_n < 1 %}{% set max_src_n = 1 %}{% endif %}
+        {% for src, n in top_sources %}
+          <div class="fig-role-row">
+            <div class="fig-role-name">{{ src }}</div>
+            <div class="fig-role-bar"><div class="fig-role-bar-fill" style="width: {{ (n / max_src_n * 100)|round(1) }}%"></div></div>
+            <div class="fig-role-n">{{ n }}</div>
+          </div>
+        {% else %}
+          <div class="fig-empty" style="padding: 32px 20px;">
+            <div class="fig-empty-eyebrow">→ Empty</div>
+            <p>No tagged traffic yet — share the link with <code>?utm_source=</code> to start attributing.</p>
+          </div>
+        {% endfor %}
+      </div>
     </div>
-  </section>
+  </div>
 
-  <section class="panel" aria-label="Recent signups">
-    <div class="panel-head">
-      <h2>Recent <em>arrivals</em></h2>
-      <span class="meta">Latest 8</span>
+  <div class="fig-card">
+    <div class="fig-card-head">
+      <div>
+        <div class="fig-card-eyebrow">→ Arrivals</div>
+        <h2>Recent <em>signups</em></h2>
+      </div>
+      <div class="fig-card-meta">latest 8</div>
     </div>
-    <div class="recent-list">
+    <div class="fig-card-body">
       {% for r in recent %}
-        <div class="recent-row">
+        <div class="fig-recent-row">
           <div><a href="/admin/signups/{{ r['id'] }}">{{ r['email'] }}</a></div>
-          <div class="recent-role">{{ r['role'] or '—' }}</div>
-          <div class="recent-time">{{ r['created_at'].strftime('%Y-%m-%d %H:%M') }} UTC</div>
+          <div class="fig-recent-role">{{ r['role'] or '—' }}</div>
+          <div class="fig-recent-time">{{ r['created_at'].strftime('%Y-%m-%d %H:%M') }} UTC</div>
         </div>
       {% else %}
-        <div class="empty">
-          <div class="empty-italic">No signups yet.</div>
-          <div class="empty-sub">The desk is quiet</div>
+        <div class="fig-empty" style="padding: 32px 20px;">
+          <div class="fig-empty-eyebrow">→ Empty</div>
+          <p>No signups yet — the desk is quiet.</p>
         </div>
       {% endfor %}
     </div>
-  </section>
+  </div>
 </div>
 
-<section class="audit-strip" aria-label="Recent admin activity">
-  <div class="strip-head">
-    <h3>Recent <em>activity</em></h3>
+<div class="fig-audit-strip">
+  <div class="fig-strip-head">
+    <div>
+      <div class="fig-card-eyebrow">→ On record</div>
+      <h3>Recent <em>activity</em></h3>
+    </div>
     <a href="/admin/audit">Full audit →</a>
   </div>
   {% for ev in recent_audit[:8] %}
-    <div class="strip-row">
+    <div class="fig-strip-row">
       <div class="time">{{ ev['created_at'].strftime('%H:%M:%S') }} UTC</div>
       <div class="act">{{ ev['action'] }}</div>
       <div class="target">{{ ev['target'] or '—' }}</div>
@@ -247,7 +268,7 @@
       <div></div>
     </div>
   {% else %}
-    <div class="strip-row"><div class="time">—</div><div class="act">No events yet</div><div class="target">—</div><div class="ip">—</div><div></div></div>
+    <div class="fig-strip-row"><div class="time">—</div><div class="act">No events yet</div><div class="target">—</div><div class="ip">—</div><div></div></div>
   {% endfor %}
-</section>
+</div>
 {% endblock %}

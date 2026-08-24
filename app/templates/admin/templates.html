@@ -8,90 +8,99 @@
 {% block breadcrumbs %}
 <div class="breadcrumbs">
   <a href="/admin/">Admin</a>
-  <span class="sep">/</span>
+  <span class="sep">›</span>
   <span class="here">Templates</span>
 </div>
 {% endblock %}
 
 {% block body %}
 
-<div class="page-head">
-  <div class="eyebrow">Catalog</div>
-  <h1>The <em>template</em> shelf</h1>
-  <div class="rule"></div>
+<div class="fig-page-head">
+  <div class="fig-eyebrow">Catalog · Visibility</div>
+  <h1 class="fig-h1">The <em>template</em> shelf</h1>
+  <div class="fig-rule"><span class="fig-rule-label">{{ items|length }} total · {{ visible_count }} visible</span></div>
 </div>
 
 {% if flash %}
-  <div class="flash flash-ok">✓ Updated — <code>{{ flash }}</code> visibility flipped.</div>
+  <div class="fig-banner is-ok">✓ Updated — <code>{{ flash }}</code> visibility flipped.</div>
 {% endif %}
 {% if err == 'not-found' %}
-  <div class="flash flash-warn">That template doesn't exist in the catalog.</div>
+  <div class="fig-banner is-warn">That template doesn't exist in the catalog.</div>
 {% elif err == 'missing-id' %}
-  <div class="flash flash-warn">Missing template id.</div>
+  <div class="fig-banner is-warn">Missing template id.</div>
 {% elif err == 'save-failed' %}
-  <div class="flash flash-warn">Couldn't save. Refresh and try again.</div>
+  <div class="fig-banner is-warn">Couldn't save. Refresh and try again.</div>
 {% endif %}
 
-<section class="stat-row stat-row-2" aria-label="Catalog totals">
-  <div class="stat">
-    <div class="stat-num">{{ items|length }}</div>
-    <div class="stat-label">Total templates</div>
-    <div class="sub">In the catalog</div>
+<section class="fig-stats cols-2" aria-label="Catalog totals">
+  <div class="fig-stat">
+    <div class="fig-stat-num">{{ items|length }}</div>
+    <div class="fig-stat-label">Total templates</div>
+    <div class="fig-stat-sub">In the catalog</div>
   </div>
-  <div class="stat">
-    <div class="stat-num">{{ visible_count }}</div>
-    <div class="stat-label">Visible to users</div>
-    <div class="sub">Show in the sidebar</div>
+  <div class="fig-stat">
+    <div class="fig-stat-num">{{ visible_count }}</div>
+    <div class="fig-stat-label">Visible to users</div>
+    <div class="fig-stat-sub">Shown in the sidebar</div>
   </div>
 </section>
 
-<section class="cards" aria-label="Templates">
+<div class="fig-section-head">
+  <div class="left">
+    <h2>Catalog <em>shelf</em></h2>
+    <p>Toggle visibility per template. Pro-only templates stay in the catalog regardless of visibility.</p>
+  </div>
+</div>
+
+{% if items|length == 0 %}
+  <div class="fig-empty">
+    <div class="fig-empty-eyebrow">→ Catalog empty</div>
+    <h3>No templates yet.</h3>
+    <p>Run <code>scripts/templates.sql</code> against Neon to seed the role-based catalog.</p>
+  </div>
+{% else %}
+<div class="fig-templates-grid">
   {% for t in items %}
-    <article class="card card-template">
-      <div class="card-head">
-        <div class="card-eyebrow">→ Template / {{ '%02d'|format(t.sort) }}</div>
-        <h2 class="card-title">{{ t.name }}</h2>
-        <div class="card-sub"><code>{{ t.id }}</code></div>
+    <article class="fig-card">
+      <div class="fig-card-head">
+        <div>
+          <div class="fig-card-eyebrow">→ Template / №{{ '%02d'|format(t.sort) }}</div>
+          <h2>{{ t.name }}</h2>
+          <p>{{ t.description or '—' }}</p>
+        </div>
+        <span class="fig-pill is-info"><code style="background:transparent;border:0;padding:0;color:inherit;">{{ t.id }}</code></span>
       </div>
 
-      <div class="card-body">
-        <p class="template-desc">{{ t.description or '—' }}</p>
-        <div class="template-flags">
+      <div class="fig-card-body">
+        <div class="fig-flag-row">
           {% if t.is_pro_only %}
-            <span class="badge badge-pro">Pro-only</span>
+            <span class="fig-pill is-pro"><span class="dot"></span>Pro only</span>
           {% else %}
-            <span class="badge badge-muted">Free + Pro</span>
+            <span class="fig-pill is-info"><span class="dot"></span>Free + Pro</span>
           {% endif %}
           {% if t.is_visible %}
-            <span class="badge badge-on">Visible</span>
+            <span class="fig-pill is-on"><span class="dot"></span>Visible</span>
           {% else %}
-            <span class="badge badge-off">Hidden</span>
+            <span class="fig-pill is-off"><span class="dot"></span>Hidden</span>
           {% endif %}
         </div>
       </div>
 
-      <form class="card-foot" method="post" action="/admin/templates/{{ t.id }}/toggle">
-        <div class="card-foot-row">
-          <button type="submit" class="btn btn-toggle {{ 'is-on' if t.is_visible else 'is-off' }}">
-            {% if t.is_visible %}Hide from users{% else %}Show to users{% endif %}
-          </button>
-          <span class="card-foot-note">
-            {% if t.is_visible %}
-              Users can see this in their sidebar.
-            {% else %}
-              Hidden — users don't see this row.
-            {% endif %}
-          </span>
-        </div>
+      <form class="fig-card-foot" method="post" action="/admin/templates/{{ t.id }}/toggle">
+        <button type="submit" class="fig-btn {{ 'is-on' if t.is_visible else 'is-off' }}">
+          {% if t.is_visible %}Hide from users{% else %}Show to users{% endif %}
+        </button>
+        <span style="margin-left: 12px; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.04em;">
+          {% if t.is_visible %}
+            users can see this in their sidebar
+          {% else %}
+            hidden — users don't see this row
+          {% endif %}
+        </span>
       </form>
     </article>
   {% endfor %}
-</section>
-
-{% if items|length == 0 %}
-  <div class="empty-state">
-    No templates yet. Run <code>scripts/templates.sql</code> against Neon to seed the role-based catalog.
-  </div>
+</div>
 {% endif %}
 
 {% endblock %}

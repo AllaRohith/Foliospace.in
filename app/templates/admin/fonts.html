@@ -8,108 +8,112 @@
 {% block breadcrumbs %}
 <div class="breadcrumbs">
   <a href="/admin/">Admin</a>
-  <span class="sep">/</span>
+  <span class="sep">›</span>
   <span class="here">Fonts</span>
 </div>
 {% endblock %}
 
 {% block body %}
 
-<div class="page-head">
-  <div class="eyebrow">Moderation</div>
-  <h1>The <em>custom font</em> desk</h1>
-  <div class="rule"></div>
+<div class="fig-page-head">
+  <div class="fig-eyebrow">Moderation · Custom fonts</div>
+  <h1 class="fig-h1">The <em>font</em> desk</h1>
+  <div class="fig-rule"><span class="fig-rule-label">{{ pending|length }} pending · {{ decided|length }} decided</span></div>
 </div>
 
 {% if msg == 'approved' %}
-  <div class="flash flash-ok">✓ Font approved. It'll load on the user's public folio from now on.</div>
+  <div class="fig-banner is-ok">✓ Font approved. It'll load on the user's public folio from now on.</div>
 {% elif msg == 'rejected' %}
-  <div class="flash flash-ok">Font rejected. The user can re-upload.</div>
+  <div class="fig-banner is-ok">Font rejected. The user can re-upload.</div>
 {% endif %}
 {% if err == 'not-found' %}
-  <div class="flash flash-warn">That font doesn't exist (or was already removed).</div>
+  <div class="fig-banner is-warn">That font doesn't exist (or was already removed).</div>
 {% elif err == 'missing-id' %}
-  <div class="flash flash-warn">Missing font id.</div>
+  <div class="fig-banner is-warn">Missing font id.</div>
 {% endif %}
 
-<section class="stat-row stat-row-2" aria-label="Font totals">
-  <div class="stat">
-    <div class="stat-num">{{ pending|length }}</div>
-    <div class="stat-label">Pending review</div>
-    <div class="sub">Awaiting decision</div>
+<section class="fig-stats cols-2" aria-label="Font totals">
+  <div class="fig-stat">
+    <div class="fig-stat-num">{{ pending|length }}</div>
+    <div class="fig-stat-label">Pending review</div>
+    <div class="fig-stat-sub">Awaiting decision</div>
   </div>
-  <div class="stat">
-    <div class="stat-num">{{ decided|length }}</div>
-    <div class="stat-label">Decided</div>
-    <div class="sub">Approved or rejected</div>
+  <div class="fig-stat">
+    <div class="fig-stat-num">{{ decided|length }}</div>
+    <div class="fig-stat-label">Decided</div>
+    <div class="fig-stat-sub">Approved or rejected</div>
   </div>
 </section>
 
-<section class="cards" aria-label="Pending fonts">
-  <div class="page-head page-head-sub">
-    <div class="eyebrow">Pending</div>
+<div class="fig-section-head">
+  <div class="left">
     <h2>Awaiting <em>review</em></h2>
+    <p>User-uploaded fonts on Pro accounts. Approve to load on their public folio via @font-face.</p>
   </div>
-  {% if pending|length == 0 %}
-    <div class="empty-state">No pending fonts. Queue is empty.</div>
-  {% endif %}
+</div>
+
+{% if pending|length == 0 %}
+  <div class="fig-empty">
+    <div class="fig-empty-eyebrow">→ Queue empty</div>
+    <h3>No pending fonts.</h3>
+    <p>When a Pro user uploads a font, it lands here for review.</p>
+  </div>
+{% endif %}
+
+<div class="fig-fonts-grid">
   {% for f in pending %}
-    <article class="card card-font">
-      <div class="card-head">
-        <div class="card-eyebrow">→ Font / {{ f.created_at.strftime('%Y-%m-%d') if f.created_at else '—' }}</div>
-        <h2 class="card-title">{{ f.font_name }}</h2>
-        <div class="card-sub">
-          by <strong>{{ f.display_name }}</strong>
-          {% if f.slug %}<span class="card-sub-sep">·</span><code>/{{ f.slug }}</code>{% endif %}
+    <article class="fig-card fig-font-card">
+      <div class="fig-card-head">
+        <div>
+          <div class="fig-card-eyebrow">→ Font / №{{ '%04d'|format(f.id) }} · {{ f.created_at.strftime('%Y-%m-%d') if f.created_at else '—' }}</div>
+          <h2>{{ f.font_name }}</h2>
+          <p>by <strong>{{ f.display_name }}</strong>{% if f.slug %} · <code style="font-size:11.5px;background:var(--bg);padding:1px 6px;border:1px solid var(--border);border-radius:4px;color:var(--neon);">/{{ f.slug }}</code>{% endif %}</p>
         </div>
       </div>
 
-      <div class="card-body">
-        <div class="font-preview-wrap">
-          <iframe class="font-preview" src="/{{ f.slug }}?preview=1" sandbox="allow-same-origin" title="Font preview"></iframe>
+      <div class="fig-card-body">
+        <div class="fig-font-preview-wrap">
+          <iframe class="fig-font-preview" src="/{{ f.slug }}?preview=1" sandbox="allow-same-origin" title="Font preview"></iframe>
         </div>
-        <div class="font-meta">
-          <code class="font-url">{{ f.file_url }}</code>
-        </div>
+        <code class="fig-font-url">{{ f.file_url }}</code>
       </div>
 
-      <div class="card-foot">
-        <div class="card-foot-row">
+      <div class="fig-card-foot">
+        <div class="fig-foot-row">
           <form method="post" action="/admin/fonts/{{ f.id }}/approve">
-            <button type="submit" class="btn btn-toggle is-on">Approve</button>
+            <button type="submit" class="fig-btn is-on">Approve</button>
           </form>
           <form method="post" action="/admin/fonts/{{ f.id }}/reject">
-            <button type="submit" class="btn btn-toggle is-off">Reject</button>
+            <button type="submit" class="fig-btn is-off">Reject</button>
           </form>
-          <span class="card-foot-note">
-            Approval loads the font on the user's public folio. You can re-reject later from this desk.
-          </span>
+          <span class="fig-foot-note">Approval loads the font on the user's public folio. You can re-reject later from this desk.</span>
         </div>
       </div>
     </article>
   {% endfor %}
-</section>
+</div>
 
 {% if decided|length > 0 %}
-<section class="cards" aria-label="Decided fonts">
-  <div class="page-head page-head-sub">
-    <div class="eyebrow">History</div>
+<div class="fig-section-head">
+  <div class="left">
     <h2>Already <em>decided</em></h2>
+    <p>History — by date, newest first.</p>
   </div>
+</div>
+
+<div class="fig-fonts-grid">
   {% for f in decided %}
-    <article class="card card-font card-font-decided">
-      <div class="card-head">
-        <div class="card-eyebrow">
-          → {{ f.status|capitalize }} / {{ f.created_at.strftime('%Y-%m-%d') if f.created_at else '—' }}
+    <article class="fig-card fig-font-card" style="opacity: 0.85;">
+      <div class="fig-card-head">
+        <div>
+          <div class="fig-card-eyebrow">→ {{ f.status|capitalize }} / №{{ '%04d'|format(f.id) }} · {{ f.created_at.strftime('%Y-%m-%d') if f.created_at else '—' }}</div>
+          <h2>{{ f.font_name }}</h2>
+          <p>by <strong>{{ f.display_name }}</strong>{% if f.slug %} · <code style="font-size:11.5px;background:var(--bg);padding:1px 6px;border:1px solid var(--border);border-radius:4px;color:var(--neon);">/{{ f.slug }}</code>{% endif %}</p>
         </div>
-        <h2 class="card-title">{{ f.font_name }}</h2>
-        <div class="card-sub">
-          by <strong>{{ f.display_name }}</strong>
-          {% if f.slug %}<span class="card-sub-sep">·</span><code>/{{ f.slug }}</code>{% endif %}
-        </div>
+        <span class="fig-pill {{ 'is-on' if f.status == 'approved' else 'is-off' }}"><span class="dot"></span>{{ f.status }}</span>
       </div>
-      <div class="card-body">
-        <div class="font-status font-status-{{ f.status }}">
+      <div class="fig-card-body">
+        <div class="fig-banner {{ 'is-ok' if f.status == 'approved' else 'is-warn' }}" style="margin:0;">
           {% if f.status == 'approved' %}
             Live on the public folio via @font-face.
           {% else %}
@@ -119,7 +123,7 @@
       </div>
     </article>
   {% endfor %}
-</section>
+</div>
 {% endif %}
 
 {% endblock %}

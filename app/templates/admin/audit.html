@@ -9,49 +9,49 @@
 {% block breadcrumbs %}
 <div class="breadcrumbs">
   <a href="/admin/">Admin</a>
-  <span class="sep">/</span>
+  <span class="sep">›</span>
   <span class="here">Audit</span>
 </div>
 {% endblock %}
 
 {% block body %}
 
-<div class="page-head">
-  <div class="eyebrow">Forensics</div>
-  <h1>The <em>record</em></h1>
-  <div class="rule"></div>
+<div class="fig-page-head">
+  <div class="fig-eyebrow">Forensics · On-record</div>
+  <h1 class="fig-h1">The <em>record</em></h1>
+  <div class="fig-rule"><span class="fig-rule-label">{{ total }} event{{ '' if total == 1 else 's' }}</span></div>
 </div>
 
-<form method="get" action="/admin/audit" class="filters" role="search">
-  <div class="field">
-    <label class="field-label" for="action">Action</label>
-    <select id="action" name="action" class="select">
+<form method="get" action="/admin/audit" class="fig-filters" role="search">
+  <div class="fig-field">
+    <label class="fig-field-label" for="action">Action</label>
+    <select id="action" name="action" class="fig-select">
       <option value="">All actions</option>
       {% for a in actions %}
         <option value="{{ a }}" {{ 'selected' if action == a else '' }}>{{ a }}</option>
       {% endfor %}
     </select>
   </div>
-  <div class="field">
-    <label class="field-label" for="from">From</label>
-    <input id="from" name="from" type="date" class="input" value="{{ date_from or '' }}" />
+  <div class="fig-field">
+    <label class="fig-field-label" for="from">From</label>
+    <input id="from" name="from" type="date" class="fig-input" value="{{ date_from or '' }}" />
   </div>
-  <div class="field">
-    <label class="field-label" for="to">To</label>
-    <input id="to" name="to" type="date" class="input" value="{{ date_to or '' }}" />
+  <div class="fig-field">
+    <label class="fig-field-label" for="to">To</label>
+    <input id="to" name="to" type="date" class="fig-input" value="{{ date_to or '' }}" />
   </div>
-  <div class="actions">
-    <a href="/admin/audit" class="btn btn-sm btn-ghost">Clear</a>
-    <button type="submit" class="btn btn-sm btn-primary">Apply</button>
+  <div class="fig-actions">
+    <a href="/admin/audit" class="fig-btn is-ghost sm">Clear</a>
+    <button type="submit" class="fig-btn is-primary sm">Apply</button>
   </div>
 </form>
 
 {% if rows %}
-  <div class="table-wrap">
-    <table class="table audit-table">
+  <div class="fig-table-wrap" style="overflow-x: auto;">
+    <table class="fig-table" style="min-width: 760px;">
       <thead>
         <tr>
-          <th style="width:80px">#</th>
+          <th style="width:90px">№</th>
           <th style="width:170px">When</th>
           <th style="width:160px">Action</th>
           <th style="width:140px">IP</th>
@@ -63,28 +63,28 @@
       <tbody>
         {% for r in rows %}
           <tr>
-            <td class="id-cell">#{{ '%06d'|format(r['id']) }}</td>
-            <td class="time">{{ r['created_at'].strftime('%Y-%m-%d %H:%M:%S') }} UTC</td>
-            <td class="act-cell">{{ r['action'] }}</td>
-            <td class="time">{{ r['ip'] or '—' }}</td>
-            <td class="target-cell">{{ r['target'] or '—' }}</td>
-            <td class="meta-cell">
+            <td class="id">№{{ '%06d'|format(r['id']) }}</td>
+            <td class="mono">{{ r['created_at'].strftime('%Y-%m-%d %H:%M:%S') }} UTC</td>
+            <td class="role">{{ r['action'] }}</td>
+            <td class="mono">{{ r['ip'] or '—' }}</td>
+            <td class="mono">{{ r['target'] or '—' }}</td>
+            <td class="mono">
               {% if r['metadata'] %}
                 {{ r['metadata']|tojson(indent=None) }}
               {% else %}
                 —
               {% endif %}
             </td>
-            <td class="time">{{ (r['session_id'][:10] + '…') if r['session_id'] else '—' }}</td>
+            <td class="mono">{{ (r['session_id'][:10] + '…') if r['session_id'] else '—' }}</td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 
-  <nav class="pagination" aria-label="Pagination">
-    <div class="pagination-meta">{{ total }} event{{ '' if total == 1 else 's' }} · page {{ page }} of {{ total_pages }}</div>
-    <div class="pagination-links">
+  <nav class="fig-pager" aria-label="Pagination">
+    <div class="fig-pager-meta">{{ total }} event{{ '' if total == 1 else 's' }} · page {{ page }} of {{ total_pages }}</div>
+    <div class="fig-pager-links">
       {% if page > 1 %}
         <a href="/admin/audit?{{ {'action': action, 'from': date_from, 'to': date_to, 'page': page - 1}|urlencode }}">← Prev</a>
       {% else %}
@@ -98,9 +98,10 @@
     </div>
   </nav>
 {% else %}
-  <div class="empty">
-    <div class="empty-italic">No audit events match.</div>
-    <div class="empty-sub">Adjust the filters or clear to widen the net</div>
+  <div class="fig-empty">
+    <div class="fig-empty-eyebrow">→ No matches</div>
+    <h3>No audit events match.</h3>
+    <p>Adjust the filters or clear to widen the net.</p>
   </div>
 {% endif %}
 {% endblock %}

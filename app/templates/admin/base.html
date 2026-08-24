@@ -106,7 +106,7 @@
         <button type="button" class="hamburger" id="sidebar-toggle" aria-label="Toggle navigation">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12"/></svg>
         </button>
-        <div class="app-bar-issue">Issue {{ issue() }} · {{ now().strftime('%Y-%m-%d') }} UTC</div>
+        <div class="app-bar-issue"><span class="pulse"></span>ISSUE {{ issue() }} · {{ now().strftime('%Y-%m-%d') }} UTC</div>
       </div>
       <div class="app-bar-search">
         <span class="search-kbd"><kbd>⌘</kbd><kbd>K</kbd></span>

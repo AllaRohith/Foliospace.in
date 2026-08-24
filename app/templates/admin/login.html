@@ -6,21 +6,22 @@
 {% block description %}FolioSpace admin sign in.{% endblock %}
 
 {% block body %}
-<div class="login-wrap">
-  <div class="login-card">
-    <div class="login-eyebrow">→ Console · Restricted</div>
-    <h1 class="login-title"><em>Sign</em> in</h1>
-    <div class="login-rule"></div>
-    <p class="login-sub">Internal access only.<br/>All activity is logged.</p>
+<div class="fig-login-wrap">
+  <div class="fig-login-card">
+    <div class="fig-login-mark" aria-hidden="true"></div>
+    <div class="fig-login-eyebrow"><span class="blink"></span>Console · Restricted</div>
+    <h1><em>Sign</em> in</h1>
+    <div class="fig-login-rule"><span class="dot"></span></div>
+    <p class="fig-login-sub">Internal access only · all activity is logged.</p>
 
     {% if locked %}
-      <div class="login-err is-warn">Too many attempts. Try again in a few minutes.</div>
+      <div class="fig-login-err is-warn">Too many attempts. Try again in a few minutes.</div>
     {% elif error %}
-      <div class="login-err">{{ error if error is string else 'Invalid credentials.' }}</div>
+      <div class="fig-login-err">{{ error if error is string else 'Invalid credentials.' }}</div>
     {% endif %}
 
-    <form method="post" action="/admin/login" autocomplete="off" novalidate>
-      <div class="login-field">
+    <form method="post" action="/admin/login" class="fig-login-form" autocomplete="off" novalidate>
+      <div class="fig-form-field">
         <label for="password">Password</label>
         <input
           id="password"
@@ -33,10 +34,10 @@
           autocapitalize="off"
         />
       </div>
-      <button type="submit" class="login-submit">Enter</button>
+      <button type="submit" class="fig-login-submit">Enter the console</button>
     </form>
 
-    <p class="login-foot">All access audited</p>
+    <p class="fig-login-foot">All access audited ↗ live</p>
   </div>
 </div>
 {% endblock %}
