@@ -140,14 +140,21 @@
 
   function credentialToJSON(cred) {
     if (!cred) return null;
+    var r = cred.response || {};
+    var response = {
+      clientDataJSON: bytesToB64u(r.clientDataJSON),
+      authenticatorData: bytesToB64u(r.authenticatorData),
+      signature: bytesToB64u(r.signature)
+    };
+    if (r.userHandle) {
+      response.userHandle = bytesToB64u(r.userHandle);
+    }
     return {
       id: cred.id,
       rawId: bytesToB64u(cred.rawId),
       type: cred.type,
       clientExtensionResults: cred.getClientExtensionResults ? cred.getClientExtensionResults() : {},
-      response: {
-        clientDataJSON: bytesToB64u(cred.response.clientDataJSON)
-      }
+      response: response
     };
   }
 

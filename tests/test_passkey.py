@@ -837,5 +837,83 @@ class WebauthnCrossVersionTests(unittest.TestCase):
         self.assertEqual(_enum_or_str(_FakeEnum()), "preferred")
 
 
+# ── JS login-credential serializer (static source check) ───────────────────────────────────────────────────
+
+class CredentialToJSONSourceTests(unittest.TestCase):
+    """Regression for the Render 2026-08-24 'authenticatorData missing' bug.
+
+    The login-side JS serializer used to only include response.clientDataJSON
+    in the credential posted to /passkey/login/complete. The browser's
+    AuthenticatorAssertionResponse ALSO has authenticatorData, signature, and
+    optionally userHandle — py_webauthn's verify_authentication_response
+    requires all three. We re-introduced them; this test pins the source so
+    nobody strips them out again.
+    """
+
+    def _read(self, name: str) -> str:
+        import pathlib
+        return pathlib.Path(
+            f"/Users/rohithnaidualla/Desktop/FolioSpace/app/static/js/{name}"
+        ).read_text()
+
+    def _extract(self, src: str) -> str:
+        # Grab everything from `function credentialToJSON(` to the closing brace
+        # of its body. Brace counting tolerates nested braces in inner objects.
+        start = src.index("function credentialToJSON(")
+        depth = 0
+        i = src.index("{", start)
+        end = None
+        for j in range(i, len(src)):
+            if src[j] == "{":
+                depth += 1
+            elif src[j] == "}":
+                depth -= 1
+                if depth == 0:
+                    end = j + 1
+                    break
+        self.assertIsNotNone(end, "could not find end of credentialToJSON")
+        return src[i:end]
+
+    def test_unminified_includes_authenticator_data_and_signature(self):
+        src = self._read("passkey.js")
+        body = self._extract(src)
+        self.assertIn("authenticatorData", body,
+                      "credentialToJSON must include authenticatorData")
+        self.assertIn("signature", body,
+                      "credentialToJSON must include signature")
+        self.assertIn("userHandle", body,
+                      "credentialToJSON must handle userHandle (resident-key flows)")
+
+    def test_minified_includes_authenticator_data_and_signature(self):
+        src = self._read("passkey.min.js")
+        self.assertIn("function credentialToJSON(", src,
+                      "credentialToJSON missing from min.js")
+        body = self._extract(src)
+        self.assertIn("authenticatorData", body,
+                      "credentialToJSON in min.js must include authenticatorData")
+        self.assertIn("signature", body,
+                      "credentialToJSON in min.js must include signature")
+
+    def test_login_response_carries_authenticator_data_and_signature(self):
+        # Sanity check: the function emitted to /passkey/login/complete is
+        # `credentialToJSON(cred)`, not `attestationToJSON(cred)`. If someone
+        # swaps them, login would silently break.
+        src = self._read("passkey.js")
+        # credentialToJSON must be called as a function (not just defined).
+        call_sites = src.count("credentialToJSON(") - src.count("function credentialToJSON(")
+        self.assertGreaterEqual(call_sites, 1,
+            "credentialToJSON must be called at least once (login handler)")
+        # attestationToJSON must NOT be called by passkeyLogin.
+        # Check that the substring around the login handler only references credentialToJSON.
+        login_idx = src.index("function passkeyLogin(")
+        # Find the next top-level function declaration after passkeyLogin
+        register_idx = src.index("function passkeyRegister(", login_idx)
+        login_block = src[login_idx:register_idx]
+        self.assertIn("credentialToJSON(", login_block,
+            "passkeyLogin must call credentialToJSON")
+        self.assertNotIn("attestationToJSON(", login_block,
+            "passkeyLogin must NOT call attestationToJSON")
+
+
 if __name__ == "__main__":
     unittest.main()
