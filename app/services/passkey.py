@@ -434,8 +434,28 @@ def start_registration(
     return out
 
 
+def _enum_or_str(value):
+    """Return the wire-format string for a value that may be a 3.x enum or a 2.x raw str.
+
+    py_webauthn 3.x wraps these in enum members (AttestationConveyancePreference,
+    UserVerificationRequirement, AuthenticatorAttachment, AuthenticatorTransport);
+    2.x leaves them as plain strings. The JSON wire format is the same: the string
+    value. This helper normalizes both.
+    """
+    if value is None:
+        return None
+    if isinstance(value, str):
+        return value
+    return getattr(value, "value", value)
+
+
 def _serialize_reg_options(opts) -> dict[str, Any]:
-    """Convert py_webauthn PublicKeyCredentialCreationOptions → JSON dict."""
+    """Convert py_webauthn PublicKeyCredentialCreationOptions → JSON dict.
+
+    Tolerates both webauthn 2.x (strings) and 3.x (enums with `.value`).
+    Skips `hints` on 2.x — the field does not exist there.
+    """
+    sel = opts.authenticator_selection
     return {
         "rp": {"id": opts.rp.id, "name": opts.rp.name},
         "user": {
@@ -453,25 +473,21 @@ def _serialize_reg_options(opts) -> dict[str, Any]:
             {
                 "id": b64u_encode(bytes(c.id)),
                 "type": "public-key",
-                "transports": [t.value for t in (c.transports or [])],
+                "transports": [_enum_or_str(t) for t in (c.transports or [])],
             }
             for c in (opts.exclude_credentials or [])
         ],
         "authenticatorSelection": {
-            "residentKey": (opts.authenticator_selection.resident_key.value
-                            if opts.authenticator_selection and opts.authenticator_selection.resident_key
-                            else None),
-            "userVerification": (opts.authenticator_selection.user_verification.value
-                                  if opts.authenticator_selection and opts.authenticator_selection.user_verification
-                                  else None),
-            "authenticatorAttachment": (opts.authenticator_selection.authenticator_attachment.value
-                                         if opts.authenticator_selection and opts.authenticator_selection.authenticator_attachment
-                                         else None),
-            "requireResidentKey": bool(opts.authenticator_selection.require_resident_key)
-                                  if opts.authenticator_selection else False,
+            "residentKey": (_enum_or_str(sel.resident_key) if sel else None),
+            "userVerification": (_enum_or_str(sel.user_verification) if sel else None),
+            "authenticatorAttachment": (_enum_or_str(sel.authenticator_attachment) if sel else None),
+            "requireResidentKey": bool(sel.require_resident_key) if sel else False,
         },
-        "attestation": opts.attestation.value if opts.attestation else "none",
-        "hints": [h.value for h in (opts.hints or [])],
+        "attestation": _enum_or_str(opts.attestation) or "none",
+        # `hints` was added to PublicKeyCredentialCreationOptions in webauthn 3.x
+        # (present but None when not set); absent in 2.x. Emit only when non-empty.
+        **({"hints": [_enum_or_str(h) for h in opts.hints]}
+           if hasattr(opts, "hints") and opts.hints else {}),
     }
 
 
@@ -629,20 +645,19 @@ def _serialize_authn_options(opts) -> dict[str, Any]:
         "challenge": b64u_encode(opts.challenge),
         "rpId": opts.rp_id,
         "timeout": opts.timeout,
-        "userVerification": (opts.user_verification.value
-                              if opts.user_verification else None),
+        "userVerification": _enum_or_str(opts.user_verification),
         "allowCredentials": [
             {
                 "id": b64u_encode(bytes(c.id)),
                 "type": "public-key",
-                "transports": [t.value for t in (c.transports or [])],
+                "transports": [_enum_or_str(t) for t in (c.transports or [])],
             }
             for c in (opts.allow_credentials or [])
         ],
-        # webauthn 3.x removed `hints` from PublicKeyCredentialRequestOptions.
-        # (2.x had it.) Skip when absent — the field is a hint, not required
-        # for the browser's navigator.credentials.get() call.
-        **({"hints": [h.value for h in opts.hints]} if hasattr(opts, "hints") else {}),
+        # `hints` is present on PublicKeyCredentialRequestOptions in 2.x but
+        # was removed in 3.x. Emit when present so 3.x doesn't AttributeError.
+        **({"hints": [_enum_or_str(h) for h in opts.hints]}
+           if hasattr(opts, "hints") and opts.hints else {}),
     }
 
 

@@ -533,33 +533,44 @@ class DashboardPageContextTests(unittest.TestCase):
 
 # ── webauthn 3.x API compatibility ─────────────────────────────────────────────────────────────────────────
 
-class Webauthn3xBuilderTests(unittest.TestCase):
-    """Regression: py_webauthn 3.x broke two builder inputs vs 2.x.
+class WebauthnCrossVersionTests(unittest.TestCase):
+    """Regression: serialize for both webauthn 2.x AND 3.x.
 
-    1. `generate_registration_options` no longer accepts `authenticator_selection`
-       as a dict — it requires `AuthenticatorSelectionCriteria` dataclass. Passing
-       a dict hits `AttributeError: 'dict' object has no attribute 'resident_key'`
-       inside the library and the route returns 500.
+    Render currently runs webauthn 2.2.0 (per `pip install --dry-run -r
+    requirements.txt`). 3.x has been released but pip resolves to 2.2.0
+    because nothing in the requirements graph pulls a newer one. So the
+    serializers MUST tolerate both:
 
-    2. `PublicKeyCredentialRequestOptions` lost its `hints` field. The serializer
-       `_serialize_authn_options` previously did `opts.hints` and raised
-       `AttributeError: ... no attribute 'hints'` on every login ceremony.
+    - 2.x: raw strings (e.g. attestation='none', user_verification='required',
+      transports=['usb']), no `hints` field on either Options dataclass.
+    - 3.x: enum members with `.value`, `hints` field on
+      PublicKeyCredentialCreationOptions (was added), absent on
+      PublicKeyCredentialRequestOptions (was removed).
 
-    These tests exercise the actual library on webauthn 3.x. Skip if py_webauthn
-    is not installed or is <2.0.
+    Three historical bugs encoded here:
+    1. Passing `authenticator_selection` as a dict instead of
+       `AuthenticatorSelectionCriteria` dataclass — fails on BOTH versions.
+    2. `_serialize_reg_options` accessing `opts.attestation.value` — fails on 2.x
+       (it's a string, not an enum).
+    3. Accessing `opts.hints` — fails on 2.x (no field) AND on 3.x
+       PublicKeyCredentialRequestOptions (no field there either).
     """
 
     def setUp(self):
         import webauthn
-        from packaging.version import Version
         try:
-            v = Version(webauthn.__version__)
-        except Exception:
-            self.skipTest(f"could not parse webauthn version: {webauthn.__version__}")
-        if v < Version("3.0"):
-            self.skipTest(f"py_webauthn {v} — these regressions only fire on 3.x")
+            import dataclasses
+            from webauthn.helpers.structs import (
+                PublicKeyCredentialCreationOptions,
+                PublicKeyCredentialRequestOptions,
+            )
+            self._pkc_fields = [f.name for f in dataclasses.fields(PublicKeyCredentialCreationOptions)]
+            self._pkr_fields = [f.name for f in dataclasses.fields(PublicKeyCredentialRequestOptions)]
+        except Exception as e:
+            self.skipTest(f"py_webauthn not importable: {e}")
+        self._version = webauthn.__version__
 
-    def _gen_options(self):
+    def _build_registration(self):
         from app.services import passkey as pk
         wa = pk._webauthn()
         return wa["generate_registration_options"](
@@ -584,43 +595,46 @@ class Webauthn3xBuilderTests(unittest.TestCase):
             timeout=300000,
         )
 
-    def test_registration_options_build_with_dataclass(self):
-        """The route must pass AuthenticatorSelectionCriteria, not a dict."""
-        opts = self._gen_options()
-        sel = opts.authenticator_selection
-        self.assertEqual(sel.user_verification.value, "required")
-        self.assertEqual(sel.resident_key.value, "preferred")
-        self.assertEqual(sel.authenticator_attachment.value, "platform")
-
-    def test_serialize_reg_options_round_trip(self):
-        """The serializer must produce a JSON-friendly dict on webauthn 3.x."""
-        from app.services import passkey as pk
-        out = pk._serialize_reg_options(self._gen_options())
-        for key in ("rp", "user", "challenge", "pubKeyCredParams", "timeout",
-                    "excludeCredentials", "authenticatorSelection", "attestation"):
-            self.assertIn(key, out)
-        self.assertEqual(out["authenticatorSelection"]["userVerification"], "required")
-        self.assertEqual(out["authenticatorSelection"]["authenticatorAttachment"], "platform")
-        self.assertEqual(out["authenticatorSelection"]["residentKey"], "preferred")
-
-    def test_serialize_authn_options_no_hints(self):
-        """PublicKeyCredentialRequestOptions dropped `hints` in 3.x.
-
-        _serialize_authn_options must not raise AttributeError when reading it.
-        """
+    def _build_authentication(self):
         from app.services import passkey as pk
         wa = pk._webauthn()
-        opts = wa["generate_authentication_options"](
+        return wa["generate_authentication_options"](
             rp_id="localhost",
             challenge=b"x" * 32,
             timeout=300000,
             user_verification=wa["UserVerificationRequirement"].REQUIRED,
             allow_credentials=[],
         )
+
+    def test_reg_serializer_works_on_this_version(self):
+        from app.services import passkey as pk
+        opts = self._build_registration()
+        out = pk._serialize_reg_options(opts)
+        # wire format the browser expects
+        self.assertEqual(out["rp"]["id"], "localhost")
+        self.assertEqual(out["authenticatorSelection"]["userVerification"], "required")
+        self.assertEqual(out["authenticatorSelection"]["authenticatorAttachment"], "platform")
+        self.assertEqual(out["authenticatorSelection"]["residentKey"], "preferred")
+        self.assertEqual(out["attestation"], "none")
+        # hints is optional; only present when the library populates it
+        if "hints" in self._pkc_fields:
+            self.assertNotIn("hints", out)  # None → skipped
+
+    def test_authn_serializer_works_on_this_version(self):
+        from app.services import passkey as pk
+        opts = self._build_authentication()
         out = pk._serialize_authn_options(opts)
-        for key in ("challenge", "rpId", "timeout", "userVerification", "allowCredentials"):
-            self.assertIn(key, out)
         self.assertEqual(out["userVerification"], "required")
+        self.assertEqual(out["rpId"], "localhost")
+
+    def test_enum_or_str_handles_strings(self):
+        from app.services.passkey import _enum_or_str
+        self.assertEqual(_enum_or_str("required"), "required")
+        self.assertEqual(_enum_or_str(None), None)
+        # 3.x enum — check by mocking an enum-like object
+        class _FakeEnum:
+            value = "preferred"
+        self.assertEqual(_enum_or_str(_FakeEnum()), "preferred")
 
 
 if __name__ == "__main__":
