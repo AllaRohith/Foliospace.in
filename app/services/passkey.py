@@ -11,6 +11,7 @@ DB schema lives in `scripts/passkeys.sql`:
 from __future__ import annotations
 
 import base64
+import json
 import logging
 import os
 import secrets
@@ -205,6 +206,29 @@ def b64u_decode(s: str) -> bytes:
 
 def b64u_encode(b: bytes) -> str:
     return base64.urlsafe_b64encode(b).rstrip(b"=").decode("ascii")
+
+
+def extract_challenge(credential: dict) -> bytes:
+    """Pull the raw challenge bytes out of a credential/assertion dict sent from the browser.
+
+    The browser's PublicKeyCredential JSON does NOT have a top-level `challenge` key —
+    the original challenge bytes are base64url-encoded inside
+    `response.clientDataJSON` (a JSON object whose `challenge` field is the base64url
+    original nonce we minted at /passkey/*/begin).
+    """
+    response = credential.get("response") or {}
+    cdata_b64u = response.get("clientDataJSON")
+    if not cdata_b64u:
+        raise PasskeyAttestationFailed("clientDataJSON missing")
+    try:
+        cdata = b64u_decode(cdata_b64u)
+        cdata_obj = json.loads(cdata)
+        challenge_b64u = cdata_obj.get("challenge")
+    except (ValueError, KeyError, TypeError) as e:
+        raise PasskeyAttestationFailed(f"clientDataJSON undecodable: {e}") from e
+    if not challenge_b64u:
+        raise PasskeyAttestationFailed("challenge missing from clientDataJSON")
+    return b64u_decode(challenge_b64u)
 
 
 # ── Challenge lifecycle ─────────────────────────────────────────────────────────────────────────────────
@@ -499,10 +523,9 @@ def complete_registration(
 ) -> dict:
     """Verify the attestation response and persist the credential."""
     user = _require_verified_user(user_id)
-    # Pull challenge from DB via the client-supplied challenge bytes.
-    client_challenge_b64u = attestation.get("challenge") or attestation.get("rawId") and attestation.get("response", {}).get("clientDataJSON", "")
-    # The library reads challenge from attestation.client_data.challenge, so we pass it raw.
-    raw_challenge = b64u_decode(attestation["challenge"])
+    # Pull challenge from response.clientDataJSON (browser JSON has no top-level
+    # `challenge` key — it lives base64url-encoded inside clientDataJSON).
+    raw_challenge = extract_challenge(attestation)
     # Consume the stored challenge (locks the row).
     challenge_row = _consume_challenge(raw_challenge, "register")
     if challenge_row["user_id"] != user_id:
@@ -669,7 +692,7 @@ def complete_login(
 
     Caller is responsible for calling `user_auth.create_user_session(...)` after.
     """
-    raw_challenge = b64u_decode(assertion["challenge"])
+    raw_challenge = extract_challenge(assertion)
     challenge_row = _consume_challenge(raw_challenge, "login")
     raw_id = b64u_decode(assertion["rawId"])
     # Look up the stored credential by rawId.

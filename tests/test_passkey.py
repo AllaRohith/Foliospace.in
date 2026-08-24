@@ -8,6 +8,7 @@ Run from the repo root:
     python3 -m unittest tests.test_passkey -v
 """
 import base64
+import json
 import secrets
 import unittest
 from types import SimpleNamespace
@@ -370,13 +371,18 @@ class CounterRegressionTests(unittest.TestCase):
                     with mock.patch.dict(passkey._webauthn_cache,
                                          {"verify_authentication_response": mock.MagicMock(return_value=_V())}):
                         with mock.patch.object(passkey.user_auth, "audit_user"):
+                            _cdj = _b64u(json.dumps({
+                                "type": "webauthn.get",
+                                "challenge": _b64u(b"\xaa\xbb"),
+                                "origin": "https://foliospace.in",
+                                "crossOrigin": False,
+                            }).encode("utf-8"))
                             assertion = {
                                 "id": "AQID",
                                 "rawId": "AQID",
-                                "challenge": _b64u(b"\xaa\xbb"),
                                 "type": "public-key",
                                 "response": {
-                                    "clientDataJSON": _b64u(b"\x00"),
+                                    "clientDataJSON": _cdj,
                                     "authenticatorData": _b64u(b"\x01"),
                                     "signature": _b64u(b"\x02"),
                                 },
@@ -419,13 +425,18 @@ class AuditLogTests(unittest.TestCase):
                     with mock.patch.dict(passkey._webauthn_cache,
                                          {"verify_authentication_response": mock.MagicMock(return_value=_V())}):
                         with mock.patch.object(passkey.user_auth, "audit_user") as audit:
+                            _cdj = _b64u(json.dumps({
+                                "type": "webauthn.get",
+                                "challenge": _b64u(b"\xaa"),
+                                "origin": "https://foliospace.in",
+                                "crossOrigin": False,
+                            }).encode("utf-8"))
                             assertion = {
                                 "id": "AQID",
                                 "rawId": "AQID",
-                                "challenge": _b64u(b"\xaa"),
                                 "type": "public-key",
                                 "response": {
-                                    "clientDataJSON": _b64u(b"\x00"),
+                                    "clientDataJSON": _cdj,
                                     "authenticatorData": _b64u(b"\x01"),
                                     "signature": _b64u(b"\x02"),
                                 },
@@ -529,6 +540,68 @@ class DashboardPageContextTests(unittest.TestCase):
         # All sidebar-required fields must reach the template untouched.
         for key in ("slug", "email", "display_name", "is_internal", "plan"):
             self.assertIn(key, ctx["user"], f"user context missing `{key}` for sidebar")
+
+
+# ── extract_challenge regression ─────────────────────────────────────────────────────────────────────────────
+
+class ExtractChallengeTests(unittest.TestCase):
+    """Regression for the KeyError 'challenge' bug hit on Render 2026-08-24.
+
+    The browser's PublicKeyCredential JSON has NO top-level `challenge` key —
+    the challenge bytes live base64url-encoded inside `response.clientDataJSON`.
+    complete_registration / complete_login used to do `attestation["challenge"]`
+    and 500 with KeyError. extract_challenge decodes the real shape.
+    """
+
+    def _cdj(self, raw_challenge: bytes, kind: str = "webauthn.create") -> str:
+        return base64.urlsafe_b64encode(json.dumps({
+            "type": kind,
+            "challenge": base64.urlsafe_b64encode(raw_challenge).rstrip(b"=").decode("ascii"),
+            "origin": "https://foliospace.in",
+            "crossOrigin": False,
+        }, separators=(",", ":")).encode("utf-8")).rstrip(b"=").decode("ascii")
+
+    def test_returns_raw_challenge_bytes(self):
+        from app.services import passkey
+        raw = b"\xaa" * 32
+        cred = {
+            "id": "x", "rawId": "x", "type": "public-key",
+            "response": {"clientDataJSON": self._cdj(raw),
+                         "attestationObject": "y"},
+        }
+        self.assertEqual(passkey.extract_challenge(cred), raw)
+
+    def test_login_shape(self):
+        from app.services import passkey
+        raw = b"\xbb" * 16
+        cred = {
+            "id": "x", "rawId": "x", "type": "public-key",
+            "response": {"clientDataJSON": self._cdj(raw, kind="webauthn.get"),
+                         "authenticatorData": "z", "signature": "w"},
+        }
+        self.assertEqual(passkey.extract_challenge(cred), raw)
+
+    def test_missing_client_data_raises(self):
+        from app.services import passkey
+        with self.assertRaises(passkey.PasskeyAttestationFailed):
+            passkey.extract_challenge({"response": {}, "id": "x", "rawId": "x"})
+
+    def test_garbage_client_data_raises(self):
+        from app.services import passkey
+        with self.assertRaises(passkey.PasskeyAttestationFailed):
+            passkey.extract_challenge({
+                "response": {"clientDataJSON": "!!not-base64!!"},
+                "id": "x", "rawId": "x",
+            })
+
+    def test_json_without_challenge_field_raises(self):
+        from app.services import passkey
+        cdata = base64.urlsafe_b64encode(b'{"type":"webauthn.create","origin":"x"}').rstrip(b"=")
+        with self.assertRaises(passkey.PasskeyAttestationFailed):
+            passkey.extract_challenge({
+                "response": {"clientDataJSON": cdata.decode("ascii")},
+                "id": "x", "rawId": "x",
+            })
 
 
 # ── webauthn 3.x API compatibility ─────────────────────────────────────────────────────────────────────────
