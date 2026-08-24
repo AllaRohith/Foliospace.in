@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block description %}{{ description }}{% endblock %}
+{% block og_title %}{{ page_title }}{% endblock %}
+{% block og_description %}{{ description }}{% endblock %}
+{% block twitter_title %}{{ page_title }}{% endblock %}
+{% block twitter_description %}{{ description }}{% endblock %}
+
+{% block content %}
+{% include "partials/_nav.html" %}
+<main class="research-page">
+  <div class="container">
+    <p class="research-eyebrow">{{ eyebrow }}</p>
+    <h1 class="research-title">{{ title|safe }}</h1>
+    <p class="research-lede">{{ lede }}</p>
+
+    <article class="research-article">
+      {% for section in sections %}
+        {% if section.h2 %}<h2>{{ section.h2|safe }}</h2>{% endif %}
+        {% if section.h3 %}<h3>{{ section.h3|safe }}</h3>{% endif %}
+        {% for para in section.paragraphs %}<p>{{ para|safe }}</p>{% endfor %}
+        {% if section.list %}
+          <ul>
+            {% for item in section.list %}<li>{{ item|safe }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+        {% if section.quote %}
+          <blockquote>&ldquo;{{ section.quote.text }}&rdquo;{% if section.quote.cite %}<cite>— {{ section.quote.cite|safe }}</cite>{% endif %}</blockquote>
+        {% endif %}
+      {% endfor %}
+    </article>
+
+    <p class="stats-foot" style="margin-top: 32px;">
+      Last updated {{ updated }}. Methodology, sources, and corrections are listed inline above. Cite this page as: <em>FolioSpace Research &mdash; {{ eyebrow }}</em>, foliospace.in/research.
+    </p>
+  </div>
+</main>
+{% include "partials/_footer.html" %}
+{% endblock %}
+
+{% block jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ScholarlyArticle",
+  "headline": "{{ title|striptags }}",
+  "description": "{{ description }}",
+  "author": {"@type": "Organization", "name": "FolioSpace", "url": "https://foliospace.in"},
+  "publisher": {"@type": "Organization", "name": "FolioSpace", "url": "https://foliospace.in"},
+  "datePublished": "{{ date_published }}",
+  "dateModified": "{{ date_modified }}",
+  "url": "https://foliospace.in/research",
+  "inLanguage": "en-IN"
+}
+</script>
+{% endblock %}

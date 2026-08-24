@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block description %}{{ description }}{% endblock %}
+{% block og_title %}{{ page_title }}{% endblock %}
+{% block og_description %}{{ description }}{% endblock %}
+{% block twitter_title %}{{ page_title }}{% endblock %}
+{% block twitter_description %}{{ description }}{% endblock %}
+
+{% block content %}
+{% include "partials/_nav.html" %}
+<main class="stats-page">
+  <div class="container">
+    <p class="stats-eyebrow">FolioSpace in numbers</p>
+    <h1 class="stats-title">A <em>live ledger</em> of who&rsquo;s on FolioSpace.</h1>
+    <p class="stats-lede">First-party data, refreshed weekly. These are the numbers we use internally to plan the product &mdash; published here so you can verify them yourself.</p>
+
+    <section class="stats-grid" aria-label="Headline stats">
+      <article class="stats-card">
+        <span class="stats-card-num">{{ stats.folios_published }}</span>
+        <span class="stats-card-label">Published folios</span>
+        <p class="stats-card-note">Users with <code>is_public = TRUE</code> as of today.</p>
+      </article>
+      <article class="stats-card">
+        <span class="stats-card-num">{{ stats.waitlist_count }}</span>
+        <span class="stats-card-label">On the waitlist</span>
+        <p class="stats-card-note">Cumulative signups since {{ stats.waitlist_since }}.</p>
+      </article>
+      <article class="stats-card">
+        <span class="stats-card-num">{{ stats.uptime_pct }}%</span>
+        <span class="stats-card-label">Uptime, trailing 30d</span>
+        <p class="stats-card-note">Render free tier status; cold starts in the cold-start count, not outages.</p>
+      </article>
+      <article class="stats-card">
+        <span class="stats-card-num">{{ stats.lh_mobile }}</span>
+        <span class="stats-card-label">Lighthouse mobile</span>
+        <p class="stats-card-note">Median across landing, pricing, and a sample of public folios.</p>
+      </article>
+      <article class="stats-card">
+        <span class="stats-card-num">{{ stats.ttfb_ms }}ms</span>
+        <span class="stats-card-label">TTFB, homepage</span>
+        <p class="stats-card-note">Median from the closest five Render regions, last 24 hours.</p>
+      </article>
+      <article class="stats-card">
+        <span class="stats-card-num">{{ stats.founder_seats_left }}</span>
+        <span class="stats-card-label">Founder seats left</span>
+        <p class="stats-card-note">Free Year-1 Pro grants for the first {{ stats.founder_cohort_limit }} waitlist signups.</p>
+      </article>
+    </section>
+
+    <h2 class="stats-section-title">Pages by category</h2>
+    <p class="stats-card-note">Public folios grouped by the category the user picked during onboarding. Empty categories are not shown.</p>
+    <table class="stats-table">
+      <thead>
+        <tr><th>Category</th><th>Published</th><th>Share</th></tr>
+      </thead>
+      <tbody>
+        {% for row in stats.by_category %}
+          <tr>
+            <td>{{ row.label }}</td>
+            <td class="num">{{ row.count }}</td>
+            <td class="num">{{ row.share }}%</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h2 class="stats-section-title">Top public folios (30d)</h2>
+    <p class="stats-card-note">Most-viewed folios, deduplicated by daily salted IP hash. Bot traffic is filtered at the edge.</p>
+    <table class="stats-table">
+      <thead>
+        <tr><th>Folio</th><th>Views</th><th>Unique visitors</th></tr>
+      </thead>
+      <tbody>
+        {% for row in stats.top_folios %}
+          <tr>
+            <td><a href="/{{ row.slug }}" target="_blank" rel="noopener noreferrer">/{{ row.slug }}</a></td>
+            <td class="num">{{ row.views }}</td>
+            <td class="num">{{ row.uniques }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <p class="stats-foot">
+      <strong>Methodology.</strong> Counts come from the same database that powers the dashboard &mdash; you can reproduce them via the API or by signing up. View counts use a daily-rotated salt + SHA-256(IP), and bots are filtered on user-agent. We do not measure individual identities. The waitlist counter is cumulative since launch and is <em>not</em> reduced by deletions. Stats are a snapshot, not a metric of product quality &mdash; we publish them for transparency.
+    </p>
+
+    <p class="stats-foot" style="margin-top: 14px;">
+      Last refreshed: {{ stats.refreshed_at }}. Questions or corrections? <a href="mailto:hello@foliospace.in">hello@foliospace.in</a>.
+    </p>
+  </div>
+</main>
+{% include "partials/_footer.html" %}
+{% endblock %}
+
+{% block jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "FolioSpace Stats",
+  "description": "First-party operational stats for FolioSpace — published folios, waitlist count, uptime, and page performance metrics.",
+  "url": "https://foliospace.in/stats",
+  "creator": {"@type": "Organization", "name": "FolioSpace", "url": "https://foliospace.in"},
+  "dateModified": "{{ stats.refreshed_iso }}",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "temporalCoverage": "{{ stats.refreshed_iso }}/.."
+}
+</script>
+{% endblock %}

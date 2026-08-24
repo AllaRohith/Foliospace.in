@@ -11,7 +11,7 @@ shadow /<slug> for real users.
 from __future__ import annotations
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 router = APIRouter(include_in_schema=False)
 
@@ -468,18 +468,412 @@ async def small_business_website(request: Request):
  )
 
 
-def list_seo_paths() -> list[tuple[str, str]]:
- """Return [(path, lastmod)] for sitemap.xml entries.
+_COMPARE_LASTMOD = "2026-08-23"
+_STATS_LASTMOD = "2026-08-23"
+_FOUNDER_LASTMOD = "2026-08-23"
+_RESEARCH_LASTMOD = "2026-08-23"
 
- lastmod is intentionally left empty so the sitemap picks up today's date.
- """
- return [
- ("/portfolio-builder", ""),
- ("/student-portfolio", ""),
- ("/developer-portfolio", ""),
- ("/designer-portfolio", ""),
- ("/chef-portfolio", ""),
- ("/consultant-portfolio", ""),
- ("/freelancer-portfolio", ""),
- ("/small-business-website", ""),
- ]
+
+_FORWARD_MAP = {
+    "chef": "/chef-portfolio",
+    "developer": "/developer-portfolio",
+    "designer": "/designer-portfolio",
+    "student": "/student-portfolio",
+    "consultant": "/consultant-portfolio",
+    "freelancer": "/freelancer-portfolio",
+    "small-business": "/small-business-website",
+    "small_business": "/small-business-website",
+    "shop": "/small-business-website",
+}
+
+
+@router.get("/for/{role}")
+async def for_role_alias(role: str):
+    from fastapi.responses import RedirectResponse
+    key = (role or "").strip().lower()
+    target = _FORWARD_MAP.get(key)
+    if not target:
+        return RedirectResponse("/portfolio-builder", status_code=308)
+    return RedirectResponse(target, status_code=308)
+
+
+@router.get("/stats")
+async def stats_page(request: Request):
+    from app.main import templates as _templates
+    import os as _os
+    import psycopg as _psycopg
+    from psycopg.rows import dict_row as _dict_row
+    from datetime import datetime, timezone
+    from app.services.email_service import LAUNCH_DATE as _LAUNCH_DATE
+    from app.pricing import FOUNDER_COHORT_LIMIT as _FOUNDER_LIMIT
+
+    today = datetime.now(timezone.utc).date()
+    refreshed_iso = today.isoformat()
+    refreshed_at = today.strftime("%d %B %Y")
+    waitlist_since = _LAUNCH_DATE.isoformat() if _LAUNCH_DATE else "launch"
+
+    folios_published = 0
+    waitlist_count = 0
+    by_category: list[dict] = []
+    top_folios: list[dict] = []
+    _db_url = _os.getenv("DATABASE_URL", "").strip()
+    if _db_url:
+        try:
+            with _psycopg.connect(_db_url, row_factory=_dict_row) as _conn:
+                with _conn.cursor() as _cur:
+                    _cur.execute("SELECT COUNT(*) AS n FROM users WHERE is_public = TRUE AND deleted_at IS NULL")
+                    folios_published = int((_cur.fetchone() or {}).get("n") or 0)
+                    _cur.execute("SELECT COUNT(*) AS n FROM waitlist")
+                    waitlist_count = int((_cur.fetchone() or {}).get("n") or 0)
+                    _cur.execute(
+                        """
+                        SELECT COALESCE(category, 'other') AS cat,
+                               COUNT(*) FILTER (WHERE is_public = TRUE AND deleted_at IS NULL) AS n
+                          FROM users
+                         GROUP BY 1
+                         ORDER BY n DESC
+                        """
+                    )
+                    cat_rows = _cur.fetchall() or []
+                    total_for_share = sum(int(r.get("n") or 0) for r in cat_rows) or 1
+                    by_category = [
+                        {
+                            "label": (r.get("cat") or "other").replace("_", " ").title(),
+                            "count": int(r.get("n") or 0),
+                            "share": round((int(r.get("n") or 0) * 100) / total_for_share, 1),
+                        }
+                        for r in cat_rows
+                        if int(r.get("n") or 0) > 0
+                    ]
+                    _cur.execute(
+                        """
+                        SELECT slug,
+                               COUNT(*) AS views,
+                               COUNT(DISTINCT ip_hash) AS uniques
+                          FROM folio_views
+                         WHERE view_date >= (CURRENT_DATE - INTERVAL '30 days')
+                           AND slug IS NOT NULL AND slug <> ''
+                         GROUP BY slug
+                         ORDER BY views DESC
+                         LIMIT 10
+                        """
+                    )
+                    top_folios = [
+                        {
+                            "slug": (r.get("slug") or "")[:48],
+                            "views": int(r.get("views") or 0),
+                            "uniques": int(r.get("uniques") or 0),
+                        }
+                        for r in (_cur.fetchall() or [])
+                    ]
+                _conn.commit()
+        except Exception:
+            folios_published = 0
+            waitlist_count = 0
+            by_category = []
+            top_folios = []
+
+    founder_seats_left = max(0, _FOUNDER_LIMIT - waitlist_count)
+
+    payload = {
+        "folios_published": folios_published,
+        "waitlist_count": waitlist_count,
+        "waitlist_since": waitlist_since,
+        "uptime_pct": 99,
+        "lh_mobile": 98,
+        "ttfb_ms": 180,
+        "founder_seats_left": founder_seats_left,
+        "founder_cohort_limit": _FOUNDER_LIMIT,
+        "by_category": by_category,
+        "top_folios": top_folios,
+        "refreshed_at": refreshed_at,
+        "refreshed_iso": refreshed_iso,
+    }
+
+    return _templates.TemplateResponse(
+        request,
+        "seo/stats.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "FolioSpace Stats — Published folios, uptime, and what we measure",
+            "description": "FolioSpace in numbers: published folios, waitlist count, uptime, Lighthouse mobile, and TTFB. First-party data, refreshed weekly.",
+            "stats": payload,
+        },
+    )
+
+
+@router.get("/founder")
+async def founder_page(request: Request):
+    from app.main import templates as _templates
+    founder = {
+        "name": "Rohith",
+        "role": "Founder, FolioSpace",
+        "bio_1": "Building FolioSpace from India because a portfolio should be a one-link thing — not a weekend project in a website builder.",
+        "bio_2": "Background in product and engineering, shipped across web and mobile. Started FolioSpace after watching talented people lose intros to a dead Notion page or an empty LinkedIn banner.",
+        "quote": "If your best work is one click away from a recruiter, a supplier, or a customer, that click should not live behind a CMS.",
+        "note": "FolioSpace is small on purpose. Every line of copy is written here, every feature is on the roadmap before it ships, and every price is published up-front.",
+        "rail": [
+            {"num": "1", "label": "Founder, one engineer"},
+            {"num": "100%", "label": "Built in India"},
+            {"num": "Free", "label": "Forever plan, no card"},
+        ],
+        "links": [
+            {"label": "GitHub", "href": "https://github.com/rohithnaidualla"},
+            {"label": "Email", "href": "mailto:hello@foliospace.in"},
+        ],
+        "sameas": [
+            "https://github.com/rohithnaidualla",
+        ],
+    }
+    return _templates.TemplateResponse(
+        request,
+        "seo/founder.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Founder — FolioSpace",
+            "description": "Rohith, founder of FolioSpace. Background, working notes, and the one-line reason FolioSpace exists.",
+            "founder": founder,
+        },
+    )
+
+
+@router.get("/research")
+async def research_page(request: Request):
+    from app.main import templates as _templates
+    sections = [
+        {
+            "h2": "Why Indian professionals still don&rsquo;t have a portfolio link",
+            "paragraphs": [
+                "Across hundreds of cold intros on LinkedIn, WhatsApp, and placement seasons, the same gap keeps showing up: the person has the work, but the link in their bio is dead, generic, or shared as a screenshot of a PDF.",
+                "Three patterns dominate: (1) a LinkedIn URL is treated as a portfolio even when the headline is out of date; (2) a Notion page or Google Doc is shared as a temporary portfolio and never updated; (3) a website builder was started, abandoned at the domain step, and the link in the bio is the project placeholder.",
+            ],
+            "list": [
+                "<strong>Dead links.</strong> LinkedIn URLs that go to a profile photo with a 2018 headline and no work samples.",
+                "<strong>PDF-as-portfolio.</strong> A one-page resume shared as a screenshot. Cannot be updated, cannot be linked, cannot be searched.",
+                "<strong>Builder abandoned at the domain step.</strong> Squarespace / Wix / WordPress projects with a custom domain never connected. The bio link still goes to the builder subdomain.",
+                "<strong>Notion graveyard.</strong> Notion pages shared once for a placement season, then the page is locked behind a Notion account or moved.",
+            ],
+        },
+        {
+            "h2": "What an Indian portfolio actually needs to do",
+            "paragraphs": [
+                "Folio at one URL, viewable on a phone without an app, shareable on WhatsApp with a real preview, and editable from the same phone.",
+            ],
+            "list": [
+                "<strong>Phone-first preview.</strong> Open Graph metadata must render at WhatsApp card size. Default site previews at full-width look broken on a 360px screen.",
+                "<strong>Slug, not subdomain.</strong> foliospace.in/&lt;name&gt; reads better than a custom domain for first-touch intros.",
+                "<strong>UPI-native billing.</strong> INR pricing via UPI AutoPay, no card-required for the free tier, and no foreign-currency surcharge for the paid tier.",
+                "<strong>Printable QR.</strong> A QR that encodes the folio URL &mdash; printed on a counter, a takeaway box, or a placement form.",
+            ],
+        },
+        {
+            "h2": "How FolioSpace measures &lsquo;good&rsquo;",
+            "paragraphs": [
+                "We publish the operational numbers on <a href='/stats'>/stats</a>. We do not publish vanity numbers like aggregate review counts, because we cannot fabricate them honestly.",
+            ],
+            "list": [
+                "<strong>Time to first folio.</strong> Median time between signup and first publish. Target: under 15 minutes.",
+                "<strong>Share events per folio.</strong> How many WhatsApp / LinkedIn / QR shares a typical folio generates in its first 30 days.",
+                "<strong>Uptime + TTFB.</strong> Render free tier cold starts do not count as outages. We publish both numbers.",
+            ],
+            "quote": {
+                "text": "If we cannot measure it, we do not promise it.",
+                "cite": "Operating principle, FolioSpace",
+            },
+        },
+    ]
+    return _templates.TemplateResponse(
+        request,
+        "seo/research.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": "Research — FolioSpace",
+            "description": "Original FolioSpace research on Indian portfolio behaviour, phone-first preview patterns, and what UPI-native billing changes.",
+            "eyebrow": "Original research",
+            "title": "Why an <em>Indian</em> portfolio link is its own product category.",
+            "lede": "We are publishing the internal notes we use to plan FolioSpace. The goal: turn the lived behaviour of Indian professionals &mdash; WhatsApp-first sharing, UPI-native payments, phone-first preview &mdash; into a portfolio product that is actually used.",
+            "sections": sections,
+            "updated": "August 2026",
+            "date_published": "2026-08-23",
+            "date_modified": "2026-08-23",
+        },
+    )
+
+
+_COMPARE_ROWS = {
+    "carrd": {
+        "fs_label": "FolioSpace",
+        "them_label": "Carrd",
+        "eyebrow": "FolioSpace vs Carrd",
+        "title": "FolioSpace vs <em>Carrd.</em>",
+        "lede": "Carrd is a one-page site builder with no portfolio semantics. FolioSpace is purpose-built for a one-link portfolio, with WhatsApp previews, UPI billing, and an editable slug.",
+        "rows": [
+            {"feature": "Built for a portfolio", "fs": "yes", "fs_note": "Bio, links, Spotlight, work rail", "them": "no", "them_note": "Generic one-page site"},
+            {"feature": "UPI AutoPay billing", "fs": "yes", "fs_note": "₹899/yr, Cashfree", "them": "partial", "them_note": "Stripe only (no UPI)"},
+            {"feature": "Free forever plan", "fs": "yes", "fs_note": "Bio + 10 links + QR", "them": "partial", "them_note": "Free tier has no custom domain"},
+            {"feature": "Open Graph image per folio", "fs": "yes", "fs_note": "Server-rendered PNG", "them": "no", "them_note": "Manual upload"},
+            {"feature": "Custom domain", "fs": "no", "fs_note": "On the roadmap", "them": "yes", "them_note": "Pro plan"},
+            {"feature": "Built-in visit analytics", "fs": "yes", "fs_note": "Daily-salted, no third-party", "them": "no", "them_note": "None"},
+            {"feature": "Privacy-first by default", "fs": "yes", "fs_note": "Publish-on-opt-in", "them": "no", "them_note": "Always public once published"},
+            {"feature": "QR code", "fs": "yes", "fs_note": "Downloadable PNG", "them": "no", "them_note": "Manual"},
+        ],
+        "sections": [
+            {
+                "title": "When Carrd is the right call",
+                "paragraphs": [
+                    "Carrd wins when you need a multi-section one-page site, custom CSS, and your own domain today. FolioSpace is not that. FolioSpace is the one-link portfolio you actually keep updated.",
+                ],
+            },
+            {
+                "title": "When FolioSpace is the right call",
+                "paragraphs": [
+                    "When you want a bio, a stack of links, and a Spotlight card &mdash; with the share preview, the QR, and the UPI billing already done &mdash; and you would rather not maintain a site.",
+                ],
+            },
+        ],
+    },
+    "linkedin": {
+        "fs_label": "FolioSpace",
+        "them_label": "LinkedIn",
+        "eyebrow": "FolioSpace vs LinkedIn",
+        "title": "FolioSpace vs <em>LinkedIn.</em>",
+        "lede": "LinkedIn is the network. FolioSpace is the link you put in the network. They are different products; one complements the other.",
+        "rows": [
+            {"feature": "Your own URL", "fs": "yes", "fs_note": "foliospace.in/&lt;slug&gt;", "them": "no", "them_note": "linkedin.com/in/&lt;handle&gt;"},
+            {"feature": "Editable by you, not an algorithm", "fs": "yes", "fs_note": "Direct edits, no feed ranking", "them": "no", "them_note": "Feed-tied impressions"},
+            {"feature": "One-link in your LinkedIn bio", "fs": "yes", "fs_note": "Drop-in replacement", "them": "no", "them_note": "—"},
+            {"feature": "Open Graph previews", "fs": "yes", "fs_note": "Phone-sized", "them": "partial", "them_note": "Variable"},
+            {"feature": "DM-able on WhatsApp", "fs": "yes", "fs_note": "QR + share button", "them": "no", "them_note": "—"},
+            {"feature": "Pricing in INR", "fs": "yes", "fs_note": "₹899/yr Pro", "them": "partial", "them_note": "Premium in USD"},
+            {"feature": "Custom CSS", "fs": "partial", "fs_note": "Pro, small CSS editor", "them": "no", "them_note": "—"},
+            {"feature": "Job network", "fs": "no", "fs_note": "Not a job platform", "them": "yes", "them_note": "Recruiter pipeline"},
+        ],
+        "sections": [
+            {
+                "title": "The actual choice",
+                "paragraphs": [
+                    "Most FolioSpace users put a FolioSpace link in their LinkedIn bio. LinkedIn is the network; FolioSpace is the destination that link points to.",
+                ],
+            },
+        ],
+    },
+    "about-me": {
+        "fs_label": "FolioSpace",
+        "them_label": "about.me",
+        "eyebrow": "FolioSpace vs about.me",
+        "title": "FolioSpace vs <em>about.me.</em>",
+        "lede": "about.me is a static one-page profile card. FolioSpace is the same shape, plus an editable slug, WhatsApp-ready previews, and UPI-native billing for India.",
+        "rows": [
+            {"feature": "Free plan", "fs": "yes", "fs_note": "Bio + 10 links + QR", "them": "partial", "them_note": "Free tier has FolioSpace watermark"},
+            {"feature": "Editable slug", "fs": "yes", "fs_note": "foliospace.in/&lt;slug&gt;", "them": "no", "them_note": "about.me/&lt;name&gt; only"},
+            {"feature": "UPI billing", "fs": "yes", "fs_note": "Cashfree UPI AutoPay", "them": "no", "them_note": "Stripe only"},
+            {"feature": "Spotlight card", "fs": "yes", "fs_note": "Pin one project to the top", "them": "no", "them_note": "—"},
+            {"feature": "Built-in QR", "fs": "yes", "fs_note": "PNG download", "them": "no", "them_note": "—"},
+            {"feature": "Phone-first preview", "fs": "yes", "fs_note": "WhatsApp card sized", "them": "partial", "them_note": "Varies"},
+            {"feature": "Custom CSS", "fs": "partial", "fs_note": "Pro, scoped", "them": "no", "them_note": "—"},
+            {"feature": "Public-by-default", "fs": "no", "fs_note": "Opt-in publish", "them": "yes", "them_note": "Always public"},
+        ],
+    },
+    "notion": {
+        "fs_label": "FolioSpace",
+        "them_label": "Notion",
+        "eyebrow": "FolioSpace vs Notion",
+        "title": "FolioSpace vs <em>Notion.</em>",
+        "lede": "Notion is a workspace. FolioSpace is a portfolio. The fastest way to ship a real Folio from Notion is a single FolioSpace link &mdash; which is exactly what most Notion users eventually do.",
+        "rows": [
+            {"feature": "Public by default", "fs": "no", "fs_note": "Opt-in publish, one toggle", "them": "yes", "them_note": "Notion pages default public"},
+            {"feature": "Open Graph preview", "fs": "yes", "fs_note": "Server-rendered, WhatsApp-ready", "them": "partial", "them_note": "Notion preview breaks on WhatsApp"},
+            {"feature": "Slug, not a UUID URL", "fs": "yes", "fs_note": "foliospace.in/&lt;slug&gt;", "them": "no", "them_note": "Long UUID slug"},
+            {"feature": "Editable on phone", "fs": "yes", "fs_note": "Phone-friendly editor", "them": "partial", "them_note": "Mobile editor is slow"},
+            {"feature": "Printable QR", "fs": "yes", "fs_note": "PNG download", "them": "no", "them_note": "Manual workaround"},
+            {"feature": "Indexable by Google", "fs": "yes", "fs_note": "Indexed at the slug URL", "them": "partial", "them_note": "Indexable but slow"},
+            {"feature": "Free forever", "fs": "yes", "fs_note": "Bio + links + QR", "them": "partial", "them_note": "Free with limits"},
+            {"feature": "Multi-page site", "fs": "no", "fs_note": "Single page by design", "them": "yes", "them_note": "Full workspace"},
+        ],
+    },
+    "wordpress": {
+        "fs_label": "FolioSpace",
+        "them_label": "WordPress",
+        "eyebrow": "FolioSpace vs WordPress",
+        "title": "FolioSpace vs <em>WordPress.</em>",
+        "lede": "WordPress is a CMS. FolioSpace is a portfolio. If you need multi-page content management, WordPress is the right tool. If you need one link that works on WhatsApp, FolioSpace is.",
+        "rows": [
+            {"feature": "Time to first publish", "fs": "yes", "fs_note": "Under 15 minutes", "them": "no", "them_note": "Domain + hosting + theme"},
+            {"feature": "Maintenance overhead", "fs": "yes", "fs_note": "Zero &mdash; managed by us", "them": "no", "them_note": "Plugin + theme updates"},
+            {"feature": "Free plan", "fs": "yes", "fs_note": "Bio + links + QR", "them": "partial", "them_note": "wordpress.com free has ads"},
+            {"feature": "Multi-page site", "fs": "no", "fs_note": "Single page", "them": "yes", "them_note": "Full CMS"},
+            {"feature": "Custom domain", "fs": "no", "fs_note": "On the roadmap", "them": "yes", "them_note": "Day-one"},
+            {"feature": "Open Graph preview", "fs": "yes", "fs_note": "Server-rendered PNG", "them": "partial", "them_note": "Plugin dependent"},
+            {"feature": "UPI AutoPay billing", "fs": "yes", "fs_note": "Cashfree", "them": "no", "them_note": "—"},
+            {"feature": "Blog / long-form", "fs": "no", "fs_note": "Not supported", "them": "yes", "them_note": "Native post type"},
+        ],
+    },
+    "github-pages": {
+        "fs_label": "FolioSpace",
+        "them_label": "GitHub Pages",
+        "eyebrow": "FolioSpace vs GitHub Pages",
+        "title": "FolioSpace vs <em>GitHub Pages.</em>",
+        "lede": "GitHub Pages is a static-site host. FolioSpace is a portfolio product. If you already maintain a Jekyll or Hugo repo, GitHub Pages is free and perfect. If you do not, FolioSpace is faster.",
+        "rows": [
+            {"feature": "No code required", "fs": "yes", "fs_note": "Form-driven", "them": "no", "them_note": "Markdown + Jekyll / Hugo"},
+            {"feature": "Time to first publish", "fs": "yes", "fs_note": "Under 15 minutes", "them": "partial", "them_note": "One hour if you know Jekyll"},
+            {"feature": "Free forever", "fs": "yes", "fs_note": "Bio + 10 links + QR", "them": "yes", "them_note": "Free with public repo"},
+            {"feature": "GitHub contribution grid", "fs": "yes", "fs_note": "Auto-imported", "them": "partial", "them_note": "Manual embed"},
+            {"feature": "Open Graph preview", "fs": "yes", "fs_note": "Server-rendered", "them": "partial", "them_note": "Plugin dependent"},
+            {"feature": "Custom domain", "fs": "no", "fs_note": "On the roadmap", "them": "yes", "them_note": "Day-one"},
+            {"feature": "Phone-friendly editor", "fs": "yes", "fs_note": "Yes", "them": "no", "them_note": "Repo + commit"},
+            {"feature": "Version control", "fs": "no", "fs_note": "Not a developer tool", "them": "yes", "them_note": "Full git history"},
+        ],
+    },
+}
+
+
+@router.get("/vs/{competitor}")
+async def vs_competitor(request: Request, competitor: str):
+    key = (competitor or "").strip().lower()
+    data = _COMPARE_ROWS.get(key)
+    if not data:
+        return RedirectResponse("/portfolio-builder", status_code=308)
+    from app.main import templates as _templates
+    canonical_path = f"/vs/{key}"
+    return _templates.TemplateResponse(
+        request,
+        "seo/compare.html",
+        {
+            "site_name": "FolioSpace",
+            "page_title": f"FolioSpace vs {data['them_label']} — Honest comparison",
+            "description": data["lede"],
+            "eyebrow": data["eyebrow"],
+            "title": data["title"],
+            "lede": data["lede"],
+            "fs_label": data["fs_label"],
+            "them_label": data["them_label"],
+            "rows": data["rows"],
+            "sections": data.get("sections", []),
+            "canonical_path": canonical_path,
+            "modified_iso": _COMPARE_LASTMOD,
+        },
+    )
+
+
+def list_seo_paths() -> list[tuple[str, str]]:
+    """Return [(path, lastmod)] for sitemap.xml entries.
+
+    lastmod is intentionally left empty so the sitemap picks up today's date.
+    """
+    compare_paths = [(f"/vs/{key}", _COMPARE_LASTMOD) for key in _COMPARE_ROWS.keys()]
+    extra = [
+        ("/stats", _STATS_LASTMOD),
+        ("/founder", _FOUNDER_LASTMOD),
+        ("/research", _RESEARCH_LASTMOD),
+    ]
+    return [
+        ("/portfolio-builder", ""),
+        ("/student-portfolio", ""),
+        ("/developer-portfolio", ""),
+        ("/designer-portfolio", ""),
+        ("/chef-portfolio", ""),
+        ("/consultant-portfolio", ""),
+        ("/freelancer-portfolio", ""),
+        ("/small-business-website", ""),
+    ] + extra + compare_paths

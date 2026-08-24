@@ -251,8 +251,8 @@ async def landing(request: Request):
         {
             "site_name": "FolioSpace",
             "tagline": "Your story. One link. Done.",
-            "page_title": "FolioSpace — Your portfolio. Your link. Done.",
-            "description": f"One link for every Indian pro — chefs, devs, students, consultants, shops, founders. Pro is ₹{_PRO_YEAR1_INR}/yr in Year 1, ₹1,499 from Year 2.",
+            "page_title": "FolioSpace — One-page portfolio for Indian professionals (₹899/yr Pro)",
+            "description": "FolioSpace is a one-page portfolio for Indian professionals — chefs, developers, students, consultants, shops, founders. Free forever; Pro is ₹899/yr in Year 1 (then ₹1,499/yr from Year 2), billed via UPI AutoPay.",
             "launch_iso": launch_iso,
             "waitlist_count": waitlist_count,
             "founder_seats_left": founder_seats_left,
@@ -409,6 +409,26 @@ async def robots():
     response = PlainTextResponse(content=content, media_type="text/plain")
     response.headers["Cache-Control"] = "public, max-age=3600, must-revalidate"
     return response
+
+
+@app.get("/llms.txt", include_in_schema=False)
+async def llms_txt():
+    from fastapi.responses import FileResponse
+    fp = BASE_DIR / "static" / "llms.txt"
+    if not fp.is_file():
+        from fastapi.responses import PlainTextResponse
+        return PlainTextResponse("# FolioSpace llms.txt missing", status_code=404)
+    return FileResponse(fp, media_type="text/plain; charset=utf-8")
+
+
+@app.get("/llms-full.txt", include_in_schema=False)
+async def llms_full_txt():
+    from fastapi.responses import FileResponse
+    fp = BASE_DIR / "static" / "llms-full.txt"
+    if not fp.is_file():
+        from fastapi.responses import PlainTextResponse
+        return PlainTextResponse("# FolioSpace llms-full.txt missing", status_code=404)
+    return FileResponse(fp, media_type="text/plain; charset=utf-8")
 
 
 @app.get("/sitemap.xml")

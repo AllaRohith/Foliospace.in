@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block description %}{{ description }}{% endblock %}
+{% block og_title %}{{ page_title }}{% endblock %}
+{% block og_description %}{{ description }}{% endblock %}
+{% block twitter_title %}{{ page_title }}{% endblock %}
+{% block twitter_description %}{{ description }}{% endblock %}
+
+{% block content %}
+{% include "partials/_nav.html" %}
+<main class="founder-page">
+  <div class="container">
+    <p class="founder-eyebrow">Founder</p>
+    <h1 class="founder-name">{{ founder.name }}</h1>
+    <p class="founder-role">{{ founder.role }}</p>
+
+    <div class="founder-rail">
+      <div class="founder-rail-stat">
+        <span class="founder-rail-num">{{ founder.rail[0].num }}</span>
+        <span class="founder-rail-label">{{ founder.rail[0].label }}</span>
+      </div>
+      <div class="founder-rail-stat">
+        <span class="founder-rail-num">{{ founder.rail[1].num }}</span>
+        <span class="founder-rail-label">{{ founder.rail[1].label }}</span>
+      </div>
+      <div class="founder-rail-stat">
+        <span class="founder-rail-num">{{ founder.rail[2].num }}</span>
+        <span class="founder-rail-label">{{ founder.rail[2].label }}</span>
+      </div>
+    </div>
+
+    <p class="founder-bio">{{ founder.bio_1 }}</p>
+    <p class="founder-bio">{{ founder.bio_2 }}</p>
+
+    <blockquote class="founder-quote">&ldquo;{{ founder.quote }}&rdquo;</blockquote>
+
+    <h2 class="stats-section-title">A working note</h2>
+    <p class="founder-bio">{{ founder.note }}</p>
+
+    <div class="founder-links">
+      {% for link in founder.links %}
+        <a class="founder-link" href="{{ link.href }}" target="_blank" rel="noopener noreferrer">{{ link.label }} &rarr;</a>
+      {% endfor %}
+    </div>
+  </div>
+</main>
+{% include "partials/_footer.html" %}
+{% endblock %}
+
+{% block jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "{{ founder.name }}",
+  "jobTitle": "{{ founder.role }}",
+  "worksFor": {"@type": "Organization", "name": "FolioSpace", "url": "https://foliospace.in"},
+  "url": "https://foliospace.in/founder",
+  "description": "Founder of FolioSpace, a one-link portfolio for every Indian professional.",
+  "sameAs": [
+    {% for link in founder.sameas %}"{{ link }}"{% if not loop.last %},{% endif %}{% endfor %}
+  ]
+}
+</script>
+{% endblock %}

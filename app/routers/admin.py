@@ -1049,3 +1049,37 @@ async def grants_revoke(user_id: str, request: Request):
         metadata={"reason": revoke_reason, "email": target_email},
     )
     return RedirectResponse("/admin/grants?msg=revoked", status_code=303)
+
+
+@router.post("/indexnow")
+@limiter.limit("10/minute")
+async def indexnow_submit(request: Request):
+    guard = _gate(request)
+    if isinstance(guard, RedirectResponse):
+        return guard
+    sid = guard
+    key = os.getenv("INDEXNOW_API_KEY", "").strip()
+    if not key:
+        admin_auth.audit(request, sid, "indexnow.skipped", metadata={"reason": "no_api_key"})
+        return RedirectResponse("/admin/?err=indexnow-no-key", status_code=303)
+    try:
+        from scripts.indexnow_submit import _collect_static_urls, _collect_folio_urls, submit as _submit
+    except Exception as e:
+        logger.exception("indexnow import failed: %s", e)
+        return RedirectResponse("/admin/?err=indexnow-import", status_code=303)
+    urls = _collect_static_urls() + _collect_folio_urls()
+    urls = sorted(set(u for u in urls if u))
+    result = _submit(urls, key=key)
+    admin_auth.audit(
+        request,
+        sid,
+        "indexnow.submit",
+        metadata={
+            "submitted": int(result.get("submitted") or 0),
+            "http_status": result.get("http_status"),
+            "ok": bool(result.get("ok")),
+        },
+    )
+    if result.get("ok"):
+        return RedirectResponse(f"/admin/?msg=indexnow-submitted-{result.get('submitted')}", status_code=303)
+    return RedirectResponse(f"/admin/?err=indexnow-fail", status_code=303)

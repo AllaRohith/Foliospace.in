@@ -23,8 +23,42 @@
         "@type": "Country",
         "name": "India"
       },
-      "priceRange": "₹₹"
+      "priceRange": "₹₹",
+      "sameAs": [
+        "https://github.com/rohithnaidualla"
+      ]
     },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://foliospace.in/#app",
+      "name": "FolioSpace",
+      "alternateName": "Folio Space",
+      "url": "https://foliospace.in",
+      "applicationCategory": "BusinessApplication",
+      "applicationSubCategory": "Portfolio Website Builder",
+      "operatingSystem": "Web",
+      "inLanguage": "en-IN",
+      "description": "One-page portfolio for Indian professionals — chefs, developers, students, consultants, shops, founders.",
+      "offers": {
+        "@type": "Offer",
+        "price": "899",
+        "priceCurrency": "INR",
+        "priceValidUntil": "2027-12-31",
+        "category": "Pro Year 1 subscription",
+        "url": "https://foliospace.in/pricing"
+      },
+      "featureList": [
+        "One-page portfolio",
+        "WhatsApp link previews",
+        "Dynamic Open Graph image",
+        "PDF export",
+        "Contact form to WhatsApp",
+        "Passkey sign-in",
+        "30-day visit analytics",
+        "UPI AutoPay billing"
+      ],
+      "creator": { "@id": "https://foliospace.in/#org" }
+    }
     {
       "@type": "WebSite",
       "@id": "https://foliospace.in/#site",
@@ -41,6 +75,148 @@
       "isPartOf": { "@id": "https://foliospace.in/#site" },
       "about": { "@id": "https://foliospace.in/#org" },
       "inLanguage": "en-IN"
+    }
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is FolioSpace?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "FolioSpace is a one-page portfolio for Indian professionals — chefs, developers, students, consultants, shop owners, agencies, and founders. You sign up, claim your slug, fill in your work, and ship a clean folio at foliospace.in/your-name that previews on WhatsApp, exports as a PDF, and runs on UPI AutoPay billing."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is FolioSpace free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. The Solo tier is free forever — foliospace.in/your-name, share QR, PDF export, contact form to WhatsApp, passkey sign-in. Pro adds every template, dynamic OG image, SEO tags, 30-day visit analytics, and the 10-friend referral program. The Made with FolioSpace badge stays on both tiers."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much does FolioSpace Pro cost in India?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Pro is ₹899 per year in Year 1 (launch offer, 40% off the regular price) and ₹1,499 per year from Year 2. Payment is via Cashfree UPI AutoPay or Card AutoPay — PhonePe, Google Pay, Paytm, BHIM, any UPI app. Cancel any time from your dashboard."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How is FolioSpace different from Linktree or Carrd?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Linktree is a list of links. Carrd is a one-page site builder. FolioSpace is a proper portfolio built for the Indian web — UPI-native billing, WhatsApp link previews, fast on slower mobile networks, and a server-rendered page that exports to PDF. Built in India, not retrofitted."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I make a portfolio with FolioSpace?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sign up with email or OAuth (GitHub, Google, LinkedIn). Pick your slug. Fill in your name, role, bio, and links. Flip the public toggle. Your folio is live at foliospace.in/your-name in under five minutes. No design skills required."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Will my FolioSpace page load on slow mobile networks?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. FolioSpace is intentionally lightweight — server-rendered HTML, no client-side framework, lazy-loaded images, no third-party trackers. Pages measure well under 200 KB on first load and are tested on slow Indian mobile networks before each release."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is FolioSpace available across India?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. FolioSpace is pan-Indian. Pricing is in INR, payment is UPI AutoPay (works with every Indian bank account and UPI app), and the service is hosted on Render with a Neon Postgres database. Folios render correctly on every device and network."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use FolioSpace for my small business or shop?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Boutiques, salons, restaurants, studios, and local services use FolioSpace as a one-page online presence — bio, hours, custom links (Swiggy, Zomato, Google Maps, your own booking page), a printable QR, and a contact form that opens WhatsApp. Free forever for the basics."
+      }
+    }
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to make your FolioSpace portfolio",
+  "description": "Five steps to publish a portfolio at foliospace.in/your-name.",
+  "totalTime": "PT5M",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Sign up",
+      "text": "Email + password, or one-tap sign-in with GitHub, Google, or LinkedIn."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Claim your slug",
+      "text": "Pick foliospace.in/your-name. If it's taken, the form suggests alternates."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Fill the basics",
+      "text": "Name, role, bio, links, avatar. Takes about three minutes on phone or laptop."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Publish",
+      "text": "Flip the public toggle. Your folio is live at foliospace.in/your-name."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 5,
+      "name": "Share",
+      "text": "Copy the link, send on WhatsApp, post on LinkedIn, print the QR. Previews look right everywhere."
+    }
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://foliospace.in/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Pricing",
+      "item": "https://foliospace.in/pricing"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Community",
+      "item": "https://foliospace.in/space-community"
     }
   ]
 }
@@ -220,6 +396,57 @@
             <span class="cover-marquee-item">foliospace.in/sample-founder</span>
             <span class="cover-marquee-dot">·</span>
           {% endif %}
+        </div>
+      </div>
+    </section>
+
+    <section class="tldr-section" id="what-is" aria-labelledby="tldr-headline">
+      <div class="container">
+        <p class="tldr-eyebrow">→ In one sentence</p>
+        <h2 class="tldr-headline" id="tldr-headline"><strong>FolioSpace</strong> is a one-page portfolio for Indian professionals.</h2>
+        <p class="tldr-def">Chefs, developers, students, consultants, shop owners, agencies, and founders. Your folio lives at <em>foliospace.in/your-name</em>, previews cleanly on WhatsApp and LinkedIn, exports to PDF, and runs on UPI AutoPay — built in India, for the Indian web.</p>
+        <div class="tldr-answer">
+          <span class="tldr-answer-label">TL;DR</span>
+          <p>It's free to start (no card), ₹899/yr for Pro in Year 1, fast on slow mobile networks, and your handle is yours forever. Made for people who want one clean link that actually shows their work.</p>
+        </div>
+        <ul class="tldr-takeaways" aria-label="Key takeaways">
+          <li><strong>Free Solo tier</strong> — your slug, share QR, PDF export, contact form, passkey sign-in. Forever.</li>
+          <li><strong>Pro ₹899/yr Year 1</strong> — launch offer, 40% off the regular ₹1,499/yr. UPI AutoPay via Cashfree.</li>
+          <li><strong>Indian by default</strong> — INR pricing, UPI-native billing, lightweight on every Indian network.</li>
+          <li><strong>Privacy-first</strong> — folios are private until you flip the public toggle. Delete your data any time.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="qa-section" id="quick-answers" aria-labelledby="qa-headline">
+      <div class="container">
+        <p class="qa-eyebrow">→ Quick answers</p>
+        <h2 class="qa-headline" id="qa-headline">The questions people ask <em>before they sign up.</em></h2>
+        <div class="qa-grid">
+          <article class="qa-card">
+            <h3 class="qa-q">What is FolioSpace?</h3>
+            <p class="qa-a">A one-page portfolio service built for Indian professionals — chefs, developers, students, consultants, shop owners, agencies, and founders. You sign up, claim your slug, fill in your work, and share one clean link. Free forever for the basics.</p>
+          </article>
+          <article class="qa-card">
+            <h3 class="qa-q">Is FolioSpace free?</h3>
+            <p class="qa-a">Yes. The Solo tier is free forever — your slug, share QR, PDF export, contact form, passkey sign-in. Pro adds every template, dynamic OG image, SEO tags, 30-day visit analytics, and the 10-friend referral program. The Made with FolioSpace badge stays on both tiers.</p>
+          </article>
+          <article class="qa-card">
+            <h3 class="qa-q">How much does Pro cost in India?</h3>
+            <p class="qa-a">Pro is ₹899 per year in Year 1 (launch offer, 40% off the regular price) and ₹1,499 per year from Year 2. Paid via Cashfree UPI AutoPay or Card AutoPay — PhonePe, Google Pay, Paytm, BHIM, any UPI app. Cancel any time from your dashboard.</p>
+          </article>
+          <article class="qa-card">
+            <h3 class="qa-q">How is this different from Linktree or Carrd?</h3>
+            <p class="qa-a">Linktree is a list of links. Carrd is a one-page site builder. FolioSpace is a proper portfolio built for the Indian web — UPI-native billing, WhatsApp link previews, fast on slower mobile networks, and a server-rendered page that exports to PDF. Not retrofitted.</p>
+          </article>
+          <article class="qa-card">
+            <h3 class="qa-q">Can I use my own domain?</h3>
+            <p class="qa-a">Not yet — custom domains are on the roadmap. Until then, every FolioSpace user gets a clean foliospace.in/your-name URL that's yours forever, even if you cancel Pro. The handle is the brand.</p>
+          </article>
+          <article class="qa-card">
+            <h3 class="qa-q">Will my folio work on slow mobile networks?</h3>
+            <p class="qa-a">Yes. FolioSpace is intentionally lightweight — server-rendered HTML, no client-side framework, lazy-loaded images, no third-party trackers. Pages measure under 200 KB on first load and are tested on slow Indian mobile networks before each release.</p>
+          </article>
         </div>
       </div>
     </section>
@@ -760,7 +987,7 @@
         <div class="faq-list reveal">
           <details class="faq-item">
             <summary>
-              <span>Why ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr?</span>
+              <h3 class="faq-q">Why ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr?</h3>
               <span class="faq-icon" aria-hidden="true"></span>
             </summary>
             <div class="faq-body">
@@ -769,7 +996,7 @@
           </details>
           <details class="faq-item">
             <summary>
-              <span>Is this just another Linktree?</span>
+              <h3 class="faq-q">Is this just another Linktree?</h3>
               <span class="faq-icon" aria-hidden="true"></span>
             </summary>
             <div class="faq-body">
@@ -778,7 +1005,7 @@
           </details>
           <details class="faq-item">
             <summary>
-              <span>What happens after I join the waitlist?</span>
+              <h3 class="faq-q">What happens after I join the waitlist?</h3>
               <span class="faq-icon" aria-hidden="true"></span>
             </summary>
             <div class="faq-body">
@@ -787,7 +1014,7 @@
           </details>
           <details class="faq-item">
             <summary>
-              <span>Will my portfolio load on slower mobile networks?</span>
+              <h3 class="faq-q">Will my portfolio load on slower mobile networks?</h3>
               <span class="faq-icon" aria-hidden="true"></span>
             </summary>
             <div class="faq-body">
@@ -876,6 +1103,14 @@
             <h3>Open-source-friendly code.</h3>
             <p>FastAPI + Jinja2 + vanilla CSS/JS. No proprietary frontend framework. What we ship, a senior engineer can read end to end.</p>
           </article>
+        </div>
+        <div class="trust-cites reveal" aria-label="Sources and references">
+          <p class="trust-cites-label">→ Sources cited on this page</p>
+          <ul class="trust-cites-list">
+            <li><a href="https://www.npci.org.in/what-we-do/upi/auto-pay" target="_blank" rel="noopener noreferrer">NPCI UPI AutoPay</a> — the recurring-mandate framework powering Cashfree subscriptions in India.</li>
+            <li><a href="https://datareportal.com/reports/digital-2026-india" target="_blank" rel="noopener noreferrer">DataReportal: Digital 2026 India</a> — annual state-of-digital report (internet users, mobile connections, UPI volume).</li>
+            <li><a href="https://owasp.org/www-project-top-ten/" target="_blank" rel="noopener noreferrer">OWASP Top 10</a> — web-application security risks we design against (CSP, HSTS, parameterised SQL, rate limits).</li>
+          </ul>
         </div>
         <p class="trust-foot reveal">
           <a href="/privacy">Privacy policy</a>

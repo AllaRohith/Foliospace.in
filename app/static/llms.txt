@@ -1,43 +1,100 @@
 # FolioSpace
 
-> One-page portfolio for every Indian professional — chefs, developers, students, consultants, shop owners, agencies, founders. ₹899/yr in Year 1, ₹1,499/yr from Year 2 via UPI AutoPay.
+> One-link portfolio for every Indian professional — chefs, developers, students, consultants, shop owners, agencies, founders. Foliospace.in/yourname, no code, no card.
 
-## About
+## What it is
 
-FolioSpace turns a single URL into a public folio. Sign up with email or OAuth (GitHub, Google, LinkedIn). Pick a slug, fill in your work, ship a portfolio. Free forever, Pro unlocks custom domain + analytics + remove branding.
+FolioSpace turns a single URL into a public folio. Sign up with email or OAuth (GitHub, Google, LinkedIn). Pick a slug, fill in your work, ship a portfolio. The free Solo tier is yours forever; Pro adds every template, dynamic OG image, SEO tags, visit analytics, and the 10-friend referral program.
 
-- Pricing: ₹0 free forever, Pro ₹899 in Year 1, ₹1,499 from Year 2 (annual only)
-- No trial — pay upfront to access Pro
-- Cancel anytime via UPI AutoPay
+- Audience: Indian professionals who need a clean public profile without coding
+- Hosting: Render (US-Oregon free tier), Neon Postgres (free tier)
+- Built with: FastAPI + Jinja2 + vanilla CSS/JS (no framework, no GSAP)
+
+## Pricing
+
+- Solo (free): ₹0 forever. 1 clean template, share QR, PDF export, contact form to WhatsApp, passkey sign-in. "Made with FolioSpace" badge stays on.
+- Pro: ₹899/yr in Year 1 (launch offer, 40% off), ₹1,499/yr from Year 2 onward. UPI AutoPay or Card AutoPay via Cashfree Payments.
+- Year-1 lock: Refer 10 verified friends and Year-1 price stays locked at renewal, permanently (no downgrade).
+- Cancel any time from /dashboard or your UPI app. 7 grace days on payment failure.
+- The "Made with FolioSpace" badge stays on both tiers — it's our word of mouth.
+
+### What free (Solo) gets vs what Pro adds
+
+Solo: foliospace.in/yourname handle, 1 template, share QR, PDF export, contact form, passkey sign-in, "Made with FolioSpace" badge.
+
+Pro adds: every template unlocked, dynamic OG image for WhatsApp/LinkedIn/X shares, SEO tags + meta control, 30-day visit analytics, 10-friend referral program (Year-1 price locked forever), custom CSS.
+
+Not on Solo: visit analytics, dynamic OG image, SEO tags, referral eligibility.
 
 ## Key pages
 
-- [Home](https://foliospace.in/): product overview, social proof, pricing summary
-- [Pricing](https://foliospace.in/pricing): full plan comparison, FAQ
-- [Features](https://foliospace.in/features): what's shipped today, what's next on the roadmap (GitHub import, LinkedIn import, custom domain)
-- [Community](https://foliospace.in/space-community): waitlist + charter for the community tier
-- [Privacy](https://foliospace.in/privacy): data retention, GDPR/India DPDP
-- [Terms](https://foliospace.in/terms): UPI AutoPay cancellation terms
+- [Home](https://foliospace.in/): product overview, social proof, Page 02 evolution, Page 04 who's on it, Page 05 receipt (Solo + Pro cards), Page 06 by the numbers, FAQ
+- [Pricing](https://foliospace.in/pricing): Solo receipt summary, Annual Pro figure with ₹1,499 struck + ₹899 + 40% OFF badge, what's-init list, 4-step billing, FAQ, refund + data-safety
+- [Features](https://foliospace.in/features): what's shipped today + roadmap (custom domain, multi-section folios coming soon)
+- [Community](https://foliospace.in/community): waitlist for the community tier + charter
+- [Privacy](https://foliospace.in/privacy): data collected, retention, GDPR/India DPDP compliance, deletion rights
+- [Terms](https://foliospace.in/terms): UPI AutoPay cancellation, refund window, account suspension
+- [Security](https://foliospace.in/security): passkey WebAuthn, bcrypt, TrustedHost, CSP, HSTS, slowapi rate-limit
+- [Stats](https://foliospace.in/stats): first-party operational stats — published folios, waitlist count, uptime, Lighthouse, TTFB, top public folios, methodology
+- [Founder](https://foliospace.in/founder): Person JSON-LD — Rohith, working notes, contact
+- [Research](https://foliospace.in/research): original research notes — why an Indian portfolio link is its own product category
+- [vs Carrd](https://foliospace.in/vs/carrd) · [vs LinkedIn](https://foliospace.in/vs/linkedin) · [vs about.me](https://foliospace.in/vs/about-me) · [vs Notion](https://foliospace.in/vs/notion) · [vs WordPress](https://foliospace.in/vs/wordpress) · [vs GitHub Pages](https://foliospace.in/vs/github-pages): honest comparison tables
+- [For chefs](https://foliospace.in/for/chef) · [developers](https://foliospace.in/for/developer) · [designers](https://foliospace.in/for/designer) · [students](https://foliospace.in/for/student) · [consultants](https://foliospace.in/for/consultant) · [freelancers](https://foliospace.in/for/freelancer) · [small businesses](https://foliospace.in/for/small-business): role-based landing pages (308 redirect to canonical /<role>-portfolio)
+- [Sitemap](https://foliospace.in/sitemap.xml): every public folio + static page
+- [llms-full.txt](https://foliospace.in/llms-full.txt): full marketing copy for ingestion
 
 ## Public folios
 
-Every user gets `/<slug>`. Examples live at:
+Every user gets `/<slug>`. Live examples:
 - https://foliospace.in/allarohithnaidu (founder)
 
-## API surface
+## Referral program
 
-Public:
-- `GET /sitemap.xml`: sitemap of every public folio + static pages
+10 successful referrals (signed up + verified email + published folio via `/ref/{code}`) → Year-1 price (₹899) locked at renewal forever. Daily Render cron backstop ensures no missed state transitions. No downgrade path once earned.
+
+Cookie plumbing: `/ref/{code}` sets `fs_ref` cookie (30-day TTL, httponly, samesite=lax). Cleared on successful signup.
+
+## API surface (public)
+
+- `GET /sitemap.xml`: every public folio + static pages
 - `GET /<slug>`: public folio (404 if `is_public=false`)
 - `GET /<slug>/og.png`: dynamic Open Graph image (1200×630)
 - `GET /<slug>/qr.png`: QR code for share
-- `GET /robots.txt`: blocks `/admin/`, `/dashboard/`, `/api/`
+- `GET /llms.txt`: this file
+- `GET /llms-full.txt`: full marketing copy (markdown)
+- `GET /robots.txt`: blocks `/admin/`, `/dashboard/`, `/api/`, `/auth/`
+- `GET /ref/{code}`: sets referral cookie, 303 to /signup
 
-Authenticated:
+## API surface (authenticated)
+
 - `POST /signup`, `POST /login`, `POST /forgot`, `POST /reset`
-- `GET/POST /<slug>/manage`: edit folio
-- `GET /dashboard`: visits analytics (30-day sparkline)
+- `GET /auth/oauth/{github|google|linkedin}/start` and `/callback` and `/attach`
+- `GET/POST /<slug>/manage`: edit folio (template, sections, avatar, OG, SEO, work_rail)
+- `GET /dashboard`: visits analytics (Pro only), referrals (any user)
+- `GET /dashboard/billing`: manage subscription, view receipts
+- `GET/POST /passkey/login/{begin,complete}`: WebAuthn assertion (passkey sign-in)
+- `POST /passkey/register/{begin,complete}`: WebAuthn attestation (enrol passkey)
+- `GET /dashboard/passkeys`: manage enrolled passkeys (Pro)
+- `DELETE /dashboard/passkey/{credential_id}`: revoke a passkey
+
+## Tech stack
+
+- Python 3.13 + FastAPI 0.136 + Jinja2 3.1
+- PostgreSQL via psycopg 3.2 (Neon serverless)
+- Cashfree Subscriptions API (UPI AutoPay, Card AutoPay) — razorpay 2.0.1 removed in Phase B migration
+- Cloudinary signed direct upload (avatars, video, fonts)
+- Resend for transactional email (welcome, OTP, payment events)
+- webauthn 2.2 for passkey ceremonies
+- itsdangerous for session cookies, bcrypt for passwords
+- slowapi for rate limiting
+- QR via qrcode 7.4
 
 ## Owner
 
-Rohith Naidu Alla — rohithnaidualla on GitHub.
+Rohith Naidu Alla — rohithnaidualla on GitHub. Founder + sole developer.
+
+Contact: foliospace.in@gmail.com
+
+---
+
+Last updated: 2026-08-23.

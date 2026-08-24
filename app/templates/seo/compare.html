@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block description %}{{ description }}{% endblock %}
+{% block og_title %}{{ page_title }}{% endblock %}
+{% block og_description %}{{ description }}{% endblock %}
+{% block twitter_title %}{{ page_title }}{% endblock %}
+{% block twitter_description %}{{ description }}{% endblock %}
+
+{% block content %}
+{% include "partials/_nav.html" %}
+<main class="compare-page">
+  <div class="container">
+    <p class="compare-eyebrow">{{ eyebrow }}</p>
+    <h1 class="compare-title">{{ title|safe }}</h1>
+    <p class="compare-lede">{{ lede }}</p>
+
+    <div class="compare-table-wrap">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th scope="col">Capability</th>
+            <th scope="col">{{ fs_label }}</th>
+            <th scope="col">{{ them_label }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+            <tr>
+              <td class="feature">{{ row.feature }}</td>
+              <td class="fs-cell">
+                {% if row.fs == "yes" %}<span class="check">&#10003;</span> {{ row.fs_note }}{% endif %}
+                {% if row.fs == "no" %}<span class="cross">&mdash;</span> {{ row.fs_note }}{% endif %}
+                {% if row.fs == "partial" %}<span class="partial">Partial</span> {{ row.fs_note }}{% endif %}
+              </td>
+              <td>
+                {% if row.them == "yes" %}<span class="check">&#10003;</span> {{ row.them_note }}{% endif %}
+                {% if row.them == "no" %}<span class="cross">&mdash;</span> {{ row.them_note }}{% endif %}
+                {% if row.them == "partial" %}<span class="partial">Partial</span> {{ row.them_note }}{% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if sections %}
+      {% for section in sections %}
+        <h2 class="compare-section-title">{{ section.title|safe }}</h2>
+        {% for para in section.paragraphs %}<p style="font-size: 16px; line-height: 1.6; color: var(--ink-2); margin: 0 0 14px; max-width: 64ch;">{{ para|safe }}</p>{% endfor %}
+      {% endfor %}
+    {% endif %}
+
+    <div class="compare-cta-row">
+      <a class="seo-cta seo-cta-primary" href="/signup">Start free &rarr;</a>
+      <a class="seo-cta seo-cta-secondary" href="/pricing">See pricing</a>
+    </div>
+  </div>
+</main>
+{% include "partials/_footer.html" %}
+{% endblock %}
+
+{% block jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "{{ title|striptags }}",
+  "description": "{{ description }}",
+  "url": "https://foliospace.in{{ canonical_path }}",
+  "isPartOf": {"@type": "WebSite", "name": "FolioSpace", "url": "https://foliospace.in"},
+  "dateModified": "{{ modified_iso }}"
+}
+</script>
+{% endblock %}

@@ -1,0 +1,520 @@
+# FolioSpace — Full
+
+> One-link portfolio for every Indian professional — chefs, developers, students, consultants, shop owners, agencies, founders.
+> foliospace.in/yourname. No code, no card. Free forever for the basics.
+
+This is the full marketing copy of foliospace.in, for AI search crawlers and agents. For the concise index, see [/llms.txt](https://foliospace.in/llms.txt).
+
+---
+
+## TL;DR
+
+FolioSpace is a one-page portfolio SaaS for Indian professionals. Every user gets a public folio at `foliospace.in/<their-slug>`. Sign up with email or OAuth (GitHub, Google, LinkedIn). Pick a slug, fill in your work, ship a portfolio.
+
+- **Audience:** Indian professionals who need a clean public profile without coding.
+- **Pricing:** Solo (free) forever. Pro ₹899/yr in Year 1 (launch offer, 40% off), ₹1,499/yr from Year 2. UPI AutoPay or Card AutoPay via Cashfree.
+- **Built with:** FastAPI + Jinja2 + vanilla CSS/JS (no client-side framework, no GSAP).
+- **Hosting:** Render (US-Oregon free tier), Neon Postgres (free tier).
+- **Launch date:** {{ launch_date_label }}.
+
+---
+
+## About FolioSpace
+
+### What it is
+
+A portfolio for everyone. FolioSpace turns a single URL into a public folio. It's built for the Indian web — fast on slower mobile connections, lightweight by design, ready to share on WhatsApp.
+
+Pull quote from the home page:
+
+> A one-page portfolio. A menu customers can preview before they arrive. A single link recruiters actually open — fast on any phone, anywhere in India.
+
+### Who it's for
+
+If you've done anything worth showing, this is for you.
+
+- **Students.** Internships · projects · first CV. Land internships with work that speaks louder than grades. Your college projects, hackathon wins, and GSoC — laid out the way a recruiter actually reads them.
+- **Chefs.** Menus · plating · bookings. Your signature dishes, your plating, your kitchen — beautifully. Live menu, tasting-night bookings, press quotes — all under your name.
+- **Artists.** Gallery · ceramics · video. A gallery that loads in a blink — even on a flaky network. Paintings, photography, ceramics, video, anything visual. Lazy-loaded, but feels instant.
+- **Consultants.** Case studies · book a call · share. Case studies, a one-tap "book a call" button, and a PDF that exports clean — all on one link a recruiter actually opens.
+- **Developers.** Repos · talks · OSS. Ship your projects, repos, and talks — all in one place. Your OSS work, your conference talks, your "now" status. GitHub integration (paste a username, pick what to show).
+- **Working pros.** Side projects · writing · talks. Side projects, talks, writing — visible at last. The work you do after 9pm, finally somewhere it lives. Share without posting on LinkedIn.
+- **Shops.** Boutiques · salons · restaurants · studios. Your shopfront, without the dev team. Menu, price list, look-book, catalogue, hours, location — one link a customer actually opens. Built so the phone call becomes an order.
+- **Businesses & studios.** Agencies · clinics · founders · teams. Services, team, case studies, testimonials — one page for the whole company. The link you put on proposals, invoices, and Instagram bios — without paying a designer to keep it fresh.
+
+### What it replaces
+
+Three places to lose your work. One link to keep it. The home page contrasts the old way (Notion page + Drive folder + LinkedIn attachment — heavy, slow on mobile, lost in DMs) with the FolioSpace way: one URL that loads fast, previews as a WhatsApp link card, renders a clean LinkedIn OG image, exports as a PDF. One URL, every channel.
+
+---
+
+## Pricing
+
+### Solo (Free)
+
+- **₹0 / forever.** No card, no UPI, no Aadhaar. Just sign up.
+- **Handle:** foliospace.in/yourname — yours forever, even if you cancel.
+- **Includes:**
+  - 1 clean template
+  - "Made with FolioSpace" badge
+  - foliospace.in/yourname
+  - Share QR + PDF export
+  - Contact form to your WhatsApp
+  - Passkey sign-in
+- **Not on Solo:** visit analytics, dynamic OG image, SEO tags, referral eligibility.
+
+### Pro
+
+- **₹899 / year in Year 1** (launch offer, 40% off).
+- **₹1,499 / year from Year 2 onward.**
+- UPI AutoPay or Card AutoPay via Cashfree. Annual billing. Cancel any time from your dashboard — two taps.
+- **Includes:**
+  - Every template, unlocked
+  - One-tap PDF download
+  - Contact form to your WhatsApp
+  - Dynamic OG image for shares
+  - SEO tags + meta control
+  - 30-day visit analytics
+  - Refer 10 friends · Year-1 locked forever
+  - Edit from your phone, in any language
+
+The "Made with FolioSpace" badge stays on both tiers — it's our word of mouth.
+
+### Year-1 lock (referral program)
+
+Refer 10 verified friends and Year-1 pricing (₹899) stays locked at renewal forever. There is no downgrade path once earned.
+
+### How billing works
+
+1. **Sign up.** Email + password, one role field. Two minutes.
+2. **Click Activate.** From your dashboard, one tap opens Cashfree's secure UPI mandate page.
+3. **Approve in your UPI app.** PhonePe, Google Pay, Paytm, BHIM — any UPI app. You approve a one-tap annual eMandate for ₹899.
+4. **Year 2 — swap or stay.** On renewal, you pay ₹1,499 — unless you've referred 10 verified friends, in which case Year 1 pricing stays locked for your renewal.
+
+### Pricing FAQ
+
+**Why does Year 2 cost more?**
+Year 1 is the launch offer — a 40% off thank-you for early adopters. From Year 2 the regular price is ₹1,499. Refer 10 verified friends and we lock your renewal at the Year-1 price — every year, as long as you stay subscribed.
+
+**Do I need a card or netbanking?**
+No. Pro is paid by UPI AutoPay — PhonePe, Google Pay, Paytm, BHIM, any UPI app. You approve a one-tap annual mandate once, then it auto-charges yearly. Card AutoPay also supported if you prefer.
+
+**What if my payment fails?**
+You get 7 grace days with full Pro access. We email you on day 1. If the charge still fails after day 7, your folio flips to Free — same template, with the FolioSpace badge.
+
+**Who handles the UPI mandate?**
+Cashfree Payments — a RBI-licensed payment aggregator. Your UPI mandate is created inside your UPI app, not by FolioSpace. We never see your UPI PIN or your account number.
+
+**What happens to my folio if I cancel?**
+Your handle (`foliospace.in/yourname`) is yours forever. If you cancel, your folio flips to Free: same content, badge visible, public toggle honored. Upgrade again any time.
+
+**Can I get a refund?**
+Cancel inside the first 7 days of a paid year and we refund the charge — email foliospace.in@gmail.com and we'll process it same-day.
+
+**Is my data safe?**
+Encrypted at rest (Neon Postgres + TLS in transit). You can delete your account any time — profile, folios, and visit history are wiped within 30 days. See the [full privacy policy](https://foliospace.in/privacy).
+
+---
+
+## The numbers
+
+- **Lightweight by design.** Most pages ship at 1.5MB. We don't.
+- **Share-preview optimised.** WhatsApp, LinkedIn, X — same OG image.
+- **One-tap PDF export.** Print-ready, from your folio URL.
+- **₹899 / year** — Pro, billed annually. UPI AutoPay. Cancel any time.
+
+Built for the speed of a tap.
+
+---
+
+## Example folios (illustrative)
+
+The home page showcases six example folios by persona:
+
+- **Student** — Projects, talks, internships — one link a recruiter can preview in WhatsApp before opening. *(PDF ready)*
+- **Chef** — Menus, plating, supplier story — all on one page that WhatsApp previews as a card. *(Contact form)*
+- **Illustrator** — Gallery that loads on slower networks. Hand-drawn thumbnails, light tiles, full-screen tap-to-view — built to work without fibre. *(All templates)*
+- **Consultant** — Three case studies, one PDF, one contact button — all under your slug. *(PDF in one tap)*
+- **Developer** — Repos, talks, OSS — in one place. GitHub import ships with the page. *(Coming soon)*
+- **Working pro** — Talks, blog posts, weekend builds — somewhere they live. *(Edit on mobile)*
+
+---
+
+## Features
+
+### What's shipped today
+
+- **One-tap signup** with email + password, GitHub, Google, or LinkedIn OAuth.
+- **Slug reservation** on signup — your handle is yours forever.
+- **Cloudinary signed direct upload** for avatars and portfolio images.
+- **Public folio at `foliospace.in/<slug>`** with privacy-first default (off until you flip it on).
+- **Dynamic OG image** (1200×630) for WhatsApp, LinkedIn, and X shares.
+- **QR code** for the share URL (downloadable PNG).
+- **PDF export** — print-ready, one tap from any folio.
+- **Contact form to WhatsApp** — pre-filled message, no email leak.
+- **Visit analytics** — 30-day rolling sparkline of views and unique visitors. Pro only.
+- **Passkey sign-in** — one-tap Face ID / Touch ID login via WebAuthn.
+- **GitHub import** — paste a username, get pinned repos + 53-week contribution grid. Manual refresh on `/<slug>/manage`.
+- **LinkedIn data** — LinkedIn URL + AutoFill Plugin + Gravatar enrichment. Replaces paid APIs with three free paths.
+- **Editable "What I do" rail** — `users.work_rail` JSONB powers the public "What I do" card; user-editable, 30-row cap, free + Pro.
+- **Owner shell** — both `/<slug>/manage` and `/dashboard/billing` share the same plan card, in-sync across screens by construction.
+- **Subscription comp/grants** — admins can grant Pro for N years or forever via the `subscription_grants` table. Effective-plan priority: comp > subscription > free.
+
+### What's building next
+
+Two integrations shipping soon (honest copy, no waitlist for this — the page itself is the announcement):
+
+- **GitHub integration.** Repos · contribution graph · pinned. Paste a username, get your pinned repos, contribution graph, languages, and a clean project grid on your folio — auto-refreshing. You choose which repos are public and which stay private. *(Roadmap — see /features for current status.)*
+- **LinkedIn integration.** Experience · education · certs · everything. Pull your full LinkedIn profile — every role, every company, every project, education, certifications, the works. Edits on LinkedIn reflect on your folio. The boring CV, automated — so you can write the interesting bits yourself. *(Roadmap — see /features for current status.)*
+
+Custom domains are on the roadmap (not yet shipped).
+
+---
+
+## Public folios
+
+Every user gets `/<slug>`. Live examples:
+
+- https://foliospace.in/allarohithnaidu (founder)
+
+The full directory of public folios is at [/space-community](https://foliospace.in/space-community). Each tile shows avatar, name, role, category, and `foliospace.in/<slug>`. Browsable by craft (chef, developer, consultant, founder, student, shop) and by place (pan-India, sortable by city).
+
+### Share
+
+Every public folio has a share section with:
+
+- Copy-to-clipboard URL
+- Pre-filled WhatsApp message
+- LinkedIn share
+- Email share
+- QR code (works for private folios too — the QR respects the privacy toggle at scan time)
+
+---
+
+## Referral program
+
+10 successful referrals → Year-1 price (₹899) locked at renewal forever. No downgrade ever.
+
+### How a "successful referral" is earned
+
+A referee must satisfy all three:
+
+1. Signed up via `/ref/{code}` (cookie attribute set)
+2. `email_verified = TRUE`
+3. `is_public = TRUE` (their folio is published)
+
+Tier (Free vs Pro) does not matter — both count. Cumulative across all months — no time window.
+
+### Status chain
+
+```
+pending  ──[referee signs up via /ref/{code}]──▶  pending  (referrals row inserted)
+pending  ──[referee verifies email]─────────────▶  verified
+verified ──[referee publishes folio is_public]─▶  active    (active_count +1, may trigger plan swap)
+```
+
+Monotonic. No `DELETE` path. Partial index on `(referrer_id) WHERE status = 'active'` for the hot path.
+
+### Cookie plumbing
+
+`/ref/{code}` sets the `fs_ref` cookie (30-day TTL, httponly, samesite=lax) and 303-redirects to `/signup`. Cookie is cleared on successful signup.
+
+### Upgrade mechanism
+
+A daily Render Cron Job (03:00 IST) is the backstop. It scans `v_referral_counts` for users with `active_count >= 10` whose subscription is still on the Year-2 plan, and swaps them back to Year-1 via `cashfree.update_subscription_plan`. Cron never downgrades — only year-2 → year-1.
+
+---
+
+## API surface
+
+### Public
+
+- `GET /` — landing page
+- `GET /pricing` — pricing
+- `GET /features` — features + roadmap
+- `GET /space-community` — directory of public folios
+- `GET /privacy` — privacy policy
+- `GET /terms` — terms of service
+- `GET /security` — security notes
+- `GET /sitemap.xml` — every public folio + static pages
+- `GET /llms.txt` — AI crawler index
+- `GET /llms-full.txt` — AI crawler full marketing copy (this file)
+- `GET /robots.txt` — blocks `/admin/`, `/dashboard/`, `/api/`, `/auth/`
+- `GET /<slug>` — public folio (404 if `is_public=false`)
+- `GET /<slug>/og.png` — dynamic Open Graph image (1200×630)
+- `GET /<slug>/qr.png` — QR code for share
+- `GET /ref/{code}` — sets referral cookie, 303 to /signup
+
+### Authentication
+
+- `POST /signup` — email + password (creates user, sends 6-digit OTP)
+- `POST /signup/verify` — verify 6-digit code
+- `POST /login` — email + password (creates session)
+- `POST /forgot` — request password-reset email
+- `POST /reset` — reset password with token (redirects to /login, no auto-login)
+- `POST /logout` — destroy session
+- `GET /auth/oauth/{github|google|linkedin}/start` — begin OAuth
+- `GET /auth/oauth/{github|google|linkedin}/callback` — complete OAuth (login)
+- `GET /auth/oauth/{github|google|linkedin}/attach` — link OAuth to existing account
+
+### Authenticated — owner
+
+- `GET /<slug>/manage` — edit folio (template, sections, avatar, OG, SEO, work_rail, is_public)
+- `POST /<slug>/manage` — save folio changes
+- `GET /dashboard` — overview (plan card, referrals widget)
+- `GET /dashboard/profile` — profile (name, role, bio, phone, avatar, social links)
+- `POST /dashboard/profile` — update profile
+- `GET /dashboard/billing` — manage subscription, view receipts, plan-swap, cancel
+- `POST /dashboard/billing/activate` — start Cashfree UPI AutoPay flow
+- `POST /dashboard/billing/cancel` — cancel subscription at end of period
+- `GET /dashboard/referrals` — referral code, count, share UI, progress to 10
+- `GET /dashboard/passkeys` — manage enrolled passkeys
+- `POST /dashboard/passkeys/register` — enrol a new passkey (begin + complete)
+- `DELETE /dashboard/passkey/{credential_id}` — revoke a passkey
+- `POST /passkey/login/{begin,complete}` — WebAuthn assertion (passkey sign-in)
+
+### Webhooks
+
+- `POST /webhooks/cashfree` — HMAC-SHA256-verified payment events; idempotent via `webhook_events.event_id` PK
+
+### Admin
+
+- `GET /admin/login` — single bcrypt password + cookie session
+- `GET /admin/` — operator dashboard (users, subscriptions, comp/grants, audit logs)
+- `POST /admin/grant` — grant Pro for N years or forever
+- `POST /admin/revoke` — revoke a grant
+
+---
+
+## Tech stack
+
+- **Backend:** Python 3.13 + FastAPI 0.136 + Jinja2 3.1
+- **Database:** PostgreSQL via psycopg 3.2 (Neon serverless, US East)
+- **Payments:** Cashfree Subscriptions API (UPI AutoPay, Card AutoPay)
+- **Image / video / font hosting:** Cloudinary signed direct upload
+- **Transactional email:** Resend (welcome, OTP, payment events, password reset)
+- **Passkeys:** webauthn 2.2 (PyPI package `webauthn`)
+- **Auth & sessions:** itsdangerous for session cookies, bcrypt for passwords (via passlib)
+- **Rate limiting:** slowapi
+- **QR codes:** qrcode 7.4
+- **Frontend:** vanilla CSS + vanilla JS. No client-side framework. Server-rendered HTML.
+
+---
+
+## Security notes
+
+> Last updated 22 Aug 2026 · applies to foliospace.in
+
+### What we build
+
+- **Strict Content Security Policy** — `script-src` restricted to `'self'` with explicit allow-lists for LinkedIn and Google Analytics.
+- **HSTS** with `includeSubDomains` and `preload` opt-in via the `Strict-Transport-Security` header on every response.
+- **TrustedHost middleware** that 404s any request with a non-allow-listed `Host` header.
+- **CSRF tokens** on every state-changing form, session-bound and server-validated.
+- **Rate limits** via slowapi on login, signup, forgot-password, reset, OAuth callbacks, webhooks, and admin login.
+- **Argon2/bcrypt password hashing** via passlib; OAuth users have a `NULL` password_hash and are gated by require_user checks.
+- **Server-side fetch of OG image URLs and avatars** through a public-URL allow-list that rejects private IP ranges, embedded credentials, and non-http schemes. DNS is resolved at write time.
+- **Webhook endpoints** exempted from Origin checks but verified via HMAC-SHA256 (Cashfree).
+- **Parameterised database queries** — no string interpolation into SQL.
+
+### What we don't build
+
+- We don't load third-party ad scripts, retargeting pixels, or session-replay tools in your folio or on any logged-in page.
+- We don't store card numbers, UPI PINs, or any payment instrument. Cashfree holds the mandate; we store only a subscription ID.
+- We don't run a JS framework on the client. Your folio is server-rendered HTML + vanilla JS — there is no React, Vue, or hydration in the page you share.
+- We don't sell or share your data.
+
+### What we monitor
+
+- Application logs are retained for 30 days on Render free tier; longer retention is on the roadmap.
+- Failed login attempts and rate-limit hits are logged with anonymised IPs (last octet zeroed).
+- Security headers are tested on every deploy via a smoke test in CI.
+
+### Reporting a problem
+
+Found a vulnerability or something that worries you? Email **security@foliospace.in**. We respond within 72 hours and credit researchers on a public page if you'd like.
+
+We do not run a paid bug bounty yet. This will change once the product reaches steady state.
+
+### Open dependencies
+
+FolioSpace is built on FastAPI, Jinja2, psycopg, passlib, slowapi, python-multipart, and httpx for Cashfree Subscriptions API calls. The full dependency tree lives in `requirements.txt`. Server-rendered templates use vanilla CSS/JS only.
+
+---
+
+## Privacy policy
+
+> Issue No. 02 · Last updated August 2026
+
+### What we collect
+
+When you join the FolioSpace waitlist, we collect:
+
+- Your **email address** — to contact you about the launch.
+- Your **role** (optional) — to understand who FolioSpace is for.
+- Your **IP address** — used only to prevent spam and abuse, then discarded within 30 days.
+- If you arrive via a tagged link, the **referral source** (for example `utm_source=twitter`) — so we can tell which channels send us the most useful people, not to track you across the web.
+
+That's it. No third-party trackers, no analytics scripts, no fingerprinting.
+
+### How we use it
+
+We use your email for exactly two things:
+
+- Send you a **welcome email** confirming you're on the list.
+- Send you **one launch email** when FolioSpace goes live, plus an optional reminder or two before that.
+
+We do not sell, rent, or share your email with anyone. Ever.
+
+### Where it lives
+
+Email addresses are stored in a Postgres database hosted on Neon (US East region). Welcome and launch emails are sent via Resend, a transactional email provider. Both services are GDPR-compliant and use TLS in transit.
+
+### Your rights
+
+You can ask us to **delete your data at any time**. Reply to any FolioSpace email with "delete" and we'll remove your record within 7 days. You can also email us directly at foliospace.in@gmail.com.
+
+If you're an Indian resident, the Digital Personal Data Protection Act 2023 gives you the right to access, correct, and erase personal data held about you. The above deletion process satisfies that.
+
+### How long we keep it
+
+If you joined the waitlist but never signed up for an account, we keep your email address for **90 days after public launch** so we can send you a final reminder. After 90 days we delete the waitlist table entirely. Your email is **not** used for marketing during this period — it sits there until either you sign up or the 90 days pass.
+
+### Children's privacy
+
+FolioSpace is not directed at children under 13. We do not knowingly collect data from anyone under 13. If a parent or guardian believes their child has signed up, email us and we'll delete the record.
+
+### Changes to this policy
+
+If we ever change this policy in a material way, we'll email everyone on the list with the diff and a link to the updated version. We'll never change it silently.
+
+### Get in touch
+
+Questions, complaints, or data requests: foliospace.in@gmail.com. We reply within 48 hours.
+
+---
+
+## Terms of service
+
+> Issue No. 03 · Last updated August 2026
+
+### What FolioSpace is
+
+FolioSpace is a portfolio service for Indian professionals — chefs, students, consultants, developers, designers, and anyone with work to show. Right now we're in private beta: this website collects waitlist signups for the public launch on or around the launch date.
+
+### What we promise
+
+- We'll email you when we launch (and once or twice before that, no more).
+- We'll never sell or share your email.
+- We'll delete your data on request, and bulk-delete unconverted waitlist emails within 90 days of public launch.
+- We'll be honest about what's working and what's not.
+
+### What we don't promise
+
+- A specific launch date — we aim for the launch date, but if the product isn't ready, we slip.
+- Specific features or pricing that aren't listed on the site.
+- That the service will always be free or that prices won't change.
+
+### Acceptable use
+
+When the product launches, you agree to use FolioSpace lawfully. Don't use it for spam, harassment, scraping, distributing malware, hosting illegal content, or impersonating others. We may suspend or terminate accounts that violate these terms.
+
+### Your content
+
+You own everything you upload to FolioSpace — your bio, photos, project files, contact info. We only use it to render your portfolio and to provide the service you signed up for. You can export or delete your content at any time.
+
+### Our content
+
+The FolioSpace brand, code, templates, and design system are ours. Don't copy the site wholesale or resell the templates as your own product. You're welcome to reference and learn from them.
+
+### Liability and warranties
+
+FolioSpace is provided "as is." We work hard to keep it running and your data safe, but we can't guarantee 100% uptime or that the service will never lose data. To the maximum extent permitted by law, our liability is limited to the fees you've paid us in the last 12 months (which, for the waitlist period, is zero).
+
+### Governing law
+
+These terms are governed by the laws of India. Any disputes will be handled in the courts of competent jurisdiction in India.
+
+### Changes to these terms
+
+If we materially change these terms, we'll email everyone on the list and post a changelog. Continued use after that means you accept the new terms.
+
+### Contact us
+
+Questions or complaints: foliospace.in@gmail.com. We reply within 48 hours.
+
+---
+
+## FAQ (landing page)
+
+**Why ₹899/yr?**
+It covers payment processing, hosting, the OG image renderer, the QR generator, and the analytics storage — for one folio per user. No setup fee. We add features, not price hikes.
+
+**Is this just another Linktree?**
+No. Linktree is a list of links. FolioSpace is a proper portfolio — case studies, a PDF that exports clean, contact forms that don't leak your email. Built for the Indian web, not retrofitted.
+
+**What happens after I join the waitlist?**
+We'll email you the moment launch slots open. The first N join the founder cohort automatically — locked-in launch pricing, founder badge, and a say in what we build next. No spam, no drip — just one ping when it's your turn.
+
+**Will my portfolio load on slower mobile networks?**
+It's built to. Pages are intentionally lightweight, with lazy-loaded images and no heavy client-side framework. We measure Core Web Vitals on each release.
+
+---
+
+## Trust signals
+
+From the home page ("The work that holds the work"):
+
+- **Security headers, on every response.** CSP, HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy — all set in middleware.
+- **OG image SSRF guard.** Custom OG image URLs are validated to block private IP ranges, embedded credentials, and non-http schemes. DNS resolved at write time.
+- **Avatar URL validation.** Same allow-list logic on avatar URLs — only public https endpoints accepted.
+- **Rate limits on auth endpoints.** Login, signup, forgot-password, and reset endpoints are protected with slowapi tuned for human use.
+- **CSRF tokens on every form.** Session-bound tokens, validated server-side. Same-origin checks on state-changing endpoints.
+- **No analytics on third-party pixels.** Visit counts and custom events are server-rendered. No Facebook, Google Ads, or Hotjar scripts injected into your folio.
+- **One price, public.** ₹899/yr in Year 1, ₹1,499/yr from Year 2. No tiers, no upsells mid-flow, no surprise currency conversion.
+- **UPI AutoPay, not card storage.** Card numbers never touch our servers. Cashfree holds the UPI AutoPay mandate.
+- **Open-source-friendly code.** FastAPI + Jinja2 + vanilla CSS/JS. No proprietary frontend framework.
+
+---
+
+## Founder cohort
+
+The first N signups get founder perks:
+
+1. **Year-1 launch offer at ₹899.** Full Pro features on signup — no card, no UPI mandate, no charge.
+2. **₹899/yr in Year 1, UPI AutoPay or Card AutoPay via Cashfree.** Same price as everyone. No setup fee, no surprise hikes.
+3. **Cancel any time, two taps.** From your dashboard. Access continues to the end of the paid period.
+
+Plus: founder badge, locked-in launch pricing, and a say in what we build next (quarterly calls).
+
+---
+
+## Owner
+
+**Rohith Naidu Alla** — rohithnaidualla on GitHub. Founder + sole developer.
+
+Contact: foliospace.in@gmail.com
+Security reports: security@foliospace.in
+
+---
+
+## Related pages
+
+- [Home](https://foliospace.in/) — product overview
+- [Pricing](https://foliospace.in/pricing) — full plan comparison
+- [Features](https://foliospace.in/features) — what's shipped + roadmap
+- [Community](https://foliospace.in/space-community) — directory of public folios
+- [Privacy](https://foliospace.in/privacy) — privacy policy
+- [Terms](https://foliospace.in/terms) — terms of service
+- [Security](https://foliospace.in/security) — security notes
+- [Stats](https://foliospace.in/stats) — first-party operational stats + methodology
+- [Founder](https://foliospace.in/founder) — Person JSON-LD + working notes
+- [Research](https://foliospace.in/research) — original FolioSpace research notes
+- [vs Carrd](https://foliospace.in/vs/carrd) · [vs LinkedIn](https://foliospace.in/vs/linkedin) · [vs about.me](https://foliospace.in/vs/about-me) · [vs Notion](https://foliospace.in/vs/notion) · [vs WordPress](https://foliospace.in/vs/wordpress) · [vs GitHub Pages](https://foliospace.in/vs/github-pages) — honest comparison tables
+- For chefs: [chef-portfolio](https://foliospace.in/chef-portfolio), [for/chef](https://foliospace.in/for/chef) · developers: [developer-portfolio](https://foliospace.in/developer-portfolio), [for/developer](https://foliospace.in/for/developer) · designers: [designer-portfolio](https://foliospace.in/designer-portfolio) · students: [student-portfolio](https://foliospace.in/student-portfolio) · consultants: [consultant-portfolio](https://foliospace.in/consultant-portfolio) · freelancers: [freelancer-portfolio](https://foliospace.in/freelancer-portfolio) · small businesses: [small-business-website](https://foliospace.in/small-business-website) — role-based landing pages (the `/for/<role>` URLs are 308 aliases to the canonical pages)
+- [Sitemap](https://foliospace.in/sitemap.xml) — every public folio + static page
+- [llms.txt](https://foliospace.in/llms.txt) — concise index for AI crawlers
+
+---
+
+Last updated: 2026-08-23.
