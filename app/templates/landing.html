@@ -98,7 +98,7 @@
       "name": "Is FolioSpace free?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. The Solo tier is free forever — foliospace.in/your-name, share QR, PDF export, contact form to WhatsApp, passkey sign-in. Pro adds every template, dynamic OG image, SEO tags, 30-day visit analytics, and the 10-friend referral program. The Made with FolioSpace badge stays on both tiers."
+        "text": "Yes. The Solo tier is free forever — foliospace.in/your-name, share QR, PDF export, contact form to WhatsApp, passkey sign-in. Pro adds Spotlight card (pin a project to the top), custom fonts, unlimited links (Free is capped at 10), and the ₹{{ PRO_YEAR1_INR }}/yr Year-1 launch price. The Made with FolioSpace badge stays on both tiers."
       }
     },
     {
@@ -107,14 +107,6 @@
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Pro is ₹{{ '{:,}'.format(PRO_YEAR1_INR) }} per year in Year 1 (launch offer, 40% off the regular price) and ₹{{ '{:,}'.format(PRO_YEAR2_INR) }} per year from Year 2. Payment is via Cashfree UPI AutoPay or Card AutoPay — PhonePe, Google Pay, Paytm, BHIM, any UPI app. Cancel any time from your dashboard."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How is FolioSpace different from Linktree or Carrd?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Linktree is a list of links. Carrd is a one-page site builder. FolioSpace is a proper portfolio built for the Indian web — UPI-native billing, WhatsApp link previews, fast on slower mobile networks, and a server-rendered page that exports to PDF. Built in India, not retrofitted."
       }
     },
     {
@@ -427,15 +419,11 @@
           </article>
           <article class="qa-card">
             <h3 class="qa-q">Is FolioSpace free?</h3>
-            <p class="qa-a">Yes. The Solo tier is free forever — your slug, share QR, PDF export, contact form, passkey sign-in. Pro adds every template, dynamic OG image, SEO tags, 30-day visit analytics, and the 10-friend referral program. The Made with FolioSpace badge stays on both tiers.</p>
+            <p class="qa-a">Yes. The Solo tier is free forever — your slug, share QR, PDF export, contact form, passkey sign-in. Pro adds Spotlight card (pin a project to the top), custom fonts, unlimited links (Free is capped at 10), and the ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr Year-1 launch price. The Made with FolioSpace badge stays on both tiers.</p>
           </article>
           <article class="qa-card">
             <h3 class="qa-q">How much does Pro cost in India?</h3>
             <p class="qa-a">Pro is ₹{{ "{:,}".format(PRO_YEAR1_INR) }} per year in Year 1 (launch offer, 40% off the regular price) and ₹{{ "{:,}".format(PRO_YEAR2_INR) }} per year from Year 2. Paid via Cashfree UPI AutoPay or Card AutoPay — PhonePe, Google Pay, Paytm, BHIM, any UPI app. Cancel any time from your dashboard.</p>
-          </article>
-          <article class="qa-card">
-            <h3 class="qa-q">How is this different from Linktree or Carrd?</h3>
-            <p class="qa-a">Linktree is a list of links. Carrd is a one-page site builder. FolioSpace is a proper portfolio built for the Indian web — UPI-native billing, WhatsApp link previews, fast on slower mobile networks, and a server-rendered page that exports to PDF. Not retrofitted.</p>
           </article>
           <article class="qa-card">
             <h3 class="qa-q">Can I use my own domain?</h3>
@@ -808,7 +796,7 @@
               <li><span class="receipt-bullet">›</span>Contact form to your WhatsApp</li>
               <li><span class="receipt-bullet">›</span>Passkey sign-in</li>
             </ul>
-            <p class="receipt-fineprint">No visit analytics, no dynamic OG image, no SEO tags, no referral eligibility on Solo.</p>
+            <p class="receipt-fineprint">No Spotlight card, no custom fonts, 10-link cap. Upgrade for everything.</p>
             <a href="#join" class="btn btn-ghost receipt-cta" aria-disabled="true" tabindex="-1">Start free <span class="receipt-cta-note">— coming soon</span></a>
             <span class="receipt-perf" aria-hidden="true"></span>
           </article>
@@ -831,14 +819,11 @@
             </div>
             <p class="receipt-sub">UPI AutoPay or Card · annual billing · cancel in two taps.</p>
             <ul class="receipt-items">
-              <li><span class="receipt-bullet">›</span>Every template, unlocked</li>
-              <li><span class="receipt-bullet">›</span>One-tap PDF download</li>
-              <li><span class="receipt-bullet">›</span>Contact form to your WhatsApp</li>
-              <li><span class="receipt-bullet">›</span>Dynamic OG image for shares</li>
-              <li><span class="receipt-bullet">›</span>SEO tags + meta control</li>
-              <li><span class="receipt-bullet">›</span>30-day visit analytics</li>
-              <li><span class="receipt-bullet">›</span>Refer 10 friends · Year-1 locked forever</li>
-              <li><span class="receipt-bullet">›</span>Edit from your phone, in any language</li>
+              <li><span class="receipt-bullet">›</span>Spotlight card — pin a project to the top</li>
+              <li><span class="receipt-bullet">›</span>Custom fonts — your typeface, not ours</li>
+              <li><span class="receipt-bullet">›</span>Unlimited links (Free is capped at 10)</li>
+              <li><span class="receipt-bullet">›</span>Refer 10 friends · Year-1 price locked forever</li>
+              <li><span class="receipt-bullet">›</span>Everything in Solo, on every device</li>
             </ul>
             <a href="/dashboard/billing" class="btn btn-primary receipt-cta" aria-disabled="true" tabindex="-1">Activate at ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr — save {{ annual_savings_percent() }}% <span class="receipt-cta-note">— coming soon</span></a>
             <span class="receipt-perf" aria-hidden="true"></span>
@@ -991,15 +976,6 @@
             <div class="faq-body">
               <p>₹{{ "{:,}".format(PRO_YEAR1_INR) }} is the <strong>launch price for Year 1</strong> — 40% off the regular ₹{{ "{:,}".format(PRO_YEAR2_INR) }}/yr. From Year 2 onwards, Pro renews at the standard ₹{{ "{:,}".format(PRO_YEAR2_INR) }}/yr. Refer 10 verified friends and the ₹{{ "{:,}".format(PRO_YEAR1_INR) }} rate locks in for life.</p>
               <p>It covers payment processing, hosting, the OG image renderer, the QR generator, and the analytics storage — for one folio per user. No setup fee. We add features, not price hikes.</p>
-            </div>
-          </details>
-          <details class="faq-item">
-            <summary>
-              <h3 class="faq-q">Is this just another Linktree?</h3>
-              <span class="faq-icon" aria-hidden="true"></span>
-            </summary>
-            <div class="faq-body">
-              <p>No. Linktree is a list of links. FolioSpace is a proper portfolio — case studies, a PDF that exports clean, contact forms that don't leak your email. Built for the Indian web, not retrofitted.</p>
             </div>
           </details>
           <details class="faq-item">
