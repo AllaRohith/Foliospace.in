@@ -604,6 +604,133 @@ class ExtractChallengeTests(unittest.TestCase):
             })
 
 
+# ── VerifiedRegistration field access ──────────────────────────────────────────────────────────────────────
+
+class CompleteRegistrationFieldAccessTests(unittest.TestCase):
+    """Regression for the AttributeError 'credential' bug hit on Render 2026-08-24.
+
+    complete_registration used to read `verification.credential.id`,
+    `verification.credential.transports`, `verification.credential.backup_eligible`,
+    `verification.credential.backup_state` — but py_webauthn's VerifiedRegistration
+    (identical shape on 2.x and 3.x) is a flat dataclass with credential_id /
+    credential_public_key / credential_backed_up. None of the original fields exist.
+
+    This test verifies complete_registration reads the CORRECT field names and the
+    DB INSERT receives the right types (bytes for credential_id/public_key, UUID
+    for aaguid, None for transports, bool for the backup flags).
+    """
+
+    def _stub_verified(self):
+        from dataclasses import make_dataclass
+        return make_dataclass("StubVerified", [
+            ("credential_id", bytes),
+            ("credential_public_key", bytes),
+            ("sign_count", int),
+            ("aaguid", str),
+            ("fmt", str),
+            ("credential_type", str),
+            ("user_verified", bool),
+            ("attestation_object", bytes),
+            ("credential_device_type", str),
+            ("credential_backed_up", bool),
+        ])(
+            credential_id=b"\x01\x02\x03\x04",
+            credential_public_key=b"\xde\xad\xbe\xef" * 8,
+            sign_count=0,
+            aaguid="550e8400-e29b-41d4-a716-446655440000",
+            fmt="none",
+            credential_type="public-key",
+            user_verified=True,
+            attestation_object=b"\xa0",
+            credential_device_type="single_device",
+            credential_backed_up=False,
+        )
+
+    def _setup_patches(self, passkey):
+        raw_challenge = b"\xaa" * 32
+        cdata = json.dumps({
+            "type": "webauthn.create",
+            "challenge": base64.urlsafe_b64encode(raw_challenge).rstrip(b"=").decode("ascii"),
+            "origin": "https://foliospace.in",
+            "crossOrigin": False,
+        }, separators=(",", ":")).encode("utf-8")
+        cred = {
+            "id": "AQIDBA", "rawId": "AQIDBA", "type": "public-key",
+            "response": {
+                "clientDataJSON": base64.urlsafe_b64encode(cdata).rstrip(b"=").decode("ascii"),
+                "attestationObject": "ignored",
+            },
+        }
+        captured = {}
+        cursor = mock.MagicMock()
+        cursor.__enter__ = lambda s: s
+        cursor.__exit__ = lambda *a: False
+        cursor.execute = lambda sql, params=(): captured.setdefault("params", params)
+        cursor.fetchone = lambda: {"id": 999}
+        conn = mock.MagicMock()
+        conn.__enter__ = lambda s: s
+        conn.__exit__ = lambda *a: False
+        conn.cursor = lambda: cursor
+        # Make sure the cache is populated before we patch it (other tests need it).
+        passkey._webauthn()
+        self._cache_patcher = mock.patch.dict(
+            passkey._webauthn_cache,
+            {"verify_registration_response": mock.MagicMock(return_value=self._stub_verified())},
+        )
+        self._cache_patcher.start()
+        self.addCleanup(self._cache_patcher.stop)
+        self._connect_patcher = mock.patch.object(passkey, "_connect", return_value=conn)
+        self._connect_patcher.start()
+        self.addCleanup(self._connect_patcher.stop)
+        self._require_patcher = mock.patch.object(
+            passkey, "_require_verified_user",
+            return_value={"id": "11111111-1111-1111-1111-111111111111", "email": "a@b.in"},
+        )
+        self._require_patcher.start()
+        self.addCleanup(self._require_patcher.stop)
+        self._consume_patcher = mock.patch.object(
+            passkey, "_consume_challenge",
+            return_value={"user_id": "11111111-1111-1111-1111-111111111111", "email_hint": None},
+        )
+        self._consume_patcher.start()
+        self.addCleanup(self._consume_patcher.stop)
+        return cred, captured
+
+    def test_does_not_attribute_error(self):
+        from app.services import passkey
+        cred, captured = self._setup_patches(passkey)
+        result = passkey.complete_registration(
+            "11111111-1111-1111-1111-111111111111", cred, "Test",
+            request=mock.MagicMock(),
+        )
+        self.assertIn("id", result)
+        self.assertIn("credential_id", result)
+
+    def test_insert_uses_correct_field_names(self):
+        from app.services import passkey
+        cred, captured = self._setup_patches(passkey)
+        passkey.complete_registration(
+            "11111111-1111-1111-1111-111111111111", cred, "Test",
+            request=mock.MagicMock(),
+        )
+        params = captured["params"]
+        self.assertEqual(params[1], b"\x01\x02\x03\x04",
+                         "credential_id must come from .credential_id, not .id")
+        self.assertEqual(params[2], b"\xde\xad\xbe\xef" * 8,
+                         "public_key must come from .credential_public_key")
+        self.assertIsNone(params[4],
+                          "transports not exposed by py_webauthn — must be NULL")
+        import uuid
+        self.assertEqual(params[5], uuid.UUID("550e8400-e29b-41d4-a716-446655440000"),
+                         "aaguid string must parse to UUID")
+        self.assertIs(params[6], True,
+                      "user_verified must come from .user_verified")
+        self.assertIs(params[7], False,
+                      "backup_eligible mirrors .credential_backed_up")
+        self.assertIs(params[8], False,
+                      "backup_state must come from .credential_backed_up")
+
+
 # ── webauthn 3.x API compatibility ─────────────────────────────────────────────────────────────────────────
 
 class WebauthnCrossVersionTests(unittest.TestCase):

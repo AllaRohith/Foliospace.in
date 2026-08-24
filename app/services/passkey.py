@@ -15,6 +15,7 @@ import json
 import logging
 import os
 import secrets
+import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -547,8 +548,26 @@ def complete_registration(
         logger.warning("registration verify failed for user=%s: %s", user_id, e)
         raise PasskeyAttestationFailed(str(e)) from e
 
-    cred = verification.credential
-    transports = [t.value for t in (cred.transports or [])]
+    cred = verification
+    # py_webauthn 2.x AND 3.x both expose the credential as a flat VerifiedRegistration
+    # dataclass (no nested `.credential` object). The fields we need:
+    #   - credential_id           (bytes)  -> DB credential_id
+    #   - credential_public_key  (bytes)  -> DB public_key
+    #   - sign_count             (int)
+    #   - aaguid                 (str)    -> DB aaguid (UUID, parse safely)
+    #   - user_verified          (bool)
+    #   - credential_backed_up   (bool)   -> DB backup_state
+    # `transports` and `backup_eligible` are NOT exposed by py_webauthn (they're in the
+    # raw auth_data but the library doesn't surface them). transports -> NULL,
+    # backup_eligible mirrors credential_backed_up as the best available proxy.
+    aaguid_str = str(cred.aaguid) if cred.aaguid else None
+    aaguid_uuid = None
+    if aaguid_str:
+        try:
+            aaguid_uuid = uuid.UUID(aaguid_str)
+        except (ValueError, AttributeError, TypeError):
+            logger.info("register: ignoring unparseable aaguid=%r for user=%s", aaguid_str, user_id)
+            aaguid_uuid = None
     with _connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -562,14 +581,14 @@ def complete_registration(
                 """,
                 (
                     user_id,
-                    bytes(cred.id),
-                    bytes(cred.public_key),
+                    bytes(cred.credential_id),
+                    bytes(cred.credential_public_key),
                     int(cred.sign_count or 0),
-                    transports,
-                    str(cred.aaguid) if cred.aaguid else None,
+                    None,  # transports: not exposed by py_webauthn
+                    aaguid_uuid,
                     bool(cred.user_verified),
-                    bool(cred.backup_eligible),
-                    bool(cred.backup_state),
+                    bool(cred.credential_backed_up),  # best available proxy for backup_eligible
+                    bool(cred.credential_backed_up),
                     (friendly_name or "").strip()[:80] or None,
                 ),
             )
@@ -583,10 +602,10 @@ def complete_registration(
         request,
         user_id,
         "passkey.register",
-        target=str(cred.id),
-        metadata={"transports": transports},
+        target=b64u_encode(bytes(cred.credential_id)),
+        metadata={"aaguid": aaguid_str, "backed_up": bool(cred.credential_backed_up)},
     )
-    return {"id": str(row["id"]), "transports": transports}
+    return {"id": str(row["id"]), "credential_id": b64u_encode(bytes(cred.credential_id))}
 
 
 # ── Login ─────────────────────────────────────────────────────────────────────────────────────────────────
