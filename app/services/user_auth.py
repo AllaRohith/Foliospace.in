@@ -1152,18 +1152,18 @@ def update_user_profile(
                 if linkedin_present:
                     set_clauses.append("linkedin_url = %s")
                     params.append(linkedin_value or None)
-                if headline_present:
+                if headline_present and headline_clean:
                     set_clauses.append("headline = %s")
-                    params.append(headline_clean or None)
-                if locale_present:
+                    params.append(headline_clean)
+                if locale_present and locale_clean:
                     set_clauses.append("locale = %s")
-                    params.append(locale_clean or None)
-                if zoneinfo_present:
+                    params.append(locale_clean)
+                if zoneinfo_present and zoneinfo_clean:
                     set_clauses.append("zoneinfo = %s")
-                    params.append(zoneinfo_clean or None)
-                if profile_url_present:
+                    params.append(zoneinfo_clean)
+                if profile_url_present and profile_url_clean:
                     set_clauses.append("profile_url = %s")
-                    params.append(profile_url_clean or None)
+                    params.append(profile_url_clean)
                 params.append(uid)
                 sql = f"""
                     UPDATE users

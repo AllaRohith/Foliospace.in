@@ -83,6 +83,76 @@ class UpdateUserProfileValidationTests(unittest.TestCase):
             )
         self.assertIsNotNone(res)
 
+    def test_empty_form_values_do_NOT_overwrite_existing(self):
+        """Regression: form save with empty LinkedIn fields must not clobber
+        existing users.headline/locale/zoneinfo/profile_url values that
+        were set by a prior Refresh or manual entry.
+        """
+        captured_sql = []
+        fake_row = {
+            "id": "00000000-0000-0000-0000-000000000000",
+            "headline": "Existing headline",
+            "locale": "en_IN",
+            "zoneinfo": "Asia/Kolkata",
+            "profile_url": "https://www.linkedin.com/in/existing",
+        }
+        fake_cur = mock.MagicMock()
+        fake_cur.fetchone.side_effect = [
+            {"is_public": False},
+            fake_row,
+        ]
+        fake_cur.execute.side_effect = lambda sql, params=None: captured_sql.append(str(sql).lower())
+        fake_conn = mock.MagicMock()
+        fake_conn.__enter__ = mock.MagicMock(return_value=fake_conn)
+        fake_conn.__exit__ = mock.MagicMock(return_value=False)
+        fake_conn.cursor.return_value.__enter__ = mock.MagicMock(return_value=fake_cur)
+        fake_conn.cursor.return_value.__exit__ = mock.MagicMock(return_value=False)
+        with mock.patch("app.services.user_auth._connect", return_value=fake_conn):
+            self._call(
+                headline="",
+                locale="",
+                zoneinfo="",
+                profile_url="",
+            )
+        joined = "\n".join(captured_sql)
+        self.assertNotIn("headline = %s", joined)
+        self.assertNotIn("locale = %s", joined)
+        self.assertNotIn("zoneinfo = %s", joined)
+        self.assertNotIn("profile_url = %s", joined)
+
+    def test_typed_form_value_overwrites_existing(self):
+        captured_sql = []
+        fake_row = {
+            "id": "00000000-0000-0000-0000-000000000000",
+            "headline": "Existing",
+            "locale": "en_IN",
+            "zoneinfo": "Asia/Kolkata",
+            "profile_url": "",
+        }
+        fake_cur = mock.MagicMock()
+        fake_cur.fetchone.side_effect = [
+            {"is_public": False},
+            fake_row,
+        ]
+        fake_cur.execute.side_effect = lambda sql, params=None: captured_sql.append(str(sql).lower())
+        fake_conn = mock.MagicMock()
+        fake_conn.__enter__ = mock.MagicMock(return_value=fake_conn)
+        fake_conn.__exit__ = mock.MagicMock(return_value=False)
+        fake_conn.cursor.return_value.__enter__ = mock.MagicMock(return_value=fake_cur)
+        fake_conn.cursor.return_value.__exit__ = mock.MagicMock(return_value=False)
+        with mock.patch("app.services.user_auth._connect", return_value=fake_conn):
+            self._call(
+                headline=HEADLINE_OK,
+                locale="en_US",
+                zoneinfo="America/New_York",
+                profile_url="https://www.linkedin.com/in/newhandle",
+            )
+        joined = "\n".join(captured_sql)
+        self.assertIn("headline = %s", joined)
+        self.assertIn("locale = %s", joined)
+        self.assertIn("zoneinfo = %s", joined)
+        self.assertIn("profile_url = %s", joined)
+
     def test_known_good_values_pass_regex(self):
         self.assertTrue(re.fullmatch(r"[A-Za-z]{2,3}(_[A-Z]{2})?", LOCALE_OK))
         self.assertTrue(re.fullmatch(r"[A-Za-z]+(/[A-Za-z_]+)*", ZONEINFO_OK))
