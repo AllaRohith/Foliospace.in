@@ -31,7 +31,7 @@
 
 <section class="fig-stats" aria-label="Headline numbers">
   <div class="fig-stat">
-    <svg class="micro" viewBox="0 0 64 22" preserveAspectRatio="none" aria-hidden="true">
+    <svg class="micro" width="60" height="22" viewBox="0 0 64 22" preserveAspectRatio="none" aria-hidden="true">
       {% set ms = per_day[-7:] if per_day else [] %}
       {% if ms|length >= 2 %}
         {% set mm = (ms|map(attribute=1)|max) or 1 %}
@@ -39,7 +39,7 @@
         <path class="area" d="M0,22
           {% for d, n in ms %}{% set x = loop.index0 * w %}{% set y = 22 - (n / mm) * 18 %}{{ ' L%.2f,%.2f'|format(x, y) }}{% endfor %}
           L64,22 Z" />
-        <path d="M0,{{ '%.2f'|format(22 - (ms[0][1] / mm) * 18) }}
+        <path fill="none" d="M0,{{ '%.2f'|format(22 - (ms[0][1] / mm) * 18) }}
           {% for d, n in ms[1:] %}{% set x = loop.index0 * w + w %}{% set y = 22 - (n / mm) * 18 %}{{ ' L%.2f,%.2f'|format(x, y) }}{% endfor %}" />
         <circle class="dot" cx="64" cy="{{ '%.2f'|format(22 - (ms[-1][1] / mm) * 18) }}" r="1.6" />
       {% endif %}
@@ -50,14 +50,14 @@
   </div>
 
   <div class="fig-stat">
-    <svg class="micro" viewBox="0 0 64 22" preserveAspectRatio="none" aria-hidden="true">
+    <svg class="micro" width="60" height="22" viewBox="0 0 64 22" preserveAspectRatio="none" aria-hidden="true">
       {% if per_day|length >= 2 %}
         {% set mm = (per_day|map(attribute=1)|max) or 1 %}
         {% set w = 64.0 / ((per_day|length) - 1) %}
         <path class="area" d="M0,22
           {% for d, n in per_day %}{% set x = loop.index0 * w %}{% set y = 22 - (n / mm) * 18 %}{{ ' L%.2f,%.2f'|format(x, y) }}{% endfor %}
           L64,22 Z" />
-        <path d="M0,{{ '%.2f'|format(22 - (per_day[0][1] / mm) * 18) }}
+        <path fill="none" d="M0,{{ '%.2f'|format(22 - (per_day[0][1] / mm) * 18) }}
           {% for d, n in per_day[1:] %}{% set x = loop.index0 * w + w %}{% set y = 22 - (n / mm) * 18 %}{{ ' L%.2f,%.2f'|format(x, y) }}{% endfor %}" />
         <circle class="dot" cx="64" cy="{{ '%.2f'|format(22 - (per_day[-1][1] / mm) * 18) }}" r="1.6" />
       {% endif %}
@@ -76,14 +76,14 @@
   </div>
 
   <div class="fig-stat">
-    <svg class="micro" viewBox="0 0 64 22" preserveAspectRatio="none" aria-hidden="true">
+    <svg class="micro" width="60" height="22" viewBox="0 0 64 22" preserveAspectRatio="none" aria-hidden="true">
       {% if top_role_7d|length >= 2 %}
         {% set mm = (top_role_7d|map(attribute=1)|max) or 1 %}
         {% set w = 64.0 / ((top_role_7d|length) - 1) %}
         <path class="area" d="M0,22
           {% for d, n in top_role_7d %}{% set x = loop.index0 * w %}{% set y = 22 - (n / mm) * 18 %}{{ ' L%.2f,%.2f'|format(x, y) }}{% endfor %}
           L64,22 Z" />
-        <path d="M0,{{ '%.2f'|format(22 - (top_role_7d[0][1] / mm) * 18) }}
+        <path fill="none" d="M0,{{ '%.2f'|format(22 - (top_role_7d[0][1] / mm) * 18) }}
           {% for d, n in top_role_7d[1:] %}{% set x = loop.index0 * w + w %}{% set y = 22 - (n / mm) * 18 %}{{ ' L%.2f,%.2f'|format(x, y) }}{% endfor %}" />
         <circle class="dot" cx="64" cy="{{ '%.2f'|format(22 - (top_role_7d[-1][1] / mm) * 18) }}" r="1.6" />
       {% endif %}
@@ -141,7 +141,7 @@
             <path class="area" d="M{{ '%.2f'|format(pad_l) }},{{ ch - pad_b }}
               {% for d, c in series %}{% set x = pad_l + (loop.index0 * step) + (step / 2) %}{% set y = pad_t + (1 - (c / max_n)) * plot_h %}{{ ' L%.2f,%.2f'|format(x, y) }}{% endfor %}
               L{{ '%.2f'|format(pad_l + plot_w) }},{{ ch - pad_b }} Z" />
-            <path class="line" d="M{{ '%.2f'|format(pad_l + (step / 2)) }},{{ '%.2f'|format(pad_t + (1 - (series[0][1] / max_n)) * plot_h) }}
+            <path class="line" fill="none" d="M{{ '%.2f'|format(pad_l + (step / 2)) }},{{ '%.2f'|format(pad_t + (1 - (series[0][1] / max_n)) * plot_h) }}
               {% for d, c in series[1:] %}{% set x = pad_l + (loop.index0 * step) + (step / 2) %}{% set y = pad_t + (1 - (c / max_n)) * plot_h %}{{ ' L%.2f,%.2f'|format(x, y) }}{% endfor %}" />
             {% for d, c in series %}
               {% set x = pad_l + (loop.index0 * step) + (step / 2) %}
