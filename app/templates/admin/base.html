@@ -149,6 +149,6 @@
     </div>
   </div>
 
-  <script src="{{ request.url_for('static', path='js/admin.min.js') }}" defer></script>
+  <script src="{{ request.url_for('static', path='js/admin.min.js') }}?v={{ asset_v }}" defer></script>
 </body>
 </html>

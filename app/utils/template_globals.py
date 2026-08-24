@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 
 def install_template_globals(templates) -> None:
@@ -9,14 +10,24 @@ def install_template_globals(templates) -> None:
     gets the same globals so any template anywhere can call them.
 
     SSOT invariants this preserves:
-      - `asset_v`         → CSS/JS cache-bust (env-driven)
+      - `asset_v`         → CSS/JS cache-bust (env + content mtime)
       - `plan_summary(u)` → plan-state to template (single source of truth)
       - `compute_completion(u)` → profile-completion numbers (single source)
       - `nav_user(request)` → top-nav user object (single source)
     """
-    templates.env.globals["asset_v"] = (
+    sha = (
         os.getenv("RENDER_GIT_COMMIT") or os.getenv("GIT_COMMIT") or "dev"
     )[:8]
+
+    css_mtime = "0"
+    css_path = Path(__file__).resolve().parent.parent / "static" / "css" / "main.css"
+    if css_path.exists():
+        try:
+            css_mtime = str(int(css_path.stat().st_mtime))
+        except OSError:
+            css_mtime = "0"
+
+    templates.env.globals["asset_v"] = f"{sha}-{css_mtime}"
 
     from app.services.billing import plan_summary as _plan_summary
     from app.services.user_auth import compute_completion as _compute_completion

@@ -75,7 +75,7 @@
                 —
               {% endif %}
             </td>
-            <td class="mono">{{ (r['session_id'][:10] + '…') if r['session_id'] else '—' }}</td>
+            <td class="mono">{{ (r['session_id'][:8] + '…') if r['session_id'] else '—' }}</td>
           </tr>
         {% endfor %}
       </tbody>

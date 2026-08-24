@@ -114,6 +114,8 @@ class OriginCheckMiddleware(BaseHTTPMiddleware):
             "/api/waitlist/join",
             "/admin/login",
             "/admin/logout",
+            "/admin/users/grant",
+            "/admin/indexnow",
             "/signup",
             "/login",
             "/logout",
@@ -131,6 +133,12 @@ class OriginCheckMiddleware(BaseHTTPMiddleware):
         )
         self.protected_prefixes = (
             "/admin/signups/",
+            "/admin/users/revoke-grant",
+            "/admin/pending-grants/revoke",
+            "/admin/pending-grants/resend",
+            "/admin/fonts/approve",
+            "/admin/fonts/reject",
+            "/admin/templates/toggle",
         )
         self.trust_internal_token = (trust_internal_token or os.getenv("INTERNAL_TRUST_TOKEN") or "").strip()
 

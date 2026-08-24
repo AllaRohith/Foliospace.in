@@ -46,8 +46,10 @@ def _user_agent(request: Request) -> str:
     return (request.headers.get("user-agent", "") or "")[:512]
 
 
-def verify_password(plain: str) -> bool:
+def verify_password(plain: str, request_ip: str | None = None) -> bool:
     if not ADMIN_PASSWORD_HASH or not plain:
+        return False
+    if request_ip and is_locked_out(request_ip):
         return False
     try:
         return bcrypt.checkpw(plain.encode("utf-8"), ADMIN_PASSWORD_HASH.encode("utf-8"))

@@ -93,6 +93,15 @@ def _anonymize_ip(ip: str | None) -> str:
     return ip[: ip.rfind(".") + 1] + "0" if "." in ip else "0.0.0.0"
 
 
+def _mask_email(email: str | None) -> str:
+    if not email or "@" not in email:
+        return email or ""
+    local, domain = email.rsplit("@", 1)
+    if len(local) <= 2:
+        return f"{local[:1]}***@{domain}"
+    return f"{local[:2]}***@{domain}"
+
+
 def _no_cache(response: Response) -> Response:
     response.headers["Cache-Control"] = "private, no-store"
     response.headers["Pragma"] = "no-cache"
@@ -137,7 +146,7 @@ async def login_submit(
         return RedirectResponse("/admin/login?locked=1", status_code=303)
     ok = False
     try:
-        ok = admin_auth.verify_password(sanitized_pw)
+        ok = admin_auth.verify_password(sanitized_pw, request_ip=ip)
     finally:
         admin_auth.record_login_attempt(ip, ok)
     if not ok:
@@ -275,7 +284,10 @@ async def dashboard(request: Request):
                          LIMIT 6
                         """
                     )
-                    recent_audit = list(cur.fetchall())
+                    recent_audit = [
+                        {**dict(r), "ip": _anonymize_ip(r["ip"])}
+                        for r in cur.fetchall()
+                    ]
                     cur.execute("SELECT count(*) AS n FROM admin_audit_log")
                     audit_total = int((cur.fetchone() or {}).get("n") or 0)
                 conn.commit()
@@ -555,6 +567,7 @@ async def signup_detail(signup_id: int, request: Request):
 
 
 @router.post("/signups/{signup_id}/delete")
+@limiter.limit("20/minute")
 async def signup_delete(signup_id: int, request: Request):
     guard = _gate(request)
     if isinstance(guard, RedirectResponse):
@@ -636,7 +649,10 @@ async def audit_log(request: Request):
                         """,
                         [*params, PAGE_SIZE, offset],
                     )
-                    rows = list(cur.fetchall())
+                    rows = [
+                        {**dict(r), "ip": _anonymize_ip(r["ip"])}
+                        for r in cur.fetchall()
+                    ]
                     cur.execute(
                         "SELECT DISTINCT action FROM admin_audit_log ORDER BY action"
                     )
@@ -997,10 +1013,11 @@ async def grants_grant(request: Request, background: BackgroundTasks):
                 request,
                 sid,
                 "grant.pending.create",
-                target=target_email,
+                target=_mask_email(target_email),
                 metadata={
                     "expires_at": expires_at.isoformat() if expires_at else None,
                     "reason": reason,
+                    "email": _mask_email(target_email),
                 },
             )
 
@@ -1069,7 +1086,7 @@ async def grants_grant(request: Request, background: BackgroundTasks):
         metadata={
             "expires_at": expires_at.isoformat() if expires_at else None,
             "reason": reason,
-            "email": target_email,
+            "email": _mask_email(target_email),
         },
     )
     return RedirectResponse(f"/admin/grants?msg=granted:{duration}", status_code=303)
@@ -1136,7 +1153,7 @@ async def pending_grants_resend(grant_id: str, request: Request, background: Bac
 
     admin_auth.audit(
         request, sid, "grant.pending.resend",
-        target=gid, metadata={"pending_id": int(gid), "email": email},
+        target=gid, metadata={"pending_id": int(gid), "email": _mask_email(email)},
     )
     return RedirectResponse("/admin/grants?msg=pending-resent", status_code=303)
 
@@ -1198,7 +1215,7 @@ async def grants_revoke(user_id: str, request: Request):
         sid,
         "grant.revoke",
         target=uid,
-        metadata={"reason": revoke_reason, "email": target_email},
+        metadata={"reason": revoke_reason, "email": _mask_email(target_email)},
     )
     return RedirectResponse("/admin/grants?msg=revoked", status_code=303)
 
