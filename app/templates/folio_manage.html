@@ -134,6 +134,22 @@
                       <button type="button" class="fm-avatar-btn fm-avatar-btn-quiet" data-fm-avatar-remove>Remove</button>
                     {% endif %}
                   </div>
+                  {% if user.avatar_provider %}
+                    <div class="fm-avatar-source">
+                      {% set provider_label = {
+                        'linkedin': 'LinkedIn',
+                        'gravatar': 'Gravatar',
+                        'cloudinary': 'your upload',
+                        'manual': 'manual',
+                      }.get(user.avatar_provider, user.avatar_provider) %}
+                      Source: <strong>{{ provider_label }}</strong>
+                      {% if user.avatar_provider == 'linkedin' %}
+                        · refreshes on every LinkedIn sync
+                      {% elif user.avatar_provider == 'gravatar' %}
+                        · refreshes on next email-verify
+                      {% endif %}
+                    </div>
+                  {% endif %}
                 </div>
               {% else %}
                 <label class="fm-avatar-dropzone" data-fm-avatar-dropzone for="fm-avatar-input">

@@ -158,4 +158,54 @@ def sync_basic_profile(user_id: str) -> dict:
                     (payload["headline"][:60], user_id),
                 )
         conn.commit()
-    return {"ok": True, "payload": payload}
+    avatar_mirror = _mirror_avatar(user_id, payload.get("picture", ""))
+    result = {"ok": True, "payload": payload}
+    if avatar_mirror is not None:
+        result["avatar_mirror"] = avatar_mirror
+    return result
+
+
+def _mirror_avatar(user_id: str, picture_url: str) -> dict | None:
+    if not picture_url or not picture_url.lower().startswith(("http://", "https://")):
+        return None
+    from app.services.user_auth import _connect as _uac
+    with _uac() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT avatar_provider, avatar_public_id FROM users WHERE id = %s",
+                (user_id,),
+            )
+            row = cur.fetchone()
+            if not row:
+                return None
+            current_provider = (row["avatar_provider"] or "").strip().lower()
+            current_public_id = (row["avatar_public_id"] or "").strip()
+            if current_provider not in ("", "linkedin"):
+                return {"skipped": True, "reason": f"provider={current_provider or 'none'}"}
+    from app.services import cloudinary_svc
+    upload_res = cloudinary_svc.upload_remote(picture_url, user_id, kind="image")
+    if not upload_res or not upload_res.get("url"):
+        return {"skipped": True, "reason": "upload-failed"}
+    new_url = upload_res["url"]
+    new_public_id = upload_res["public_id"]
+    with _uac() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE users
+                   SET avatar_url = %s,
+                       avatar_public_id = %s,
+                       avatar_provider = 'linkedin',
+                       updated_at = NOW()
+                 WHERE id = %s
+                """,
+                (new_url, new_public_id, user_id),
+            )
+        conn.commit()
+    if current_public_id and current_public_id != new_public_id:
+        try:
+            from app.services import cloudinary_svc as _cs
+            _cs.destroy_avatar(current_public_id)
+        except Exception:
+            pass
+    return {"ok": True, "url": new_url, "public_id": new_public_id}

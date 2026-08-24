@@ -1,6 +1,7 @@
 import logging
 import os
 import time
+from urllib.parse import urlparse
 
 import cloudinary
 import cloudinary.uploader
@@ -95,3 +96,50 @@ def destroy_avatar(public_id: str, resource_type: str = "image") -> bool:
     except Exception as e:
         logger.exception("cloudinary destroy failed for %s: %s", public_id, e)
         return False
+
+
+_ALLOWED_REMOTE_HOSTS = (
+    "media.licdn.com",
+    "media-exp1.licdn.com",
+    "media-exp2.licdn.com",
+    "static.licdn.com",
+    "avatars.githubusercontent.com",
+    "raw.githubusercontent.com",
+    "www.gravatar.com",
+    "secure.gravatar.com",
+)
+
+
+def upload_remote(url: str, user_id: str, kind: str = "image") -> dict | None:
+    if not url or not user_id:
+        return None
+    try:
+        host = (urlparse(url).hostname or "").lower()
+    except ValueError:
+        return None
+    if not host or not any(host == h or host.endswith("." + h) for h in _ALLOWED_REMOTE_HOSTS):
+        logger.warning("upload_remote rejected non-allowlisted host: %s", host)
+        return None
+    if not _configured():
+        logger.warning("upload_remote called but Cloudinary not configured")
+        return None
+    if not _cloudinary_config():
+        return None
+    folder = f"{VIDEO_FOLDER}/{user_id}" if kind == "video" else f"{FOLDER}/{user_id}"
+    preset = UPLOAD_PRESET_VIDEO or UPLOAD_PRESET if kind == "video" else UPLOAD_PRESET
+    try:
+        result = cloudinary.uploader.upload(
+            url,
+            folder=folder,
+            overwrite=True,
+            invalidate=True,
+            resource_type="video" if kind == "video" else "image",
+            upload_preset=preset,
+        )
+        return {
+            "url": result.get("secure_url") or result.get("url"),
+            "public_id": result.get("public_id"),
+        }
+    except Exception as e:
+        logger.exception("upload_remote failed for %s -> %s: %s", user_id, host, e)
+        return None

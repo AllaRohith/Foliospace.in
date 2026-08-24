@@ -198,6 +198,48 @@
     </div>
 
     <div class="legal-section">
+      <h2>What <em>we collect once you sign up.</em></h2>
+      <p>If you create a FolioSpace account, we additionally collect and store:</p>
+      <ul>
+        <li><strong>Account basics</strong> — display name, email, slug, phone (optional), role (optional), bio (optional), public/private flag.</li>
+        <li><strong>Avatar</strong> — uploaded photos are stored on Cloudinary (US). If you link LinkedIn, we copy your LinkedIn profile photo to Cloudinary on every sync and label it with <code>avatar_provider='linkedin'</code>. If you unlink LinkedIn, the photo is removed from Cloudinary and <code>avatar_provider</code> is cleared. If you uploaded the photo yourself (<code>avatar_provider='cloudinary'</code> or <code>'manual'</code>), unlinking LinkedIn will not delete it.</li>
+        <li><strong>LinkedIn (OAuth)</strong> — when you click <em>Connect LinkedIn</em>, we request the <code>openid profile email</code> scope only. Two LinkedIn endpoints are then called with your bearer token:
+          <ul>
+            <li><code>GET https://api.linkedin.com/v2/userinfo</code> — OpenID Connect userinfo</li>
+            <li><code>GET https://api.linkedin.com/v2/me?projection=(id,localizedFirstName,localizedLastName,localizedHeadline,vanityName,profilePicture(displayImage~:playableStreams))</code> — basic profile projection</li>
+          </ul>
+          From those endpoints we capture the following fields and store them in our database:
+          <ul>
+            <li><code>sub</code> — your LinkedIn user ID (stored as <code>social_accounts.provider_uid</code>)</li>
+            <li><code>email</code> — your primary LinkedIn email (stored as <code>social_accounts.email</code>)</li>
+            <li><code>name</code>, <code>given_name</code>, <code>family_name</code> — from <code>/v2/userinfo</code>; <code>name</code> is copied to <code>users.display_name</code> only on your first signup</li>
+            <li><code>email_verified</code> — boolean flag</li>
+            <li><code>locale</code> (e.g. <code>en_IN</code>) and <code>zoneinfo</code> (e.g. <code>Asia/Kolkata</code>) — language and timezone</li>
+            <li><code>picture</code> — your LinkedIn profile photo URL; we download this and re-upload it to Cloudinary as your folio avatar (labelled <code>avatar_provider='linkedin'</code>)</li>
+            <li><code>localizedFirstName</code>, <code>localizedLastName</code>, <code>localizedHeadline</code> — your first name, last name, and professional headline</li>
+            <li><code>vanityName</code> — your LinkedIn vanity slug, used to derive your public profile URL (<code>https://www.linkedin.com/in/&lt;vanityName&gt;</code>)</li>
+            <li><code>access_token</code>, <code>scope</code>, <code>expires_at</code>, <code>last_synced_at</code> — stored on the <code>social_accounts</code> row; the access token is <strong>Fernet-encrypted at rest</strong></li>
+          </ul>
+          As a one-shot back-fill (only when your <code>users.role</code> field is empty), your LinkedIn headline is also copied into <code>users.role</code> and truncated to 60 characters. We do <strong>not</strong> capture, and the OAuth scope does not allow us to capture, any of the following:
+          <ul>
+            <li>Work experience / positions history</li>
+            <li>Education history</li>
+            <li>Skills, endorsements, recommendations</li>
+            <li>Connections, followers, contact list</li>
+            <li>Posts, articles, comments, shares, reactions</li>
+            <li>Messages or InMail</li>
+            <li>Job applications or recruiter activity</li>
+            <li>Advertising data, audience insights, conversion tracking</li>
+            <li>Ad targereting / matched audiences</li>
+          </ul>
+          The features page previously mentioned experience and education; those fields are <strong>not</strong> collected today and would require upgrading to a paid LinkedIn Marketing API tier if ever added.</li>
+        <li><strong>GitHub (OAuth)</strong> — when you click <em>Connect GitHub</em>, we fetch your public repos, contribution graph, and basic profile (login, name, bio, avatar URL) via the public REST API. Your access token is Fernet-encrypted at rest. We do <strong>not</strong> read your private repos, gists, or issues.</li>
+        <li><strong>Gravatar enrichment</strong> — once per email verification, we look up <code>api.gravatar.com</code> using a SHA-256 hash of your email and copy any <em>job title</em>, <em>bio</em>, and <em>linkedin_url</em> you have published there into your FolioSpace profile — only filling fields that are currently empty.</li>
+      </ul>
+      <p>You can <strong>disconnect any provider at any time</strong> from <code>/&lt;your-slug&gt;/manage</code>. Disconnecting removes the OAuth identity and (for LinkedIn) the mirrored avatar; data you copied into your own profile (name, role, bio, phone, linkedin_url) is kept — it's yours. Disconnecting does not call the provider's revocation endpoint; you can also revoke FolioSpace from <a href="https://www.linkedin.com/psettings/permitted-services">LinkedIn</a> or <a href="https://github.com/settings/applications">GitHub</a> directly.</p>
+    </div>
+
+    <div class="legal-section">
       <h2>How <em>long we keep it.</em></h2>
       <p>If you joined the waitlist but never signed up for an account, we plan to delete waitlist-only emails <strong>90 days after public launch</strong>. We'll send a final reminder before deletion. If we miss the 90-day mark for any reason, you can still ask us to delete your record at any time using the process in <em>Your rights</em> above — your email is <strong>never</strong> used for marketing during this period.</p>
     </div>

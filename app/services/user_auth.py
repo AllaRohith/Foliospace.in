@@ -784,7 +784,31 @@ def unlink_social_account(user_id: str | UUID, provider: str) -> bool:
                     (uid, pid),
                 )
                 deleted = cur.rowcount
+                avatar_public_id_to_destroy = None
+                if pid == "linkedin":
+                    cur.execute(
+                        """
+                        UPDATE users
+                           SET avatar_url = NULL,
+                               avatar_public_id = NULL,
+                               avatar_provider = NULL,
+                               updated_at = NOW()
+                         WHERE id = %s
+                           AND avatar_provider = 'linkedin'
+                        RETURNING avatar_public_id
+                        """,
+                        (uid,),
+                    )
+                    row = cur.fetchone()
+                    if row and row.get("avatar_public_id"):
+                        avatar_public_id_to_destroy = row["avatar_public_id"]
             conn.commit()
+        if avatar_public_id_to_destroy:
+            try:
+                from app.services import cloudinary_svc as _cs
+                _cs.destroy_avatar(avatar_public_id_to_destroy)
+            except Exception:
+                logger.warning("cloudinary destroy failed on linkedin avatar unlink: %s", avatar_public_id_to_destroy)
         return deleted > 0
     except (psycopg.Error, ValueError, TypeError) as e:
         logger.exception("unlink_social_account failed: %s", e)
@@ -866,6 +890,7 @@ def clear_avatar(user_id) -> dict | None:
                     UPDATE users
                        SET avatar_url = NULL,
                            avatar_public_id = NULL,
+                           avatar_provider = NULL,
                            updated_at = NOW()
                      WHERE id = %s AND deleted_at IS NULL
                     RETURNING id, slug, avatar_public_id
