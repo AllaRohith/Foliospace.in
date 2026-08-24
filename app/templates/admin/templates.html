@@ -24,9 +24,7 @@
 {% if flash %}
   <div class="flash flash-ok">✓ Updated — <code>{{ flash }}</code> visibility flipped.</div>
 {% endif %}
-{% if err == 'default-locked' %}
-  <div class="flash flash-warn">Template #1 (default) can't be turned off — it's the safe fallback for every user.</div>
-{% elif err == 'not-found' %}
+{% if err == 'not-found' %}
   <div class="flash flash-warn">That template doesn't exist in the catalog.</div>
 {% elif err == 'missing-id' %}
   <div class="flash flash-warn">Missing template id.</div>
@@ -59,7 +57,6 @@
       <div class="card-body">
         <p class="template-desc">{{ t.description or '—' }}</p>
         <div class="template-flags">
-          {% if t.is_default %}<span class="badge badge-default">Default</span>{% endif %}
           {% if t.is_pro_only %}
             <span class="badge badge-pro">Pro-only</span>
           {% else %}
@@ -75,8 +72,7 @@
 
       <form class="card-foot" method="post" action="/admin/templates/{{ t.id }}/toggle">
         <div class="card-foot-row">
-          <button type="submit" class="btn btn-toggle {{ 'is-on' if t.is_visible else 'is-off' }}"
-                  {% if t.is_default %}disabled title="Default template can't be hidden"{% endif %}>
+          <button type="submit" class="btn btn-toggle {{ 'is-on' if t.is_visible else 'is-off' }}">
             {% if t.is_visible %}Hide from users{% else %}Show to users{% endif %}
           </button>
           <span class="card-foot-note">
@@ -94,7 +90,7 @@
 
 {% if items|length == 0 %}
   <div class="empty-state">
-    No templates yet. Run <code>scripts/templates.sql</code> against Neon to seed the default template (#1).
+    No templates yet. Run <code>scripts/templates.sql</code> against Neon to seed the role-based catalog.
   </div>
 {% endif %}
 

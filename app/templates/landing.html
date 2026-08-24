@@ -48,17 +48,14 @@
         "url": "https://foliospace.in/pricing"
       },
       "featureList": [
-        "One-page portfolio",
-        "WhatsApp link previews",
-        "Dynamic Open Graph image",
-        "PDF export",
-        "Contact form to WhatsApp",
-        "Passkey sign-in",
-        "30-day visit analytics",
+        "Spotlight card (pin a project to the top)",
+        "Custom fonts",
+        "Unlimited links (Free is capped at 10)",
+        "Refer 10 friends to lock the Year-1 price",
         "UPI AutoPay billing"
       ],
       "creator": { "@id": "https://foliospace.in/#org" }
-    }
+    },
     {
       "@type": "WebSite",
       "@id": "https://foliospace.in/#site",
@@ -98,7 +95,7 @@
       "name": "Is FolioSpace free?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. The Solo tier is free forever — foliospace.in/your-name, share QR, PDF export, contact form to WhatsApp, passkey sign-in. Pro adds Spotlight card (pin a project to the top), custom fonts, unlimited links (Free is capped at 10), and the ₹{{ PRO_YEAR1_INR }}/yr Year-1 launch price. The Made with FolioSpace badge stays on both tiers."
+        "text": "Yes. The Solo tier is free forever — foliospace.in/your-name, share QR, PDF export, contact form to WhatsApp, passkey sign-in. Pro adds Spotlight card (pin a project to the top), custom fonts, unlimited links (Free is capped at 10), and the ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr Year-1 launch price. The Made with FolioSpace badge stays on both tiers."
       }
     },
     {
@@ -510,7 +507,7 @@
 
               <button type="submit" class="btn btn-primary magnetic signup-dossier-cta">Claim my spot →</button>
               <p class="form-msg" id="form-msg" role="status" aria-live="polite"></p>
-              <div class="signup-dossier-microcopy" id="signup-microcopy">→ 8 already in · no spam · delete on request</div>
+              <div class="signup-dossier-microcopy" id="signup-microcopy">→ {{ waitlist_count }} already in · no spam · delete on request</div>
             </form>
             {% endif %}
           </div>
@@ -595,7 +592,7 @@
           <span class="ticker-head-dot" aria-hidden="true"></span>
           <span class="ticker-head-eyebrow">FolioSpace Newsroom</span>
         </span>
-        <span class="ticker-head-c">Sept 2026 <span class="ticker-head-times">·</span> Live</span>
+        <span class="ticker-head-c">{% if launched %}Sept 2026 <span class="ticker-head-times">·</span> Live{% else %}Sept 2026 <span class="ticker-head-times">·</span> {{ launch_date_label() }}{% endif %}</span>
         <span class="ticker-head-r">Latest stories</span>
       </div>
       <div class="ticker-rail">
@@ -797,7 +794,7 @@
               <li><span class="receipt-bullet">›</span>Passkey sign-in</li>
             </ul>
             <p class="receipt-fineprint">No Spotlight card, no custom fonts, 10-link cap. Upgrade for everything.</p>
-            <a href="#join" class="btn btn-ghost receipt-cta" aria-disabled="true" tabindex="-1">Start free <span class="receipt-cta-note">— coming soon</span></a>
+            {% if launched %}<a href="/signup" class="btn btn-ghost receipt-cta">Start free →</a>{% else %}<a href="#join" class="btn btn-ghost receipt-cta" aria-disabled="true" tabindex="-1">Start free <span class="receipt-cta-note">— coming soon</span></a>{% endif %}
             <span class="receipt-perf" aria-hidden="true"></span>
           </article>
 
@@ -825,7 +822,7 @@
               <li><span class="receipt-bullet">›</span>Refer 10 friends · Year-1 price locked forever</li>
               <li><span class="receipt-bullet">›</span>Everything in Solo, on every device</li>
             </ul>
-            <a href="/dashboard/billing" class="btn btn-primary receipt-cta" aria-disabled="true" tabindex="-1">Activate at ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr — save {{ annual_savings_percent() }}% <span class="receipt-cta-note">— coming soon</span></a>
+            {% if launched %}<a href="/dashboard/billing" class="btn btn-primary receipt-cta">Activate at ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr — save {{ annual_savings_percent() }}% →</a>{% else %}<a href="/dashboard/billing" class="btn btn-primary receipt-cta" aria-disabled="true" tabindex="-1">Activate at ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr — save {{ annual_savings_percent() }}% <span class="receipt-cta-note">— coming soon</span></a>{% endif %}
             <span class="receipt-perf" aria-hidden="true"></span>
           </article>
         </div>
@@ -904,8 +901,8 @@
               <div class="h-avatar">D</div>
               <span class="h-role">Example Folio · Developer</span>
               <h3>Repos, talks, OSS.</h3>
-              <p>Repos, talks, OSS — in one place. GitHub import on the way.</p>
-              <div class="h-foot"><span class="badge">Coming soon</span></div>
+              <p>Repos, talks, OSS — in one place. Pull your GitHub profile in two taps.</p>
+              <div class="h-foot"><span class="badge">Pull repos →</span></div>
             </article>
             <article class="h-card">
               <div class="h-avatar">P</div>
@@ -948,8 +945,8 @@
               <div class="h-avatar">D</div>
               <span class="h-role">Example Folio · Developer</span>
               <h3>Repos, talks, OSS.</h3>
-              <p>Repos, talks, OSS — in one place. GitHub import on the way.</p>
-              <div class="h-foot"><span class="badge">Coming soon</span></div>
+              <p>Repos, talks, OSS — in one place. Pull your GitHub profile in two taps.</p>
+              <div class="h-foot"><span class="badge">Pull repos →</span></div>
             </article>
             <article class="h-card">
               <div class="h-avatar">P</div>
@@ -993,7 +990,7 @@
               <span class="faq-icon" aria-hidden="true"></span>
             </summary>
             <div class="faq-body">
-              <p>It's built to. Pages are intentionally lightweight, with lazy-loaded images and no heavy client-side framework. We measure Core Web Vitals on each release — actual numbers live on /perf (coming soon).</p>
+              <p>It's built to. Pages are intentionally lightweight, with lazy-loaded images and no heavy client-side framework. We measure Core Web Vitals on each release — actual numbers live on <a href="/stats">/stats</a>.</p>
             </div>
           </details>
         </div>
@@ -1012,14 +1009,14 @@
             <span class="h-role">For builders</span>
             <h3>GitHub.</h3>
             <p>Pinned repos, contribution graph, languages. Paste a username.</p>
-            <div class="h-foot"><span class="badge outline">In beta</span></div>
+            <div class="h-foot"><span class="badge outline">Import →</span></div>
           </article>
           <article class="h-card reveal">
             <div class="h-avatar">L</div>
             <span class="h-role">For everyone</span>
             <h3>LinkedIn.</h3>
             <p>Experience, education, certs — the whole profile. Auto-refreshing.</p>
-            <div class="h-foot"><span class="badge outline">In beta</span></div>
+            <div class="h-foot"><span class="badge outline">Import →</span></div>
           </article>
         </div>
 
@@ -1133,8 +1130,8 @@
               <li class="ticket-perk" style="--i:1">
                 <span class="ticket-perk-num">01</span>
                 <div class="ticket-perk-body">
-                  <strong>Year-1 launch offer at ₹{{ "{:,}".format(PRO_YEAR1_INR) }}.</strong>
-                  <span>Full Pro features on signup — no card, no UPI mandate, no charge.</span>
+                  <strong>Year-1 launch offer at ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr.</strong>
+                  <span>Locked in for the first year — charged via UPI AutoPay, cancel any time.</span>
                 </div>
               </li>
               <li class="ticket-perk" style="--i:2">

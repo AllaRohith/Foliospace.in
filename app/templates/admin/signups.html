@@ -53,10 +53,10 @@
 </form>
 
 <div class="chips">
-  <a href="/admin/signups?q={{ q }}&from={{ date_from }}&to={{ date_to }}" class="chip {{ '' if role else 'is-active' }}">All</a>
+  <a href="/admin/signups?q={{ q }}&from={{ date_from }}&to={{ date_to }}&page=1" class="chip {{ '' if role else 'is-active' }}">All</a>
   {% for r in role_values %}
     <a
-      href="/admin/signups?role={{ r }}&q={{ q }}&from={{ date_from }}&to={{ date_to }}"
+      href="/admin/signups?role={{ r }}&q={{ q }}&from={{ date_from }}&to={{ date_to }}&page=1"
       class="chip {{ 'is-active' if role == r else '' }}"
     >{{ r|capitalize }}</a>
   {% endfor %}

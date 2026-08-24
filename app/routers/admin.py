@@ -180,6 +180,7 @@ async def dashboard(request: Request):
     recent = []
     top_role_7d = []
     recent_audit = []
+    audit_total = 0
     if DATABASE_URL:
         try:
             with _connect() as conn:
@@ -275,6 +276,8 @@ async def dashboard(request: Request):
                         """
                     )
                     recent_audit = list(cur.fetchall())
+                    cur.execute("SELECT count(*) AS n FROM admin_audit_log")
+                    audit_total = int((cur.fetchone() or {}).get("n") or 0)
                 conn.commit()
         except psycopg.Error as e:
             logger.exception("dashboard query failed: %s", e)
@@ -316,6 +319,7 @@ async def dashboard(request: Request):
             "top_role_count": top_role_count,
             "top_role_7d": top_role_7d,
             "recent_audit": recent_audit,
+            "audit_total": audit_total,
             "cold_open": cold_open,
             "role_values": ROLE_VALUES,
         },

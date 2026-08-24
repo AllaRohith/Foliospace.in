@@ -6,6 +6,7 @@
 {% block og_description %}{{ description }}{% endblock %}
 {% block twitter_title %}{{ page_title }}{% endblock %}
 {% block twitter_description %}{{ description }}{% endblock %}
+{% block canonical %}{{ canonical_path }}{% endblock %}
 
 {% block content %}
 {% include "partials/_nav.html" %}
@@ -34,6 +35,10 @@
     <p class="stats-foot" style="margin-top: 32px;">
       Last updated {{ updated }}. Methodology, sources, and corrections are listed inline above. Cite this page as: <em>FolioSpace Research &mdash; {{ eyebrow }}</em>, foliospace.in/research.
     </p>
+
+    <p class="stats-foot" style="margin-top: 8px;">
+      Related: <a href="/stats">/stats</a> &middot; <a href="/founder">/founder</a>.
+    </p>
   </div>
 </main>
 {% include "partials/_footer.html" %}
@@ -43,14 +48,14 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "ScholarlyArticle",
+  "@type": "Article",
   "headline": "{{ title|striptags }}",
   "description": "{{ description }}",
   "author": {"@type": "Organization", "name": "FolioSpace", "url": "https://foliospace.in"},
   "publisher": {"@type": "Organization", "name": "FolioSpace", "url": "https://foliospace.in"},
   "datePublished": "{{ date_published }}",
   "dateModified": "{{ date_modified }}",
-  "url": "https://foliospace.in/research",
+  "url": "{{ canonical_path }}",
   "inLanguage": "en-IN"
 }
 </script>

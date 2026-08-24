@@ -22,7 +22,7 @@
         <li>CSRF tokens on every state-changing form, session-bound and server-validated.</li>
         <li>Rate limits via <code>slowapi</code> on login, signup, forgot-password, reset, OAuth callbacks, webhooks, and admin login.</li>
         <li>Argon2/bcrypt password hashing via <code>passlib</code>; OAuth users have a NULL password_hash and are gated by require_user checks.</li>
-        <li>Server-side fetch of OG image URLs and avatars through a public-URL allow-list that rejects private IP ranges, embedded credentials, and non-http schemes. DNS is resolved at write time.</li>
+        <li>Server-side fetch of OG image URLs and avatars through a URL safety guard that rejects private IP ranges, embedded credentials, and non-http(s) schemes. DNS is resolved at write time.</li>
         <li>Webhook endpoints exempted from Origin checks but verified via HMAC-SHA256 (Cashfree).</li>
         <li>Database queries are parameterised — no string interpolation into SQL.</li>
       </ul>

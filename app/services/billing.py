@@ -25,6 +25,7 @@ from app.pricing import (
     PRO_YEAR2_INR,
     FREE_PRICE_INR,
     PRO_ANNUAL_INR,
+    PAYMENT_GRACE_DAYS,
 )
 
 logger = logging.getLogger(__name__)
@@ -764,7 +765,7 @@ def _on_subscription_halted(cur, payload: dict):
     )
     if user_id:
         cur.execute(
-            "UPDATE users SET plan_expires_at = NOW() + INTERVAL '7 days', "
+            f"UPDATE users SET plan_expires_at = NOW() + INTERVAL '{int(PAYMENT_GRACE_DAYS)} days', "
             "payment_failed_at = NOW(), updated_at = NOW() WHERE id = %s",
             (user_id,),
         )

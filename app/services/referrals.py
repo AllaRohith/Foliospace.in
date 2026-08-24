@@ -247,10 +247,42 @@ def evaluate_user_referrals(user_id: str) -> dict | None:
 
 def progress_for_user(user_id: str) -> dict:
     """Dashboard-friendly progress dict."""
-    count = count_referrals(user_id)
+    breakdown = referral_status_breakdown(user_id)
+    count = breakdown["active"]
     return {
         "active_count": count,
         "threshold": REFERRAL_THRESHOLD,
         "remaining": max(0, REFERRAL_THRESHOLD - count),
         "unlocked": count >= REFERRAL_THRESHOLD,
+        "pending_count": breakdown["pending"],
+        "verified_count": breakdown["verified"],
     }
+
+
+def referral_status_breakdown(user_id: str) -> dict:
+    """Pending + verified + active counts. All three statuses from the enum."""
+    if not DATABASE_URL:
+        return {"pending": 0, "verified": 0, "active": 0}
+    try:
+        uid = UUID(str(user_id))
+    except (ValueError, TypeError):
+        return {"pending": 0, "verified": 0, "active": 0}
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT status, COUNT(*) AS n FROM referrals "
+                    "WHERE referrer_id = %s GROUP BY status",
+                    (uid,),
+                )
+                rows = cur.fetchall() or []
+        out = {"pending": 0, "verified": 0, "active": 0}
+        for row in rows:
+            s = (row or {}).get("status")
+            n = int((row or {}).get("n", 0))
+            if s in out:
+                out[s] = n
+        return out
+    except psycopg.Error as e:
+        logger.exception("referral_status_breakdown failed: %s", e)
+        return {"pending": 0, "verified": 0, "active": 0}

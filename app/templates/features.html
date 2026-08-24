@@ -4,30 +4,14 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebPage",
-      "@id": "https://foliospace.in/features#webpage",
-      "url": "https://foliospace.in/features",
-      "name": "Features — FolioSpace",
-      "description": "Two integrations shipping next on FolioSpace — GitHub repos and contribution graph, LinkedIn profile import. Listed here honestly, not behind a waitlist.",
-      "isPartOf": { "@id": "https://foliospace.in/#site" },
-      "about": { "@id": "https://foliospace.in/features#roadmap" },
-      "inLanguage": "en-IN",
-      "dateModified": "2026-08-22"
-    },
-    {
-      "@type": "ItemList",
-      "@id": "https://foliospace.in/features#roadmap",
-      "name": "FolioSpace integration roadmap",
-      "itemListOrder": "https://schema.org/ItemListOrderAscending",
-      "numberOfItems": 2,
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "item": { "@type": "WebPage", "name": "GitHub integration", "url": "https://foliospace.in/features#github" } },
-        { "@type": "ListItem", "position": 2, "item": { "@type": "WebPage", "name": "LinkedIn integration", "url": "https://foliospace.in/features#linkedin" } }
-      ]
-    }
-  ]
+  "@type": "WebPage",
+  "@id": "https://foliospace.in/features#webpage",
+  "url": "https://foliospace.in/features",
+  "name": "Features — FolioSpace",
+  "description": "Everything shipped in FolioSpace today, plus what's queued for the next release.",
+  "isPartOf": { "@id": "https://foliospace.in/#site" },
+  "inLanguage": "en-IN",
+  "dateModified": "2026-08-24"
 }
 </script>
 {% endblock %}
@@ -39,43 +23,96 @@
     <section class="features-page-hero">
       <div class="container">
         <div class="features-pills" aria-label="Jump to feature">
-          <a href="#github" class="features-pill">GitHub integration</a>
-          <a href="#linkedin" class="features-pill">LinkedIn integration</a>
-          <a href="#features" class="features-pill">Full roadmap</a>
-          <a href="#features" class="features-pill">More on the way</a>
+          <a href="#shipped" class="features-pill">Shipped today</a>
+          <a href="#integrations" class="features-pill">Integrations</a>
+          <a href="#pro" class="features-pill">Pro adds</a>
+          <a href="#next" class="features-pill">Up next</a>
         </div>
-        <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page F1<span class="folio-meta-sep">/</span>The roadmap</p>
-        <h1 class="reveal">What's <em>building next.</em></h1>
-        <p class="features-page-lead reveal">Two integrations, when they ship. We're listing them here because you'd rather know what's coming than find out in a tweet. No waitlist for this — the page itself is the announcement.</p>
+        <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page F1<span class="folio-meta-sep">/</span>The features</p>
+        <h1 class="reveal">What's <em>shipped.</em></h1>
+        <p class="features-page-lead reveal">Every feature on this page works today. Anything queued is below — listed honestly, no countdown gimmicks.</p>
       </div>
     </section>
 
-    <section id="github" class="features-page-row">
+    <section id="shipped" class="features-page-row">
       <div class="container">
         <article class="who-dir-row">
           <div class="who-dir-num">/01</div>
-          <div class="who-dir-mark who-dir-mark--5" aria-hidden="true">G</div>
+          <div class="who-dir-mark" aria-hidden="true">↗</div>
           <div class="who-dir-body">
-            <h2 class="who-dir-title">GitHub.</h2>
-            <span class="who-dir-tag">Repos · contribution graph · pinned</span>
-            <p class="who-dir-desc">Paste a username, get your pinned repos, contribution graph, languages, and a clean project grid on your folio — auto-refreshing. You choose which repos are public and which stay private.</p>
-            <span class="badge outline">Coming soon</span>
+            <h2 class="who-dir-title">Share kit — QR, WhatsApp pre-fill, OG image.</h2>
+            <span class="who-dir-tag">Every folio · Free + Pro</span>
+            <p class="who-dir-desc">Every public folio gets a printable QR code, a pre-filled WhatsApp share message, and a dynamic Open Graph image that previews correctly on WhatsApp, LinkedIn, and X. Free and Pro both.</p>
+            <span class="badge">Live</span>
           </div>
           <span class="who-dir-arrow" aria-hidden="true">→</span>
         </article>
       </div>
     </section>
 
-    <section id="linkedin" class="features-page-row">
+    <section id="integrations" class="features-page-row">
       <div class="container">
         <article class="who-dir-row">
           <div class="who-dir-num">/02</div>
+          <div class="who-dir-mark who-dir-mark--5" aria-hidden="true">G</div>
+          <div class="who-dir-body">
+            <h2 class="who-dir-title">GitHub import.</h2>
+            <span class="who-dir-tag">Repos · contribution graph · languages</span>
+            <p class="who-dir-desc">Connect your GitHub account from <a href="/welcome">/welcome</a>. Pinned repos, 53-week contribution grid, top languages, and a clean project grid render on your folio. Refresh manually any time from <code>/{your-slug}/manage</code>. Private repos stay private.</p>
+            <span class="badge">Live</span>
+          </div>
+          <span class="who-dir-arrow" aria-hidden="true">→</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="features-page-row">
+      <div class="container">
+        <article class="who-dir-row">
+          <div class="who-dir-num">/03</div>
           <div class="who-dir-mark who-dir-mark--4" aria-hidden="true">L</div>
           <div class="who-dir-body">
-            <h2 class="who-dir-title">LinkedIn.</h2>
-            <span class="who-dir-tag">Experience · education · certs · everything</span>
-            <p class="who-dir-desc">Pull your full LinkedIn profile — every role, every company, every project, education, certifications, the works. Edits on LinkedIn reflect on your folio. The boring CV, automated — so you can write the interesting bits yourself.</p>
-            <span class="badge outline">Coming soon</span>
+            <h2 class="who-dir-title">LinkedIn import + AutoFill.</h2>
+            <span class="who-dir-tag">Experience · education · certs · AutoFill plugin</span>
+            <p class="who-dir-desc">Paste your public LinkedIn URL or install the LinkedIn AutoFill browser plugin to populate name, role, bio, experience, and education. Public profile only — we never ask for credentials.</p>
+            <span class="badge">Live</span>
+          </div>
+          <span class="who-dir-arrow" aria-hidden="true">→</span>
+        </article>
+      </div>
+    </section>
+
+    <section id="pro" class="features-page-row">
+      <div class="container">
+        <article class="who-dir-row">
+          <div class="who-dir-num">/04</div>
+          <div class="who-dir-mark who-dir-mark--1" aria-hidden="true">★</div>
+          <div class="who-dir-body">
+            <h2 class="who-dir-title">Pro-only additions.</h2>
+            <span class="who-dir-tag">What the ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr unlocks</span>
+            <p class="who-dir-desc">
+              <strong>Spotlight card</strong> — pin a project to the top of your folio.<br>
+              <strong>Custom fonts</strong> — upload your own typeface, get it approved by us within 48 hours.<br>
+              <strong>Unlimited links</strong> — Free is capped at 10 custom links.<br>
+              <strong>Referral lock-in</strong> — refer 10 verified friends and your Year-1 price stays locked forever.
+            </p>
+            <span class="badge outline">Pro</span>
+          </div>
+          <span class="who-dir-arrow" aria-hidden="true">→</span>
+        </article>
+      </div>
+    </section>
+
+    <section id="next" class="features-page-row">
+      <div class="container">
+        <article class="who-dir-row">
+          <div class="who-dir-num">/05</div>
+          <div class="who-dir-mark who-dir-mark--2" aria-hidden="true">→</div>
+          <div class="who-dir-body">
+            <h2 class="who-dir-title">Up next.</h2>
+            <span class="who-dir-tag">Queued · no ETA yet</span>
+            <p class="who-dir-desc">Custom domains (foliospace.in/yourname via your own domain), a multi-folio workspace for agencies, and a printable résumé export. Listed in order of demand — tell us which one matters at <a href="mailto:foliospace.in@gmail.com">foliospace.in@gmail.com</a>.</p>
+            <span class="badge outline">Queued</span>
           </div>
           <span class="who-dir-arrow" aria-hidden="true">→</span>
         </article>
@@ -84,7 +121,8 @@
 
     <section class="features-page-cta">
       <div class="container">
-        <p class="features-page-cta-line">Two integrations. Honest copy. No countdown gimmicks. When they ship, they'll be on this page, in plain English.</p>
+        <p class="features-page-cta-line">Five rows. No countdown. When something ships it moves from "Up next" to the top of this page.</p>
+        <a href="/signup" class="btn btn-primary">Claim your slug →</a>
         <a href="/" class="btn btn-ghost">← Back to FolioSpace</a>
       </div>
     </section>
