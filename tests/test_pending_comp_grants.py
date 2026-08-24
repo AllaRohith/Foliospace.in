@@ -15,6 +15,7 @@ Run from repo root:
     python3 -m unittest tests.test_pending_comp_grants
 """
 import unittest
+from datetime import datetime, timezone
 from unittest import mock
 
 from app.services import comp_grants as cg
@@ -388,6 +389,54 @@ class UserAuthHookTests(unittest.TestCase):
             except ValueError:
                 pass
         self.assertTrue(True)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Duration label formatting (months + years + forever)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class DurationLabelTests(unittest.TestCase):
+    def test_none_is_forever(self):
+        self.assertEqual(cg._duration_label(None), "forever")
+
+    def test_years_singular(self):
+        from datetime import timedelta
+        exp = datetime.now(timezone.utc) + timedelta(days=365)
+        self.assertEqual(cg._duration_label(exp), "1 year")
+
+    def test_years_plural(self):
+        from datetime import timedelta
+        exp = datetime.now(timezone.utc) + timedelta(days=365 * 2)
+        self.assertEqual(cg._duration_label(exp), "2 years")
+
+    def test_months_singular(self):
+        from datetime import timedelta
+        exp = datetime.now(timezone.utc) + timedelta(days=30)
+        self.assertEqual(cg._duration_label(exp), "1 month")
+
+    def test_months_plural_two(self):
+        from datetime import timedelta
+        exp = datetime.now(timezone.utc) + timedelta(days=60)
+        self.assertEqual(cg._duration_label(exp), "2 months")
+
+    def test_months_plural_three(self):
+        from datetime import timedelta
+        exp = datetime.now(timezone.utc) + timedelta(days=90)
+        self.assertEqual(cg._duration_label(exp), "3 months")
+
+    def test_months_plural_six(self):
+        from datetime import timedelta
+        exp = datetime.now(timezone.utc) + timedelta(days=180)
+        self.assertEqual(cg._duration_label(exp), "6 months")
+
+    def test_naive_datetime_treated_as_utc(self):
+        from datetime import timedelta
+        naive = datetime.now(timezone.utc) + timedelta(days=30)
+        naive = naive.replace(tzinfo=None)
+        self.assertEqual(cg._duration_label(naive), "1 month")
+
+    def test_non_datetime_returns_forever(self):
+        self.assertEqual(cg._duration_label("2027-01-01"), "forever")
 
 
 if __name__ == "__main__":

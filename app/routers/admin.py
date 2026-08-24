@@ -948,6 +948,14 @@ async def grants_grant(request: Request, background: BackgroundTasks):
         years = max(1, min(years, 99))
         from datetime import timedelta as _td
         expires_at = datetime.now(timezone.utc) + _td(days=365 * years)
+    elif duration.endswith("m"):
+        try:
+            months = int(duration[:-1] or "1")
+        except ValueError:
+            months = 1
+        months = max(1, min(months, 36))
+        from datetime import timedelta as _td
+        expires_at = datetime.now(timezone.utc) + _td(days=30 * months)
     else:
         return RedirectResponse("/admin/grants?err=bad-duration", status_code=303)
 

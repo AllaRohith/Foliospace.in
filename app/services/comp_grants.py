@@ -303,5 +303,8 @@ def _duration_label(expires_at) -> str:
         if delta_days >= 360:
             years = max(1, round(delta_days / 365))
             return f"{years} year" + ("s" if years != 1 else "")
+        if delta_days >= 28:
+            months = max(1, round(delta_days / 30))
+            return f"{months} month" + ("s" if months != 1 else "")
         return f"{delta_days} days"
     return "forever"
