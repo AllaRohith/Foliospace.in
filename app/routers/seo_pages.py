@@ -101,7 +101,7 @@ async def portfolio_builder(request: Request):
  {"q": "Can I use my own domain?",
  "a": "Not yet. Custom domains are on the roadmap. Until then, you get a clean foliospace.in/<slug> URL."},
  {"q": "Is there a free plan?",
- "a": "Yes. Free folios include the basics — profile, bio, up to 10 links, and QR. Pro adds unlimited links, analytics, custom CSS, and removes the small 'Made with FolioSpace' footer."},
+ "a": "Yes. Free folios include the basics — profile, bio, up to 10 links, and QR. Pro adds unlimited links, analytics, custom CSS, and keeps the small 'Made with FolioSpace' badge (it stays on both tiers — it's our word of mouth)."},
  {"q": "How do I get paid if I want Pro?",
  "a": "UPI AutoPay via Cashfree. You authorise a small annual debit (₹899 in Year 1, ₹1,499 from Year 2) and cancel any time from your dashboard or your bank's app."},
  ],
@@ -251,7 +251,7 @@ async def designer_portfolio(request: Request):
  ],
  honest=[
  "FolioSpace is not a Behance replacement. It's a link you control, optimised for sharing.",
- "Free folios carry a small 'Made with FolioSpace' line in the footer. Pro removes it.",
+ "The 'Made with FolioSpace' badge stays on both Free and Pro folios — it's how people find us.",
  "We're a small product. Custom requests go to the roadmap, not to a ticket queue.",
  ],
  faqs=[
@@ -596,7 +596,8 @@ async def stats_page(request: Request):
         {
             "site_name": "FolioSpace",
             "page_title": "FolioSpace Stats — Published folios, uptime, and what we measure",
-            "description": "FolioSpace in numbers: published folios, waitlist count, uptime, Lighthouse mobile, and TTFB. First-party data, refreshed weekly.",
+            "description": "FolioSpace in numbers: published folios, waitlist count, uptime, Lighthouse mobile, and TTFB. Live counts plus the targets we hold ourselves to.",
+            "canonical_path": "/stats",
             "stats": payload,
         },
     )
@@ -606,7 +607,7 @@ async def stats_page(request: Request):
 async def founder_page(request: Request):
     from app.main import templates as _templates
     founder = {
-        "name": "Rohith",
+        "name": "Rohith Naidu Alla",
         "role": "Founder, FolioSpace",
         "bio_1": "Building FolioSpace from India because a portfolio should be a one-link thing — not a weekend project in a website builder.",
         "bio_2": "Background in product and engineering, shipped across web and mobile. Started FolioSpace after watching talented people lose intros to a dead Notion page or an empty LinkedIn banner.",
@@ -619,7 +620,7 @@ async def founder_page(request: Request):
         ],
         "links": [
             {"label": "GitHub", "href": "https://github.com/rohithnaidualla"},
-            {"label": "Email", "href": "mailto:hello@foliospace.in"},
+            {"label": "Email", "href": "mailto:foliospace.in@gmail.com"},
         ],
         "sameas": [
             "https://github.com/rohithnaidualla",
@@ -631,7 +632,8 @@ async def founder_page(request: Request):
         {
             "site_name": "FolioSpace",
             "page_title": "Founder — FolioSpace",
-            "description": "Rohith, founder of FolioSpace. Background, working notes, and the one-line reason FolioSpace exists.",
+            "description": "Rohith Naidu Alla, founder of FolioSpace. Background, working notes, and the one-line reason FolioSpace exists.",
+            "canonical_path": "/founder",
             "founder": founder,
         },
     )
@@ -689,6 +691,7 @@ async def research_page(request: Request):
             "site_name": "FolioSpace",
             "page_title": "Research — FolioSpace",
             "description": "Original FolioSpace research on Indian portfolio behaviour, phone-first preview patterns, and what UPI-native billing changes.",
+            "canonical_path": "/research",
             "eyebrow": "Original research",
             "title": "Why an <em>Indian</em> portfolio link is its own product category.",
             "lede": "We are publishing the internal notes we use to plan FolioSpace. The goal: turn the lived behaviour of Indian professionals &mdash; WhatsApp-first sharing, UPI-native payments, phone-first preview &mdash; into a portfolio product that is actually used.",
@@ -709,7 +712,7 @@ _COMPARE_ROWS = {
         "lede": "Carrd is a one-page site builder with no portfolio semantics. FolioSpace is purpose-built for a one-link portfolio, with WhatsApp previews, UPI billing, and an editable slug.",
         "rows": [
             {"feature": "Built for a portfolio", "fs": "yes", "fs_note": "Bio, links, Spotlight, work rail", "them": "no", "them_note": "Generic one-page site"},
-            {"feature": "UPI AutoPay billing", "fs": "yes", "fs_note": "₹899/yr, Cashfree", "them": "partial", "them_note": "Stripe only (no UPI)"},
+            {"feature": "UPI AutoPay billing", "fs": "yes", "fs_note": "₹899/yr, Cashfree", "them": "partial", "them_note": "Stripe/Paddle (no UPI)"},
             {"feature": "Free forever plan", "fs": "yes", "fs_note": "Bio + 10 links + QR", "them": "partial", "them_note": "Free tier has no custom domain"},
             {"feature": "Open Graph image per folio", "fs": "yes", "fs_note": "Server-rendered PNG", "them": "no", "them_note": "Manual upload"},
             {"feature": "Custom domain", "fs": "no", "fs_note": "On the roadmap", "them": "yes", "them_note": "Pro plan"},
@@ -764,9 +767,9 @@ _COMPARE_ROWS = {
         "title": "FolioSpace vs <em>about.me.</em>",
         "lede": "about.me is a static one-page profile card. FolioSpace is the same shape, plus an editable slug, WhatsApp-ready previews, and UPI-native billing for India.",
         "rows": [
-            {"feature": "Free plan", "fs": "yes", "fs_note": "Bio + 10 links + QR", "them": "partial", "them_note": "Free tier has FolioSpace watermark"},
+            {"feature": "Free plan", "fs": "yes", "fs_note": "Bio + 10 links + QR", "them": "partial", "them_note": "Free tier has small about.me watermark"},
             {"feature": "Editable slug", "fs": "yes", "fs_note": "foliospace.in/&lt;slug&gt;", "them": "no", "them_note": "about.me/&lt;name&gt; only"},
-            {"feature": "UPI billing", "fs": "yes", "fs_note": "Cashfree UPI AutoPay", "them": "no", "them_note": "Stripe only"},
+            {"feature": "UPI billing", "fs": "yes", "fs_note": "Cashfree UPI AutoPay", "them": "no", "them_note": "Stripe/Paddle (no UPI)"},
             {"feature": "Spotlight card", "fs": "yes", "fs_note": "Pin one project to the top", "them": "no", "them_note": "—"},
             {"feature": "Built-in QR", "fs": "yes", "fs_note": "PNG download", "them": "no", "them_note": "—"},
             {"feature": "Phone-first preview", "fs": "yes", "fs_note": "WhatsApp card sized", "them": "partial", "them_note": "Varies"},

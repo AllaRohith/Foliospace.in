@@ -6,6 +6,7 @@
 {% block og_description %}{{ description }}{% endblock %}
 {% block twitter_title %}{{ page_title }}{% endblock %}
 {% block twitter_description %}{{ description }}{% endblock %}
+{% block canonical %}{{ canonical_path }}{% endblock %}
 
 {% block content %}
 {% include "partials/_nav.html" %}
@@ -13,7 +14,7 @@
   <div class="container">
     <p class="stats-eyebrow">FolioSpace in numbers</p>
     <h1 class="stats-title">A <em>live ledger</em> of who&rsquo;s on FolioSpace.</h1>
-    <p class="stats-lede">First-party data, refreshed weekly. These are the numbers we use internally to plan the product &mdash; published here so you can verify them yourself.</p>
+    <p class="stats-lede">Published-folio and waitlist counts are live and pulled from the same database that powers the dashboard. Uptime, Lighthouse, and TTFB numbers below are <strong>targets we hold ourselves to</strong> &mdash; they&rsquo;re not continuously measured yet. Treat them as a promise, not a chart.</p>
 
     <section class="stats-grid" aria-label="Headline stats">
       <article class="stats-card">
@@ -27,19 +28,19 @@
         <p class="stats-card-note">Cumulative signups since {{ stats.waitlist_since }}.</p>
       </article>
       <article class="stats-card">
-        <span class="stats-card-num">{{ stats.uptime_pct }}%</span>
-        <span class="stats-card-label">Uptime, trailing 30d</span>
-        <p class="stats-card-note">Render free tier status; cold starts in the cold-start count, not outages.</p>
+        <span class="stats-card-num">&ge;{{ stats.uptime_pct }}%</span>
+        <span class="stats-card-label">Uptime target, trailing 30d</span>
+        <p class="stats-card-note">Render free tier status; cold starts in the cold-start count, not outages. Live status check coming with our observability rollout.</p>
       </article>
       <article class="stats-card">
-        <span class="stats-card-num">{{ stats.lh_mobile }}</span>
-        <span class="stats-card-label">Lighthouse mobile</span>
-        <p class="stats-card-note">Median across landing, pricing, and a sample of public folios.</p>
+        <span class="stats-card-num">&ge;{{ stats.lh_mobile }}</span>
+        <span class="stats-card-label">Lighthouse mobile target</span>
+        <p class="stats-card-note">Performance floor across landing, pricing, and a sample of public folios.</p>
       </article>
       <article class="stats-card">
-        <span class="stats-card-num">{{ stats.ttfb_ms }}ms</span>
-        <span class="stats-card-label">TTFB, homepage</span>
-        <p class="stats-card-note">Median from the closest five Render regions, last 24 hours.</p>
+        <span class="stats-card-num">&le;{{ stats.ttfb_ms }}ms</span>
+        <span class="stats-card-label">TTFB target, homepage</span>
+        <p class="stats-card-note">Median target from the closest five Render regions.</p>
       </article>
       <article class="stats-card">
         <span class="stats-card-num">{{ stats.founder_seats_left }}</span>
@@ -49,10 +50,10 @@
     </section>
 
     <h2 class="stats-section-title">Pages by category</h2>
-    <p class="stats-card-note">Public folios grouped by the category the user picked during onboarding. Empty categories are not shown.</p>
+    <p class="stats-card-note">Public folios grouped by the category the user picked during onboarding. Share is of published folios with a non-empty category (users without a category are excluded). Empty categories are not shown.</p>
     <table class="stats-table">
       <thead>
-        <tr><th>Category</th><th>Published</th><th>Share</th></tr>
+        <tr><th>Category</th><th>Published</th><th>Share of published</th></tr>
       </thead>
       <tbody>
         {% for row in stats.by_category %}
@@ -87,7 +88,11 @@
     </p>
 
     <p class="stats-foot" style="margin-top: 14px;">
-      Last refreshed: {{ stats.refreshed_at }}. Questions or corrections? <a href="mailto:hello@foliospace.in">hello@foliospace.in</a>.
+      Last refreshed: {{ stats.refreshed_at }}. Questions or corrections? <a href="mailto:foliospace.in@gmail.com">foliospace.in@gmail.com</a>.
+    </p>
+
+    <p class="stats-foot" style="margin-top: 8px;">
+      Related: <a href="/founder">/founder</a> &middot; <a href="/research">/research</a>.
     </p>
   </div>
 </main>
@@ -100,11 +105,10 @@
   "@context": "https://schema.org",
   "@type": "Dataset",
   "name": "FolioSpace Stats",
-  "description": "First-party operational stats for FolioSpace — published folios, waitlist count, uptime, and page performance metrics.",
-  "url": "https://foliospace.in/stats",
+  "description": "Operational stats for FolioSpace — published folios, waitlist count, uptime and page performance targets.",
+  "url": "{{ canonical_path }}",
   "creator": {"@type": "Organization", "name": "FolioSpace", "url": "https://foliospace.in"},
   "dateModified": "{{ stats.refreshed_iso }}",
-  "license": "https://creativecommons.org/licenses/by/4.0/",
   "temporalCoverage": "{{ stats.refreshed_iso }}/.."
 }
 </script>

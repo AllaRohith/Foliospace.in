@@ -354,28 +354,30 @@ class EvaluateUserReferralsTests(unittest.TestCase):
 
 class ProgressForUserTests(unittest.TestCase):
     def test_below_threshold(self):
-        with mock.patch.object(refs, "count_referrals", return_value=3):
+        with mock.patch.object(refs, "referral_status_breakdown", return_value={"pending": 1, "verified": 0, "active": 3}):
             p = refs.progress_for_user("u1")
         self.assertEqual(p["active_count"], 3)
         self.assertEqual(p["threshold"], 10)
         self.assertEqual(p["remaining"], 7)
         self.assertFalse(p["unlocked"])
+        self.assertEqual(p["pending_count"], 1)
+        self.assertEqual(p["verified_count"], 0)
 
     def test_at_threshold(self):
-        with mock.patch.object(refs, "count_referrals", return_value=10):
+        with mock.patch.object(refs, "referral_status_breakdown", return_value={"pending": 0, "verified": 0, "active": 10}):
             p = refs.progress_for_user("u1")
         self.assertEqual(p["remaining"], 0)
         self.assertTrue(p["unlocked"])
 
     def test_above_threshold_clamps_remaining(self):
-        with mock.patch.object(refs, "count_referrals", return_value=42):
+        with mock.patch.object(refs, "referral_status_breakdown", return_value={"pending": 0, "verified": 0, "active": 42}):
             p = refs.progress_for_user("u1")
         self.assertEqual(p["active_count"], 42)
         self.assertEqual(p["remaining"], 0)
         self.assertTrue(p["unlocked"])
 
     def test_threshold_matches_constant(self):
-        with mock.patch.object(refs, "count_referrals", return_value=0):
+        with mock.patch.object(refs, "referral_status_breakdown", return_value={"pending": 0, "verified": 0, "active": 0}):
             p = refs.progress_for_user("u1")
         self.assertEqual(p["threshold"], refs.REFERRAL_THRESHOLD)
 

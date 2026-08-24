@@ -112,7 +112,7 @@
                 <strong>{{ r.display_name or '(no name)' }}</strong>
                 <div class="sub"><a href="mailto:{{ r.email }}">{{ r.email }}</a>{% if r.slug %} · <code>/{{ r.slug }}</code>{% endif %}</div>
               </td>
-              <td><span class="badge badge-{{ r.plan }}">{{ r.plan }}</span></td>
+              <td><span class="badge badge-{{ r.plan if r.plan in ('pro', 'free', 'trial', 'internal') else 'muted' }}">{{ r.plan }}</span></td>
               <td>
                 {% if r.expires_at %}
                   {{ r.expires_at.strftime('%Y-%m-%d') }}

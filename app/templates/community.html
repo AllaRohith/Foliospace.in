@@ -95,7 +95,7 @@
       </div>
 
       <span class="cover-vertical" aria-hidden="true">
-        <span class="cover-vertical-text">The marketplace · ships with launch · FolioSpace · 2026</span>
+        <span class="cover-vertical-text">The marketplace · {{ total }} folios listed · FolioSpace · 2026</span>
       </span>
 
       <div class="container cover-container">
@@ -112,68 +112,27 @@
         <p class="cover-tagline">Every FolioSpace pro · searchable in one place.</p>
 
         <div class="community-cover-search">
-          <div class="community-search" aria-disabled="true">
+          <form class="community-search" method="get" action="/space-community" role="search">
             <svg class="community-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="11" cy="11" r="7"/>
               <path d="m21 21-4.3-4.3"/>
             </svg>
-            <input class="community-search-input" type="search" placeholder="Search by name, company, or category…" disabled aria-label="Search the marketplace" />
-            <span class="community-search-badge">Ships with launch</span>
-          </div>
+            <input class="community-search-input" type="search" name="q" maxlength="64" placeholder="Search by name, company, or category…" value="{{ q }}" aria-label="Search the marketplace" />
+            <span class="community-search-badge">{{ total }} listed</span>
+          </form>
         </div>
 
-        <div class="community-cover-filters" aria-disabled="true" aria-label="Filter the marketplace">
-          <div class="community-cover-filters-group">
-            <span class="community-cover-filters-label">Profession</span>
-            <div class="community-cover-filters-row">
-              <button type="button" class="filter-chip" disabled>Chef</button>
-              <button type="button" class="filter-chip" disabled>Developer</button>
-              <button type="button" class="filter-chip" disabled>Consultant</button>
-              <button type="button" class="filter-chip" disabled>Founder</button>
-              <button type="button" class="filter-chip" disabled>Student</button>
-              <button type="button" class="filter-chip" disabled>Shop</button>
-            </div>
-          </div>
-          <div class="community-cover-filters-group">
-            <span class="community-cover-filters-label">Category</span>
-            <div class="community-cover-filters-row">
-              <button type="button" class="filter-chip" disabled>Booking</button>
-              <button type="button" class="filter-chip" disabled>Menu</button>
-              <button type="button" class="filter-chip" disabled>Case study</button>
-              <button type="button" class="filter-chip" disabled>Repo</button>
-              <button type="button" class="filter-chip" disabled>Lesson</button>
-              <button type="button" class="filter-chip" disabled>Catalogue</button>
-            </div>
-          </div>
-          <div class="community-cover-filters-group">
-            <span class="community-cover-filters-label">Company size</span>
-            <div class="community-cover-filters-row">
-              <button type="button" class="filter-chip" disabled>Solo</button>
-              <button type="button" class="filter-chip" disabled>2–5</button>
-              <button type="button" class="filter-chip" disabled>6–20</button>
-              <button type="button" class="filter-chip" disabled>20+</button>
-            </div>
-          </div>
-          <div class="community-cover-filters-group">
-            <span class="community-cover-filters-label">Place</span>
-            <div class="community-cover-filters-row">
-              <button type="button" class="filter-chip" disabled>Mumbai</button>
-              <button type="button" class="filter-chip" disabled>Delhi</button>
-              <button type="button" class="filter-chip" disabled>Bengaluru</button>
-              <button type="button" class="filter-chip" disabled>Kochi</button>
-              <button type="button" class="filter-chip" disabled>Guwahati</button>
-              <button type="button" class="filter-chip" disabled>Hyderabad</button>
-            </div>
-          </div>
+        <div class="community-cover-filters" aria-label="Browse the marketplace">
+          <p class="community-cover-filters-hint">Use the search above or the directory below — by name, role, or category.</p>
         </div>
 
         <div class="cover-cta-row">
           <a href="/" class="btn btn-ghost cover-cta">← Back to FolioSpace</a>
-          <span class="cover-cta-foot">Ships at launch · 2026</span>
+          <a href="#roster" class="btn btn-primary cover-cta">Browse {{ total }} listed →</a>
         </div>
       </div>
 
-      <a href="/" class="cover-stub" aria-label="The marketplace ships with launch">
+      <a href="#roster" class="cover-stub" aria-label="Browse the directory of listed folios">
         <span class="cover-stub-stub" aria-hidden="true">
           <span class="cover-stub-num">02</span>
           <span class="cover-stub-cap">issue</span>
@@ -222,7 +181,7 @@
             <h2 class="who-dir-title">By craft.</h2>
             <span class="who-dir-tag">Chefs · devs · students · consultants · shops · founders</span>
             <p class="who-dir-desc">Each folio tile carries the maker's craft — chef, developer, consultant, founder, anything. A small image, a one-line tag-line, the city. Browsing feels like flipping through a hand-edited anthology, not a feed.</p>
-            <span class="badge outline">Ships at launch</span>
+            <span class="badge outline">Browse below</span>
           </div>
           <span class="who-dir-arrow" aria-hidden="true">→</span>
         </article>
@@ -238,14 +197,14 @@
             <h2 class="who-dir-title">By place.</h2>
             <span class="who-dir-tag">Pan-India · city · region · remote</span>
             <p class="who-dir-desc">The directory is pan-Indian, sortable by city. A chef in Kochi next to a developer in Guwahati. No clout sorting, no follower counts — just a real human, a real folio, sorted by where they actually work.</p>
-            <span class="badge outline">Ships at launch</span>
+            <span class="badge outline">Browse below</span>
           </div>
           <span class="who-dir-arrow" aria-hidden="true">→</span>
         </article>
       </div>
     </section>
 
-    <section class="community-directory" aria-label="Directory of listed folios">
+    <section id="roster" class="community-directory" aria-label="Directory of listed folios">
       <div class="container">
         <div class="community-directory-head">
           <div class="community-directory-eyebrow">→ Listed · {{ total }} pros</div>

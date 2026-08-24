@@ -5,7 +5,7 @@
 
 {% set nav_active = 'dashboard' %}
 {% set nav_signups_badge = total %}
-{% set nav_audit_badge = recent_audit|length %}
+{% set nav_audit_badge = audit_total %}
 
 {% block breadcrumbs %}
 <div class="breadcrumbs">
@@ -90,7 +90,7 @@
     </svg>
     <div class="stat-num"><span class="count-up" data-to="{{ top_role_count }}" data-duration="900">0</span></div>
     <div class="stat-label">{{ top_role|capitalize }}</div>
-    <div class="sub">Top role · 7d</div>
+    <div class="sub">Top role · all-time</div>
   </div>
 
   <div class="stat">

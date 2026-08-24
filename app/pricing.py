@@ -22,6 +22,11 @@ PRO_ANNUAL_INR = PRO_YEAR2_INR
 # Trial disabled (per user decision 2026-08). Keep symbol for backward compat.
 TRIAL_DAYS = int(os.getenv("TRIAL_DAYS", "0"))
 
+# Grace window after a failed Pro payment (days). User keeps Pro until plan_expires_at
+# or this many days after payment_failed_at, whichever is later. Webhook downgrade at
+# plan_expires_at; copy in pricing.html / dashboard/billing.html must reference this.
+PAYMENT_GRACE_DAYS = int(os.getenv("PAYMENT_GRACE_DAYS", "7"))
+
 # Founder cohort cap. First N people to join the waitlist get the badge.
 # 0 or negative disables the program.
 FOUNDER_COHORT_LIMIT = int(os.getenv("FOUNDER_COHORT_LIMIT", "100"))

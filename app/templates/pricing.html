@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}Pricing — FolioSpace{% endblock %}
-{% block description %}Pro is ₹{{ PRO_YEAR1_INR }}/yr in Year 1 (launch offer, 40% off), then ₹{{ PRO_YEAR2_INR }}/yr. UPI AutoPay or Card AutoPay via Cashfree. Free forever for the basics.{% endblock %}
+{% block description %}Pro is ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr in Year 1 (launch offer, {{ annual_savings_percent() }}% off), then ₹{{ "{:,}".format(PRO_YEAR2_INR) }}/yr. UPI AutoPay or Card AutoPay via Cashfree. Free forever for the basics.{% endblock %}
 {% block canonical %}/pricing{% endblock %}
 
 {% block content %}
@@ -14,7 +14,7 @@
     <header class="pricing-head">
       <div class="pricing-eyebrow">→ The receipt</div>
       <h1 class="pricing-title">One plan. <em>Two numbers.</em></h1>
-      <p class="pricing-lede">Pro is <strong>₹{{ "{:,}".format(PRO_YEAR1_INR) }} in Year 1</strong> (launch offer, 40% off) and <strong>₹{{ "{:,}".format(PRO_YEAR2_INR) }} from Year 2</strong> — charged annually by UPI AutoPay or Card AutoPay through Cashfree. No card, no foreign currency, no surprises. Cancel any time from your dashboard — two taps.</p>
+      <p class="pricing-lede">Pro is <strong>₹{{ "{:,}".format(PRO_YEAR1_INR) }} in Year 1</strong> (launch offer, {{ annual_savings_percent() }}% off) and <strong>₹{{ "{:,}".format(PRO_YEAR2_INR) }} from Year 2</strong> — charged annually by UPI AutoPay or Card AutoPay through Cashfree. No card, no foreign currency, no surprises. Cancel any time from your dashboard — two taps.</p>
 
       {% if viewer %}
         {% set ps = plan_summary(viewer) %}
@@ -125,7 +125,7 @@
         <details class="faq-item">
           <summary><span>Why does Year 2 cost more?</span><span class="faq-icon" aria-hidden="true"></span></summary>
           <div class="faq-body">
-            <p>Year 1 is the launch offer — a 40% off thank-you for early adopters. From Year 2 the regular price is ₹{{ "{:,}".format(PRO_YEAR2_INR) }}. Refer 10 verified friends and we lock your renewal at the Year-1 price — every year, as long as you stay subscribed.</p>
+            <p>Year 1 is the launch offer — a {{ annual_savings_percent() }}% off thank-you for early adopters. From Year 2 the regular price is ₹{{ "{:,}".format(PRO_YEAR2_INR) }}. Refer 10 verified friends and we lock your renewal at the Year-1 price — every year, as long as you stay subscribed.</p>
           </div>
         </details>
         <details class="faq-item">
@@ -137,7 +137,7 @@
         <details class="faq-item">
           <summary><span>What if my payment fails?</span><span class="faq-icon" aria-hidden="true"></span></summary>
           <div class="faq-body">
-            <p>You get <strong>7 grace days</strong> with full Pro access. We email you on day 1. If the charge still fails after day 7, your folio flips to <strong>Free</strong> — same template, with the FolioSpace badge.</p>
+            <p>You get <strong>{{ PAYMENT_GRACE_DAYS }} grace days</strong> with full Pro access. We email you on day 1. If the charge still fails after day {{ PAYMENT_GRACE_DAYS }}, your folio flips to <strong>Free</strong> — same template, with the FolioSpace badge.</p>
           </div>
         </details>
         <details class="faq-item">

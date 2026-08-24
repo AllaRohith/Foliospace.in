@@ -51,6 +51,14 @@
                 <strong data-referral-progress-active>{{ progress.active_count }} / {{ progress.threshold }}</strong>
               </div>
               <div class="fm-bill-figure-row">
+                <span>Pending signups</span>
+                <strong>{{ progress.pending_count }} <span class="fm-bill-figure-row-note">(signed up, not verified)</span></strong>
+              </div>
+              <div class="fm-bill-figure-row">
+                <span>Verified, not yet published</span>
+                <strong>{{ progress.verified_count }} <span class="fm-bill-figure-row-note">(verified email, still private)</span></strong>
+              </div>
+              <div class="fm-bill-figure-row">
                 <span>Reward</span>
                 <strong>Year-1 price locked forever</strong>
               </div>

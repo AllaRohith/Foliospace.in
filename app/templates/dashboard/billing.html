@@ -115,11 +115,11 @@
             </details>
             <details class="fm-bill-faq-item">
               <summary><span>Do I need a card or netbanking?</span><span class="fm-bill-faq-icon" aria-hidden="true"></span></summary>
-              <div class="fm-bill-faq-body"><p>No. Pro is paid by <strong>UPI AutoPay</strong> only — PhonePe, Google Pay, Paytm, BHIM, any UPI app. You approve a one-tap mandate once, then it auto-charges annually. Card AutoPay also supported if you prefer.</p></div>
+              <div class="fm-bill-faq-body"><p>No. Pro is paid by <strong>UPI AutoPay</strong> only — PhonePe, Google Pay, Paytm, BHIM, any UPI app. You approve a one-tap annual mandate once, then it auto-charges yearly. Cashfree supports cards too, but we only expose UPI for now.</p></div>
             </details>
             <details class="fm-bill-faq-item">
               <summary><span>What if my payment fails?</span><span class="fm-bill-faq-icon" aria-hidden="true"></span></summary>
-              <div class="fm-bill-faq-body"><p>You get <strong>7 grace days</strong> with full Pro access. We email you on day 1. If the charge still fails after day 7, your folio flips to <strong>Free</strong> — same template, with the FolioSpace badge.</p></div>
+              <div class="fm-bill-faq-body"><p>You get <strong>{{ PAYMENT_GRACE_DAYS }} grace days</strong> with full Pro access. We email you on day 1. If the charge still fails after day {{ PAYMENT_GRACE_DAYS }}, your folio flips to <strong>Free</strong> — same template, with the FolioSpace badge.</p></div>
             </details>
             <details class="fm-bill-faq-item">
               <summary><span>Who handles the UPI mandate?</span><span class="fm-bill-faq-icon" aria-hidden="true"></span></summary>
@@ -131,7 +131,7 @@
             </details>
             <details class="fm-bill-faq-item">
               <summary><span>Can I get a refund?</span><span class="fm-bill-faq-icon" aria-hidden="true"></span></summary>
-              <div class="fm-bill-faq-body"><p>Cancel inside the first 7 days of a paid year and we refund the charge — email <strong>foliospace.in@gmail.com</strong> and we'll process it same-day.</p></div>
+              <div class="fm-bill-faq-body"><p>Cancel inside the first 7 days of a paid year and we refund the charge — email <strong>foliospace.in@gmail.com</strong> and we'll process it within 1&ndash;2 business days.</p></div>
             </details>
           </div>
 
@@ -209,9 +209,13 @@
                 <tr><td>Privacy toggle</td><td>✓</td><td>✓</td></tr>
                 <tr><td>WhatsApp button</td><td>✓</td><td>✓</td></tr>
                 <tr><td>Passkey sign-in</td><td>✓</td><td>✓</td></tr>
-                <tr><td>Dynamic OG image</td><td>—</td><td>✓</td></tr>
-                <tr><td>QR + share kit</td><td>—</td><td>✓</td></tr>
-                <tr><td>30-day analytics</td><td>—</td><td>✓</td></tr>
+                <tr><td>Dynamic OG image</td><td>✓</td><td>✓</td></tr>
+                <tr><td>QR + share kit</td><td>✓</td><td>✓</td></tr>
+                <tr><td>30-day analytics</td><td>✓</td><td>✓</td></tr>
+                <tr><td>Custom links</td><td>Up to 10</td><td>Unlimited</td></tr>
+                <tr><td>Spotlight card</td><td>—</td><td>✓</td></tr>
+                <tr><td>Custom fonts</td><td>—</td><td>✓</td></tr>
+                <tr><td>Referral lock-in</td><td>—</td><td>✓</td></tr>
               </tbody>
             </table>
           </section>

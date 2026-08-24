@@ -66,7 +66,7 @@
 
       <div class="card-body">
         <div class="font-preview-wrap">
-          <iframe class="font-preview" src="/{{ f.slug or 'admin' }}/manage" sandbox="allow-same-origin" title="Font preview"></iframe>
+          <iframe class="font-preview" src="/{{ f.slug }}?preview=1" sandbox="allow-same-origin" title="Font preview"></iframe>
         </div>
         <div class="font-meta">
           <code class="font-url">{{ f.file_url }}</code>
@@ -82,7 +82,7 @@
             <button type="submit" class="btn btn-toggle is-off">Reject</button>
           </form>
           <span class="card-foot-note">
-            Approval is permanent until the user deletes it.
+            Approval loads the font on the user's public folio. You can re-reject later from this desk.
           </span>
         </div>
       </div>

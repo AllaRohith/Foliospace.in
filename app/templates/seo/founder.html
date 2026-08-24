@@ -6,6 +6,7 @@
 {% block og_description %}{{ description }}{% endblock %}
 {% block twitter_title %}{{ page_title }}{% endblock %}
 {% block twitter_description %}{{ description }}{% endblock %}
+{% block canonical %}{{ canonical_path }}{% endblock %}
 
 {% block content %}
 {% include "partials/_nav.html" %}
@@ -43,6 +44,10 @@
         <a class="founder-link" href="{{ link.href }}" target="_blank" rel="noopener noreferrer">{{ link.label }} &rarr;</a>
       {% endfor %}
     </div>
+
+    <p class="stats-foot" style="margin-top: 32px;">
+      Related: <a href="/stats">/stats</a> &middot; <a href="/research">/research</a>.
+    </p>
   </div>
 </main>
 {% include "partials/_footer.html" %}
@@ -56,8 +61,8 @@
   "name": "{{ founder.name }}",
   "jobTitle": "{{ founder.role }}",
   "worksFor": {"@type": "Organization", "name": "FolioSpace", "url": "https://foliospace.in"},
-  "url": "https://foliospace.in/founder",
-  "description": "Founder of FolioSpace, a one-link portfolio for every Indian professional.",
+  "url": "{{ canonical_path }}",
+  "description": "{{ founder.bio_1|striptags|escape }}",
   "sameAs": [
     {% for link in founder.sameas %}"{{ link }}"{% if not loop.last %},{% endif %}{% endfor %}
   ]
