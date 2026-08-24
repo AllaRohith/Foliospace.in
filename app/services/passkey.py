@@ -38,11 +38,18 @@ def _webauthn() -> dict[str, Any]:
         verify_registration_response,
     )
     from webauthn.helpers.cose import COSEAlgorithmIdentifier
-    from webauthn.helpers.options import (
-        PublicKeyCredentialDescriptor,
-        ResidentKeyRequirement,
-        UserVerificationRequirement,
-    )
+    try:
+        from webauthn.helpers.options import (  # webauthn 2.x
+            PublicKeyCredentialDescriptor,
+            ResidentKeyRequirement,
+            UserVerificationRequirement,
+        )
+    except ImportError:  # webauthn 3.x merged options into structs
+        from webauthn.helpers.structs import (
+            PublicKeyCredentialDescriptor,
+            ResidentKeyRequirement,
+            UserVerificationRequirement,
+        )
     from webauthn.helpers.structs import (
         AttestationConveyancePreference,
         AuthenticatorAttachment,
