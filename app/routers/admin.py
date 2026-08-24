@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import psycopg
-from fastapi import APIRouter, Form, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response, StreamingResponse
 from psycopg.rows import dict_row
 
@@ -885,6 +885,14 @@ async def grants_list(request: Request):
         except psycopg.Error as e:
             logger.exception("grants list query failed: %s", e)
 
+    from app.services import comp_grants as cg
+    pending_rows: list[dict] = []
+    pending_total = 0
+    if DATABASE_URL:
+        pending_rows, pending_total = cg.list_pending_comp_grants(
+            q=q, show_only_open=True, limit=PAGE_SIZE, offset=0,
+        )
+
     admin_auth.audit(
         request,
         sid,
@@ -907,6 +915,8 @@ async def grants_list(request: Request):
             "filter": "active" if show_only_active else "all",
             "msg": request.query_params.get("msg", ""),
             "err": request.query_params.get("err", ""),
+            "pending_rows": pending_rows,
+            "pending_total": pending_total,
             "nav_active": "grants",
         },
     )
@@ -915,14 +925,14 @@ async def grants_list(request: Request):
 
 @router.post("/users/grant")
 @limiter.limit("20/minute")
-async def grants_grant(request: Request):
+async def grants_grant(request: Request, background: BackgroundTasks):
     guard = _gate(request)
     if isinstance(guard, RedirectResponse):
         return guard
     sid = guard
     form = await request.form()
-    uid = _sanitize(str(form.get("user_id", "")))[:64]
-    if not uid:
+    target = _sanitize(str(form.get("user_id", "")))[:254]
+    if not target:
         return RedirectResponse("/admin/grants?err=missing-user", status_code=303)
     duration = _sanitize(str(form.get("duration", "forever")))[:16].lower()
     reason = _sanitize(str(form.get("reason", "")))[:500]
@@ -943,6 +953,70 @@ async def grants_grant(request: Request):
 
     if not DATABASE_URL:
         return RedirectResponse("/admin/grants?err=db", status_code=303)
+
+    from app.services import comp_grants as cg
+
+    looks_like_email = "@" in target
+    if looks_like_email:
+        target_email = target.strip().lower()[:254]
+        if not EMAIL_RE.match(target_email):
+            return RedirectResponse("/admin/grants?err=missing-user", status_code=303)
+        existing_uid = ""
+        try:
+            with _connect() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "SELECT id FROM users WHERE email = %s LIMIT 1",
+                        (target_email,),
+                    )
+                    row = cur.fetchone()
+                    existing_uid = (row or {}).get("id", "") or ""
+        except psycopg.Error as e:
+            logger.exception("grant email-lookup failed: %s", e)
+            return RedirectResponse("/admin/grants?err=save-failed", status_code=303)
+
+        if existing_uid:
+            target = existing_uid
+        else:
+            ok_p, info = cg.create_pending_comp_grant(
+                target_email, expires_at, reason, notes, sid,
+            )
+            if not ok_p:
+                logger.warning("create_pending_comp_grant failed: %s", info)
+                return RedirectResponse("/admin/grants?err=save-failed", status_code=303)
+
+            admin_auth.audit(
+                request,
+                sid,
+                "grant.pending.create",
+                target=target_email,
+                metadata={
+                    "expires_at": expires_at.isoformat() if expires_at else None,
+                    "reason": reason,
+                },
+            )
+
+            from app.services import email_service
+            duration_label = "forever" if expires_at is None else duration
+            cta_url = f"{email_service.PUBLIC_URL}/signup"
+
+            def _log_invite(email: str) -> None:
+                ok_e, info_e = email_service.send_comp_invite_email(
+                    to_email=email,
+                    recipient_kind="pending",
+                    duration_label=duration_label,
+                    cta_url=cta_url,
+                )
+                if not ok_e:
+                    logger.warning("comp invite email failed for %s: %s", email, info_e)
+
+            background.add_task(_log_invite, target_email)
+
+            return RedirectResponse(
+                f"/admin/grants?msg=invite-sent:{duration}", status_code=303,
+            )
+
+    uid = target[:64]
     ok = False
     target_email = ""
     try:
@@ -991,6 +1065,72 @@ async def grants_grant(request: Request):
         },
     )
     return RedirectResponse(f"/admin/grants?msg=granted:{duration}", status_code=303)
+
+
+@router.post("/pending-grants/{grant_id}/revoke")
+@limiter.limit("20/minute")
+async def pending_grants_revoke(grant_id: str, request: Request):
+    guard = _gate(request)
+    if isinstance(guard, RedirectResponse):
+        return guard
+    sid = guard
+    gid = _sanitize(grant_id)[:16]
+    if not gid or not gid.isdigit():
+        return RedirectResponse("/admin/grants?err=bad-pending-id", status_code=303)
+    from app.services import comp_grants as cg
+    ok, info = cg.revoke_pending_comp_grant(int(gid))
+    if not ok:
+        admin_auth.audit(
+            request, sid, "grant.pending.revoke.failed",
+            target=gid, metadata={"reason": info},
+        )
+        return RedirectResponse("/admin/grants?err=pending-revoke-failed", status_code=303)
+    admin_auth.audit(
+        request, sid, "grant.pending.revoke",
+        target=gid, metadata={"pending_id": int(gid)},
+    )
+    return RedirectResponse("/admin/grants?msg=pending-revoked", status_code=303)
+
+
+@router.post("/pending-grants/{grant_id}/resend")
+@limiter.limit("20/minute")
+async def pending_grants_resend(grant_id: str, request: Request, background: BackgroundTasks):
+    guard = _gate(request)
+    if isinstance(guard, RedirectResponse):
+        return guard
+    sid = guard
+    gid = _sanitize(grant_id)[:16]
+    if not gid or not gid.isdigit():
+        return RedirectResponse("/admin/grants?err=bad-pending-id", status_code=303)
+    from app.services import comp_grants as cg
+    row = cg.get_pending_comp_grant(int(gid))
+    if not row or row.get("consumed_at") or row.get("revoked_at"):
+        return RedirectResponse("/admin/grants?err=pending-not-resendable", status_code=303)
+    email = row.get("email") or ""
+    if not email:
+        return RedirectResponse("/admin/grants?err=pending-no-email", status_code=303)
+
+    from app.services import email_service
+    duration_label = "forever" if not row.get("expires_at") else "renewed"
+    cta_url = f"{email_service.PUBLIC_URL}/signup"
+
+    def _log_resend(em: str) -> None:
+        ok_e, info_e = email_service.send_comp_invite_email(
+            to_email=em,
+            recipient_kind="pending",
+            duration_label=duration_label,
+            cta_url=cta_url,
+        )
+        if not ok_e:
+            logger.warning("comp invite resend failed for %s: %s", em, info_e)
+
+    background.add_task(_log_resend, email)
+
+    admin_auth.audit(
+        request, sid, "grant.pending.resend",
+        target=gid, metadata={"pending_id": int(gid), "email": email},
+    )
+    return RedirectResponse("/admin/grants?msg=pending-resent", status_code=303)
 
 
 @router.post("/users/{user_id}/revoke-grant")

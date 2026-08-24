@@ -291,3 +291,49 @@ def send_password_reset_email(to_email: str, reset_link: str, ttl_minutes: int =
     except Exception as e:
         logger.exception("failed to send reset email to %s: %s", to_email, e)
         return False, str(e)
+
+
+def send_comp_invite_email(
+    to_email: str,
+    recipient_kind: str,
+    duration_label: str,
+    cta_url: str,
+) -> tuple[bool, str]:
+    """Comp invite — sent when an admin grants Pro to someone.
+
+    `recipient_kind` is "existing" (user already has an account) or
+    "pending" (user only on waitlist / not yet a FolioSpace user). The
+    template picks its CTA + body copy from this flag.
+    """
+    if not API_KEY:
+        logger.info("RESEND_API_KEY not set, skipping comp invite to %s", to_email)
+        return False, "no_api_key"
+    try:
+        resend.api_key = API_KEY
+        kind = (recipient_kind or "pending").strip().lower()[:16]
+        if kind not in ("existing", "pending"):
+            kind = "pending"
+        context = {
+            "public_url": PUBLIC_URL,
+            "first_name": _first_name_from_email(to_email),
+            "to_email": to_email,
+            "recipient_kind": kind,
+            "duration_label": (duration_label or "forever")[:32],
+            "cta_url": (cta_url or f"{PUBLIC_URL}/signup")[:512],
+        }
+        html = _render_template("comp_invite.html", **context)
+        subject = "You're on FolioSpace Pro — comp access"
+        params = {
+            "from": FROM_EMAIL,
+            "to": [to_email],
+            "reply_to": REPLY_TO,
+            "subject": subject,
+            "html": html,
+        }
+        result = resend.Emails.send(params)
+        msg_id = result.get("id", "unknown") if isinstance(result, dict) else str(result)
+        logger.info("sent comp invite (%s) to %s (id=%s)", kind, to_email, msg_id)
+        return True, msg_id
+    except Exception as e:
+        logger.exception("send_comp_invite_email failed for %s: %s", to_email, e)
+        return False, str(e)

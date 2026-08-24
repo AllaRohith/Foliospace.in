@@ -195,6 +195,11 @@ def create_user(
                 else:
                     row["prefilled_from_waitlist"] = False
                     row["waitlist_created_at"] = None
+                try:
+                    from app.services.comp_grants import claim_pending_comp_grants
+                    claim_pending_comp_grants(cur, row["id"], email_clean)
+                except Exception as e:
+                    logger.warning("claim_pending_comp_grants failed (non-fatal): %s", e)
             conn.commit()
     except psycopg.Error as e:
         logger.exception("create_user failed: %s", e)
@@ -678,6 +683,11 @@ def create_user_from_oauth(
                         """,
                         (provider[:16], provider_uid[:255], user["id"], email_clean),
                     )
+                    try:
+                        from app.services.comp_grants import claim_pending_comp_grants
+                        claim_pending_comp_grants(cur, user["id"], email_clean)
+                    except Exception as e:
+                        logger.warning("claim_pending_comp_grants failed (non-fatal): %s", e)
             conn.commit()
     except psycopg.Error as e:
         logger.exception("create_user_from_oauth failed: %s", e)

@@ -24,31 +24,45 @@
 
 {% if msg and msg.startswith('granted:') %}
   <div class="flash flash-ok">✓ Granted. User is on Pro until {% if msg == 'granted:forever' %}forever{% else %}{{ msg.split(':', 1)[1] }} from today{% endif %}.</div>
+{% elif msg and msg.startswith('invite-sent:') %}
+  <div class="flash flash-ok">✓ Invite sent. Pending comp grant for {% if msg == 'invite-sent:forever' %}forever{% else %}{{ msg.split(':', 1)[1] }}{% endif %} — will activate when this person signs up and verifies their email.</div>
 {% elif msg == 'revoked' %}
   <div class="flash flash-ok">✓ Grant revoked. User has been re-evaluated against remaining grants + Cashfree subscription state.</div>
+{% elif msg == 'pending-revoked' %}
+  <div class="flash flash-ok">✓ Pending invite revoked.</div>
+{% elif msg == 'pending-resent' %}
+  <div class="flash flash-ok">✓ Invite email re-sent.</div>
 {% endif %}
 {% if err == 'user-not-found' %}
   <div class="flash flash-warn">User id doesn't exist.</div>
 {% elif err == 'missing-user' %}
-  <div class="flash flash-warn">Missing user id.</div>
+  <div class="flash flash-warn">Missing user id or email.</div>
 {% elif err == 'bad-duration' %}
   <div class="flash flash-warn">Duration must be 'forever' or a number of years (e.g. 1y, 2y).</div>
 {% elif err == 'save-failed' %}
   <div class="flash flash-warn">Save failed — DB error. Try again.</div>
 {% elif err == 'db' %}
   <div class="flash flash-warn">Database not configured.</div>
+{% elif err == 'pending-revoke-failed' %}
+  <div class="flash flash-warn">Couldn't revoke that invite.</div>
+{% elif err == 'pending-not-resendable' %}
+  <div class="flash flash-warn">That invite is already consumed or revoked.</div>
+{% elif err == 'pending-no-email' %}
+  <div class="flash flash-warn">That invite has no email to resend to.</div>
+{% elif err == 'bad-pending-id' %}
+  <div class="flash flash-warn">Bad pending invite id.</div>
 {% endif %}
 
 <section class="card" aria-label="New grant">
   <div class="card-head">
     <div class="card-eyebrow">→ New grant</div>
-    <h2 class="card-title">Grant Pro to a user</h2>
-    <div class="card-sub">Look up the user id from <a href="/admin/signups">/admin/signups</a> or the users table. We store one active grant per user — re-granting overwrites the previous grant.</div>
+    <h2 class="card-title">Grant Pro to a user or email</h2>
+    <div class="card-sub">Paste a UUID (existing user) OR an email (anyone on the waitlist, cold lead, journalist, partner). If the email already belongs to a user, the grant is applied directly. Otherwise a pending invite is sent — it activates the moment that person signs up and verifies.</div>
   </div>
   <form method="post" action="/admin/users/grant" class="card-body" data-grant-form>
     <label class="form-row">
-      <span class="form-label">User id (UUID)</span>
-      <input type="text" name="user_id" required maxlength="64" pattern="[0-9a-fA-F-]{8,64}" placeholder="e.g. 8b3a…d4f" autocomplete="off" />
+      <span class="form-label">User id (UUID) or email</span>
+      <input type="text" name="user_id" required maxlength="254" placeholder="UUID  or  someone@example.com" autocomplete="off" />
     </label>
     <label class="form-row">
       <span class="form-label">Duration</span>
@@ -69,7 +83,7 @@
       <textarea name="notes" maxlength="1000" rows="2" placeholder="Anything future-you should know."></textarea>
     </label>
     <div class="card-foot">
-      <button type="submit" class="btn btn-primary" data-grant-confirm="Grant Pro to this user? They'll get a 'via comp' badge in their billing summary.">Grant Pro →</button>
+      <button type="submit" class="btn btn-primary" data-grant-confirm="Grant Pro to this user/email? If they don't have an account yet, an invite email will be sent and the comp activates on signup.">Grant Pro →</button>
     </div>
   </form>
 </section>
@@ -150,6 +164,57 @@
         {% if page < total_pages %}<a href="?q={{ q }}&amp;filter={{ filter }}&amp;page={{ page + 1 }}" class="pager-link">Next →</a>{% endif %}
       </nav>
     {% endif %}
+  {% endif %}
+</section>
+
+<section class="card" aria-label="Pending invites">
+  <div class="card-head">
+    <div class="card-eyebrow">→ Pending invites</div>
+    <h2 class="card-title">{{ pending_total }} waiting</h2>
+    <div class="card-sub">Comp grants keyed by email. Each row activates the moment that person signs up and verifies their email. Manual revoke = the comp never applies. No expiry — you decide when to clean up.</div>
+  </div>
+  {% if pending_rows|length == 0 %}
+    <div class="empty-state">No pending invites. Grant Pro to a fresh email above to create one.</div>
+  {% else %}
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Expires</th>
+            <th>Reason</th>
+            <th>Created</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in pending_rows %}
+            <tr>
+              <td>
+                <strong><a href="mailto:{{ r.email }}">{{ r.email }}</a></strong>
+              </td>
+              <td>
+                {% if r.expires_at %}
+                  {{ r.expires_at.strftime('%Y-%m-%d') }}
+                {% else %}
+                  <em>forever</em>
+                {% endif %}
+              </td>
+              <td>{{ r.reason or '—' }}</td>
+              <td>{{ r.created_at.strftime('%Y-%m-%d') if r.created_at else '—' }}</td>
+              <td>
+                <form method="post" action="/admin/pending-grants/{{ r.id }}/resend" class="inline-form" data-pending-resend>
+                  <button type="submit" class="btn btn-ghost btn-sm">Resend</button>
+                </form>
+                <form method="post" action="/admin/pending-grants/{{ r.id }}/revoke" class="inline-form" data-pending-revoke>
+                  <button type="submit" class="btn btn-warn btn-sm">Revoke</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   {% endif %}
 </section>
 
