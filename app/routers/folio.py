@@ -406,6 +406,10 @@ async def owner_folio_manage_save(
     bio: str = _Form_folio(""),
     phone: str = _Form_folio(""),
     linkedin_url: str = _Form_folio(""),
+    headline: str = _Form_folio(""),
+    locale: str = _Form_folio(""),
+    zoneinfo: str = _Form_folio(""),
+    profile_url: str = _Form_folio(""),
     is_public: str = _Form_folio(""),
     is_listed: str = _Form_folio(""),
 ):
@@ -435,6 +439,18 @@ async def owner_folio_manage_save(
         r"https?://(www\.)?linkedin\.com/in/[A-Za-z0-9_\-]+/?", linkedin_clean
     ):
         return RedirectResponse(f"/{safe_slug}/manage?err=linkedin_url", status_code=303)
+    headline_clean = (headline or "").strip()
+    if len(headline_clean) > 200:
+        return RedirectResponse(f"/{safe_slug}/manage?err=headline", status_code=303)
+    locale_clean = (locale or "").strip()
+    if locale_clean and not _re_folio.fullmatch(r"[A-Za-z]{2,3}(_[A-Z]{2})?", locale_clean):
+        return RedirectResponse(f"/{safe_slug}/manage?err=locale", status_code=303)
+    zoneinfo_clean = (zoneinfo or "").strip()
+    if zoneinfo_clean and not _re_folio.fullmatch(r"[A-Za-z]+(/[A-Za-z_]+)*", zoneinfo_clean):
+        return RedirectResponse(f"/{safe_slug}/manage?err=zoneinfo", status_code=303)
+    profile_url_clean = (profile_url or "").strip()
+    if profile_url_clean and not _re_folio.fullmatch(r"https?://\S+", profile_url_clean):
+        return RedirectResponse(f"/{safe_slug}/manage?err=profile_url", status_code=303)
     public_flag = (is_public or "").strip().lower() in ("1", "true", "on", "yes")
     listed_flag = (is_listed or "").strip().lower() in ("1", "true", "on", "yes")
     if listed_flag and not public_flag:
@@ -447,6 +463,10 @@ async def owner_folio_manage_save(
         phone=phone_clean,
         is_public=public_flag,
         linkedin_url=linkedin_clean,
+        headline=headline_clean,
+        locale=locale_clean,
+        zoneinfo=zoneinfo_clean,
+        profile_url=profile_url_clean,
     )
     if not updated:
         import logging

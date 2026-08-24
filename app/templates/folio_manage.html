@@ -86,36 +86,109 @@
             <div class="fm-flash fm-flash-warn">Role must be 60 characters or fewer.</div>
           {% elif err == 'linkedin_url' %}
             <div class="fm-flash fm-flash-warn">LinkedIn URL must look like https://linkedin.com/in/your-handle</div>
+          {% elif err == 'headline' %}
+            <div class="fm-flash fm-flash-warn">Headline must be 200 characters or fewer.</div>
+          {% elif err == 'locale' %}
+            <div class="fm-flash fm-flash-warn">Locale must look like en or en_IN.</div>
+          {% elif err == 'zoneinfo' %}
+            <div class="fm-flash fm-flash-warn">Timezone must look like Asia/Kolkata.</div>
+          {% elif err == 'profile_url' %}
+            <div class="fm-flash fm-flash-warn">Profile URL must start with https:// or http://</div>
           {% elif err == 'server' %}
             <div class="fm-flash fm-flash-warn">Couldn't save right now. Try again.</div>
           {% endif %}
 
           <form class="fm-form" method="post" action="/{{ user.slug }}/manage" autocomplete="on" novalidate>
-            <div class="fm-field">
-              <label for="display_name">Display name</label>
-              <input id="display_name" name="display_name" type="text" maxlength="80" required value="{{ user.display_name or '' }}" autofocus />
-            </div>
 
-            <div class="fm-field">
-              <label for="role">Role</label>
-              <input id="role" name="role" type="text" maxlength="60" value="{{ user.role or '' }}" placeholder="designer" data-li-autofill-name="title" />
-            </div>
+            <section class="fm-section" aria-labelledby="fm-section-identity">
+              <header class="fm-section-head">
+                <div class="fm-section-eyebrow">→ Identity</div>
+                <h2 class="fm-section-title">Who you <em>are.</em></h2>
+                <p class="fm-section-sub">How your name, role, and short intro appear on your folio.</p>
+              </header>
+              <div class="fm-section-body">
+                <div class="fm-field">
+                  <label for="display_name">Display name</label>
+                  <input id="display_name" name="display_name" type="text" maxlength="80" required value="{{ user.display_name or '' }}" autofocus />
+                </div>
 
-            <div class="fm-field">
-              <label for="bio">Bio <span class="fm-field-hint">(40+ chars = complete)</span></label>
-              <textarea id="bio" name="bio" maxlength="280" data-fm-bio-counter data-li-autofill-name="position-summary">{{ user.bio or '' }}</textarea>
-              <div class="fm-counter" data-fm-bio-counter-display>{{ (user.bio or '') | length }} / 280</div>
-            </div>
+                <div class="fm-field">
+                  <label for="role">Role <span class="fm-field-hint">(short — one or two words)</span></label>
+                  <input id="role" name="role" type="text" maxlength="60" value="{{ user.role or '' }}" placeholder="designer" data-li-autofill-name="title" />
+                </div>
 
-            <div class="fm-field">
-              <label for="phone">WhatsApp number</label>
-              <input id="phone" name="phone" type="tel" maxlength="20" value="{{ user.phone or '' }}" placeholder="+91 98765 43210" data-li-autofill-name="phone-number" />
-            </div>
+                <div class="fm-field">
+                  <label for="bio">Bio <span class="fm-field-hint">(40+ chars = complete)</span></label>
+                  <textarea id="bio" name="bio" maxlength="280" data-fm-bio-counter data-li-autofill-name="position-summary">{{ user.bio or '' }}</textarea>
+                  <div class="fm-counter" data-fm-bio-counter-display>{{ (user.bio or '') | length }} / 280</div>
+                </div>
+              </div>
+            </section>
 
-            <div class="fm-field">
-              <label for="linkedin_url">LinkedIn URL <span class="fm-field-hint">your profile link (optional)</span></label>
-              <input id="linkedin_url" name="linkedin_url" type="url" inputmode="url" maxlength="2048" value="{{ user.linkedin_url or '' }}" placeholder="https://www.linkedin.com/in/your-handle" />
-            </div>
+            <section class="fm-section" aria-labelledby="fm-section-locale">
+              <header class="fm-section-head">
+                <div class="fm-section-eyebrow">→ Location &amp; Locale</div>
+                <h2 class="fm-section-title">Where you <em>are.</em></h2>
+                <p class="fm-section-sub">Auto-filled from LinkedIn the first time you sync. You can correct it any time.</p>
+              </header>
+              <div class="fm-section-body">
+                <div class="fm-field">
+                  <label for="locale">Language <span class="fm-field-hint">(e.g. en, en_IN)</span></label>
+                  <input id="locale" name="locale" type="text" maxlength="16" pattern="[A-Za-z]{2,3}(_[A-Z]{2})?" value="{{ user.locale or '' }}" placeholder="en_IN" />
+                </div>
+
+                <div class="fm-field">
+                  <label for="zoneinfo">Timezone <span class="fm-field-hint">(e.g. Asia/Kolkata)</span></label>
+                  <input id="zoneinfo" name="zoneinfo" type="text" maxlength="64" pattern="[A-Za-z]+(/[A-Za-z_]+)*" value="{{ user.zoneinfo or '' }}" placeholder="Asia/Kolkata" />
+                </div>
+              </div>
+            </section>
+
+            <section class="fm-section" aria-labelledby="fm-section-linkedin">
+              <header class="fm-section-head">
+                <div class="fm-section-eyebrow">→ LinkedIn</div>
+                <h2 class="fm-section-title">Your <em>LinkedIn.</em></h2>
+                <p class="fm-section-sub">Your headline, profile URL, and what we import on Refresh.</p>
+              </header>
+              <div class="fm-section-body">
+                <div class="fm-field">
+                  <label for="headline">LinkedIn headline <span class="fm-field-hint">(auto-filled from LinkedIn)</span></label>
+                  <input id="headline" name="headline" type="text" maxlength="200" value="{{ user.headline or '' }}" placeholder="Senior Product Designer · ex-Google" />
+                </div>
+
+                <div class="fm-field">
+                  <label for="linkedin_url">LinkedIn URL <span class="fm-field-hint">your profile link (optional)</span></label>
+                  <input id="linkedin_url" name="linkedin_url" type="url" inputmode="url" maxlength="2048" value="{{ user.linkedin_url or '' }}" placeholder="https://www.linkedin.com/in/your-handle" />
+                </div>
+
+                <div class="fm-field">
+                  <label for="profile_url">LinkedIn vanity profile URL <span class="fm-field-hint">(auto-filled; you can override)</span></label>
+                  <input id="profile_url" name="profile_url" type="url" inputmode="url" maxlength="2048" value="{{ user.profile_url or '' }}" placeholder="https://www.linkedin.com/in/your-handle" />
+                </div>
+              </div>
+            </section>
+
+            <section class="fm-section" aria-labelledby="fm-section-contact">
+              <header class="fm-section-head">
+                <div class="fm-section-eyebrow">→ Contact</div>
+                <h2 class="fm-section-title">How people <em>reach you.</em></h2>
+                <p class="fm-section-sub">Only shown if you put it on the folio. Never sold, never shared.</p>
+              </header>
+              <div class="fm-section-body">
+                <div class="fm-field">
+                  <label for="phone">WhatsApp number</label>
+                  <input id="phone" name="phone" type="tel" maxlength="20" value="{{ user.phone or '' }}" placeholder="+91 98765 43210" data-li-autofill-name="phone-number" />
+                </div>
+              </div>
+            </section>
+
+            <section class="fm-section" aria-labelledby="fm-section-media">
+              <header class="fm-section-head">
+                <div class="fm-section-eyebrow">→ Profile media</div>
+                <h2 class="fm-section-title">Your <em>face.</em></h2>
+                <p class="fm-section-sub">Avatar and (Pro) looping profile video. Stored on Cloudinary.</p>
+              </header>
+              <div class="fm-section-body">
 
             <div class="fm-autofill" data-fm-autofill hidden aria-live="polite">
               <span class="fm-autofill-mark" aria-hidden="true">→</span>
@@ -220,9 +293,17 @@
                 <span class="fm-work-rail-status" data-fm-work-rail-status hidden></span>
               </div>
             </div>
+              </div>
+            </section>
 
+            <section class="fm-section" aria-labelledby="fm-section-spotlight">
+              <header class="fm-section-head">
+                <div class="fm-section-eyebrow">→ Spotlight <span class="fm-section-tag">Pro</span></div>
+                <h2 class="fm-section-title">Always-on-top <em>CTA.</em></h2>
+                <p class="fm-section-sub">One button pinned at the top of your folio. Bookings, recent work, anything.</p>
+              </header>
+              <div class="fm-section-body">
             <div class="fm-field fm-field-spotlight">
-              <label>Spotlight <span class="fm-field-hint">(Pro · one always-on-top CTA)</span></label>
               {% if user.plan != 'pro' and not user.is_internal %}
                 <p class="fm-spotlight-locked">Spotlight is a Pro feature. <a href="/pricing">Upgrade →</a></p>
               {% else %}
@@ -264,30 +345,49 @@
                 </form>
               {% endif %}
             </div>
+              </div>
+            </section>
 
-            <div class="fm-field fm-field-toggle">
-              <label class="fm-toggle-row" for="is_public">
-                <span class="fm-toggle-text">
-                  <span class="fm-toggle-label">Make my folio public</span>
-                  <span class="fm-field-hint">Off by default. <code>/{{ user.slug }}</code> 404s to anyone but you when off.</span>
-                </span>
-                <input id="is_public" name="is_public" type="checkbox" value="1" {% if user.is_public %}checked{% endif %} />
-                <span class="fm-toggle-track" aria-hidden="true"><span class="fm-toggle-thumb"></span></span>
-              </label>
-            </div>
+            <section class="fm-section" aria-labelledby="fm-section-visibility">
+              <header class="fm-section-head">
+                <div class="fm-section-eyebrow">→ Visibility</div>
+                <h2 class="fm-section-title">Who can <em>see you.</em></h2>
+                <p class="fm-section-sub">Privacy first. Off by default — your folio is private until you flip it on.</p>
+              </header>
+              <div class="fm-section-body">
+                <div class="fm-field fm-field-toggle">
+                  <label class="fm-toggle-row" for="is_public">
+                    <span class="fm-toggle-text">
+                      <span class="fm-toggle-label">Make my folio public</span>
+                      <span class="fm-field-hint">Off by default. <code>/{{ user.slug }}</code> 404s to anyone but you when off.</span>
+                    </span>
+                    <input id="is_public" name="is_public" type="checkbox" value="1" {% if user.is_public %}checked{% endif %} />
+                    <span class="fm-toggle-track" aria-hidden="true"><span class="fm-toggle-thumb"></span></span>
+                  </label>
+                </div>
 
-            <div class="fm-field fm-field-toggle fm-field-listing">
-              <label class="fm-toggle-row" for="is_listed">
-                <span class="fm-toggle-text">
-                  <span class="fm-toggle-label">List me in <a href="/space-community" target="_blank" rel="noopener">Space Community</a></span>
-                  <span class="fm-field-hint">Opt-in only. Requires public. Default off.</span>
-                </span>
-                <input id="is_listed" name="is_listed" type="checkbox" value="1"
-                       {% if user.is_listed %}checked{% endif %}
-                       {% if not user.is_public %}disabled{% endif %} />
-                <span class="fm-toggle-track" aria-hidden="true"><span class="fm-toggle-thumb"></span></span>
-              </label>
-            </div>
+                <div class="fm-field fm-field-toggle fm-field-listing">
+                  <label class="fm-toggle-row" for="is_listed">
+                    <span class="fm-toggle-text">
+                      <span class="fm-toggle-label">List me in <a href="/space-community" target="_blank" rel="noopener">Space Community</a></span>
+                      <span class="fm-field-hint">Opt-in only. Requires public. Default off.</span>
+                    </span>
+                    <input id="is_listed" name="is_listed" type="checkbox" value="1"
+                           {% if user.is_listed %}checked{% endif %}
+                           {% if not user.is_public %}disabled{% endif %} />
+                    <span class="fm-toggle-track" aria-hidden="true"><span class="fm-toggle-thumb"></span></span>
+                  </label>
+                </div>
+              </div>
+            </section>
+
+            <section class="fm-section" aria-labelledby="fm-section-advanced">
+              <header class="fm-section-head">
+                <div class="fm-section-eyebrow">→ Advanced</div>
+                <h2 class="fm-section-title">SEO, links, <em>fonts.</em></h2>
+                <p class="fm-section-sub">Optional knobs for how your folio is shared and styled.</p>
+              </header>
+              <div class="fm-section-body">
 
             <details class="fm-field fm-field-seo" data-fm-seo>
               <summary class="fm-seo-summary">
@@ -416,6 +516,8 @@
                 {% endif %}
               </div>
             </details>
+              </div>
+            </section>
 
             <button type="submit" class="fm-save">Save folio →</button>
           </form>

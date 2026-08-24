@@ -1075,6 +1075,10 @@ def update_user_profile(
     avatar_url=None,
     is_public,
     linkedin_url=None,
+    headline=None,
+    locale=None,
+    zoneinfo=None,
+    profile_url=None,
 ) -> dict | None:
     uid = UUID(user_id) if not isinstance(user_id, UUID) else user_id
     now = datetime.now(timezone.utc)
@@ -1085,6 +1089,32 @@ def update_user_profile(
         r"https?://(www\.)?linkedin\.com/in/[A-Za-z0-9_\-]+/?", linkedin_value
     ):
         return None
+    headline_present = headline is not None
+    locale_present = locale is not None
+    zoneinfo_present = zoneinfo is not None
+    profile_url_present = profile_url is not None
+    headline_clean = _clean_text(headline, 200) if headline_present else None
+    if headline_present and headline and (len(headline.strip()) > 200 or not headline_clean):
+        return None
+    locale_clean = _clean_text(locale, 16) if locale_present else None
+    if locale_present and locale_clean and not re.fullmatch(
+        r"[A-Za-z]{2,3}(_[A-Z]{2})?", locale_clean
+    ):
+        return None
+    zoneinfo_clean = _clean_text(zoneinfo, 64) if zoneinfo_present else None
+    if zoneinfo_present and zoneinfo_clean and not re.fullmatch(
+        r"[A-Za-z]+(/[A-Za-z_]+)*", zoneinfo_clean
+    ):
+        return None
+    if profile_url_present and profile_url:
+        try:
+            profile_url_clean = _clean_url(profile_url)
+        except ValueError:
+            return None
+        if not profile_url_clean:
+            return None
+    else:
+        profile_url_clean = None
     try:
         with _connect() as conn:
             with conn.cursor() as cur:
@@ -1122,6 +1152,18 @@ def update_user_profile(
                 if linkedin_present:
                     set_clauses.append("linkedin_url = %s")
                     params.append(linkedin_value or None)
+                if headline_present:
+                    set_clauses.append("headline = %s")
+                    params.append(headline_clean or None)
+                if locale_present:
+                    set_clauses.append("locale = %s")
+                    params.append(locale_clean or None)
+                if zoneinfo_present:
+                    set_clauses.append("zoneinfo = %s")
+                    params.append(zoneinfo_clean or None)
+                if profile_url_present:
+                    set_clauses.append("profile_url = %s")
+                    params.append(profile_url_clean or None)
                 params.append(uid)
                 sql = f"""
                     UPDATE users
@@ -1131,7 +1173,7 @@ def update_user_profile(
                     RETURNING id, email, slug, display_name, role, bio, phone, avatar_url,
                               is_public, email_verified, created_at, updated_at,
                               last_login_at, claimed_at, claim_token, claim_expires_at,
-                              deleted_at, linkedin_url
+                              deleted_at, linkedin_url, headline, locale, zoneinfo, profile_url
                 """
                 cur.execute(sql, params)
                 row = cur.fetchone()

@@ -10190,8 +10190,71 @@ body.dark .dash-badge { background: var(--card-bg); }
 .fm-form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 28px;
   margin-top: 6px;
+}
+.fm-section {
+  border-top: 1px solid var(--line, #E8E3D9);
+  padding-top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.fm-section:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+.fm-section-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.fm-section-eyebrow {
+  font-family: 'Saira', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent, #FF6B35);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fm-section-tag {
+  font-family: 'Saira', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--ink, #0F1419);
+  background: rgba(255, 107, 53, 0.14);
+  padding: 2px 7px;
+  border-radius: 999px;
+  margin-left: 2px;
+}
+.fm-section-title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 26px;
+  line-height: 1.15;
+  font-weight: 400;
+  margin: 0;
+  color: var(--ink, #0F1419);
+}
+.fm-section-title em {
+  font-style: italic;
+  color: var(--accent, #FF6B35);
+}
+.fm-section-sub {
+  font-family: 'Saira', sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted, #5C6470);
+  margin: 2px 0 0;
+  max-width: 56ch;
+}
+.fm-section-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 .fm-field {
   display: flex;

@@ -150,12 +150,56 @@ def sync_basic_profile(user_id: str) -> dict:
                 cur.execute(
                     """
                     UPDATE users
-                       SET role = %s,
+                       SET headline = %s,
+                           role = %s,
                            updated_at = NOW()
                      WHERE id = %s
                        AND (role IS NULL OR BTRIM(role) = '')
                     """,
-                    (payload["headline"][:60], user_id),
+                    (payload["headline"][:200], payload["headline"][:60], user_id),
+                )
+                cur.execute(
+                    """
+                    UPDATE users
+                       SET headline = %s,
+                           updated_at = NOW()
+                     WHERE id = %s
+                       AND (headline IS NULL OR BTRIM(headline) = '')
+                    """,
+                    (payload["headline"][:200], user_id),
+                )
+            if payload.get("locale"):
+                cur.execute(
+                    """
+                    UPDATE users
+                       SET locale = %s,
+                           updated_at = NOW()
+                     WHERE id = %s
+                       AND (locale IS NULL OR BTRIM(locale) = '')
+                    """,
+                    (payload["locale"][:16], user_id),
+                )
+            if payload.get("zoneinfo"):
+                cur.execute(
+                    """
+                    UPDATE users
+                       SET zoneinfo = %s,
+                           updated_at = NOW()
+                     WHERE id = %s
+                       AND (zoneinfo IS NULL OR BTRIM(zoneinfo) = '')
+                    """,
+                    (payload["zoneinfo"][:64], user_id),
+                )
+            if payload.get("profile_url"):
+                cur.execute(
+                    """
+                    UPDATE users
+                       SET profile_url = %s,
+                           updated_at = NOW()
+                     WHERE id = %s
+                       AND (profile_url IS NULL OR BTRIM(profile_url) = '')
+                    """,
+                    (payload["profile_url"][:2048], user_id),
                 )
         conn.commit()
     avatar_mirror = _mirror_avatar(user_id, payload.get("picture", ""))
