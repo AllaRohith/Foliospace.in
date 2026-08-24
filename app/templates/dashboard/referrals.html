@@ -37,7 +37,7 @@
               </div>
               <div class="fm-bill-figure-unit">
                 {% if progress.unlocked %}
-                  Your renewal is locked at ₹899 — forever.
+                  Your renewal is locked at ₹{{ "{:,}".format(PRO_YEAR1_INR) }} — forever.
                 {% elif progress.remaining == 1 %}
                   {{ progress.remaining }} more friend to lock Year-1.
                 {% else %}
@@ -141,7 +141,7 @@
             </details>
             <details class="fm-bill-faq-item">
               <summary><span>What happens at 10?</span><span class="fm-bill-faq-icon" aria-hidden="true"></span></summary>
-              <div class="fm-bill-faq-body"><p>If you're on a year-2 subscription, we swap you back to the year-1 plan immediately. If you're on year-1, the discount stays locked — every renewal, forever. If you're on Free, your first Pro year starts at ₹899.</p></div>
+              <div class="fm-bill-faq-body"><p>If you're on a year-2 subscription, we swap you back to the year-1 plan immediately. If you're on year-1, the discount stays locked — every renewal, forever. If you're on Free, your first Pro year starts at ₹{{ "{:,}".format(PRO_YEAR1_INR) }}.</p></div>
             </details>
             <details class="fm-bill-faq-item">
               <summary><span>Can I lose the lock once I've earned it?</span><span class="fm-bill-faq-icon" aria-hidden="true"></span></summary>

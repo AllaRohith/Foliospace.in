@@ -106,7 +106,7 @@
       "name": "How much does FolioSpace Pro cost in India?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Pro is ₹899 per year in Year 1 (launch offer, 40% off the regular price) and ₹1,499 per year from Year 2. Payment is via Cashfree UPI AutoPay or Card AutoPay — PhonePe, Google Pay, Paytm, BHIM, any UPI app. Cancel any time from your dashboard."
+        "text": "Pro is ₹{{ '{:,}'.format(PRO_YEAR1_INR) }} per year in Year 1 (launch offer, 40% off the regular price) and ₹{{ '{:,}'.format(PRO_YEAR2_INR) }} per year from Year 2. Payment is via Cashfree UPI AutoPay or Card AutoPay — PhonePe, Google Pay, Paytm, BHIM, any UPI app. Cancel any time from your dashboard."
       }
     },
     {
@@ -405,11 +405,11 @@
         <p class="tldr-def">Chefs, developers, students, consultants, shop owners, agencies, and founders. Your folio lives at <em>foliospace.in/your-name</em>, previews cleanly on WhatsApp and LinkedIn, exports to PDF, and runs on UPI AutoPay — built in India, for the Indian web.</p>
         <div class="tldr-answer">
           <span class="tldr-answer-label">TL;DR</span>
-          <p>It's free to start (no card), ₹899/yr for Pro in Year 1, fast on slow mobile networks, and your handle is yours forever. Made for people who want one clean link that actually shows their work.</p>
+          <p>It's free to start (no card), ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr for Pro in Year 1, fast on slow mobile networks, and your handle is yours forever. Made for people who want one clean link that actually shows their work.</p>
         </div>
         <ul class="tldr-takeaways" aria-label="Key takeaways">
           <li><strong>Free Solo tier</strong> — your slug, share QR, PDF export, contact form, passkey sign-in. Forever.</li>
-          <li><strong>Pro ₹899/yr Year 1</strong> — launch offer, 40% off the regular ₹1,499/yr. UPI AutoPay via Cashfree.</li>
+          <li><strong>Pro ₹{{ "{:,}".format(PRO_YEAR1_INR) }}/yr Year 1</strong> — launch offer, 40% off the regular ₹{{ "{:,}".format(PRO_YEAR2_INR) }}/yr. UPI AutoPay via Cashfree.</li>
           <li><strong>Indian by default</strong> — INR pricing, UPI-native billing, lightweight on every Indian network.</li>
           <li><strong>Privacy-first</strong> — folios are private until you flip the public toggle. Delete your data any time.</li>
         </ul>
@@ -431,7 +431,7 @@
           </article>
           <article class="qa-card">
             <h3 class="qa-q">How much does Pro cost in India?</h3>
-            <p class="qa-a">Pro is ₹899 per year in Year 1 (launch offer, 40% off the regular price) and ₹1,499 per year from Year 2. Paid via Cashfree UPI AutoPay or Card AutoPay — PhonePe, Google Pay, Paytm, BHIM, any UPI app. Cancel any time from your dashboard.</p>
+            <p class="qa-a">Pro is ₹{{ "{:,}".format(PRO_YEAR1_INR) }} per year in Year 1 (launch offer, 40% off the regular price) and ₹{{ "{:,}".format(PRO_YEAR2_INR) }} per year from Year 2. Paid via Cashfree UPI AutoPay or Card AutoPay — PhonePe, Google Pay, Paytm, BHIM, any UPI app. Cancel any time from your dashboard.</p>
           </article>
           <article class="qa-card">
             <h3 class="qa-q">How is this different from Linktree or Carrd?</h3>
@@ -989,6 +989,7 @@
               <span class="faq-icon" aria-hidden="true"></span>
             </summary>
             <div class="faq-body">
+              <p>₹{{ "{:,}".format(PRO_YEAR1_INR) }} is the <strong>launch price for Year 1</strong> — 40% off the regular ₹{{ "{:,}".format(PRO_YEAR2_INR) }}/yr. From Year 2 onwards, Pro renews at the standard ₹{{ "{:,}".format(PRO_YEAR2_INR) }}/yr. Refer 10 verified friends and the ₹{{ "{:,}".format(PRO_YEAR1_INR) }} rate locks in for life.</p>
               <p>It covers payment processing, hosting, the OG image renderer, the QR generator, and the analytics storage — for one folio per user. No setup fee. We add features, not price hikes.</p>
             </div>
           </details>
@@ -1026,23 +1027,23 @@
     <section id="features-teaser" class="features">
       <div class="container">
         <p class="folio-meta reveal"><span class="folio-meta-dot">●</span>FolioSpace · Issue 01 · Page 09<span class="folio-meta-sep">/</span>What's building next</p>
-        <h2 class="reveal">Two integrations <em>on the way.</em></h2>
-        <p class="features-teaser-lead reveal">GitHub + LinkedIn. Here's what's coming, in plain English — read the full roadmap.</p>
+        <h2 class="reveal">LinkedIn for <em>everyone.</em><br>GitHub for <em>builders.</em></h2>
+        <p class="features-teaser-lead reveal">LinkedIn pulls your experience, education, and certs — auto-refreshing, useful for every professional. GitHub pulls repos and contributions for developers and designers. <a href="/features">See the full roadmap →</a></p>
 
         <div class="features-teaser-grid">
           <article class="h-card reveal">
             <div class="h-avatar">G</div>
-            <span class="h-role">Coming soon</span>
+            <span class="h-role">For builders</span>
             <h3>GitHub.</h3>
             <p>Pinned repos, contribution graph, languages. Paste a username.</p>
-            <div class="h-foot"><span class="badge outline">Roadmap</span></div>
+            <div class="h-foot"><span class="badge outline">In beta</span></div>
           </article>
           <article class="h-card reveal">
             <div class="h-avatar">L</div>
-            <span class="h-role">Coming soon</span>
+            <span class="h-role">For everyone</span>
             <h3>LinkedIn.</h3>
             <p>Experience, education, certs — the whole profile. Auto-refreshing.</p>
-            <div class="h-foot"><span class="badge outline">Roadmap</span></div>
+            <div class="h-foot"><span class="badge outline">In beta</span></div>
           </article>
         </div>
 
