@@ -6,6 +6,7 @@
 {% block canonical %}/{% endblock %}
 
 {% block content %}
+{% include "partials/_nav.html" %}
 <style>
   .err {
     background: var(--cream, #FAF7F2);
@@ -120,4 +121,5 @@
     </div>
   </div>
 </main>
+{% include "partials/_footer.html" %}
 {% endblock %}

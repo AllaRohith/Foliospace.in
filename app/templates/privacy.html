@@ -4,6 +4,7 @@
 {% block description %}FolioSpace privacy policy. What we collect, how we use it, and how to ask us to delete it.{% endblock %}
 
 {% block content %}
+{% include "partials/_nav.html" %}
 <style>
   .legal {
     background: var(--cream, #FAF7F2);
@@ -232,4 +233,5 @@
     </nav>
   </div>
 </main>
+{% include "partials/_footer.html" %}
 {% endblock %}

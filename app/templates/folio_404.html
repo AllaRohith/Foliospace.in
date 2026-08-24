@@ -4,6 +4,7 @@
 {% block og_image %}{{ request.url_for('static', path='img/og.png') }}?v={{ asset_v }}{% endblock %}
 
 {% block content %}
+{% include "partials/_nav.html" %}
 <main id="main" class="pf-page pf-claim">
   <div class="pf-grain" aria-hidden="true"></div>
   <article class="pf-shell pf-claim-shell">
@@ -13,4 +14,5 @@
     <a class="pf-cta" href="/signup">Claim it →</a>
   </article>
 </main>
+{% include "partials/_footer.html" %}
 {% endblock %}
