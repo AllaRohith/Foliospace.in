@@ -100,6 +100,7 @@ class LinkedInSyncWritesFourColumnsTests(unittest.TestCase):
             "avatar_provider": "",
             "avatar_public_id": "",
         }
+        fake_cur.rowcount = 1
         fake_conn = mock.MagicMock()
         fake_conn.__enter__ = mock.MagicMock(return_value=fake_conn)
         fake_conn.__exit__ = mock.MagicMock(return_value=False)
@@ -147,6 +148,42 @@ class LinkedInSyncWritesFourColumnsTests(unittest.TestCase):
         self.assertIn("locale", joined)
         self.assertIn("zoneinfo", joined)
         self.assertIn("profile_url", joined)
+
+    def test_sync_v2_me_failure_does_not_break_locale_zoneinfo(self):
+        """If /v2/me 403s, locale and zoneinfo from /v2/userinfo must still write."""
+        fake_conn, fake_cur = self._build_fake_conn()
+        captured_sqls = []
+
+        def _exec(sql, params=None):
+            captured_sqls.append(str(sql).lower())
+
+        fake_cur.execute.side_effect = _exec
+
+        with mock.patch("app.services.user_auth._connect", return_value=fake_conn), \
+             mock.patch("app.services.imports.linkedin._http_get_bearer") as http_mock, \
+             mock.patch("app.services.imports.linkedin.get_token_for", return_value="fake-token"), \
+             mock.patch("app.services.imports.linkedin._mirror_avatar", return_value=None):
+            http_mock.side_effect = [
+                {
+                    "sub": "abc",
+                    "name": "Test User",
+                    "email": "t@example.com",
+                    "email_verified": True,
+                    "locale": "en_IN",
+                    "zoneinfo": "Asia/Kolkata",
+                    "picture": "",
+                },
+                None,
+            ]
+            from app.services.imports import linkedin as li
+            res = li.sync_basic_profile("00000000-0000-0000-0000-000000000000")
+
+        self.assertTrue(res.get("ok"))
+        joined = "\n".join(captured_sqls)
+        self.assertIn("locale", joined)
+        self.assertIn("zoneinfo", joined)
+        self.assertNotIn("localizedheadline", joined)
+        self.assertIn("locale", res.get("fields_written", []))
 
     def test_sync_skips_overwriting_existing_user_values(self):
         """The SQL should only fire WHERE the column is NULL or empty."""

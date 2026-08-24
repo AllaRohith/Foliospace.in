@@ -99,7 +99,22 @@ def sync_basic_profile(user_id: str) -> dict:
     raw = _http_get_bearer(LINKEDIN_USERINFO_URL, token)
     if not raw:
         return {"ok": False, "reason": "fetch-failed"}
-    me_raw = _http_get_bearer(LINKEDIN_ME_URL, token) or {}
+    me_raw: dict = {}
+    me_err: str | None = None
+    try:
+        me_resp = _http_get_bearer(LINKEDIN_ME_URL, token)
+        if isinstance(me_resp, dict):
+            me_raw = me_resp
+        else:
+            me_err = "non-dict"
+    except Exception as e:
+        me_err = str(e)
+    if me_err:
+        logger.info(
+            "linkedin /v2/me unavailable (scope=%s); headline/vanity_name skipped: %s",
+            "openid profile email",
+            me_err,
+        )
     payload = {
         "sub": _str(raw.get("sub")).strip()[:255],
         "name": _str(raw.get("name")).strip()[:160],
@@ -130,80 +145,97 @@ def sync_basic_profile(user_id: str) -> dict:
         return {"ok": False, "reason": "no-sub"}
     from psycopg.types.json import Json
     from app.services.user_auth import _connect
-    with _connect() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO imported_profile (user_id, provider, payload, fetched_at)
-                VALUES (%s, 'linkedin', %s, NOW())
-                ON CONFLICT (user_id, provider) DO UPDATE SET
-                    payload = EXCLUDED.payload,
-                    fetched_at = NOW()
-                """,
-                (user_id, Json(payload)),
-            )
-            cur.execute(
-                "UPDATE social_accounts SET last_synced_at = NOW() WHERE user_id = %s AND provider = 'linkedin'",
-                (user_id,),
-            )
-            if payload.get("headline"):
+    fields_written: list[str] = []
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
                 cur.execute(
                     """
-                    UPDATE users
-                       SET headline = %s,
-                           role = %s,
-                           updated_at = NOW()
-                     WHERE id = %s
-                       AND (role IS NULL OR BTRIM(role) = '')
+                    INSERT INTO imported_profile (user_id, provider, payload, fetched_at)
+                    VALUES (%s, 'linkedin', %s, NOW())
+                    ON CONFLICT (user_id, provider) DO UPDATE SET
+                        payload = EXCLUDED.payload,
+                        fetched_at = NOW()
                     """,
-                    (payload["headline"][:200], payload["headline"][:60], user_id),
+                    (user_id, Json(payload)),
                 )
                 cur.execute(
-                    """
-                    UPDATE users
-                       SET headline = %s,
-                           updated_at = NOW()
-                     WHERE id = %s
-                       AND (headline IS NULL OR BTRIM(headline) = '')
-                    """,
-                    (payload["headline"][:200], user_id),
+                    "UPDATE social_accounts SET last_synced_at = NOW() WHERE user_id = %s AND provider = 'linkedin'",
+                    (user_id,),
                 )
-            if payload.get("locale"):
-                cur.execute(
-                    """
-                    UPDATE users
-                       SET locale = %s,
-                           updated_at = NOW()
-                     WHERE id = %s
-                       AND (locale IS NULL OR BTRIM(locale) = '')
-                    """,
-                    (payload["locale"][:16], user_id),
-                )
-            if payload.get("zoneinfo"):
-                cur.execute(
-                    """
-                    UPDATE users
-                       SET zoneinfo = %s,
-                           updated_at = NOW()
-                     WHERE id = %s
-                       AND (zoneinfo IS NULL OR BTRIM(zoneinfo) = '')
-                    """,
-                    (payload["zoneinfo"][:64], user_id),
-                )
-            if payload.get("profile_url"):
-                cur.execute(
-                    """
-                    UPDATE users
-                       SET profile_url = %s,
-                           updated_at = NOW()
-                     WHERE id = %s
-                       AND (profile_url IS NULL OR BTRIM(profile_url) = '')
-                    """,
-                    (payload["profile_url"][:2048], user_id),
-                )
-        conn.commit()
+                if payload.get("headline"):
+                    cur.execute(
+                        """
+                        UPDATE users
+                           SET headline = %s,
+                               role = %s,
+                               updated_at = NOW()
+                         WHERE id = %s
+                           AND (role IS NULL OR BTRIM(role) = '')
+                        """,
+                        (payload["headline"][:200], payload["headline"][:60], user_id),
+                    )
+                    cur.execute(
+                        """
+                        UPDATE users
+                           SET headline = %s,
+                               updated_at = NOW()
+                         WHERE id = %s
+                           AND (headline IS NULL OR BTRIM(headline) = '')
+                        """,
+                        (payload["headline"][:200], user_id),
+                    )
+                    fields_written.append("headline")
+                if payload.get("locale"):
+                    cur.execute(
+                        """
+                        UPDATE users
+                           SET locale = %s,
+                               updated_at = NOW()
+                         WHERE id = %s
+                           AND (locale IS NULL OR BTRIM(locale) = '')
+                        """,
+                        (payload["locale"][:16], user_id),
+                    )
+                    if cur.rowcount > 0:
+                        fields_written.append("locale")
+                if payload.get("zoneinfo"):
+                    cur.execute(
+                        """
+                        UPDATE users
+                           SET zoneinfo = %s,
+                               updated_at = NOW()
+                         WHERE id = %s
+                           AND (zoneinfo IS NULL OR BTRIM(zoneinfo) = '')
+                        """,
+                        (payload["zoneinfo"][:64], user_id),
+                    )
+                    if cur.rowcount > 0:
+                        fields_written.append("zoneinfo")
+                if payload.get("profile_url"):
+                    cur.execute(
+                        """
+                        UPDATE users
+                           SET profile_url = %s,
+                               updated_at = NOW()
+                         WHERE id = %s
+                           AND (profile_url IS NULL OR BTRIM(profile_url) = '')
+                        """,
+                        (payload["profile_url"][:2048], user_id),
+                    )
+                    if cur.rowcount > 0:
+                        fields_written.append("profile_url")
+            conn.commit()
+    except Exception as e:
+        logger.exception("linkedin sync_basic_profile users-write failed: %s", e)
+        return {"ok": False, "reason": "db-write-failed", "fields_attempted": fields_written}
+    if fields_written:
+        logger.info(
+            "linkedin sync_basic_profile wrote fields=%s user_id=%s",
+            ",".join(fields_written), user_id,
+        )
     avatar_mirror = _mirror_avatar(user_id, payload.get("picture", ""))
-    result = {"ok": True, "payload": payload}
+    result = {"ok": True, "payload": payload, "fields_written": fields_written}
     if avatar_mirror is not None:
         result["avatar_mirror"] = avatar_mirror
     return result
