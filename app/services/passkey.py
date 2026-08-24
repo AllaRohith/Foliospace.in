@@ -53,6 +53,7 @@ def _webauthn() -> dict[str, Any]:
     from webauthn.helpers.structs import (
         AttestationConveyancePreference,
         AuthenticatorAttachment,
+        AuthenticatorSelectionCriteria,
         PublicKeyCredentialType,
     )
     _webauthn_cache.update(
@@ -66,6 +67,7 @@ def _webauthn() -> dict[str, Any]:
         UserVerificationRequirement=UserVerificationRequirement,
         AttestationConveyancePreference=AttestationConveyancePreference,
         AuthenticatorAttachment=AuthenticatorAttachment,
+        AuthenticatorSelectionCriteria=AuthenticatorSelectionCriteria,
         PublicKeyCredentialType=PublicKeyCredentialType,
     )
     return _webauthn_cache
@@ -400,6 +402,14 @@ def start_registration(
     webauthn_uid = _gen_webauthn_user_id(user_id)
     _store_challenge("register", challenge, user_id=user_id, ip=ip, ua=ua)
     wa = _webauthn()
+    # webauthn 3.x requires AuthenticatorSelectionCriteria dataclass, not a dict.
+    # (In 2.x the library accepted a dict and constructed the dataclass itself.)
+    authenticator_selection = wa["AuthenticatorSelectionCriteria"](
+        resident_key=wa["ResidentKeyRequirement"].PREFERRED,
+        user_verification=wa["UserVerificationRequirement"].REQUIRED,
+        authenticator_attachment=wa["AuthenticatorAttachment"].PLATFORM,
+        require_resident_key=False,
+    )
     options = wa["generate_registration_options"](
         rp_id=_rp_id(),
         rp_name=_rp_name(),
@@ -408,11 +418,7 @@ def start_registration(
         user_display_name=user["email"],
         challenge=challenge,
         attestation=wa["AttestationConveyancePreference"].NONE,
-        authenticator_selection={
-            "resident_key": wa["ResidentKeyRequirement"].PREFERRED,
-            "user_verification": wa["UserVerificationRequirement"].REQUIRED,
-            "authenticator_attachment": wa["AuthenticatorAttachment"].PLATFORM,
-        },
+        authenticator_selection=authenticator_selection,
         supported_pub_key_algs=[
             wa["COSEAlgorithmIdentifier"].ECDSA_SHA_256,
             wa["COSEAlgorithmIdentifier"].EDDSA,
@@ -633,7 +639,10 @@ def _serialize_authn_options(opts) -> dict[str, Any]:
             }
             for c in (opts.allow_credentials or [])
         ],
-        "hints": [h.value for h in (opts.hints or [])],
+        # webauthn 3.x removed `hints` from PublicKeyCredentialRequestOptions.
+        # (2.x had it.) Skip when absent — the field is a hint, not required
+        # for the browser's navigator.credentials.get() call.
+        **({"hints": [h.value for h in opts.hints]} if hasattr(opts, "hints") else {}),
     }
 
 

@@ -531,5 +531,97 @@ class DashboardPageContextTests(unittest.TestCase):
             self.assertIn(key, ctx["user"], f"user context missing `{key}` for sidebar")
 
 
+# ── webauthn 3.x API compatibility ─────────────────────────────────────────────────────────────────────────
+
+class Webauthn3xBuilderTests(unittest.TestCase):
+    """Regression: py_webauthn 3.x broke two builder inputs vs 2.x.
+
+    1. `generate_registration_options` no longer accepts `authenticator_selection`
+       as a dict — it requires `AuthenticatorSelectionCriteria` dataclass. Passing
+       a dict hits `AttributeError: 'dict' object has no attribute 'resident_key'`
+       inside the library and the route returns 500.
+
+    2. `PublicKeyCredentialRequestOptions` lost its `hints` field. The serializer
+       `_serialize_authn_options` previously did `opts.hints` and raised
+       `AttributeError: ... no attribute 'hints'` on every login ceremony.
+
+    These tests exercise the actual library on webauthn 3.x. Skip if py_webauthn
+    is not installed or is <2.0.
+    """
+
+    def setUp(self):
+        import webauthn
+        from packaging.version import Version
+        try:
+            v = Version(webauthn.__version__)
+        except Exception:
+            self.skipTest(f"could not parse webauthn version: {webauthn.__version__}")
+        if v < Version("3.0"):
+            self.skipTest(f"py_webauthn {v} — these regressions only fire on 3.x")
+
+    def _gen_options(self):
+        from app.services import passkey as pk
+        wa = pk._webauthn()
+        return wa["generate_registration_options"](
+            rp_id="localhost",
+            rp_name="FolioSpace",
+            user_id=b"x" * 16,
+            user_name="a@b.in",
+            user_display_name="a@b.in",
+            challenge=b"x" * 32,
+            attestation=wa["AttestationConveyancePreference"].NONE,
+            authenticator_selection=wa["AuthenticatorSelectionCriteria"](
+                resident_key=wa["ResidentKeyRequirement"].PREFERRED,
+                user_verification=wa["UserVerificationRequirement"].REQUIRED,
+                authenticator_attachment=wa["AuthenticatorAttachment"].PLATFORM,
+                require_resident_key=False,
+            ),
+            supported_pub_key_algs=[
+                wa["COSEAlgorithmIdentifier"].ECDSA_SHA_256,
+                wa["COSEAlgorithmIdentifier"].EDDSA,
+                wa["COSEAlgorithmIdentifier"].RSASSA_PSS_SHA_256,
+            ],
+            timeout=300000,
+        )
+
+    def test_registration_options_build_with_dataclass(self):
+        """The route must pass AuthenticatorSelectionCriteria, not a dict."""
+        opts = self._gen_options()
+        sel = opts.authenticator_selection
+        self.assertEqual(sel.user_verification.value, "required")
+        self.assertEqual(sel.resident_key.value, "preferred")
+        self.assertEqual(sel.authenticator_attachment.value, "platform")
+
+    def test_serialize_reg_options_round_trip(self):
+        """The serializer must produce a JSON-friendly dict on webauthn 3.x."""
+        from app.services import passkey as pk
+        out = pk._serialize_reg_options(self._gen_options())
+        for key in ("rp", "user", "challenge", "pubKeyCredParams", "timeout",
+                    "excludeCredentials", "authenticatorSelection", "attestation"):
+            self.assertIn(key, out)
+        self.assertEqual(out["authenticatorSelection"]["userVerification"], "required")
+        self.assertEqual(out["authenticatorSelection"]["authenticatorAttachment"], "platform")
+        self.assertEqual(out["authenticatorSelection"]["residentKey"], "preferred")
+
+    def test_serialize_authn_options_no_hints(self):
+        """PublicKeyCredentialRequestOptions dropped `hints` in 3.x.
+
+        _serialize_authn_options must not raise AttributeError when reading it.
+        """
+        from app.services import passkey as pk
+        wa = pk._webauthn()
+        opts = wa["generate_authentication_options"](
+            rp_id="localhost",
+            challenge=b"x" * 32,
+            timeout=300000,
+            user_verification=wa["UserVerificationRequirement"].REQUIRED,
+            allow_credentials=[],
+        )
+        out = pk._serialize_authn_options(opts)
+        for key in ("challenge", "rpId", "timeout", "userVerification", "allowCredentials"):
+            self.assertIn(key, out)
+        self.assertEqual(out["userVerification"], "required")
+
+
 if __name__ == "__main__":
     unittest.main()
