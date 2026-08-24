@@ -199,6 +199,7 @@ async def passkeys_page(request: Request):
             "page_title": "Passkeys — FolioSpace",
             "description": "Manage your sign-in passkey.",
             "nav_active": "passkeys",
+            "user": user,
             "u": {
                 "id": str(user["id"]),
                 "email": user["email"],

@@ -10,6 +10,7 @@ Run from the repo root:
 import base64
 import secrets
 import unittest
+from types import SimpleNamespace
 from unittest import mock
 
 
@@ -457,6 +458,77 @@ class ExceptionHierarchyTests(unittest.TestCase):
             self.assertTrue(hasattr(cls, "code"), f"{n} missing .code")
             self.assertIsInstance(cls.code, str)
             self.assertGreater(len(cls.code), 0)
+
+
+# ── /dashboard/passkeys page context ─────────────────────────────────────────────────────────────────────────
+
+class DashboardPageContextTests(unittest.TestCase):
+    """Regression: dashboard passkeys page must include `user` in template context.
+
+    The shared `_dash_sidebar.html` partial references `user.slug`, `user.is_internal`,
+    `user.display_name`, `user.email`, and the `plan_summary` macro reads `plan`/
+    `plan_expires_at`/`payment_failed_at`. Earlier, only `u` was passed → 500 with
+    `jinja2.exceptions.UndefinedError: 'user' is undefined`.
+    """
+
+    def _make_request(self):
+        from starlette.requests import Request
+
+        scope = {
+            "type": "http",
+            "method": "GET",
+            "path": "/dashboard/passkeys",
+            "headers": [],
+            "query_string": b"",
+            "scheme": "http",
+            "server": ("testserver", 80),
+            "client": ("127.0.0.1", 12345),
+        }
+        return Request(scope)
+
+    def _run(self, coro):
+        import asyncio
+
+        return asyncio.get_event_loop().run_until_complete(coro)
+
+    def test_passkeys_page_context_has_user(self):
+        import asyncio
+        from app.routers import passkey as passkey_router
+
+        fake_user = {
+            "id": "11111111-1111-1111-1111-111111111111",
+            "email": "a@b.in",
+            "slug": "alice",
+            "display_name": "Alice",
+            "email_verified": True,
+            "plan": "free",
+            "is_internal": False,
+            "plan_expires_at": None,
+            "payment_failed_at": None,
+        }
+        captured = {}
+
+        def _fake_template_response(request, name, ctx):
+            captured["name"] = name
+            captured["ctx"] = ctx
+            return SimpleNamespace(headers={}, body=b"")
+
+        req = self._make_request()
+        with mock.patch.object(
+            passkey_router.user_auth, "require_user", return_value=fake_user
+        ), mock.patch.object(
+            passkey_router.passkey_svc, "list_user_passkeys", return_value=[]
+        ), mock.patch.object(
+            passkey_router.templates, "TemplateResponse", side_effect=_fake_template_response
+        ):
+            self._run(passkey_router.passkeys_page(req))
+
+        ctx = captured.get("ctx", {})
+        self.assertIn("user", ctx, "dashboard passkeys context must include `user`")
+        self.assertIs(ctx["user"], fake_user)
+        # All sidebar-required fields must reach the template untouched.
+        for key in ("slug", "email", "display_name", "is_internal", "plan"):
+            self.assertIn(key, ctx["user"], f"user context missing `{key}` for sidebar")
 
 
 if __name__ == "__main__":
