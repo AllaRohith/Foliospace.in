@@ -17,7 +17,7 @@
             <span>Dashboard</span>
           </a>
           <a href="{{ home }}#who" data-section="who" class="nav-link">
-            <span>Who it's for</span>
+            <span>Who</span>
           </a>
           <a href="/features" class="nav-link">
             <span>Features</span>
@@ -26,14 +26,14 @@
             <span>Pricing</span>
           </a>
           <a href="/space-community" class="nav-link nav-link--end">
-            <span>Space Community</span>
+            <span>Community</span>
           </a>
           <form method="post" action="/logout" class="nav-user-form" style="display:contents;">
             <button type="submit" class="nav-user nav-user-logout" aria-label="Log out">Log out</button>
           </form>
         {% else %}
           <a href="{{ home }}#who" data-section="who" class="nav-link">
-            <span>Who it's for</span>
+            <span>Who</span>
           </a>
           <a href="/features" class="nav-link">
             <span>Features</span>
@@ -45,9 +45,9 @@
             <span>FAQ</span>
           </a>
           <a href="/space-community" class="nav-link nav-link--end">
-            <span>Space Community</span>
+            <span>Community</span>
           </a>
-          <a href="/login" class="nav-user">Log in</a>
+          <a href="/login" class="nav-user">Sign in</a>
         {% endif %}
         <div class="nav-theme-mobile">
           <span>Theme</span>
@@ -55,11 +55,6 @@
           <button id="nav-theme-mobile-moon" type="button" aria-label="Dark mode" aria-pressed="false">🌙</button>
         </div>
       </nav>
-
-      <div class="nav-search" id="nav-search">
-        <kbd>⌘K</kbd>
-        <span>Quick nav</span>
-      </div>
 
       <button class="nav-theme" id="nav-theme" aria-label="Toggle dark mode" aria-pressed="false" type="button">
         <svg class="nav-theme-icon nav-theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -79,8 +74,8 @@
         </a>
       {% elif launched %}
         <a href="/login" class="nav-cta">
-          <span class="nav-cta-text-full">Log in</span>
-          <span class="nav-cta-text-short">Log in</span>
+          <span class="nav-cta-text-full">Sign in</span>
+          <span class="nav-cta-text-short">Sign in</span>
           <span class="nav-cta-arrow">→</span>
         </a>
       {% else %}
