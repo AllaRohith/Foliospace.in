@@ -343,6 +343,7 @@ async def owner_folio_templates(request: Request, slug: str):
     from app.utils.text import strip_control
     from app.services.user_auth import _slug_is_reserved
     from app.services import user_auth as user_auth_svc
+    from app.services import billing as billing_svc
     from app.services import templates as templates_svc
 
     safe_slug = strip_control((slug or "").strip())[:48]
