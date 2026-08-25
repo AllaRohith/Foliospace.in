@@ -75,9 +75,6 @@
     }, { passive: true });
   }
 
-  const savedTheme = localStorage.getItem('fs-theme');
-  if (savedTheme === 'dark') document.body.classList.add('dark');
-
   document.querySelectorAll('[data-split]').forEach(function (el) {
     const text = el.textContent;
     el.textContent = '';
@@ -515,7 +512,6 @@
       ? { label: 'Create account', hint: 'Action', icon: '+', href: '/signup', accent: true }
       : { label: 'See the cover story', hint: 'Action', icon: '◉', href: '.cover' },
     { label: 'Scroll to top', hint: 'Action', icon: '↑', action: 'scrollTop' },
-    { label: 'Toggle dark mode', hint: 'Theme', icon: '◐', action: 'theme' },
   ];
 
   const fab = document.querySelector('.cmd-k-fab');
@@ -567,17 +563,6 @@
   function runAction(a) {
     if (!a) return;
     closePalette();
-    if (a.action === 'theme') {
-      document.body.classList.toggle('dark');
-      const dark = document.body.classList.contains('dark');
-      localStorage.setItem('fs-theme', dark ? 'dark' : 'light');
-      const navBtn = document.getElementById('nav-theme');
-      if (navBtn) {
-        navBtn.setAttribute('aria-pressed', dark ? 'true' : 'false');
-        navBtn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
-      }
-      return;
-    }
     if (a.action === 'scrollTop') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
     if (a.href) {
       if (a.href.startsWith('/')) { window.location.href = a.href; return; }
@@ -674,45 +659,6 @@
       const scrolled = window.scrollY > 80;
       nav.dataset.state = scrolled ? 'scrolled' : 'top';
     }, { passive: true });
-  })();
-
-  (function () {
-    const btn = document.getElementById('nav-theme');
-    if (!btn) return;
-
-    const KEY = 'fs-theme';
-    let theme = 'light';
-    try {
-      const stored = localStorage.getItem(KEY);
-      if (stored === 'dark' || stored === 'light') theme = stored;
-    } catch (e) {}
-
-    function apply(next, persist) {
-      theme = next;
-      const dark = next === 'dark';
-      document.body.classList.toggle('dark', dark);
-      btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
-      btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
-      if (persist) {
-        try { localStorage.setItem(KEY, next); } catch (e) {}
-      }
-    }
-
-    apply(theme, false);
-
-    btn.addEventListener('click', function () {
-      apply(theme === 'dark' ? 'light' : 'dark', true);
-    });
-
-    const sun = document.getElementById('nav-theme-mobile-sun');
-    const moon = document.getElementById('nav-theme-mobile-moon');
-    function syncMobile() {
-      if (sun) sun.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
-      if (moon) moon.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
-    }
-    syncMobile();
-    if (sun) sun.addEventListener('click', function () { apply('light', true); syncMobile(); });
-    if (moon) moon.addEventListener('click', function () { apply('dark', true); syncMobile(); });
   })();
 
   (function () {

@@ -4,8 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#FAF7F2" media="(prefers-color-scheme: light)" />
-  <meta name="theme-color" content="#0B0E12" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#FAF7F2" />
   <title>{% block title %}{{ page_title }}{% endblock %}</title>
   <meta name="description" content="{% block description %}{{ description }}{% endblock %}" />
   <meta name="robots" content="{% block robots %}index,follow{% endblock %}" />
@@ -48,7 +47,6 @@
   <script defer src="{{ request.url_for('static', path=('js/curtain.js' if fs_dev else 'js/curtain.min.js')) }}?v={{ asset_v }}"></script>
 </head>
 <body{% if launched %} data-launched="1"{% endif %} class="{% block body_class %}{% endblock %}">
-  <script src="{{ request.url_for('static', path=('js/theme.js' if fs_dev else 'js/theme.min.js')) }}?v={{ asset_v }}"></script>
   <a class="skip-link" href="#main">Skip to content</a>
   <svg class="bg-topo" aria-hidden="true">
     <defs>
