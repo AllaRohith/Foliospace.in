@@ -481,6 +481,25 @@
     });
   }
 
+  const hWrap = document.querySelector('.horizontal-wrap');
+  const hStrip = hWrap && hWrap.querySelector('.horizontal-strip');
+  const hPrev = document.getElementById('horizontal-prev');
+  const hNext = document.getElementById('horizontal-next');
+  if (hWrap && hStrip && hPrev && hNext && !window.matchMedia('(hover: none)').matches) {
+    hWrap.addEventListener('mouseenter', function () { hStrip.style.animationPlayState = 'paused'; });
+    hWrap.addEventListener('mouseleave', function () { hStrip.style.animationPlayState = 'running'; });
+    hPrev.addEventListener('click', function () {
+      const card = hStrip.querySelector('.h-card');
+      const step = card ? card.getBoundingClientRect().width + 32 : 360;
+      hStrip.scrollBy({ left: -step, behavior: 'smooth' });
+    });
+    hNext.addEventListener('click', function () {
+      const card = hStrip.querySelector('.h-card');
+      const step = card ? card.getBoundingClientRect().width + 32 : 360;
+      hStrip.scrollBy({ left: step, behavior: 'smooth' });
+    });
+  }
+
   const LAUNCHED = document.body.dataset.launched === '1';
   const CMD_ACTIONS = [
     { label: 'Hero — top of page', hint: 'Nav', icon: '↑', href: '#top' },
