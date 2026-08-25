@@ -59,6 +59,8 @@ async def dashboard_billing(request: Request):
     invoices = billing_svc.list_invoices(str(user["id"]))
     configured = cashfree_svc.is_configured()
     cf_return = request.query_params.get("cf_return") == "1"
+    comp_info = billing_svc.comp_status(str(user["id"]))
+    comp_days_left = comp_info.get("days_until_expiry") if comp_info else None
     return _no_cache(templates.TemplateResponse(
         request,
         "dashboard/billing.html",
@@ -72,6 +74,7 @@ async def dashboard_billing(request: Request):
             "cashfree_configured": configured,
             "cf_return": cf_return,
             "grace_days_left": billing_svc.grace_days_left(user),
+            "comp_days_left": comp_days_left,
             "err": (request.query_params.get("err") or "")[:24],
             "cancelled": request.query_params.get("cancel") == "1",
             "nav_active": "billing",

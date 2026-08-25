@@ -3,6 +3,7 @@
     <img class="dash-side-brand-mark" src="{{ request.url_for('static', path='img/logo-full.png') }}?v={{ asset_v }}" alt="FolioSpace — Your story. One link. Done." />
   </a>
   {% if flash %}{% include "partials/_dash_flash.html" %}{% endif %}
+  {% include "partials/_comp_ends_soon.html" %}
   <nav class="dash-side-section">
     <div class="dash-side-section-label">Your folio</div>
     <a class="dash-side-item {% if nav_active == 'manage' %}is-active{% endif %}" href="/{{ user.slug }}/manage">Edit folio →</a>

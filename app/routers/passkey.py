@@ -191,6 +191,9 @@ async def passkeys_page(request: Request):
     if not user:
         return RedirectResponse("/login?next=/dashboard/passkeys", status_code=303)
     items = passkey_svc.list_user_passkeys(str(user["id"]))
+    from app.services import billing as billing_svc
+    comp_info = billing_svc.comp_status(str(user["id"]))
+    comp_days_left = comp_info.get("days_until_expiry") if comp_info else None
     response = templates.TemplateResponse(
         request,
         "dashboard/passkeys.html",
@@ -209,6 +212,7 @@ async def passkeys_page(request: Request):
                 "email_verified": bool(user.get("email_verified")),
             },
             "passkeys": items,
+            "comp_days_left": comp_days_left,
             "saved": strip_control(request.query_params.get("saved", ""))[:32],
             "err": strip_control(request.query_params.get("err", ""))[:64],
         },

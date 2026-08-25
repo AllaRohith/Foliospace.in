@@ -150,7 +150,8 @@ class EffectivePlanTests(unittest.TestCase):
     def test_no_database_returns_free(self):
         with mock.patch.object(billing, "DATABASE_URL", ""):
             out = billing.effective_plan_for("u1")
-        self.assertEqual(out, {"plan": "free", "expires_at": None, "source": "free", "referral_count": 0})
+        self.assertEqual(out, {"plan": "free", "expires_at": None, "source": "free",
+                               "referral_count": 0, "days_until_expiry": None})
 
     def test_comp_wins_over_subscription(self):
         """If grant is active, plan=pro source=comp — even if user row says free."""

@@ -337,3 +337,41 @@ def send_comp_invite_email(
     except Exception as e:
         logger.exception("send_comp_invite_email failed for %s: %s", to_email, e)
         return False, str(e)
+
+
+def send_comp_expiry_warning_email(
+    to_email: str,
+    days_left: int,
+    expires_date: str,
+    cta_url: str,
+) -> tuple[bool, str]:
+    """Comp expiry warning — sent at 14d / 7d / 1d before a granted Pro access ends."""
+    if not API_KEY:
+        logger.info("RESEND_API_KEY not set, skipping comp expiry warning to %s", to_email)
+        return False, "no_api_key"
+    try:
+        resend.api_key = API_KEY
+        days_int = max(0, int(days_left))
+        context = {
+            "public_url": PUBLIC_URL,
+            "first_name": _first_name_from_email(to_email),
+            "days_left": days_int,
+            "expires_date": (expires_date or "")[:64],
+            "cta_url": (cta_url or f"{PUBLIC_URL}/dashboard/billing")[:512],
+        }
+        html = _render_template("comp_expiry_warning.html", **context)
+        subject = f"Your FolioSpace Pro ends in {days_int} day{'s' if days_int != 1 else ''}"
+        params = {
+            "from": FROM_EMAIL,
+            "to": [to_email],
+            "reply_to": REPLY_TO,
+            "subject": subject,
+            "html": html,
+        }
+        result = resend.Emails.send(params)
+        msg_id = result.get("id", "unknown") if isinstance(result, dict) else str(result)
+        logger.info("sent comp expiry warning (%dd) to %s (id=%s)", days_int, to_email, msg_id)
+        return True, msg_id
+    except Exception as e:
+        logger.exception("send_comp_expiry_warning_email failed for %s: %s", to_email, e)
+        return False, "send_error"

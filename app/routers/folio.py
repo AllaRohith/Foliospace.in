@@ -210,6 +210,8 @@ async def owner_folio_manage(request: Request, slug: str):
         "grace_days_left": billing_svc.grace_days_left(viewer),
         "subscription": billing_svc.current_subscription(str(viewer["id"])),
     }
+    comp_info = billing_svc.comp_status(str(viewer["id"]))
+    comp_days_left = comp_info.get("days_until_expiry") if comp_info else None
     from app.services import folio_views as views_svc
     view_stats = views_svc.get_view_stats(safe_slug, days=30)
     err = strip_control(request.query_params.get("err", ""))[:24]
@@ -273,6 +275,7 @@ async def owner_folio_manage(request: Request, slug: str):
             "grace_days_left": ctx["grace_days_left"],
             "trial_days_left": ctx["trial_days_left"],
             "subscription": ctx["subscription"],
+            "comp_days_left": comp_days_left,
             "nav_active": "manage",
             "canonical": f"/{safe_slug}/manage",
             "templates_catalog": visible_templates,
@@ -368,6 +371,8 @@ async def owner_folio_templates(request: Request, slug: str):
     is_pro = (user_plan == "pro") or is_internal
     current_tid = (user.get("template_id") or "other-base").strip()
     visible_templates = templates_svc.catalog_for_role(user.get("category") or "other")
+    comp_info_t = billing_svc.comp_status(str(viewer["id"]))
+    comp_days_left_t = comp_info_t.get("days_until_expiry") if comp_info_t else None
 
     response = templates.TemplateResponse(
         request,
@@ -387,6 +392,7 @@ async def owner_folio_templates(request: Request, slug: str):
             "saved_kind": saved_kind,
             "nav_active": "templates",
             "canonical": f"/{safe_slug}/manage/templates",
+            "comp_days_left": comp_days_left_t,
             "now": datetime.utcnow(),
         },
     )

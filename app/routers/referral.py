@@ -91,6 +91,9 @@ async def dashboard_referrals(request: Request):
         + request.headers.get("x-forwarded-host", request.url.netloc)
     )
     referral_url = f"{base_url.rstrip('/')}/ref/{code}"
+    from app.services import billing as billing_svc
+    comp_info = billing_svc.comp_status(str(user["id"]))
+    comp_days_left = comp_info.get("days_until_expiry") if comp_info else None
 
     response = templates.TemplateResponse(
         request,
@@ -104,6 +107,7 @@ async def dashboard_referrals(request: Request):
             "ref_threshold": referrals_svc.REFERRAL_THRESHOLD,
             "referral_code": code,
             "referral_url": referral_url,
+            "comp_days_left": comp_days_left,
             "nav_active": "referrals",
         },
     )

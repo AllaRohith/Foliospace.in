@@ -8603,6 +8603,46 @@ body.dark .dash-side-plan-trial { background: linear-gradient(180deg, rgba(255,1
 body.dark .dash-side-plan-grace { background: linear-gradient(180deg, rgba(180,40,40,0.18), rgba(180,40,40,0.06)); }
 body.dark .dash-side-plan-pro { background: linear-gradient(180deg, rgba(255,107,53,0.14), rgba(255,107,53,0.04)); }
 
+.comp-ends-soon-banner {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  border-left: 3px solid #FFCB45;
+  background: rgba(255, 203, 69, 0.08);
+  border-radius: 0 var(--radius-sm, 6px) var(--radius-sm, 6px) 0;
+  font-family: 'Saira', sans-serif;
+}
+.comp-ends-soon-banner.is-urgent {
+  border-left-color: #b42828;
+  background: rgba(180, 40, 40, 0.08);
+}
+.comp-ends-soon-eyebrow {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #8a6a00;
+  margin-bottom: 6px;
+}
+.comp-ends-soon-banner.is-urgent .comp-ends-soon-eyebrow { color: #b42828; }
+.comp-ends-soon-body {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-2, #1A2128);
+}
+.comp-ends-soon-body strong { font-weight: 700; }
+.comp-ends-soon-link {
+  display: inline-block;
+  margin-top: 6px;
+  font-weight: 700;
+  color: #b42828;
+  text-decoration: none;
+}
+.comp-ends-soon-link:hover { text-decoration: underline; }
+body.dark .comp-ends-soon-banner { background: rgba(255, 203, 69, 0.06); }
+body.dark .comp-ends-soon-banner.is-urgent { background: rgba(180, 40, 40, 0.10); }
+
 @media (max-width: 900px) {
   .dash-side-plan-wrap { display: none; }
 }

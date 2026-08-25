@@ -83,3 +83,30 @@ services:
         sync: false
       - key: CASHFREE_PLAN_ID_PRO_YEAR2_FULL
         sync: false
+
+  # Comp-grant expiry warnings (14d / 7d / 1d) + stale-state cleanup.
+  # Runs at 02:00 IST (UTC: 30 20 * * *) — 30 min before the referral
+  # evaluator at 21:30 UTC so the comp flip settles first.
+  - type: cron
+    name: foliospace-comp-grant-expirer
+    env: python
+    region: oregon
+    plan: free
+    schedule: "30 20 * * *"
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m app.jobs.comp_grant_expirer
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: INTERNAL_TRUST_TOKEN
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        value: FolioSpace <hello@foliospace.in>
+      - key: RESEND_REPLY_TO
+        sync: false
+      - key: PUBLIC_BASE_URL
+        sync: false

@@ -515,6 +515,17 @@ def _on_subscription_activated(cur, payload: dict):
         "updated_at = NOW() WHERE id = %s",
         (user_id,),
     )
+    cur.execute(
+        """
+        UPDATE subscription_grants
+           SET revoked_at = NOW(),
+               revoke_reason = 'user_activated_subscription'
+         WHERE user_id = %s
+           AND revoked_at IS NULL
+           AND (expires_at IS NULL OR expires_at > NOW())
+        """,
+        (user_id,),
+    )
 
 
 def _on_subscription_charged(cur, payload: dict):
@@ -786,14 +797,18 @@ _DISPATCH = {
 # ── Effective-plan decision ──────────────────────────────────────────────────────────────────────────────────
 
 def effective_plan_for(user_id: str) -> dict:
-    """Returns {plan, expires_at, source} where source ∈ {comp, subscription, free}.
+    """Returns {plan, expires_at, source, days_until_expiry} where source ∈
+    {comp, subscription, free}.
 
     Comp grants always win. Then Cashfree subscription. Else free.
     Also returns `referral_count` (status='active' rows in referrals) so
     templates can render the "X / 10 friends" badge without a second query.
+    `days_until_expiry` is set when there is a finite expiry (pro comp or
+    paid subscription) and is None for "forever" comps or free users.
     """
     if not DATABASE_URL:
-        return {"plan": "free", "expires_at": None, "source": "free", "referral_count": 0}
+        return {"plan": "free", "expires_at": None, "source": "free",
+                "referral_count": 0, "days_until_expiry": None}
     try:
         with _connect() as conn:
             with conn.cursor() as cur:
@@ -815,6 +830,7 @@ def effective_plan_for(user_id: str) -> dict:
                         "expires_at": grant["expires_at"],
                         "source": "comp",
                         "referral_count": _referral_count(user_id),
+                        "days_until_expiry": _days_until(grant["expires_at"]),
                     }
                 cur.execute(
                     "SELECT plan, plan_expires_at FROM users WHERE id = %s LIMIT 1",
@@ -823,7 +839,8 @@ def effective_plan_for(user_id: str) -> dict:
                 u = cur.fetchone()
             conn.commit()
         if not u:
-            return {"plan": "free", "expires_at": None, "source": "free", "referral_count": 0}
+            return {"plan": "free", "expires_at": None, "source": "free",
+                    "referral_count": 0, "days_until_expiry": None}
         plan = u.get("plan") or "free"
         expires_at = u.get("plan_expires_at")
         return {
@@ -831,10 +848,63 @@ def effective_plan_for(user_id: str) -> dict:
             "expires_at": expires_at,
             "source": "subscription" if plan == "pro" else "free",
             "referral_count": _referral_count(user_id),
+            "days_until_expiry": _days_until(expires_at) if plan == "pro" else None,
         }
     except psycopg.Error as e:
         logger.exception("effective_plan_for failed for user=%s: %s", user_id, e)
-        return {"plan": "free", "expires_at": None, "source": "free", "referral_count": 0}
+        return {"plan": "free", "expires_at": None, "source": "free",
+                "referral_count": 0, "days_until_expiry": None}
+
+
+def _days_until(expires_at) -> int | None:
+    if not expires_at:
+        return None
+    if isinstance(expires_at, str):
+        return None
+    if isinstance(expires_at, datetime) and expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    delta = expires_at - datetime.now(timezone.utc)
+    if delta.total_seconds() <= 0:
+        return 0
+    return int((delta.total_seconds() + 86399) // 86400)
+
+
+def comp_status(user_id: str) -> dict | None:
+    """Lightweight lookup for the comp ends-soon banner. Returns
+    {grant_id, expires_at, days_until_expiry} for the user's latest active
+    comp grant, or None if no active comp / no DB / query failed.
+
+    Used by dashboard routers that already know they have an active user row
+    and just need a single number for the banner.
+    """
+    if not DATABASE_URL:
+        return None
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT id AS grant_id, expires_at
+                      FROM subscription_grants
+                     WHERE user_id = %s
+                       AND revoked_at IS NULL
+                       AND (expires_at IS NULL OR expires_at > NOW())
+                     ORDER BY created_at DESC LIMIT 1
+                    """,
+                    (user_id,),
+                )
+                row = cur.fetchone()
+            conn.commit()
+        if not row or not row.get("expires_at"):
+            return None
+        return {
+            "grant_id": row["grant_id"],
+            "expires_at": row["expires_at"],
+            "days_until_expiry": _days_until(row["expires_at"]),
+        }
+    except psycopg.Error as e:
+        logger.exception("comp_status failed for user=%s: %s", user_id, e)
+        return None
 
 
 # ── Plan summary for templates ─────────────────────────────────────────────────────────────────────────────

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your FolioSpace Pro ends soon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Saira:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body style="margin:0;padding:0;background:#FAF7F2;font-family:'Saira',Helvetica,Arial,sans-serif;color:#0F1419;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#FAF7F2;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="520" cellspacing="0" cellpadding="0" border="0" style="max-width:520px;background:#FFFFFF;border:1px solid #E8E3D9;border-radius:14px;overflow:hidden;">
+          <tr>
+            <td style="padding:28px 32px 0;">
+              <div style="font-family:'Saira',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.24em;text-transform:uppercase;color:#FF6B35;">→ Your comp Pro access</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:16px 32px 8px;">
+              <h1 style="margin:0;font-family:'Saira',sans-serif;font-size:28px;font-weight:700;line-height:1.15;color:#0F1419;">
+                {% if days_left == 1 %}
+                  Hi, {{ first_name }}. Pro ends tomorrow.
+                {% else %}
+                  Hi, {{ first_name }}. Pro ends in {{ days_left }} days.
+                {% endif %}
+              </h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 32px 8px;">
+              <p style="margin:0;font-family:'Saira',sans-serif;font-size:15.5px;line-height:1.6;color:#1A2128;">
+                Your comp Pro access ends on <strong>{{ expires_date }}</strong>.
+                After that your folio drops to Free — Spotlight turns off, custom fonts lock, and your link list is capped at 10.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 32px 8px;">
+              <p style="margin:0;font-family:'Saira',sans-serif;font-size:15.5px;line-height:1.6;color:#1A2128;">
+                Activate Pro yourself to keep everything unlocked — same price for everyone, no contract, cancel any time.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:24px 32px;">
+              <a href="{{ cta_url }}" style="display:inline-block;background:#0F1419;color:#FAF7F2;font-family:'Saira',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;text-decoration:none;padding:14px 28px;border-radius:10px;">
+                Activate Pro to keep it →
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 32px 16px;">
+              <p style="margin:0;font-family:'Saira',sans-serif;font-size:13px;line-height:1.55;color:#5C6470;word-break:break-all;">If the button doesn't work, paste this URL into your browser:<br /><a href="{{ cta_url }}" style="color:#FF6B35;text-decoration:underline;">{{ cta_url }}</a></p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:16px 32px 28px;border-top:1px solid #E8E3D9;">
+              <div style="font-family:'Saira',sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#5C6470;">
+                FolioSpace · {{ public_url }}
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

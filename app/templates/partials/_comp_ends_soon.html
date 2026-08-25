@@ -1,0 +1,12 @@
+{% if comp_days_left is defined and comp_days_left is not none and comp_days_left >= 0 and comp_days_left <= 14 %}
+<aside class="comp-ends-soon-banner {% if comp_days_left <= 3 %}is-urgent{% else %}is-warn{% endif %}"
+       role="status" aria-live="polite"
+       data-comp-days-left="{{ comp_days_left }}">
+  <span class="comp-ends-soon-eyebrow">→ Your comp Pro access</span>
+  <p class="comp-ends-soon-body">
+    Ends in <strong>{{ comp_days_left }}</strong> day{{ '' if comp_days_left == 1 else 's' }}.
+    After that, your folio drops to Free — no Spotlight, no custom fonts, links capped at 10.
+    <a class="comp-ends-soon-link" href="/dashboard/billing">Activate Pro to keep it →</a>
+  </p>
+</aside>
+{% endif %}
