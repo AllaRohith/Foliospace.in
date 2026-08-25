@@ -4632,7 +4632,7 @@ body.dark .h-card { border-top-color: var(--ink); }
   background: var(--cream-2);
   color: var(--ink);
 }
-body.dark .h-card .h-avatar { background: var(--ink-2); color: var(--ink); }
+body.dark .h-card .h-avatar { background: var(--cream-2); color: var(--ink); }
 .h-card .h-role { font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 8px; }
 .h-card h3 { font-family: 'Saira', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 17px; line-height: 1.3; margin: 0 0 8px; font-weight: 700; }
 .h-card p { font-size: 14px; color: var(--muted); margin: 0; line-height: 1.5; }
@@ -7010,13 +7010,13 @@ body.dark .cover-grain { opacity: 0.30; }
 
 body.dark .features-page-hero,
 body.dark .features-page-row,
-body.dark .features-page-cta { background: var(--ink-2); }
+body.dark .features-page-cta { background: var(--card-bg); }
 body.dark .features-page-row .who-dir-row { border-bottom-color: var(--line); }
 body.dark .features-page-lead,
 body.dark .features-teaser-lead { color: var(--line); }
 body.dark .features-page-cta-line { color: var(--cream); }
 body.dark .features-page-cta { border-top-color: var(--line); }
-body.dark #features-teaser { background: var(--ink-2); }
+body.dark #features-teaser { background: var(--card-bg); }
 
 .features-page-row .who-dir-row,
 .community-page-row .who-dir-row {
@@ -7137,12 +7137,12 @@ body.dark #features-teaser { background: var(--ink-2); }
 
 body.dark .community-cover,
 body.dark .community-page-row,
-body.dark .community-page-cta { background: var(--ink-2); }
+body.dark .community-page-cta { background: var(--card-bg); }
 body.dark .community-page-row .who-dir-row { border-bottom-color: var(--line); }
 body.dark .community-teaser-lead { color: var(--line); }
 body.dark .community-page-cta-line { color: var(--cream); }
 body.dark .community-page-cta { border-top-color: var(--line); }
-body.dark #space-community-teaser { background: var(--ink-2); }
+body.dark #space-community-teaser { background: var(--card-bg); }
 
 body.dark .features-page-hero h1,
 body.dark .features-page-hero .folio-meta { color: var(--cream); }
