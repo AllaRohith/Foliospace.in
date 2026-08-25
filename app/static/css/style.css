@@ -5169,6 +5169,9 @@ body.dark .hero-cta-pre { background: rgba(21, 25, 30, 0.55); }
 .nav-theme:hover { background: rgba(15, 20, 25, 0.04); border-color: var(--ink); }
 .nav-theme:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .nav-theme .nav-theme-icon { width: 18px; height: 18px; }
+.nav-theme .nav-theme-icon-sun { display: none; }
+body.dark .nav-theme .nav-theme-icon-sun { display: block; }
+body.dark .nav-theme .nav-theme-icon-moon { display: none; }
 body.dark .nav-theme { border-color: var(--line); color: var(--ink); }
 body.dark .nav-theme:hover { background: rgba(255, 255, 255, 0.06); border-color: var(--ink); }
 
