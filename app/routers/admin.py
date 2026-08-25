@@ -601,6 +601,287 @@ async def signup_delete(signup_id: int, request: Request):
     return RedirectResponse("/admin/signups?msg=deleted", status_code=303)
 
 
+# ============================================================
+# USERS — search, view, audit trail
+# ============================================================
+
+USERS_PAGE_SIZE = 20
+
+
+@router.get("/users", response_class=HTMLResponse)
+async def users_list(
+    request: Request,
+    q: str = "",
+    role: str = "",
+    plan: str = "",
+    page: int = 1,
+):
+    guard = _gate(request)
+    if isinstance(guard, RedirectResponse):
+        return guard
+    sid = guard
+
+    page = max(1, page)
+    offset = (page - 1) * USERS_PAGE_SIZE
+    safe_q = (q or "").strip()[:80]
+    safe_role = (role or "").strip()[:32]
+    safe_plan = (plan or "").strip()[:16]
+
+    where: list[str] = ["u.deleted_at IS NULL"]
+    params: list = []
+    if safe_q:
+        where.append("(lower(u.email) LIKE %s OR lower(u.slug) LIKE %s OR lower(coalesce(u.display_name, '')) LIKE %s)")
+        like = f"%{safe_q.lower()}%"
+        params.extend([like, like, like])
+    if safe_role and safe_role != "all":
+        where.append("lower(u.role) = %s")
+        params.append(safe_role.lower())
+    if safe_plan:
+        if safe_plan == "pro":
+            where.append("u.plan IN ('pro', 'comp')")
+        elif safe_plan == "free":
+            where.append("(u.plan IS NULL OR u.plan = '' OR u.plan = 'free')")
+        elif safe_plan == "trial":
+            where.append("u.plan = 'trial'")
+
+    where_sql = " AND ".join(where)
+    rows: list[dict] = []
+    total = 0
+    with _connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT count(*) AS n
+                  FROM users u
+                 WHERE {where_sql}
+                """,
+                params,
+            )
+            total = int((cur.fetchone() or {}).get("n") or 0)
+            cur.execute(
+                f"""
+                SELECT u.id, u.email, u.slug, u.display_name, u.role,
+                       u.plan, u.plan_expires_at, u.is_public,
+                       u.created_at, u.last_login_at
+                  FROM users u
+                 WHERE {where_sql}
+                 ORDER BY u.created_at DESC
+                 LIMIT %s OFFSET %s
+                """,
+                [*params, USERS_PAGE_SIZE, offset],
+            )
+            rows = list(cur.fetchall() or [])
+        conn.commit()
+
+    total_pages = max(1, (total + USERS_PAGE_SIZE - 1) // USERS_PAGE_SIZE)
+
+    response = templates.TemplateResponse(
+        request,
+        "admin/users.html",
+        {
+            "page_title": "Users · FolioSpace Admin",
+            "description": "FolioSpace admin users.",
+            "nav_active": "users",
+            "nav_signups_badge": 0,
+            "issue": _issue_label,
+            "now": datetime.now(timezone.utc),
+            "users": rows,
+            "total": total,
+            "page": page,
+            "total_pages": total_pages,
+            "q": safe_q,
+            "role": safe_role,
+            "plan": safe_plan,
+        },
+    )
+    _no_cache(response)
+    admin_auth.touch(sid)
+    return response
+
+
+@router.get("/users/{user_id}", response_class=HTMLResponse)
+async def user_detail(request: Request, user_id: str):
+    guard = _gate(request)
+    if isinstance(guard, RedirectResponse):
+        return guard
+    sid = guard
+
+    user = None
+    subscriptions: list[dict] = []
+    payments: list[dict] = []
+    grants: list[dict] = []
+    pending_grants: list[dict] = []
+    socials: list[dict] = []
+    audit_events: list[dict] = []
+    signups_attached: list[dict] = []
+
+    with _connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT id, email, slug, display_name, role, bio, phone,
+                       avatar_url, avatar_video_url,
+                       linkedin_url, github_username, twitter_username, instagram_username,
+                       is_public, plan, plan_expires_at, payment_failed_at,
+                       email_verified, last_login_at, created_at, deleted_at,
+                       template_id, referral_code, work_rail,
+                       spotlight_kind, spotlight_text, spotlight_emoji, spotlight_url,
+                       seo_title, seo_description
+                  FROM users
+                 WHERE id = %s
+                 LIMIT 1
+                """,
+                (user_id,),
+            )
+            user = cur.fetchone()
+
+            if not user:
+                conn.rollback()
+                response = templates.TemplateResponse(
+                    request,
+                    "admin/user_detail.html",
+                    {
+                        "page_title": "User not found · FolioSpace Admin",
+                        "description": "User not found.",
+                        "nav_active": "users",
+                        "nav_signups_badge": 0,
+                        "issue": _issue_label,
+                        "now": datetime.now(timezone.utc),
+                        "user": None,
+                    },
+                )
+                _no_cache(response)
+                return response
+
+            cur.execute(
+                """
+                SELECT id, plan, plan_expires_at, payment_failed_at, email_verified,
+                       last_login_at, created_at, deleted_at
+                  FROM users
+                 WHERE id = %s
+                """,
+                (user_id,),
+            )
+
+            cur.execute(
+                """
+                SELECT id, status, current_period_start, current_period_end,
+                       cancel_at_period_end, cancelled_at, created_at, updated_at
+                  FROM user_subscriptions
+                 WHERE user_id = %s
+                 ORDER BY created_at DESC
+                 LIMIT 10
+                """,
+                (user_id,),
+            )
+            subscriptions = list(cur.fetchall() or [])
+
+            cur.execute(
+                """
+                SELECT id, amount_paise, currency, status, method, kind,
+                       paid_at, created_at, description
+                  FROM payments
+                 WHERE user_id = %s
+                 ORDER BY created_at DESC
+                 LIMIT 10
+                """,
+                (user_id,),
+            )
+            payments = list(cur.fetchall() or [])
+
+            cur.execute(
+                """
+                SELECT id, expires_at, reason, notes, created_at, revoked_at,
+                       granted_by_admin, revoke_reason
+                  FROM subscription_grants
+                 WHERE user_id = %s
+                 LIMIT 1
+                """,
+                (user_id,),
+            )
+            grants = list(cur.fetchall() or [])
+
+            cur.execute(
+                """
+                SELECT id, email, expires_at, reason, notes, created_at
+                  FROM pending_comp_grants
+                 WHERE lower(email) = lower(%s) AND consumed_at IS NULL
+                 ORDER BY created_at DESC
+                 LIMIT 5
+                """,
+                (user["email"],),
+            )
+            pending_grants = list(cur.fetchall() or [])
+
+            cur.execute(
+                """
+                SELECT provider, provider_uid, email, created_at
+                  FROM social_accounts
+                 WHERE user_id = %s
+                 ORDER BY created_at DESC
+                """,
+                (user_id,),
+            )
+            socials = list(cur.fetchall() or [])
+
+            cur.execute(
+                """
+                SELECT id, action, target, ip, created_at
+                  FROM admin_audit_log
+                 WHERE target LIKE %s OR target LIKE %s
+                 ORDER BY created_at DESC
+                 LIMIT 25
+                """,
+                (f"%{user_id}%", f"%{user['email']}%"),
+            )
+            audit_events = list(cur.fetchall() or [])
+
+            cur.execute(
+                """
+                SELECT id, role, created_at, utm_source, deleted_at
+                  FROM waitlist
+                 WHERE lower(email) = lower(%s)
+                 ORDER BY created_at DESC
+                 LIMIT 5
+                """,
+                (user["email"],),
+            )
+            signups_attached = list(cur.fetchall() or [])
+
+        conn.commit()
+
+    for p in payments:
+        if p.get("amount_paise") is not None:
+            try:
+                p["amount_inr"] = f"₹{int(p['amount_paise']) / 100:,.2f}"
+            except (TypeError, ValueError):
+                p["amount_inr"] = "—"
+
+    response = templates.TemplateResponse(
+        request,
+        "admin/user_detail.html",
+        {
+            "page_title": f"{user.get('display_name') or user.get('email')} · FolioSpace Admin",
+            "description": "User detail.",
+            "nav_active": "users",
+            "nav_signups_badge": 0,
+            "issue": _issue_label,
+            "now": datetime.now(timezone.utc),
+            "user": user,
+            "subscriptions": subscriptions,
+            "payments": payments,
+            "grants": grants,
+            "pending_grants": pending_grants,
+            "socials": socials,
+            "audit_events": audit_events,
+            "signups_attached": signups_attached,
+        },
+    )
+    _no_cache(response)
+    admin_auth.touch(sid)
+    return response
+
+
 @router.get("/audit", response_class=HTMLResponse)
 async def audit_log(request: Request):
     guard = _gate(request)

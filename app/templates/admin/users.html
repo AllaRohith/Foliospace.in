@@ -1,0 +1,130 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Users · FolioSpace Admin{% endblock %}
+{% block description %}FolioSpace admin users.{% endblock %}
+
+{% set nav_active = 'users' %}
+{% set nav_signups_badge = 0 %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="/admin/">Admin</a>
+  <span class="sep">›</span>
+  <span class="here">Users</span>
+</div>
+{% endblock %}
+
+{% block body %}
+
+<div class="fig-page-head">
+  <div class="fig-eyebrow">→ Operations</div>
+  <h1 class="fig-h1">All <em>users</em></h1>
+  <div class="fig-rule"><span class="fig-rule-label">№ {{ issue() }}</span></div>
+</div>
+
+<form method="get" action="/admin/users" class="fig-filters" role="search">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search email, slug, or name…" autocomplete="off" />
+  <select name="role" aria-label="Role">
+    <option value="" {% if not role %}selected{% endif %}>All roles</option>
+    {% for r in ['developer', 'designer', 'chef', 'student', 'consultant', 'founder', 'writer', 'researcher', 'photographer', 'marketer', 'other'] %}
+      <option value="{{ r }}" {% if role == r %}selected{% endif %}>{{ r|capitalize }}</option>
+    {% endfor %}
+  </select>
+  <select name="plan" aria-label="Plan">
+    <option value="" {% if not plan %}selected{% endif %}>All plans</option>
+    <option value="free" {% if plan == 'free' %}selected{% endif %}>Free</option>
+    <option value="pro" {% if plan == 'pro' %}selected{% endif %}>Pro (paid + comp)</option>
+    <option value="trial" {% if plan == 'trial' %}selected{% endif %}>Trial</option>
+  </select>
+  <button type="submit" class="fig-btn">Search</button>
+  {% if q or role or plan %}
+    <a href="/admin/users" class="fig-mini-btn">Clear</a>
+  {% endif %}
+  <div class="fig-count">{{ total }} result{{ '' if total == 1 else 's' }}</div>
+</form>
+
+{% if users %}
+<div class="fig-table-wrap">
+  <table class="fig-table">
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Slug</th>
+        <th>Name</th>
+        <th>Role</th>
+        <th>Plan</th>
+        <th>Visibility</th>
+        <th>Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+        <tr class="is-row-link" data-href="/admin/users/{{ u['id'] }}">
+          <td><a href="/admin/users/{{ u['id'] }}">{{ u['email'] }}</a></td>
+          <td class="mono">{{ u['slug'] or '—' }}</td>
+          <td>{{ u['display_name'] or '—' }}</td>
+          <td>{{ u['role'] or '—' }}</td>
+          <td>
+            <span class="fig-pill {% if u['plan'] == 'pro' or u['plan'] == 'comp' %}is-pro{% elif u['plan'] == 'trial' %}is-warn{% else %}is-muted{% endif %}">
+              <span class="dot"></span>
+              {{ u['plan'] or 'free' }}
+            </span>
+          </td>
+          <td>
+            {% if u['is_public'] %}
+              <span class="fig-pill is-on"><span class="dot"></span>public</span>
+            {% else %}
+              <span class="fig-pill is-off"><span class="dot"></span>private</span>
+            {% endif %}
+          </td>
+          <td class="mono">{{ u['created_at'].strftime('%Y-%m-%d') if u['created_at'] else '—' }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if total_pages > 1 %}
+<div class="fig-pager">
+  <div class="fig-pager-meta">Page {{ page }} of {{ total_pages }}</div>
+  <div class="fig-pager-links">
+    {% if page > 1 %}
+      <a href="/admin/users?q={{ q }}&role={{ role }}&plan={{ plan }}&page={{ page - 1 }}">‹ Prev</a>
+    {% endif %}
+    {% for p in range(1, total_pages + 1) %}
+      {% if p == page %}
+        <span class="is-current">{{ p }}</span>
+      {% elif p == 1 or p == total_pages or (p >= page - 1 and p <= page + 1) %}
+        <a href="/admin/users?q={{ q }}&role={{ role }}&plan={{ plan }}&page={{ p }}">{{ p }}</a>
+      {% elif p == 2 or p == total_pages - 1 %}
+        <span style="color: var(--text-3); padding: 0 4px;">…</span>
+      {% endif %}
+    {% endfor %}
+    {% if page < total_pages %}
+      <a href="/admin/users?q={{ q }}&role={{ role }}&plan={{ plan }}&page={{ page + 1 }}">Next ›</a>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+{% else %}
+<div class="fig-empty" style="padding: 48px 20px;">
+  <div class="fig-empty-eyebrow">→ No results</div>
+  {% if q or role or plan %}
+    <p>No users match these filters. <a href="/admin/users">Clear filters</a></p>
+  {% else %}
+    <p>No users yet. Once someone signs up, they'll appear here.</p>
+  {% endif %}
+</div>
+{% endif %}
+
+<script>
+  document.querySelectorAll('tr.is-row-link').forEach(function (tr) {
+    tr.addEventListener('click', function () {
+      var href = tr.getAttribute('data-href');
+      if (href) window.location.href = href;
+    });
+    tr.style.cursor = 'pointer';
+  });
+</script>
+{% endblock %}

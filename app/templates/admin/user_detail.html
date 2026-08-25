@@ -1,0 +1,305 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ user.display_name or user.email if user else 'Not found' }} · FolioSpace Admin{% endblock %}
+
+{% set nav_active = 'users' %}
+{% set nav_signups_badge = 0 %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="/admin/">Admin</a>
+  <span class="sep">›</span>
+  <a href="/admin/users">Users</a>
+  <span class="sep">›</span>
+  <span class="here">{{ user.email if user else 'Not found' }}</span>
+</div>
+{% endblock %}
+
+{% block body %}
+
+{% if not user %}
+<div class="fig-empty" style="padding: 64px 20px;">
+  <div class="fig-empty-eyebrow">→ 404</div>
+  <p>No user with that ID. <a href="/admin/users">Back to users</a></p>
+</div>
+
+{% else %}
+
+<a href="/admin/users" class="fig-back">‹ All users</a>
+
+<div class="fig-user-header">
+  <div class="fig-user-avatar">
+    {% if user.avatar_url %}
+      <img src="{{ user.avatar_url }}" alt="" />
+    {% else %}
+      <span>{{ user.display_name[0] if user.display_name else user.email[0]|upper }}</span>
+    {% endif %}
+  </div>
+  <div class="fig-user-id">
+    <h1 class="fig-h1">
+      {{ user.display_name or user.email }}
+      {% if user.deleted_at %}
+        <span class="fig-pill is-revoked"><span class="dot"></span>deleted</span>
+      {% endif %}
+    </h1>
+    <div class="fig-user-sub">
+      <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+      <span class="sep">·</span>
+      <span class="mono">{{ user.id }}</span>
+    </div>
+    <div class="fig-user-meta">
+      {% if user.plan == 'pro' or user.plan == 'comp' %}
+        <span class="fig-pill is-pro"><span class="dot"></span>{{ user.plan }}</span>
+      {% elif user.plan == 'trial' %}
+        <span class="fig-pill is-warn"><span class="dot"></span>trial</span>
+      {% else %}
+        <span class="fig-pill is-muted"><span class="dot"></span>free</span>
+      {% endif %}
+      {% if user.is_public %}
+        <span class="fig-pill is-on"><span class="dot"></span>public</span>
+      {% else %}
+        <span class="fig-pill is-off"><span class="dot"></span>private</span>
+      {% endif %}
+      {% if user.email_verified %}
+        <span class="fig-pill is-approved"><span class="dot"></span>verified</span>
+      {% else %}
+        <span class="fig-pill is-warn"><span class="dot"></span>unverified</span>
+      {% endif %}
+      {% if user.role %}<span class="fig-pill is-muted">{{ user.role }}</span>{% endif %}
+    </div>
+  </div>
+  <div class="fig-user-actions">
+    <a href="/{{ user.slug }}" target="_blank" class="fig-mini-btn">View folio ↗</a>
+    {% if user.plan == 'pro' or user.plan == 'comp' %}
+      <a href="/admin/grants?q={{ user.email }}" class="fig-btn is-warn">Manage grant</a>
+    {% else %}
+      <a href="/admin/grants?q={{ user.email }}" class="fig-btn">Grant Pro</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="fig-user-grid">
+
+  <div class="fig-card">
+    <div class="fig-card-head">
+      <div>
+        <div class="fig-card-eyebrow">→ Profile</div>
+        <h2>Account <em>details</em></h2>
+      </div>
+    </div>
+    <div class="fig-card-body">
+      <div class="fig-kv-row"><span class="k">Slug</span><span class="v mono">{{ user.slug or '—' }}</span></div>
+      <div class="fig-kv-row"><span class="k">Display name</span><span class="v">{{ user.display_name or '—' }}</span></div>
+      <div class="fig-kv-row"><span class="k">Role</span><span class="v">{{ user.role or '—' }}</span></div>
+      <div class="fig-kv-row"><span class="k">Phone</span><span class="v mono">{{ user.phone or '—' }}</span></div>
+      <div class="fig-kv-row"><span class="k">Bio</span><span class="v">{{ user.bio or '—' }}</span></div>
+      <div class="fig-kv-row"><span class="k">Email verified</span><span class="v">{{ '✓' if user.email_verified else '—' }}</span></div>
+      <div class="fig-kv-row"><span class="k">Template</span><span class="v mono">{{ user.template_id or 'default' }}</span></div>
+      <div class="fig-kv-row"><span class="k">Referral code</span><span class="v mono">{{ user.referral_code or '—' }}</span></div>
+    </div>
+  </div>
+
+  <div class="fig-card">
+    <div class="fig-card-head">
+      <div>
+        <div class="fig-card-eyebrow">→ Social</div>
+        <h2>Linked <em>accounts</em></h2>
+      </div>
+    </div>
+    <div class="fig-card-body">
+      {% if socials %}
+        {% for s in socials %}
+          <div class="fig-kv-row">
+            <span class="k">{{ s.provider }}</span>
+            <span class="v mono" style="overflow:hidden; text-overflow:ellipsis;">{{ s.provider_uid }}</span>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="fig-empty" style="padding: 20px 0;">
+          <p>No linked social accounts.</p>
+        </div>
+      {% endif %}
+      <div class="fig-card-foot" style="margin: 20px -20px -20px; border-radius: 0 0 var(--r-lg) var(--r-lg);">
+        <div>GitHub: <span class="mono">{{ user.github_username or '—' }}</span></div>
+        <div>LinkedIn: <span class="mono">{{ user.linkedin_url or '—' }}</span></div>
+        <div>Twitter/X: <span class="mono">{{ user.twitter_username or '—' }}</span></div>
+        <div>Instagram: <span class="mono">{{ user.instagram_username or '—' }}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fig-card">
+    <div class="fig-card-head">
+      <div>
+        <div class="fig-card-eyebrow">→ Plan</div>
+        <h2>Subscription <em>state</em></h2>
+      </div>
+      <span class="fig-card-meta">{{ subscriptions|length }} record{{ '' if subscriptions|length == 1 else 's' }}</span>
+    </div>
+    <div class="fig-card-body">
+      <div class="fig-kv-row"><span class="k">Plan</span><span class="v">{{ user.plan or 'free' }}</span></div>
+      <div class="fig-kv-row"><span class="k">Plan expires</span><span class="v mono">{{ user.plan_expires_at.strftime('%Y-%m-%d %H:%M UTC') if user.plan_expires_at else '—' }}</span></div>
+      <div class="fig-kv-row"><span class="k">Payment failed</span><span class="v mono">{{ user.payment_failed_at.strftime('%Y-%m-%d %H:%M UTC') if user.payment_failed_at else '—' }}</span></div>
+      <div class="fig-kv-row"><span class="k">Last login</span><span class="v mono">{{ user.last_login_at.strftime('%Y-%m-%d %H:%M UTC') if user.last_login_at else '—' }}</span></div>
+      <div class="fig-kv-row"><span class="k">Created</span><span class="v mono">{{ user.created_at.strftime('%Y-%m-%d %H:%M UTC') if user.created_at else '—' }}</span></div>
+
+      {% if subscriptions %}
+        <div style="margin-top: 16px;">
+          <div class="fig-card-eyebrow">Subscriptions</div>
+          {% for s in subscriptions %}
+            <div class="fig-flag-row" style="margin-top: 8px;">
+              <span class="fig-pill is-{{ 'on' if s.status in ('active','authenticated') else 'warn' if s.status == 'pending' else 'off' }}"><span class="dot"></span>{{ s.status }}</span>
+              <span class="v mono" style="font-size: 12px;">{{ s.current_period_end.strftime('%Y-%m-%d') if s.current_period_end else '—' }}</span>
+              {% if s.cancel_at_period_end %}<span class="fig-pill is-warn">cancel-pending</span>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="fig-card">
+    <div class="fig-card-head">
+      <div>
+        <div class="fig-card-eyebrow">→ Payments</div>
+        <h2>Last <em>paid</em></h2>
+      </div>
+      <span class="fig-card-meta">{{ payments|length }} record{{ '' if payments|length == 1 else 's' }}</span>
+    </div>
+    <div class="fig-card-body">
+      {% if payments %}
+        {% for p in payments %}
+          <div class="fig-flag-row" style="margin-top: 8px;">
+            <span class="fig-pill is-{{ 'on' if p.status == 'captured' else 'off' if p.status == 'failed' else 'warn' }}"><span class="dot"></span>{{ p.status }}</span>
+            <span style="font-family: var(--mono); font-size: 12.5px;">{{ p.amount_inr or '—' }}</span>
+            <span style="color: var(--text-3); font-size: 11.5px;">{{ p.paid_at.strftime('%Y-%m-%d') if p.paid_at else (p.created_at.strftime('%Y-%m-%d') if p.created_at else '—') }}</span>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="fig-empty" style="padding: 20px 0;"><p>No payments on record.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="fig-card">
+    <div class="fig-card-head">
+      <div>
+        <div class="fig-card-eyebrow">→ Comp</div>
+        <h2>Grant <em>status</em></h2>
+      </div>
+    </div>
+    <div class="fig-card-body">
+      {% if grants %}
+        {% for g in grants %}
+          {% if g.revoked_at %}
+            <div class="fig-pill is-revoked"><span class="dot"></span>revoked</div>
+            <div class="fig-kv-row"><span class="k">Reason</span><span class="v">{{ g.reason or '—' }}</span></div>
+            <div class="fig-kv-row"><span class="k">Revoked</span><span class="v mono">{{ g.revoked_at.strftime('%Y-%m-%d') }}</span></div>
+            <div class="fig-kv-row"><span class="k">Notes</span><span class="v">{{ g.revoke_reason or '—' }}</span></div>
+          {% else %}
+            <div class="fig-pill is-pro"><span class="dot"></span>active</div>
+            <div class="fig-kv-row"><span class="k">Reason</span><span class="v">{{ g.reason or '—' }}</span></div>
+            <div class="fig-kv-row"><span class="k">Granted</span><span class="v mono">{{ g.created_at.strftime('%Y-%m-%d') }}</span></div>
+            <div class="fig-kv-row"><span class="k">Expires</span><span class="v mono">{{ g.expires_at.strftime('%Y-%m-%d') if g.expires_at else '—' }}</span></div>
+            <div class="fig-kv-row"><span class="k">Notes</span><span class="v">{{ g.notes or '—' }}</span></div>
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        <div class="fig-empty" style="padding: 20px 0;"><p>No comp grant on file.</p></div>
+      {% endif %}
+
+      {% if pending_grants %}
+        <div style="margin-top: 16px;">
+          <div class="fig-card-eyebrow">→ Pending (unclaimed)</div>
+          {% for p in pending_grants %}
+            <div class="fig-flag-row" style="margin-top: 8px;">
+              <span class="fig-pill is-warn"><span class="dot"></span>pending</span>
+              <span style="font-size: 12px;">{{ p.reason or '—' }}</span>
+              <span class="mono" style="font-size: 11.5px; color: var(--text-3);">{{ p.expires_at.strftime('%Y-%m-%d') if p.expires_at else '—' }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="fig-card">
+    <div class="fig-card-head">
+      <div>
+        <div class="fig-card-eyebrow">→ Visibility</div>
+        <h2>Public <em>folio</em></h2>
+      </div>
+      <a href="/{{ user.slug }}" target="_blank" class="fig-card-meta">/{{ user.slug }} ↗</a>
+    </div>
+    <div class="fig-card-body">
+      <div class="fig-kv-row"><span class="k">Status</span><span class="v">{{ 'public' if user.is_public else 'private' }}</span></div>
+      <div class="fig-kv-row"><span class="k">SEO title</span><span class="v">{{ user.seo_title or '—' }}</span></div>
+      <div class="fig-kv-row"><span class="k">SEO description</span><span class="v">{{ user.seo_description or '—' }}</span></div>
+      <div class="fig-kv-row"><span class="k">Spotlight</span><span class="v">{{ user.spotlight_text or '—' }} {{ user.spotlight_emoji or '' }}</span></div>
+      <div class="fig-kv-row"><span class="k">Avatar</span><span class="v">{{ 'yes' if user.avatar_url else 'no' }}</span></div>
+      <div class="fig-kv-row"><span class="k">Video</span><span class="v">{{ 'yes' if user.avatar_video_url else 'no' }}</span></div>
+    </div>
+  </div>
+
+  <div class="fig-card" style="grid-column: 1 / -1;">
+    <div class="fig-card-head">
+      <div>
+        <div class="fig-card-eyebrow">→ Activity</div>
+        <h2>Audit <em>log</em> for this user</h2>
+      </div>
+      <span class="fig-card-meta">last 25</span>
+    </div>
+    <div class="fig-card-body" style="padding: 0;">
+      {% if audit_events %}
+      <table class="fig-table" style="border: 0;">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Action</th>
+            <th>Target</th>
+            <th>IP</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ev in audit_events %}
+            <tr>
+              <td class="mono">{{ ev.created_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</td>
+              <td>{{ ev.action }}</td>
+              <td class="mono" style="font-size: 11.5px;">{{ ev.target or '—' }}</td>
+              <td class="mono" style="font-size: 11.5px; color: var(--text-3);">{{ ev.ip or '—' }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+        <div class="fig-empty" style="padding: 32px 20px;"><p>No admin actions recorded for this user yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if signups_attached %}
+  <div class="fig-card" style="grid-column: 1 / -1;">
+    <div class="fig-card-head">
+      <div>
+        <div class="fig-card-eyebrow">→ History</div>
+        <h2>Waitlist <em>entries</em></h2>
+      </div>
+      <span class="fig-card-meta">{{ signups_attached|length }} row{{ '' if signups_attached|length == 1 else 's' }}</span>
+    </div>
+    <div class="fig-card-body">
+      {% for s in signups_attached %}
+        <div class="fig-flag-row" style="margin-top: 8px;">
+          <span class="fig-pill is-{{ 'revoked' if s.deleted_at else 'on' }}"><span class="dot"></span>{{ 'deleted' if s.deleted_at else 'active' }}</span>
+          <span>{{ s.role or '—' }}</span>
+          <span class="mono" style="font-size: 11.5px; color: var(--text-3);">{{ s.created_at.strftime('%Y-%m-%d %H:%M UTC') }}</span>
+          {% if s.utm_source %}<span class="fig-pill is-muted">{{ s.utm_source }}</span>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+{% endif %}
+{% endblock %}
