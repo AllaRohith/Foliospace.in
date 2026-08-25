@@ -232,4 +232,24 @@
     }
   }
 
+  var goPublicBtn = document.querySelector('[data-fm-share-go-public]');
+  if (goPublicBtn) {
+    goPublicBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      var checkbox = document.getElementById('is_public');
+      if (!checkbox) return;
+      checkbox.checked = true;
+      checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+      var section = document.getElementById('fm-section-privacy') || checkbox.closest('.fm-section');
+      if (section && section.scrollIntoView) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      try {
+        if (typeof window.fsEvent === 'function') {
+          window.fsEvent('share_go_public_click', {});
+        }
+      } catch (err) {}
+    });
+  }
+
 })();

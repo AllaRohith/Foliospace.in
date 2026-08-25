@@ -111,8 +111,7 @@ def sync_basic_profile(user_id: str) -> dict:
         me_err = str(e)
     if me_err:
         logger.info(
-            "linkedin /v2/me unavailable (scope=%s); headline/vanity_name skipped: %s",
-            "openid profile email",
+            "linkedin /v2/me unavailable; headline/vanity_name skipped: %s",
             me_err,
         )
     payload = {

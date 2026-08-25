@@ -111,7 +111,16 @@
               hideProgress();
               return;
             }
-            window.location.reload();
+            var thumb = document.querySelector('.fm-field-avatar-video .fm-avatar-thumb');
+            if (thumb && saved.url) {
+              var bust = (saved.url.indexOf('?') === -1 ? '?' : '&') + 'v=' + Date.now();
+              thumb.setAttribute('src', saved.url + bust);
+              thumb.load && thumb.load();
+            }
+            try {
+              document.dispatchEvent(new CustomEvent('fm:avatar-video-updated', { detail: { url: saved.url, public_id: saved.public_id } }));
+            } catch (e) {}
+            hideProgress();
           }).catch(function () {
             showError('Save failed. Try again.');
             hideProgress();

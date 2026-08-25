@@ -61,7 +61,7 @@ def _scope_for(provider: str) -> str:
     if provider == "github":
         return "read:user user:email repo"
     if provider == "linkedin":
-        return "openid profile email"
+        return "openid profile email r_liteprofile"
     return ""
 
 

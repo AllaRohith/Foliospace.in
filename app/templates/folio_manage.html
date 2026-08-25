@@ -49,13 +49,20 @@
             <span class="fm-share-action-sub">PNG download</span>
           </a>
         </div>
-        <div class="fm-share-hint">
-          {% if is_live %}
-            ✓ Public — anyone with your link can see it.
-          {% else %}
-            Toggle <em>Make my folio public</em> below to make your link live.
-          {% endif %}
-        </div>
+        {% if is_live %}
+          <div class="fm-share-hint fm-share-hint-live">
+            <span class="fm-share-pill fm-share-pill-live">Live</span>
+            Public — anyone with your link can see it.
+          </div>
+        {% else %}
+          <div class="fm-share-hint fm-share-hint-private">
+            <span class="fm-share-pill fm-share-pill-private">Private</span>
+            Your link shows a 404 to anyone but you. Flip <em>Make my folio public</em> on to make it live.
+          </div>
+          <button type="button" class="fm-share-go-public" data-fm-share-go-public>
+            Make my folio public →
+          </button>
+        {% endif %}
       </section>
 
       <div class="fm-grid">
