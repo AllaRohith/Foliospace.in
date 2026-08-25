@@ -38,6 +38,10 @@ def _issue_label() -> str:
     return f"№ {d.strftime('%y')}·{d.strftime('%m')}·{d.strftime('%d')}"
 
 
+def _now():
+    return datetime.now(timezone.utc)
+
+
 def _cold_open(last7: int, prev7: int, delta_pct: float, top_role: str, top_role_count: int, total: int) -> str:
     if last7 == 0:
         if total == 0:
@@ -54,8 +58,8 @@ def _cold_open(last7: int, prev7: int, delta_pct: float, top_role: str, top_role
     return " ".join(parts)
 
 
-templates.env.globals["issue"] = lambda: _issue_label()
-templates.env.globals["now"] = lambda: datetime.now(timezone.utc)
+templates.env.globals["issue"] = _issue_label
+templates.env.globals["now"] = _now
 
 ROLE_VALUES = [
     "student", "developer", "designer", "chef", "artist",
@@ -684,7 +688,7 @@ async def users_list(
             "nav_active": "users",
             "nav_signups_badge": 0,
             "issue": _issue_label,
-            "now": datetime.now(timezone.utc),
+            "now": _now,
             "users": rows,
             "total": total,
             "page": page,
@@ -746,7 +750,7 @@ async def user_detail(request: Request, user_id: str):
                         "nav_active": "users",
                         "nav_signups_badge": 0,
                         "issue": _issue_label,
-                        "now": datetime.now(timezone.utc),
+                        "now": _now,
                         "user": None,
                     },
                 )
@@ -866,7 +870,7 @@ async def user_detail(request: Request, user_id: str):
             "nav_active": "users",
             "nav_signups_badge": 0,
             "issue": _issue_label,
-            "now": datetime.now(timezone.utc),
+            "now": _now,
             "user": user,
             "subscriptions": subscriptions,
             "payments": payments,
