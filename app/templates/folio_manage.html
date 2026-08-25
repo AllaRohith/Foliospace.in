@@ -129,7 +129,7 @@
               <header class="fm-section-head">
                 <div class="fm-section-eyebrow">→ Location &amp; Locale</div>
                 <h2 class="fm-section-title">Where you <em>are.</em></h2>
-                <p class="fm-section-sub">Auto-filled from LinkedIn the first time you sync. You can correct it any time.</p>
+                <p class="fm-section-sub">Auto-filled from LinkedIn (language + timezone) on every Refresh. Override any time.</p>
               </header>
               <div class="fm-section-body">
                 <div class="fm-field">
@@ -148,11 +148,11 @@
               <header class="fm-section-head">
                 <div class="fm-section-eyebrow">→ LinkedIn</div>
                 <h2 class="fm-section-title">Your <em>LinkedIn.</em></h2>
-                <p class="fm-section-sub">Your headline, profile URL, and what we import on Refresh.</p>
+                <p class="fm-section-sub">Language + timezone auto-fill from LinkedIn. Headline + vanity URL need manual entry (our OAuth scope doesn't include them).</p>
               </header>
               <div class="fm-section-body">
                 <div class="fm-field">
-                  <label for="headline">LinkedIn headline <span class="fm-field-hint">(auto-filled from LinkedIn)</span></label>
+                  <label for="headline">LinkedIn headline <span class="fm-field-hint">(type manually — auto-fill needs LinkedIn Marketing API access)</span></label>
                   <input id="headline" name="headline" type="text" maxlength="200" value="{{ user.headline or '' }}" placeholder="Senior Product Designer · ex-Google" />
                 </div>
 
@@ -162,7 +162,7 @@
                 </div>
 
                 <div class="fm-field">
-                  <label for="profile_url">LinkedIn vanity profile URL <span class="fm-field-hint">(auto-filled; you can override)</span></label>
+                  <label for="profile_url">LinkedIn vanity profile URL <span class="fm-field-hint">(type manually — same as linkedin_url usually)</span></label>
                   <input id="profile_url" name="profile_url" type="url" inputmode="url" maxlength="2048" value="{{ user.profile_url or '' }}" placeholder="https://www.linkedin.com/in/your-handle" />
                 </div>
               </div>
