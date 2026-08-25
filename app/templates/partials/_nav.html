@@ -1,12 +1,11 @@
 {% set home = '' if request.url.path == '/' else '/' %}
 <header class="nav-wrap" id="nav-wrap">
     <div class="nav" data-state="top">
-      <a href="/" class="brand">
+      <a href="/" class="brand" aria-label="FolioSpace home">
         <picture>
           <source type="image/webp" srcset="{{ request.url_for('static', path='img/logo-mark.webp') }}?v={{ asset_v }}" />
           <img class="brand-mark brand-mark-img" src="{{ request.url_for('static', path='img/logo-mark.png') }}?v={{ asset_v }}" alt="" width="748" height="390" />
         </picture>
-        <span class="brand-name">FolioSpace</span>
       </a>
 
       {% set u = nav_user(request) %}
@@ -28,18 +27,6 @@
           <a href="/space-community" class="nav-link nav-link--end">
             <span>Community</span>
           </a>
-          <div class="nav-dropdown">
-            <button type="button" class="nav-link nav-dropdown-trigger" aria-haspopup="true" aria-expanded="false" aria-label="More pages">
-              <span>More</span>
-              <span class="nav-dropdown-arrow" aria-hidden="true">▾</span>
-            </button>
-            <ul class="nav-dropdown-menu" role="menu">
-              <li role="none"><a href="/privacy" role="menuitem">Privacy</a></li>
-              <li role="none"><a href="/terms" role="menuitem">Terms</a></li>
-              <li role="none"><a href="/security" role="menuitem">Security</a></li>
-              <li role="none"><a href="mailto:hi@foliospace.in" role="menuitem">Contact</a></li>
-            </ul>
-          </div>
           <form method="post" action="/logout" class="nav-user-form" style="display:contents;">
             <button type="submit" class="nav-user nav-user-logout" aria-label="Log out">Log out</button>
           </form>
@@ -53,24 +40,9 @@
           <a href="{{ home }}#pricing" data-section="pricing" class="nav-link">
             <span>Pricing</span>
           </a>
-          <a href="{{ home }}#faq" data-section="faq" class="nav-link">
-            <span>FAQ</span>
-          </a>
           <a href="/space-community" class="nav-link nav-link--end">
             <span>Community</span>
           </a>
-          <div class="nav-dropdown">
-            <button type="button" class="nav-link nav-dropdown-trigger" aria-haspopup="true" aria-expanded="false" aria-label="More pages">
-              <span>More</span>
-              <span class="nav-dropdown-arrow" aria-hidden="true">▾</span>
-            </button>
-            <ul class="nav-dropdown-menu" role="menu">
-              <li role="none"><a href="/privacy" role="menuitem">Privacy</a></li>
-              <li role="none"><a href="/terms" role="menuitem">Terms</a></li>
-              <li role="none"><a href="/security" role="menuitem">Security</a></li>
-              <li role="none"><a href="mailto:hi@foliospace.in" role="menuitem">Contact</a></li>
-            </ul>
-          </div>
           <a href="/login" class="nav-user">Sign in</a>
         {% endif %}
         <div class="nav-theme-mobile">

@@ -149,6 +149,7 @@
     </div>
   </div>
 
-  <script src="{{ request.url_for('static', path='js/admin.min.js') }}?v={{ asset_v }}" defer></script>
+{% set fs_dev = request.query_params.get('fs_dev') == '1' or request.cookies.get('fs_dev') == '1' %}
+  <script src="{{ request.url_for('static', path=('js/admin.js' if fs_dev else 'js/admin.min.js')) }}?v={{ asset_v }}" defer></script>
 </body>
 </html>

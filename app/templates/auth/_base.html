@@ -24,6 +24,7 @@
     </main>
   </div>
 </div>
-<script defer src="{{ request.url_for('static', path='js/dash.min.js') }}?v={{ asset_v }}"></script>
-<script defer src="{{ request.url_for('static', path='js/share.min.js') }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path=('js/dash.js' if fs_dev else 'js/dash.min.js')) }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path=('js/share.js' if fs_dev else 'js/share.min.js')) }}?v={{ asset_v }}"></script>
 {% endblock %}
+{% set fs_dev = request.query_params.get('fs_dev') == '1' or request.cookies.get('fs_dev') == '1' %}

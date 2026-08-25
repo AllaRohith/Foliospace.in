@@ -112,5 +112,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script defer src="{{ request.url_for('static', path='js/passkey.min.js') }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path=('js/passkey.js' if fs_dev else 'js/passkey.min.js')) }}?v={{ asset_v }}"></script>
 {% endblock %}
+
+{% set fs_dev = request.query_params.get('fs_dev') == '1' or request.cookies.get('fs_dev') == '1' %}

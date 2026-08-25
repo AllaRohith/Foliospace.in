@@ -29,6 +29,8 @@ def install_template_globals(templates) -> None:
 
     templates.env.globals["asset_v"] = f"{sha}-{css_mtime}"
 
+    templates.env.globals["APP_ENV"] = (os.getenv("ENV") or os.getenv("APP_ENV") or "production").lower()
+
     from app.services.billing import plan_summary as _plan_summary
     from app.services.user_auth import compute_completion as _compute_completion
 

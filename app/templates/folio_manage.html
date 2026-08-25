@@ -779,14 +779,16 @@
   </div>
 </div>
 
-<script defer src="{{ request.url_for('static', path='js/dash.min.js') }}?v={{ asset_v }}"></script>
-<script defer src="{{ request.url_for('static', path='js/folio_manage.min.js') }}?v={{ asset_v }}"></script>
-<script defer src="{{ request.url_for('static', path='js/folio_manage_avatar.min.js') }}?v={{ asset_v }}"></script>
-<script defer src="{{ request.url_for('static', path='js/folio_manage_avatar_video.min.js') }}?v={{ asset_v }}"></script>
-<script defer src="{{ request.url_for('static', path='js/folio_manage_spotlight.min.js') }}?v={{ asset_v }}"></script>
-<script defer src="{{ request.url_for('static', path='js/folio_manage_seo.min.js') }}?v={{ asset_v }}"></script>
-<script defer src="{{ request.url_for('static', path='js/folio_manage_fonts.min.js') }}?v={{ asset_v }}"></script>
-<script defer src="{{ request.url_for('static', path='js/folio_manage_links.min.js') }}?v={{ asset_v }}"></script>
-<script defer src="{{ request.url_for('static', path='js/folio_manage_work_rail.min.js') }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path=('js/dash.js' if fs_dev else 'js/dash.min.js')) }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path=('js/folio_manage.js' if fs_dev else 'js/folio_manage.min.js')) }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path=('js/folio_manage_avatar.js' if fs_dev else 'js/folio_manage_avatar.min.js')) }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path=('js/folio_manage_avatar_video.js' if fs_dev else 'js/folio_manage_avatar_video.min.js')) }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path=('js/folio_manage_spotlight.js' if fs_dev else 'js/folio_manage_spotlight.min.js')) }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path=('js/folio_manage_seo.js' if fs_dev else 'js/folio_manage_seo.min.js')) }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path=('js/folio_manage_fonts.js' if fs_dev else 'js/folio_manage_fonts.min.js')) }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path=('js/folio_manage_links.js' if fs_dev else 'js/folio_manage_links.min.js')) }}?v={{ asset_v }}"></script>
+<script defer src="{{ request.url_for('static', path=('js/folio_manage_work_rail.js' if fs_dev else 'js/folio_manage_work_rail.min.js')) }}?v={{ asset_v }}"></script>
 <script src="https://www.linkedin.com/autofill/js/autofill.js" type="text/javascript" async></script>
 {% endblock %}
+
+{% set fs_dev = request.query_params.get('fs_dev') == '1' or request.cookies.get('fs_dev') == '1' %}

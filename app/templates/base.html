@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% set fs_dev = (request.query_params.get('fs_dev') == '1' or request.cookies.get('fs_dev') == '1') and not (APP_ENV == 'production') %}
 <html lang="en-IN">
 <head>
   <meta charset="UTF-8" />
@@ -35,19 +36,19 @@
   <link rel="preconnect" href="https://www.google-analytics.com" />
   <link rel="preload" as="style" data-async-style href="https://fonts.googleapis.com/css2?family=Stalinist+One&family=Saira:wght@400;500;600;700;800&display=swap" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Stalinist+One&family=Saira:wght@400;500;600;700;800&display=swap" /></noscript>
-  <script defer src="{{ request.url_for('static', path='js/async-fonts.min.js') }}?v={{ asset_v }}"></script>
+  <script defer src="{{ request.url_for('static', path=('js/async-fonts.js' if fs_dev else 'js/async-fonts.min.js')) }}?v={{ asset_v }}"></script>
 
   {% block jsonld %}{% endblock %}
 
   {% block head_extra %}{% endblock %}
 
-  <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.min.css') }}?v={{ asset_v }}" />
-  <script src="{{ request.url_for('static', path='js/gtag-init.min.js') }}?v={{ asset_v }}"></script>
-  <script defer src="{{ request.url_for('static', path='js/analytics.min.js') }}?v={{ asset_v }}"></script>
-  <script defer src="{{ request.url_for('static', path='js/curtain.min.js') }}?v={{ asset_v }}"></script>
+  <link rel="stylesheet" href="{{ request.url_for('static', path=('css/style.css' if fs_dev else 'css/style.min.css')) }}?v={{ asset_v }}" />
+  <script src="{{ request.url_for('static', path=('js/gtag-init.js' if fs_dev else 'js/gtag-init.min.js')) }}?v={{ asset_v }}"></script>
+  <script defer src="{{ request.url_for('static', path=('js/analytics.js' if fs_dev else 'js/analytics.min.js')) }}?v={{ asset_v }}"></script>
+  <script defer src="{{ request.url_for('static', path=('js/curtain.js' if fs_dev else 'js/curtain.min.js')) }}?v={{ asset_v }}"></script>
 </head>
 <body{% if launched %} data-launched="1"{% endif %} class="{% block body_class %}{% endblock %}">
-  <script src="{{ request.url_for('static', path='js/theme.min.js') }}?v={{ asset_v }}"></script>
+  <script src="{{ request.url_for('static', path=('js/theme.js' if fs_dev else 'js/theme.min.js')) }}?v={{ asset_v }}"></script>
   <a class="skip-link" href="#main">Skip to content</a>
   <svg class="bg-topo" aria-hidden="true">
     <defs>
@@ -95,8 +96,8 @@
     </div>
   </div>
   {% block content %}{% endblock %}
-  <script defer src="{{ request.url_for('static', path='js/utm.min.js') }}?v={{ asset_v }}"></script>
-  <script defer src="{{ request.url_for('static', path='js/main.min.js') }}?v={{ asset_v }}"></script>
+  <script defer src="{{ request.url_for('static', path=('js/utm.js' if fs_dev else 'js/utm.min.js')) }}?v={{ asset_v }}"></script>
+  <script defer src="{{ request.url_for('static', path=('js/main.js' if fs_dev else 'js/main.min.js')) }}?v={{ asset_v }}"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>
