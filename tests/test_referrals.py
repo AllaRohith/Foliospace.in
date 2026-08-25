@@ -12,6 +12,7 @@ Covers:
 Run from repo root:
     python3 -m unittest tests.test_referrals
 """
+import asyncio
 import unittest
 from unittest import mock
 
@@ -538,6 +539,124 @@ class CronFindSwapTargetsTests(unittest.TestCase):
         self.assertIn("v_referral_counts", captured["sql"])
         self.assertEqual(captured["params"][0], 10)
         self.assertEqual(captured["params"][1], "plan_y1")
+
+
+class EnsureReferralCodeTests(unittest.TestCase):
+    """ensure_referral_code backfills missing codes for legacy users."""
+
+    def _build_fake_conn(self, existing_value):
+        fake_cur = mock.MagicMock()
+        fake_cur.fetchone.return_value = {"referral_code": existing_value}
+        fake_conn = mock.MagicMock()
+        fake_conn.__enter__ = mock.MagicMock(return_value=fake_conn)
+        fake_conn.__exit__ = mock.MagicMock(return_value=False)
+        fake_conn.cursor.return_value.__enter__ = mock.MagicMock(return_value=fake_cur)
+        fake_conn.cursor.return_value.__exit__ = mock.MagicMock(return_value=False)
+        return fake_conn, fake_cur
+
+    def test_returns_existing_code_without_update(self):
+        from app.services import user_auth as ua
+        fake_conn, fake_cur = self._build_fake_conn("abc12345")
+        executed = []
+        fake_cur.execute.side_effect = lambda sql, params=None: executed.append(str(sql).lower())
+        with mock.patch.object(ua, "_connect", return_value=fake_conn), \
+             mock.patch.object(ua, "DATABASE_URL", "postgresql://x"):
+            code = ua.ensure_referral_code("user-id-here")
+        self.assertEqual(code, "abc12345")
+        self.assertFalse(any("update users" in s for s in executed))
+
+    def test_backfills_when_code_is_empty(self):
+        from app.services import user_auth as ua
+        fake_conn, fake_cur = self._build_fake_conn("")
+        executed = []
+        fake_cur.execute.side_effect = lambda sql, params=None: executed.append((str(sql).lower(), params))
+        with mock.patch.object(ua, "_connect", return_value=fake_conn), \
+             mock.patch.object(ua, "_generate_unique_referral_code", return_value="newhex01"), \
+             mock.patch.object(ua, "DATABASE_URL", "postgresql://x"):
+            code = ua.ensure_referral_code("user-id-here")
+        self.assertEqual(code, "newhex01")
+        update_sqls = [s for s, _ in executed if "update users" in s]
+        self.assertEqual(len(update_sqls), 1)
+
+    def test_returns_empty_when_no_db(self):
+        from app.services import user_auth as ua
+        with mock.patch.object(ua, "DATABASE_URL", ""):
+            self.assertEqual(ua.ensure_referral_code("user-id-here"), "")
+
+    def test_returns_empty_on_psycopg_error(self):
+        import psycopg
+        from app.services import user_auth as ua
+        with mock.patch.object(ua, "DATABASE_URL", "postgresql://x"), \
+             mock.patch.object(ua, "_connect", side_effect=psycopg.Error("db down")):
+            self.assertEqual(ua.ensure_referral_code("user-id-here"), "")
+
+
+class DashboardReferralBackfillTests(unittest.TestCase):
+    """The dashboard route must backfill a missing code so the share URL is non-empty."""
+
+    def _call(self, existing_code):
+        import asyncio
+        from app.routers.referral import dashboard_referrals
+        from app.services import user_auth as ua
+        fake_request = mock.MagicMock()
+        fake_request.headers.get = lambda k, d=None: {"x-forwarded-proto": "https", "x-forwarded-host": "foliospace.in"}.get(k, d)
+        fake_request.url.scheme = "https"
+        fake_request.url.netloc = "foliospace.in"
+        captured = {}
+        def fake_render(req, tpl, ctx):
+            captured["code"] = ctx.get("referral_code")
+            captured["url"] = ctx.get("referral_url")
+            return mock.MagicMock(status_code=200)
+        user_row = {"id": "u-1", "referral_code": existing_code}
+        with mock.patch.object(ua, "require_user", return_value=user_row), \
+             mock.patch("app.routers.referral.referrals_svc.progress_for_user", return_value={"unlocked": False}), \
+             mock.patch("app.routers.referral.referrals_svc.REFERRAL_THRESHOLD", 10), \
+             mock.patch("app.routers.referral.templates.TemplateResponse", side_effect=fake_render):
+            coro = dashboard_referrals(request=fake_request)
+            res = asyncio.get_event_loop().run_until_complete(coro)
+        return captured
+
+    def test_empty_code_gets_backfilled(self):
+        import asyncio
+        from app.routers.referral import dashboard_referrals
+        from app.services import user_auth as ua
+        fake_request = mock.MagicMock()
+        fake_request.headers.get = lambda k, d=None: {"x-forwarded-proto": "https", "x-forwarded-host": "foliospace.in"}.get(k, d)
+        fake_request.url.scheme = "https"
+        fake_request.url.netloc = "foliospace.in"
+        captured = {}
+        def fake_render(req, tpl, ctx):
+            captured["code"] = ctx.get("referral_code")
+            captured["url"] = ctx.get("referral_url")
+            return mock.MagicMock(status_code=200)
+        user_row = {"id": "u-1", "referral_code": ""}
+        with mock.patch.object(ua, "require_user", return_value=user_row), \
+             mock.patch.object(ua, "ensure_referral_code", return_value="fresh01") as ensure_mock, \
+             mock.patch("app.routers.referral.referrals_svc.progress_for_user", return_value={"unlocked": False}), \
+             mock.patch("app.routers.referral.referrals_svc.REFERRAL_THRESHOLD", 10), \
+             mock.patch("app.routers.referral.templates.TemplateResponse", side_effect=fake_render):
+            asyncio.get_event_loop().run_until_complete(dashboard_referrals(request=fake_request))
+        ensure_mock.assert_called_once_with("u-1")
+        self.assertEqual(captured["code"], "fresh01")
+        self.assertEqual(captured["url"], "https://foliospace.in/ref/fresh01")
+
+    def test_existing_code_does_not_trigger_backfill(self):
+        from app.services import user_auth as ua
+        from app.routers.referral import dashboard_referrals
+        fake_request = mock.MagicMock()
+        fake_request.headers.get = lambda k, d=None: {"x-forwarded-proto": "https", "x-forwarded-host": "foliospace.in"}.get(k, d)
+        fake_request.url.scheme = "https"
+        fake_request.url.netloc = "foliospace.in"
+        def fake_render(req, tpl, ctx):
+            return mock.MagicMock(status_code=200)
+        user_row = {"id": "u-1", "referral_code": "already00"}
+        with mock.patch.object(ua, "require_user", return_value=user_row), \
+             mock.patch.object(ua, "ensure_referral_code") as ensure_mock, \
+             mock.patch("app.routers.referral.referrals_svc.progress_for_user", return_value={"unlocked": False}), \
+             mock.patch("app.routers.referral.referrals_svc.REFERRAL_THRESHOLD", 10), \
+             mock.patch("app.routers.referral.templates.TemplateResponse", side_effect=fake_render):
+            asyncio.get_event_loop().run_until_complete(dashboard_referrals(request=fake_request))
+        ensure_mock.assert_not_called()
 
 
 if __name__ == "__main__":

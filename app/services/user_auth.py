@@ -103,6 +103,36 @@ def _generate_unique_referral_code() -> str:
     return secrets.token_hex(7)
 
 
+def ensure_referral_code(user_id: str) -> str:
+    """Backfill a referral_code for users missing one (e.g. legacy rows where
+    the column was added after signup). Returns the current/now-set code.
+    Updates the in-memory user row callers may still be holding is the caller's
+    responsibility — we don't have that row here.
+    """
+    if not DATABASE_URL:
+        return ""
+    try:
+        with _connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT referral_code FROM users WHERE id = %s", (user_id,))
+                row = cur.fetchone()
+                if not row:
+                    return ""
+                existing = (row.get("referral_code") or "").strip()
+                if existing:
+                    return existing
+                code = _generate_unique_referral_code()
+                cur.execute(
+                    "UPDATE users SET referral_code = %s WHERE id = %s",
+                    (code, user_id),
+                )
+            conn.commit()
+            return code
+    except psycopg.Error as e:
+        logger.warning("ensure_referral_code failed for user %s: %s", user_id[:8] if user_id else "?", e)
+        return ""
+
+
 RESERVED_SLUGS = frozenset({
     "admin", "login", "signup", "logout", "logout", "me",
     "dashboard", "api", "static", "sitemap", "robots",

@@ -81,13 +81,16 @@ async def dashboard_referrals(request: Request):
         return RedirectResponse("/login?next=/dashboard/referrals", status_code=303)
 
     progress = referrals_svc.progress_for_user(str(user["id"]))
+    code = (user.get("referral_code") or "").strip()
+    if not code:
+        code = user_auth.ensure_referral_code(str(user["id"]))
     # Referral URL uses PUBLIC_BASE_URL (or request.base_url as fallback).
     base_url = (
         request.headers.get("x-forwarded-proto", request.url.scheme)
         + "://"
         + request.headers.get("x-forwarded-host", request.url.netloc)
     )
-    referral_url = f"{base_url.rstrip('/')}/ref/{user.get('referral_code') or ''}"
+    referral_url = f"{base_url.rstrip('/')}/ref/{code}"
 
     response = templates.TemplateResponse(
         request,
@@ -99,7 +102,7 @@ async def dashboard_referrals(request: Request):
             "user": user,
             "progress": progress,
             "ref_threshold": referrals_svc.REFERRAL_THRESHOLD,
-            "referral_code": user.get("referral_code") or "",
+            "referral_code": code,
             "referral_url": referral_url,
             "nav_active": "referrals",
         },
